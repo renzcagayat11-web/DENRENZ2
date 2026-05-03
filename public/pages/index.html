@@ -6,6 +6,7 @@
     <title>DENR Permit — Web Portal</title>
     <link rel="stylesheet" href="/assets/css/styles.css">
     <link rel="stylesheet" href="/assets/css/about-enhanced.css">
+    <link rel="icon" type="image/png" href="/assets/images/logo.png">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   </head>
@@ -32,11 +33,12 @@
     <main>
       <section id="home" class="hero hero-with-video">
         <div class="hero-video-fixed">
-          <video autoplay muted loop playsinline preload="auto" id="heroVideo" style="display:block !important;opacity:1 !important;visibility:visible !important;width:100%;height:100%;object-fit:cover;background:#000;">
-            <source src="/assets/images/forest.mp4" type="video/mp4">
+          <video id="heroVideo" src="/assets/images/forest.mp4" autoplay muted loop playsinline preload="auto" 
+                 style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;z-index:1;"
+                 onloadeddata="console.log('✅ Video loaded');this.style.opacity=1;"
+                 onerror="console.error('❌ Video error:',this.error)">
           </video>
-          <div id="videoDebug" style="position:absolute;top:10px;left:10px;z-index:10000;background:rgba(0,0,0,0.8);color:#0f0;padding:10px;font-family:monospace;font-size:12px;max-width:300px;word-wrap:break-word;">Loading video...</div>
-          <div class="hero-overlay"></div>
+          <div class="hero-overlay" style="z-index:2;"></div>
         </div>
         <div class="hero-content container">
           <div class="hero-badge">🌱 Environmental Permit Management</div>
@@ -441,80 +443,5 @@
     <script src="/assets/js/dynamic-slider.js"></script>
     <script src="/assets/js/image-modal.js"></script>
     <script src="/assets/js/contact-enhanced.js"></script>
-    <script>
-      // Aggressive video initialization
-      (function initHeroVideo() {
-        const video = document.getElementById('heroVideo');
-        const debug = document.getElementById('videoDebug');
-        
-        function log(msg) {
-          console.log(msg);
-          if (debug) debug.innerHTML += '<br>' + msg;
-        }
-        
-        if (!video) {
-          log('❌ Video element not found');
-          return;
-        }
-        
-        log('🎬 Initializing...');
-        
-        // Check video file
-        const source = video.querySelector('source');
-        const videoUrl = source ? source.src : 'NO SOURCE';
-        log('📹 URL: ' + videoUrl);
-        
-        // File check
-        fetch(videoUrl, { method: 'HEAD' }).then(r => {
-          log('✅ File exists: ' + r.status);
-        }).catch(e => {
-          log('❌ File error: ' + e.message);
-        });
-        
-        // Force load
-        video.load();
-        
-        function forcePlay() {
-          video.muted = true;
-          video.playsinline = true;
-          video.play().then(() => {
-            log('✅ PLAYING');
-            video.style.zIndex = '9999';
-            if (debug) debug.style.display = 'none';
-          }).catch(e => {
-            log('⚠️ Blocked: ' + e.message);
-          });
-        }
-        
-        // Event listeners
-        video.addEventListener('loadeddata', () => {
-          log('📊 Data loaded');
-          forcePlay();
-        });
-        
-        video.addEventListener('canplay', () => {
-          log('▶️ Can play');
-          forcePlay();
-        });
-        
-        video.addEventListener('playing', () => {
-          log('✅ NOW PLAYING');
-          if (debug) debug.style.display = 'none';
-        });
-        
-        video.addEventListener('error', () => {
-          log('💥 Error: ' + (video.error ? video.error.code : 'unknown'));
-        });
-        
-        // Multiple attempts
-        [0, 100, 300, 1000, 3000].forEach(t => setTimeout(forcePlay, t));
-        
-        // Interaction fallback
-        ['click', 'scroll', 'touchstart'].forEach(evt => {
-          document.addEventListener(evt, () => video.play().catch(()=>{}), { once: true });
-        });
-        
-      })();
-    </script>
   </body>
 </html>
