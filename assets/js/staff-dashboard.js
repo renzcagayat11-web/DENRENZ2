@@ -1,7 +1,7 @@
 import { auth, db } from './firebase-config.js';
 
 // Sidebar Toggle Function
-function toggleSidebar() {
+window.toggleSidebar = function() {
   const sidebar = document.querySelector('.sidebar');
   const toggleIcon = document.querySelector('.toggle-icon');
   

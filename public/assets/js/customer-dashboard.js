@@ -1978,8 +1978,8 @@ async function loadTimeline() {
   }
 }
 
-// Fetch user's applications
-async function fetchUserApplications() {
+// Fetch user's applications - wrapped in window for global access
+window.fetchUserApplications = async function() {
   try {
     if (!auth.currentUser) {
       console.error('Customer dashboard: No authenticated user found');
@@ -2028,7 +2028,7 @@ async function fetchUserApplications() {
     userApplications = [];
     displayApplications();
   }
-}
+};
 
 // Display applications in table
 function displayApplications() {
@@ -3347,12 +3347,18 @@ function applyFilters() {
       match = false;
     }
 
-    if (dateFromFilter && new Date(app.createdAt) < new Date(dateFromFilter)) {
-      match = false;
+    if (dateFromFilter && app.createdAt) {
+      const appDate = app.createdAt.toDate ? app.createdAt.toDate() : new Date(app.createdAt);
+      if (appDate < new Date(dateFromFilter)) {
+        match = false;
+      }
     }
 
-    if (dateToFilter && new Date(app.createdAt) > new Date(dateToFilter)) {
-      match = false;
+    if (dateToFilter && app.createdAt) {
+      const appDate = app.createdAt.toDate ? app.createdAt.toDate() : new Date(app.createdAt);
+      if (appDate > new Date(dateToFilter)) {
+        match = false;
+      }
     }
 
     if (searchFilter) {
@@ -3472,275 +3478,94 @@ window.viewApplication = async function(appId) {
   console.log('viewApplication called with appId:', appId);
   
   // Fetch fresh data from Firestore to ensure documents are up-to-date
-  let app = null;
+  let application = null;
   try {
     const appRef = doc(db, 'applications', appId);
     const appSnap = await getDoc(appRef);
     if (appSnap.exists()) {
-      app = { id: appSnap.id, ...appSnap.data() };
-      console.log('Fetched fresh app data from Firestore:', app);
+      application = { id: appSnap.id, ...appSnap.data() };
+      console.log('Fetched fresh app data from Firestore for view:', application);
       
       // Update the cached list with fresh data
       const cachedIndex = userApplications.findIndex(a => a.id === appId);
       if (cachedIndex !== -1) {
-        userApplications[cachedIndex] = app;
+        userApplications[cachedIndex] = application;
       }
     }
   } catch (error) {
     console.error('Error fetching fresh application data:', error);
-    // Fallback to cached data
-    app = userApplications.find(a => a.id === appId);
+    application = userApplications.find(app => app.id === appId);
   }
   
-  if (!app) {
-    // Final fallback to cache
-    app = userApplications.find(a => a.id === appId);
+  if (!application) {
+    application = userApplications.find(app => app.id === appId);
   }
   
-  console.log('Found app:', app);
+  if (!application) return;
   
-  if (!app) {
-    console.log('Application not found');
-    return;
-  }
+  // Debug: Log application data
+  console.log('Customer View Application:', application);
+  console.log('Pickup Schedule:', application.pickupSchedule);
+  
+  // Set current application ID for global access
+  currentApplicationId = appId;
   
   const modal = document.getElementById('applicationModal');
   const detailsDiv = document.getElementById('applicationDetails');
   
-  console.log('Modal element:', modal);
-  console.log('Details element:', detailsDiv);
-  
+  // Show loading state
   detailsDiv.innerHTML = `
-    <div class="detail-row">
-      <div class="detail-label">Application ID:</div>
-      <div class="detail-value">${app.applicationId || app.id}</div>
+    <div style="text-align: center; padding: 40px;">
+      <div style="font-size: 48px; margin-bottom: 16px;">⏳</div>
+      <div style="font-size: 18px; color: #666;">Loading application details...</div>
     </div>
-    <div class="detail-row">
-      <div class="detail-label">Permit Type:</div>
-      <div class="detail-value">${app.permitType || 'N/A'}</div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-label">Applicant Name:</div>
-      <div class="detail-value">${app.applicantName || 'N/A'}</div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-label">Address:</div>
-      <div class="detail-value">${app.applicantAddress || 'N/A'}</div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-label">Mobile Number:</div>
-      <div class="detail-value">${app.applicantMobile || 'N/A'}</div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-label">Date Submitted:</div>
-      <div class="detail-value">${formatDate(app.createdAt)}</div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-label">Current Status:</div>
-      <div class="detail-value">
-        <span class="status-badge ${getStatusClass(app.status)}">${app.status}</span>
-      </div>
-    </div>
-    ${app.applicationDetails ? `
-    <div class="detail-row">
-      <div class="detail-label">Application Details:</div>
-      <div class="detail-value">${app.applicationDetails}</div>
-    </div>
-    ` : ''}
-    ${app.rejectionReason ? `
-    <div class="detail-row">
-      <div class="detail-label">Rejection Reason:</div>
-      <div class="detail-value" style="color: #ef4444;">${app.rejectionReason}</div>
-    </div>
-    ` : ''}
-    ${app.revisionComments ? `
-    <div class="detail-row">
-      <div class="detail-label">📝 Revision Required:</div>
-      <div class="detail-value" style="color: #f59e0b; background: #fffbeb; padding: 12px; border-radius: 6px; border-left: 4px solid #f59e0b;">
-        <strong>Please revise the following:</strong><br>
-        ${app.revisionComments}
-      </div>
-    </div>
-    ` : ''}
-    ${app.reviewedBy ? `
-    <div class="detail-row">
-      <div class="detail-label">Reviewed By:</div>
-      <div class="detail-value">${app.reviewedBy}</div>
-    </div>
-    ` : ''}
-    ${app.reviewedAt ? `
-    <div class="detail-row">
-      <div class="detail-label">Review Date:</div>
-      <div class="detail-value">${formatDate(app.reviewedAt)}</div>
-    </div>
-    ` : ''}
-    ${app.documents && app.documents.length > 0 ? `
-    <div class="detail-row">
-      <div class="detail-label">Uploaded Documents:</div>
-      <div class="detail-value">
-        ${app.documents.map((doc, index) => {
-          // Debug: Log document structure
-          console.log(`Document ${index}:`, doc);
-          
-          // Handle different document URL field names
-          const docUrl = doc.url || doc.data || doc.downloadUrl || doc.cloudinaryUrl || '';
-          const docName = doc.name || doc.fileName || doc.originalName || `Document ${index + 1}`;
-          const docType = doc.type || doc.mimeType || doc.contentType || '';
-          const docSize = doc.size || doc.fileSize || 0;
-          const docPublicId = doc.public_id || doc.publicId || doc.cloudinaryPublicId || '';
-          
-          // Generate Cloudinary optimized URLs if available
-          const isCloudinary = docPublicId || (docUrl && docUrl.includes('cloudinary'));
-          const isImage = docType && docType.startsWith('image/');
-          
-          let thumbnailUrl = docUrl;
-          let highQualityUrl = docUrl;
-          
-          // Only apply transformations for images uploaded to image/upload
-          if (isCloudinary && docPublicId && isImage && docUrl.includes('/image/upload/')) {
-            const urlParts = docUrl.split('/image/upload/');
-            if (urlParts.length === 2) {
-              const baseUrl = urlParts[0] + '/image/upload/';
-              const imageId = urlParts[1];
-              
-              thumbnailUrl = `${baseUrl}q_auto:good,f_auto,w_200,h_150,c_fill,q_80/${imageId}`;
-              highQualityUrl = `${baseUrl}q_auto:best,f_auto,w_800,h_600,c_limit,q_90/${imageId}`;
-            }
-          }
-          
-          // Check if URL exists before proceeding
-          if (!docUrl) {
-            return `<div class="document-card" style="margin-top: 12px; padding: 12px; border: 1px solid #ef4444; border-radius: 8px; background: #fef2f2;">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="font-size: 24px;">❌</div>
-                <div style="flex: 1;">
-                  <div style="font-weight: 500; color: #dc2626; margin-bottom: 4px;">${docName}</div>
-                  <div style="font-size: 12px; color: #7f1d1d;">
-                    File URL not available - Document may be corrupted
-                  </div>
-                </div>
-              </div>
-            </div>`;
-          }
-          
-          if (docType && docType.startsWith('image/')) {
-            return `<div class="document-card" style="margin-top: 12px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <div style="font-weight: 500; color: #374151; flex: 1;">${docName}</div>
-                <div style="font-size: 11px; color: #6b7280;">
-                  ${docSize ? formatFileSize(docSize) : ''}
-                  ${isCloudinary ? ' • Optimized' : ''}
-                </div>
-              </div>
-              <div style="position: relative; margin-bottom: 8px;">
-                <img src="${thumbnailUrl}" alt="${docName}" 
-                     style="width: 100%; max-height: 150px; object-fit: cover; border-radius: 6px; border: 1px solid #d1d5db; cursor: pointer;" 
-                     onclick="window.open('${highQualityUrl}', '_blank')"
-                     onmouseover="this.src='${highQualityUrl}'" 
-                     onmouseout="this.src='${thumbnailUrl}'" />
-                <div style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">
-                  🔍 Click to enlarge
-                </div>
-              </div>
-            </div>`;
-          } else {
-            // Handle documents (PDF, Word, etc.)
-            const fileIcon = getFileIcon(docType || docName);
-            return `<div class="document-card" style="margin-top: 12px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb;">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="font-size: 24px;">${fileIcon}</div>
-                <div style="flex: 1;">
-                  <div style="font-weight: 500; color: #374151; margin-bottom: 4px;">${docName}</div>
-                  <div style="font-size: 12px; color: #6b7280;">
-                    ${docSize ? formatFileSize(docSize) : ''}
-                    ${isCloudinary ? ' • Cloudinary Hosted' : ''}
-                  </div>
-                </div>
-              </div>
-              <div style="display: flex; gap: 8px; margin-top: 8px;">
-                <button onclick="downloadFile('${docUrl}', '${docName}')" style="
-                  background: #10b981;
-                  color: white;
-                  border: none;
-                  padding: 6px 12px;
-                  border-radius: 4px;
-                  font-size: 12px;
-                  cursor: pointer;
-                  width: 100%;
-                ">Download</button>
-              </div>
-            </div>`;
-          }
-        }).join('')}
-      </div>
-    </div>
-    ` : ''}
   `;
   
-  // Add pickup schedule for approved applications
-  if (app.status && app.status.toLowerCase() === 'approved') {
-    console.log('Adding pickup schedule for approved app');
-    detailsDiv.innerHTML += `
-      <div class="detail-row" style="margin-top: 20px;">
-        <div class="detail-label" style="vertical-align: top;">📅 Pickup Schedule:</div>
-        <div class="detail-value">
-          ${app.pickupSchedule && app.pickupSchedule.date ? `
-            <div style="background: #f0fdf4; padding: 16px; border-radius: 8px; border-left: 4px solid #10b981; margin-top: 8px;">
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                <div>
-                  <strong>Date:</strong><br>
-                  <span style="font-size: 14px;">${app.pickupSchedule.date}</span>
-                </div>
-                <div>
-                  <strong>Time:</strong><br>
-                  <span style="font-size: 14px; ${app.pickupSchedule.time ? '' : 'color: #64748b;'}">${app.pickupSchedule.time || 'To be scheduled'}</span>
-                </div>
-                ${app.pickupSchedule.notes ? `
-                  <div style="grid-column: 1 / -1; margin-top: 8px;">
-                    <strong>Notes:</strong><br>
-                    <span style="font-size: 13px;">${app.pickupSchedule.notes}</span>
-                  </div>
-                ` : ''}
-              </div>
-            </div>
-          ` : `
-            <div style="background: #fef3c7; padding: 16px; border-radius: 8px; border-left: 4px solid #f59e0b; margin-top: 8px;">
-              <div style="text-align: center; color: #92400e;">
-                <div style="font-size: 20px; margin-bottom: 6px;">📅</div>
-                <div style="font-weight: 600; margin-bottom: 4px;">Pickup Schedule Pending</div>
-                <div style="font-size: 13px;">Your permit has been approved. Please wait for the pickup schedule to be assigned.</div>
-              </div>
-            </div>
-          `}
-        </div>
-      </div>
-    `;
-  }
-  
-  console.log('Setting modal display to flex');
   modal.style.display = 'flex';
-  console.log('Modal display after setting:', modal.style.display);
-};
-
-// Fetch user applications
-window.fetchUserApplications = async function() {
-  if (!auth.currentUser) return;
   
+  // Simulate loading for better UX
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  // Generate application details HTML
+  const detailsHTML = generateApplicationDetailsHTML(application);
+  detailsDiv.innerHTML = detailsHTML;
+  
+  // Update modal actions for customer
+  const modalActions = document.getElementById('modalActions');
+  modalActions.innerHTML = `
+    <button class="btn-secondary" onclick="printApplication()">🖨️ Print</button>
+    <button class="btn-primary" onclick="downloadAllDocuments()">📥 Download All Documents</button>
+    <button class="btn-secondary" onclick="hideModal('applicationModal')">Close</button>
+  `;
+  
+  modal.style.display = 'flex';
+  
+  // Set up real-time listener for auto-updating documents
   try {
-    const q = query(
-      collection(db, 'applications'),
-      where('applicantUid', '==', auth.currentUser.uid),
-      orderBy('createdAt', 'desc')
-    );
-    const snapshot = await getDocs(q);
-    userApplications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    displayApplications();
-    updateStats();
-    loadActivityFeed();
+    const appRef = doc(db, 'applications', appId);
+    window._appModalUnsubscribe = onSnapshot(appRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const updatedApp = { id: docSnap.id, ...docSnap.data() };
+        console.log('Real-time update received - documents:', updatedApp.documents?.length || 0);
+        
+        // Update cache
+        const cachedIndex = userApplications.findIndex(a => a.id === appId);
+        if (cachedIndex !== -1) {
+          userApplications[cachedIndex] = updatedApp;
+        }
+        
+        // Re-render modal content if modal is still open
+        if (modal.style.display === 'flex') {
+          const newHTML = generateApplicationDetailsHTML(updatedApp);
+          detailsDiv.innerHTML = newHTML;
+        }
+      }
+    });
+    console.log('Firestore real-time listener set up for application:', appId);
   } catch (error) {
-    console.error('Error fetching applications:', error);
+    console.error('Error setting up real-time listener:', error);
   }
-}
+};
 
 // Delete application
 window.deleteApplication = async function(appId) {

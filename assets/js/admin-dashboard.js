@@ -29,7 +29,7 @@ const API_BASE = window.API_BASE || (location.hostname === 'localhost' || locati
 let allApplications = [];
 
 // Sidebar Toggle Function
-function toggleSidebar() {
+window.toggleSidebar = function() {
   const sidebar = document.getElementById('sidebar');
   const mainContent = document.querySelector('.main-content');
   

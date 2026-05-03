@@ -1978,8 +1978,8 @@ async function loadTimeline() {
   }
 }
 
-// Fetch user's applications
-async function fetchUserApplications() {
+// Fetch user's applications - wrapped in window for global access
+window.fetchUserApplications = async function() {
   try {
     if (!auth.currentUser) {
       console.error('Customer dashboard: No authenticated user found');
@@ -2028,7 +2028,7 @@ async function fetchUserApplications() {
     userApplications = [];
     displayApplications();
   }
-}
+};
 
 // Display applications in table
 function displayApplications() {
@@ -3347,12 +3347,18 @@ function applyFilters() {
       match = false;
     }
 
-    if (dateFromFilter && new Date(app.createdAt) < new Date(dateFromFilter)) {
-      match = false;
+    if (dateFromFilter && app.createdAt) {
+      const appDate = app.createdAt.toDate ? app.createdAt.toDate() : new Date(app.createdAt);
+      if (appDate < new Date(dateFromFilter)) {
+        match = false;
+      }
     }
 
-    if (dateToFilter && new Date(app.createdAt) > new Date(dateToFilter)) {
-      match = false;
+    if (dateToFilter && app.createdAt) {
+      const appDate = app.createdAt.toDate ? app.createdAt.toDate() : new Date(app.createdAt);
+      if (appDate > new Date(dateToFilter)) {
+        match = false;
+      }
     }
 
     if (searchFilter) {
@@ -3398,8 +3404,6 @@ function displayApplicationsWithFilter(applications) {
     const needsRevision = app.status === 'needs revision';
     const canEdit = isPending || needsRevision;
     const canDelete = app.status === 'pending' || app.status === 'under review' || app.status === 'rejected' || needsRevision;
-
-    // Pickup schedule removed from table view - shown only in detailed modal
 
     row.innerHTML = `
       <td>${app.applicationId || app.id}</td>
@@ -3468,7 +3472,7 @@ function formatDate(timestamp) {
 }
 
 // View application details
-window.viewApplication = async function(appId) {
+function viewApplication(appId) {
   console.log('viewApplication called with appId:', appId);
   
   // Fetch fresh data from Firestore to ensure documents are up-to-date
@@ -3721,26 +3725,6 @@ window.viewApplication = async function(appId) {
   modal.style.display = 'flex';
   console.log('Modal display after setting:', modal.style.display);
 };
-
-// Fetch user applications
-window.fetchUserApplications = async function() {
-  if (!auth.currentUser) return;
-  
-  try {
-    const q = query(
-      collection(db, 'applications'),
-      where('applicantUid', '==', auth.currentUser.uid),
-      orderBy('createdAt', 'desc')
-    );
-    const snapshot = await getDocs(q);
-    userApplications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    displayApplications();
-    updateStats();
-    loadActivityFeed();
-  } catch (error) {
-    console.error('Error fetching applications:', error);
-  }
-}
 
 // Delete application
 window.deleteApplication = async function(appId) {
