@@ -461,13 +461,13 @@ document.addEventListener('DOMContentLoaded', () => {
           console.log('🔍 LOGIN DEBUG: Role detected:', role, '- User should go to:', role + '-dashboard.html');
           if(role === 'admin'){
             console.log('🔍 LOGIN DEBUG: Redirecting to admin dashboard');
-            window.location.href = '/admin-dashboard.html';
+            window.location.href = '/pages/admin-dashboard.html';
           } else if(role === 'staff'){
             console.log('🔍 LOGIN DEBUG: Redirecting to staff dashboard');
-            window.location.href = '/staff-dashboard.html';
+            window.location.href = '/pages/staff-dashboard.html';
           } else if(role === 'customer'){
             console.log('🔍 LOGIN DEBUG: Redirecting to customer dashboard');
-            window.location.href = '/customer-dashboard.html';
+            window.location.href = '/pages/customer-dashboard.html';
           }
         }catch(e){ 
           console.log('🔍 LOGIN DEBUG: Error in token processing:', e);

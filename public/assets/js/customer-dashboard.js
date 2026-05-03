@@ -525,9 +525,9 @@ onAuthStateChanged(auth, async (user) => {
           // Redirect to appropriate dashboard based on role
           console.log('Customer dashboard: Redirecting to role-specific dashboard:', userData.role);
           if (userData.role === 'admin') {
-            window.location.href = 'admin-dashboard.html';
+            window.location.href = '/pages/admin-dashboard.html';
           } else if (userData.role === 'staff') {
-            window.location.href = 'staff-dashboard.html';
+            window.location.href = '/pages/staff-dashboard.html';
           }
           return;
         }
@@ -591,7 +591,9 @@ onAuthStateChanged(auth, async (user) => {
   } else {
     // User not logged in - redirect to login page
     // The justLoggedOut flag prevents auto-redirect loops
-    window.location.href = 'index.html';
+    if (!sessionStorage.getItem('justLoggedOut')) {
+      window.location.href = 'index.html';
+    }
   }
 });
 

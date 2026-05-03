@@ -254,7 +254,9 @@ onAuthStateChanged(auth, async (user) => {
     }
   } else {
     console.log('Admin dashboard: No user authenticated, redirecting...');
-    window.location.href = 'index.html';
+    if (!sessionStorage.getItem('justLoggedOut')) {
+      window.location.href = 'index.html';
+    }
   }
 });
 
