@@ -363,6 +363,7 @@ const suffix = q('#suffix');
 const mobile = q('#mobile');
 const address = q('#address');
 const forgotLink = q('#forgotLink');
+const rememberMe = q('#rememberMe');
 const signoutBtn = q('#signoutBtn');
 const out = q('#out');
 const userInfo = q('#userInfo');
@@ -376,8 +377,56 @@ qa('.nav-btn').forEach(btn => btn.addEventListener('click', (e) => {
   q('#' + target).style.display = '';
 }));
 
+// Remember Me functionality
+function loadSavedCredentials() {
+  const savedEmail = localStorage.getItem('rememberedEmail');
+  const savedPassword = localStorage.getItem('rememberedPassword');
+  const rememberChecked = localStorage.getItem('rememberMeChecked') === 'true';
+  
+  if (authEmail && savedEmail) {
+    authEmail.value = savedEmail;
+  }
+  if (authPassword && savedPassword && rememberChecked) {
+    authPassword.value = savedPassword;
+  }
+  if (rememberMe && rememberChecked) {
+    rememberMe.checked = true;
+  }
+}
+
+function saveCredentials(email, password, remember) {
+  if (remember && email && password) {
+    localStorage.setItem('rememberedEmail', email);
+    localStorage.setItem('rememberedPassword', password);
+    localStorage.setItem('rememberMeChecked', 'true');
+  } else {
+    localStorage.removeItem('rememberedEmail');
+    localStorage.removeItem('rememberedPassword');
+    localStorage.removeItem('rememberMeChecked');
+  }
+}
+
+function clearSavedCredentials() {
+  localStorage.removeItem('rememberedEmail');
+  localStorage.removeItem('rememberedPassword');
+  localStorage.removeItem('rememberMeChecked');
+}
+
 // Auth modal handlers - wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', () => {
+  // Load saved credentials when page loads
+  loadSavedCredentials();
+  
+  // Add event listener for remember me checkbox
+  if (rememberMe) {
+    rememberMe.addEventListener('change', (e) => {
+      if (!e.target.checked) {
+        // User unchecked remember me, clear saved credentials
+        clearSavedCredentials();
+      }
+    });
+  }
+  
   // Re-select elements after DOM is ready
   const authSigninBtn = document.getElementById('authSigninBtn');
   const authSignupBtn = document.getElementById('authSignupBtn');
@@ -399,6 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const mobile = document.getElementById('mobile');
   const address = document.getElementById('address');
   const forgotLink = document.getElementById('forgotLink');
+  const rememberMe = document.getElementById('rememberMe');
   const authEmail = document.getElementById('authEmail');
   const authPassword = document.getElementById('authPassword');
 
@@ -535,9 +585,29 @@ document.addEventListener('DOMContentLoaded', () => {
         authSignupForm.style.display = 'none';
         authSigninForm.style.display = '';
         document.getElementById('authModalTitle').textContent = 'Login to Your Account';
-        // clear sensitive fields
+        
+        // Pre-fill email from signup and focus on password field
+        const emailForLogin = signupEmail.value || email;
+        if (document.getElementById('authEmail')) {
+          document.getElementById('authEmail').value = emailForLogin;
+        }
+        // Clear previous field errors and focus on password
+        clearFieldAlert('authEmail');
+        clearFieldAlert('authPassword');
+        if (document.getElementById('authPassword')) {
+          document.getElementById('authPassword').value = '';
+          document.getElementById('authPassword').focus();
+        }
+        
+        // clear sensitive fields from signup
         signupPassword.value = ''; signupConfirm.value = '';
-      } catch (err) { authMsg.textContent = 'Sign up error: ' + err.message }
+      } catch (err) { 
+        if (err.code === 'auth/email-already-in-use') {
+          showFieldAlert('signupEmail', 'This email is already registered. Please use a different email or login if you already have an account.');
+        } else {
+          authMsg.textContent = 'Sign up error: ' + err.message;
+        }
+      }
     });
 
     // Allow Enter key to trigger signup
@@ -631,6 +701,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
           }
           
+          // Save credentials if remember me is checked
+          if (rememberMe && rememberMe.checked) {
+            saveCredentials(email, pass, true);
+          } else {
+            saveCredentials(email, pass, false);
+          }
+          
           // Admin and staff can sign in without verification
           console.log('🔍 LOGIN DEBUG: Login successful, role:', role);
           authMsg.textContent = 'Signed in: ' + cred.user.email + ' (role: '+role+')'; 
@@ -683,10 +760,30 @@ document.addEventListener('DOMContentLoaded', () => {
     authResendBtn.addEventListener('click', async ()=>{
       try{
         const user = auth.currentUser;
-        if(!user) return authMsg.textContent = 'Sign in first to resend verification.';
+        if(!user) {
+          // Try to get email from the form for newly registered users
+          const email = document.getElementById('authEmail')?.value || document.getElementById('signupEmail')?.value;
+          if(!email) return authMsg.textContent = 'Please enter your email address first.';
+          
+          // Try to sign in the user to get their user object for resending
+          try {
+            const tempCred = await signInWithEmailAndPassword(auth, email, 'temp'); // This will fail but we can handle it
+          } catch (signInErr) {
+            if (signInErr.code === 'auth/wrong-password' || signInErr.code === 'auth/user-not-found') {
+              authMsg.textContent = 'Account not found or incorrect password. Please check your credentials.';
+            } else {
+              authMsg.textContent = 'Error: '+signInErr.message;
+            }
+            return;
+          }
+        }
+        
         await sendEmailVerification(user);
-        authMsg.textContent = 'Verification email resent.';
-      }catch(err){ authMsg.textContent = 'Error: '+err.message }
+        authMsg.textContent = 'Verification email resent. Please check your inbox.';
+      }catch(err){ 
+        console.error('Resend verification error:', err);
+        authMsg.textContent = 'Error resending verification: '+err.message;
+      }
     });
   }
 
@@ -780,6 +877,8 @@ document.addEventListener('DOMContentLoaded', () => {
       await signOut(auth);
       out.textContent = 'Signed out';
       sessionStorage.removeItem('justLoggedOut');
+      // Clear remembered credentials on sign out
+      clearSavedCredentials();
     });
   }
 
@@ -790,6 +889,8 @@ document.addEventListener('DOMContentLoaded', () => {
       authSignupForm.style.display=''; 
       authSigninForm.style.display='none'; 
       document.getElementById('authModalTitle').textContent='Create Account'; 
+      // Hide resend button when switching to signup
+      if (authResendBtn) authResendBtn.style.display = 'none';
     });
   }
 
@@ -801,6 +902,8 @@ document.addEventListener('DOMContentLoaded', () => {
       authSignupForm.style.display='none'; 
       authSigninForm.style.display=''; 
       document.getElementById('authModalTitle').textContent='Login to Your Account'; 
+      // Hide resend button when switching to signin normally
+      if (authResendBtn) authResendBtn.style.display = 'none';
     });
   }
 
@@ -1104,6 +1207,12 @@ window.openAuthModal = function(mode){
   const authSigninForm = document.getElementById('authSigninForm');
   const authSignupForm = document.getElementById('authSignupForm');
   const authModalTitle = document.getElementById('authModalTitle');
+  const authResendBtn = document.getElementById('authResendBtn');
+  const authMsg = document.getElementById('authMsg');
+  
+  // Hide resend button and clear message when opening modal normally
+  if (authResendBtn) authResendBtn.style.display = 'none';
+  if (authMsg) authMsg.textContent = '';
   
   if(mode==='signup'){ 
     if(authModalTitle) authModalTitle.textContent='Sign Up'; 
