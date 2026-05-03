@@ -1600,22 +1600,6 @@ function getCleanDocumentName(originalName, fileType, index) {
   }
 }
 
-// Helper function to get status icon
-function getStatusIcon(status) {
-  switch(status.toLowerCase()) {
-    case 'pending':
-      return '⏳';
-    case 'under review':
-      return '👁️';
-    case 'approved':
-      return '✅';
-    case 'rejected':
-      return '❌';
-    default:
-      return '📋';
-  }
-}
-
 // Page Navigation
 window.navigateToSection = function(sectionId) {
   document.querySelectorAll('.page-section').forEach(section => {

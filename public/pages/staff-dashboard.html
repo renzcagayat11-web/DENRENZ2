@@ -10,6 +10,49 @@
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
   </head>
   <body>
+    <!-- IMMEDIATE NAVIGATION - Runs before anything else -->
+    <script>
+      // Define navigation IMMEDIATELY before DOM loads
+      window.navigateToSection = function(sectionId) {
+        console.log('[STAFF NAV] Navigating to:', sectionId);
+        alert('Navigating to: ' + sectionId); // DEBUG - remove after testing
+        
+        // Hide all sections
+        var sections = document.querySelectorAll('.page-section');
+        for (var i = 0; i < sections.length; i++) {
+          sections[i].classList.remove('active');
+          sections[i].style.display = 'none';
+        }
+        
+        // Show target
+        var target = document.getElementById(sectionId);
+        if (target) {
+          target.classList.add('active');
+          target.style.display = 'block';
+          console.log('[STAFF NAV] SUCCESS: Showing', sectionId);
+        } else {
+          console.error('[STAFF NAV] ERROR: Section not found:', sectionId);
+        }
+        
+        // Update nav items
+        var navItems = document.querySelectorAll('.nav-item');
+        for (var j = 0; j < navItems.length; j++) {
+          navItems[j].classList.remove('active');
+          if (navItems[j].getAttribute('data-section') === sectionId) {
+            navItems[j].classList.add('active');
+          }
+        }
+        
+        // Save
+        try { localStorage.setItem('currentSection', sectionId); } catch(e) {}
+        
+        // Scroll top
+        window.scrollTo(0, 0);
+      };
+      
+      console.log('[STAFF NAV] Navigation function defined immediately');
+    </script>
+    
     <div class="dashboard-container">
       <!-- Sidebar -->
       <aside class="sidebar">
@@ -21,31 +64,31 @@
           </button>
         </div>
         <nav class="sidebar-nav">
-          <a href="javascript:void(0)" class="nav-item active" data-section="dashboardSection">
+          <a href="javascript:void(0)" class="nav-item active" data-section="dashboardSection" onclick="navigateToSection('dashboardSection'); return false;">
             <span class="nav-icon">📊</span>
             <span>Dashboard</span>
           </a>
-          <a href="javascript:void(0)" class="nav-item" data-section="applicationsSection">
+          <a href="javascript:void(0)" class="nav-item" data-section="applicationsSection" onclick="navigateToSection('applicationsSection'); return false;">
             <span class="nav-icon">📋</span>
             <span>Applications</span>
           </a>
-          <a href="javascript:void(0)" class="nav-item" data-section="ocrSection">
+          <a href="javascript:void(0)" class="nav-item" data-section="ocrSection" onclick="navigateToSection('ocrSection'); return false;">
             <span class="nav-icon">📄</span>
             <span>Document OCR</span>
           </a>
-          <a href="javascript:void(0)" class="nav-item" data-section="recordsSection">
+          <a href="javascript:void(0)" class="nav-item" data-section="recordsSection" onclick="navigateToSection('recordsSection'); return false;">
             <span class="nav-icon">📋</span>
             <span>My Records</span>
           </a>
-          <a href="javascript:void(0)" class="nav-item" data-section="performanceSection">
+          <a href="javascript:void(0)" class="nav-item" data-section="performanceSection" onclick="navigateToSection('performanceSection'); return false;">
             <span class="nav-icon">📈</span>
             <span>My Performance</span>
           </a>
-          <a href="javascript:void(0)" class="nav-item" data-section="settingsSection">
+          <a href="javascript:void(0)" class="nav-item" data-section="settingsSection" onclick="navigateToSection('settingsSection'); return false;">
             <span class="nav-icon">⚙️</span>
             <span>Settings</span>
           </a>
-          <a href="javascript:void(0)" class="nav-item" data-section="helpSection">
+          <a href="javascript:void(0)" class="nav-item" data-section="helpSection" onclick="navigateToSection('helpSection'); return false;">
             <span class="nav-icon">❓</span>
             <span>Help</span>
           </a>
