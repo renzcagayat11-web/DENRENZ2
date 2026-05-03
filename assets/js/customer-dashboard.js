@@ -3472,7 +3472,7 @@ function formatDate(timestamp) {
 }
 
 // View application details
-function viewApplication(appId) {
+async function viewApplication(appId) {
   console.log('viewApplication called with appId:', appId);
   
   // Fetch fresh data from Firestore to ensure documents are up-to-date
