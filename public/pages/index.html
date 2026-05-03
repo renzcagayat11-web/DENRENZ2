@@ -32,8 +32,7 @@
     <main>
       <section id="home" class="hero hero-with-video">
         <div class="hero-video-fixed">
-          <video autoplay muted loop playsinline poster="/assets/images/forest-poster.jpg" onerror="this.style.display='none'; this.nextElementSibling.style.background='linear-gradient(135deg, #0b5f2c 0%, #0a7a3c 50%, #059669 100%)';">
-            <source src="assets/images/forest.mp4" type="video/mp4">
+          <video autoplay muted loop playsinline preload="auto" id="heroVideo" style="display:block;opacity:1;visibility:visible;width:100%;height:100%;object-fit:cover;">
             <source src="/assets/images/forest.mp4" type="video/mp4">
           </video>
           <div class="hero-overlay"></div>
@@ -442,33 +441,45 @@
     <script src="/assets/js/image-modal.js"></script>
     <script src="/assets/js/contact-enhanced.js"></script>
     <script>
-      // Force video autoplay - handles browser autoplay restrictions
-      (function forceVideoAutoplay() {
-        const video = document.querySelector('.hero-video-fixed video');
-        if (!video) return;
+      // Force video autoplay with better debugging
+      (function initHeroVideo() {
+        const video = document.getElementById('heroVideo');
+        if (!video) {
+          console.error('❌ Hero video element not found!');
+          return;
+        }
         
-        function attemptPlay() {
+        console.log('🎬 Hero video found, initializing...');
+        
+        function tryPlay() {
           video.play().then(() => {
-            console.log('✅ Hero video playing');
+            console.log('✅ Video playing successfully');
+            video.style.opacity = '1';
+            video.style.visibility = 'visible';
           }).catch(err => {
-            console.log('⚠️ Video autoplay blocked:', err.message);
-            // Retry on first user interaction
-            const events = ['click', 'touchstart', 'scroll', 'keydown'];
-            const playHandler = () => {
-              video.play().catch(() => {});
-              events.forEach(e => document.removeEventListener(e, playHandler));
-            };
-            events.forEach(e => document.addEventListener(e, playHandler, { once: true }));
+            console.log('⚠️ Autoplay blocked:', err.message);
           });
         }
         
-        // Try immediately and after a short delay
-        attemptPlay();
-        setTimeout(attemptPlay, 100);
-        setTimeout(attemptPlay, 500);
+        // Try multiple times
+        tryPlay();
+        setTimeout(tryPlay, 50);
+        setTimeout(tryPlay, 200);
+        setTimeout(tryPlay, 1000);
         
-        // Also try when video metadata is loaded
-        video.addEventListener('loadedmetadata', attemptPlay);
+        // Ensure video is visible
+        video.style.display = 'block';
+        video.style.opacity = '1';
+        video.style.visibility = 'visible';
+        
+        // Play on any user interaction
+        const playOnInteract = () => {
+          video.play().catch(() => {});
+        };
+        document.addEventListener('click', playOnInteract, { once: true });
+        document.addEventListener('scroll', playOnInteract, { once: true });
+        document.addEventListener('touchstart', playOnInteract, { once: true });
+        
       })();
     </script>
   </body>
