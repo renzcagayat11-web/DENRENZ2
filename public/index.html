@@ -3,6 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <!-- Prevent caching for auth security -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>DENR Permit — Web Portal</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/about-enhanced.css">
@@ -431,6 +435,55 @@
       </div>
     </div>
 
+    <!-- Auth Redirect: Prevent logged-in users from accessing index page -->
+    <script type="module">
+      import { auth, db } from './assets/js/firebase-config.js';
+      import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+      import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+      
+      // Check if user is already logged in on index page
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          console.log('[AUTH GUARD] User already logged in, checking role...');
+          
+          try {
+            // Get user role from Firestore
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            const userData = userDoc.data();
+            const role = userData?.role;
+            
+            console.log('[AUTH GUARD] User role:', role);
+            
+            // Don't redirect if just logged out
+            if (sessionStorage.getItem('justLoggedOut')) {
+              console.log('[AUTH GUARD] Just logged out, staying on index');
+              sessionStorage.removeItem('justLoggedOut');
+              return;
+            }
+            
+            // Redirect based on role
+            if (role === 'admin') {
+              console.log('[AUTH GUARD] Redirecting to admin dashboard');
+              window.location.replace('/pages/admin-dashboard.html');
+            } else if (role === 'staff') {
+              console.log('[AUTH GUARD] Redirecting to staff dashboard');
+              window.location.replace('/pages/staff-dashboard.html');
+            } else {
+              // Customer or no role - redirect to customer dashboard
+              console.log('[AUTH GUARD] Redirecting to customer dashboard');
+              window.location.replace('/pages/customer-dashboard.html');
+            }
+          } catch (error) {
+            console.error('[AUTH GUARD] Error checking role:', error);
+            // If error, assume customer and redirect
+            window.location.replace('/pages/customer-dashboard.html');
+          }
+        } else {
+          console.log('[AUTH GUARD] No user logged in, staying on index');
+        }
+      });
+    </script>
+    
     <script type="module" src="assets/js/app.js"></script>
     <script src="assets/js/dynamic-slider.js"></script>
     <script src="assets/js/image-modal.js"></script>
