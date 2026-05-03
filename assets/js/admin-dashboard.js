@@ -834,17 +834,22 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-// Page navigation function
+// Page navigation function - UPDATED with inline styles
 window.navigateToSection = function(sectionId) {
-  // Hide all sections
+  console.log('[ADMIN NAV] Navigating to:', sectionId);
+  
+  // Hide all sections - use both class and inline style
   document.querySelectorAll('.page-section').forEach(section => {
     section.classList.remove('active');
+    section.style.display = 'none'; // FORCE hide
   });
   
   // Show target section
   const targetSection = document.getElementById(sectionId);
   if (targetSection) {
     targetSection.classList.add('active');
+    targetSection.style.display = 'block'; // FORCE show
+    console.log('[ADMIN NAV] SUCCESS: Section', sectionId, 'is now visible');
     
     // Track page access
     trackPageAccess(sectionId);
@@ -863,6 +868,8 @@ window.navigateToSection = function(sectionId) {
     } else if (sectionId === 'auditSection') {
       loadAuditLogs();
     }
+  } else {
+    console.error('[ADMIN NAV] ERROR: Section not found:', sectionId);
   }
   
   // Update page title
@@ -880,6 +887,20 @@ window.navigateToSection = function(sectionId) {
     };
     pageTitle.textContent = sectionNames[sectionId] || 'Dashboard';
   }
+  
+  // Update nav items active state
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.remove('active');
+    if (item.getAttribute('data-section') === sectionId) {
+      item.classList.add('active');
+    }
+  });
+  
+  // Save to localStorage
+  try { localStorage.setItem('currentSection', sectionId); } catch(e) {}
+  
+  // Scroll to top
+  window.scrollTo(0, 0);
 };
 
 // Load all applications for Applications section with 5-row scroll limit
