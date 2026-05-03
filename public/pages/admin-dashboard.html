@@ -1,0 +1,1515 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin Dashboard — DENR Permit System</title>
+    <link rel="stylesheet" href="/assets/css/admin-dashboard.css" />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <img src="/assets/images/logo.png" alt="DENR" class="sidebar-logo" />
+          <div class="sidebar-title">DENR-CENRO<br>Sta. Cruz</div>
+          <button class="sidebar-toggle-simple" id="sidebarToggle" onclick="toggleSidebar()">
+            <span class="toggle-icon">◀</span>
+          </button>
+        </div>
+        <nav class="sidebar-nav">
+          <a href="#dashboard" class="nav-item active" data-section="dashboardSection" data-tooltip="Dashboard">
+            <span class="nav-icon">📊</span>
+            <span class="nav-text">Dashboard</span>
+          </a>
+          <a href="#applications" class="nav-item" data-section="applicationsSection" data-tooltip="Applications">
+            <span class="nav-icon">📋</span>
+            <span class="nav-text">Applications</span>
+          </a>
+          <a href="#records" class="nav-item" data-section="recordsSection" data-tooltip="Records">
+            <span class="nav-icon">📁</span>
+            <span class="nav-text">Records</span>
+          </a>
+          <a href="#users" class="nav-item" data-section="usersSection" data-tooltip="Manage Users">
+            <span class="nav-icon">👥</span>
+            <span class="nav-text">Manage Users</span>
+          </a>
+          <a href="#reports" class="nav-item" data-section="reportsSection" data-tooltip="Reports">
+            <span class="nav-icon">📈</span>
+            <span class="nav-text">Reports</span>
+          </a>
+          <a href="#content" class="nav-item" data-section="contentSection" data-tooltip="Content">
+            <span class="nav-icon">📝</span>
+            <span class="nav-text">Content</span>
+          </a>
+          <a href="#settings" class="nav-item" data-section="settingsSection" data-tooltip="Settings">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-text">Settings</span>
+          </a>
+          <a href="#audit" class="nav-item" data-section="auditSection" data-tooltip="Audit Logs">
+            <span class="nav-icon">📝</span>
+            <span class="nav-text">Audit Logs</span>
+          </a>
+        </nav>
+        <div class="sidebar-footer">
+          <button id="logoutBtn" class="logout-btn" data-tooltip="Logout">
+            <span>🚪</span>
+            <span class="nav-text">Logout</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+          <div class="header-left">
+            <h1 class="page-title">Dashboard</h1>
+          </div>
+          <div class="header-right">
+            <div class="notification-wrapper">
+              <button class="notification-btn">
+                <span>🔔</span>
+                <span class="notification-badge">11</span>
+              </button>
+            </div>
+            <div class="user-avatar">
+              <div class="avatar-circle">SA</div>
+              <div class="user-info">
+                <div class="user-name" id="userName">System Administrator</div>
+                <div class="user-role" id="userRole">Admin</div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="content-area">
+          <!-- Dashboard Overview Section -->
+          <section id="dashboardSection" class="page-section active">
+            <!-- Welcome Section -->
+            <section class="welcome-section">
+              <h2 class="welcome-title">Welcome back, <span id="welcomeName">System Administrator</span>!</h2>
+              <p class="welcome-subtitle">Manage environmental permits and monitor system performance in real-time</p>
+            </section>
+
+            <!-- Quick Stats -->
+            <section class="quick-stats">
+              <div class="stat-card date-card">
+                <div class="stat-icon">Date</div>
+                <div class="stat-content">
+                  <div class="stat-value" id="currentDate">Loading...</div>
+                  <div class="stat-label">Today's Date</div>
+                </div>
+              </div>
+              <div class="stat-card time-card">
+                <div class="stat-icon">Time</div>
+                <div class="stat-content">
+                  <div class="stat-value" id="currentTime">Loading...</div>
+                  <div class="stat-label">Current Time</div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Summary Cards -->
+            <section class="summary-cards">
+              <div class="summary-card blue">
+                <div class="summary-icon">Total</div>
+                <div class="summary-content">
+                  <div class="summary-value" id="summaryTotal">5</div>
+                  <div class="summary-label">TOTAL APPLICATIONS</div>
+                  <div class="summary-sub">0 today</div>
+                </div>
+              </div>
+              <div class="summary-card yellow">
+                <div class="summary-icon">Pending</div>
+                <div class="summary-content">
+                  <div class="summary-value" id="summaryPending">4</div>
+                  <div class="summary-label">PENDING REVIEW</div>
+                  <div class="summary-sub">10 pending, 1 under review</div>
+                </div>
+              </div>
+              <div class="summary-card green">
+                <div class="summary-icon">Approved</div>
+                <div class="summary-content">
+                  <div class="summary-value" id="summaryApproved">1</div>
+                  <div class="summary-label">APPROVED</div>
+                  <div class="summary-sub">26.7% approval rate</div>
+                </div>
+              </div>
+              <div class="summary-card red">
+                <div class="summary-icon">Rejected</div>
+                <div class="summary-content">
+                  <div class="summary-value" id="summaryRejected">0</div>
+                  <div class="summary-label">REJECTED</div>
+                  <div class="summary-sub">0% rejection rate</div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Charts and Tables Section -->
+            <section class="charts-section">
+              <!-- Application Statistics -->
+              <div class="chart-card">
+                <h3 class="chart-title">Application Statistics</h3>
+                <div class="table-container">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Status</th>
+                        <th>Count</th>
+                        <th>Percentage</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><span class="status-badge pending">PENDING</span></td>
+                        <td id="pendingCount">0</td>
+                        <td id="pendingPercent">0%</td>
+                      </tr>
+                      <tr>
+                        <td><span class="status-badge under-review">UNDER REVIEW</span></td>
+                        <td id="underReviewCount">0</td>
+                        <td id="underReviewPercent">0%</td>
+                      </tr>
+                      <tr>
+                        <td><span class="status-badge approved">APPROVED</span></td>
+                        <td id="approvedCount">0</td>
+                        <td id="approvedPercent">0%</td>
+                      </tr>
+                      <tr>
+                        <td><span class="status-badge rejected">REJECTED</span></td>
+                        <td id="rejectedCount">0</td>
+                        <td id="rejectedPercent">0%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Recent Applications Summary -->
+              <div class="table-card">
+                <div class="table-header">
+                  <h3 class="table-title">Recent Applications Summary</h3>
+                  <button class="view-all-btn" onclick="navigateToSection('applicationsSection')">View All</button>
+                </div>
+                <div class="table-container">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Application ID</th>
+                        <th>Applicant Name</th>
+                        <th>Permit Type</th>
+                        <th>Date Submitted</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="recentApplications">
+                      <!-- Recent applications will be loaded here from database -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+
+            <!-- Detailed Permit Type Analysis -->
+            <section class="permit-analysis-section">
+              <h3 class="section-title">Detailed Permit Type Analysis</h3>
+              <div class="table-container full-width">
+                <table class="data-table analysis-table">
+                  <thead>
+                    <tr>
+                      <th>PERMIT TYPE</th>
+                      <th>TOTAL</th>
+                      <th>APPROVED</th>
+                      <th>REJECTED</th>
+                      <th>PENDING</th>
+                      <th>UNDER REVIEW</th>
+                      <th>APPROVAL RATE</th>
+                    </tr>
+                  </thead>
+                  <tbody id="permitAnalysis">
+                    <!-- Permit analysis will be loaded here -->
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+          <!-- Applications Section -->
+          <section id="applicationsSection" class="page-section">
+            <div class="section-header">
+              <h2 class="section-title">All Applications</h2>
+              <div class="filter-controls">
+                <select id="appStatusFilter" class="filter-select">
+                  <option value="all">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="under review">Under Review</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+                <select id="appTypeFilter" class="filter-select">
+                  <option value="all">All Types</option>
+                  <option value="Mining Permit">Mining Permit</option>
+                  <option value="Tree Cutting Permit">Tree Cutting Permit</option>
+                  <option value="Tree Planting Permit">Tree Planting Permit</option>
+                  <option value="Wildlife Permit">Wildlife Permit</option>
+                  <option value="Rolling">Rolling</option>
+                </select>
+                <input type="text" id="appSearchInput" class="search-input" placeholder="Search by ID or name..." />
+              </div>
+            </div>
+            <div class="applications-table-container">
+              <div class="table-header-info">
+                <p class="table-info">Showing <span id="visibleCount">5</span> of <span id="totalCount">0</span> applications</p>
+              </div>
+              <div class="table-wrapper">
+                <div class="table-scroll-container">
+                  <table class="modern-data-table">
+                    <thead>
+                      <tr>
+                        <th>Application ID</th>
+                        <th>Applicant Name</th>
+                        <th>Permit Type</th>
+                        <th>Date Submitted</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="allApplicationsTable">
+                      <!-- Applications will be loaded here -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Records Section -->
+          <section id="recordsSection" class="page-section">
+            <div class="section-header">
+              <h2 class="section-title">Records & Documents</h2>
+            </div>
+            <div class="records-grid">
+              <div class="record-card">
+                <div class="record-icon">📄</div>
+                <h3>Approved Permits</h3>
+                <p>View all approved permit documents</p>
+                <button class="btn-secondary" onclick="showApprovedPermits()">View All</button>
+              </div>
+              <div class="record-card">
+                <div class="record-icon">📁</div>
+                <h3>Archived Records</h3>
+                <p>Access historical and rejected permit records</p>
+                <button class="btn-secondary" onclick="showArchivedRecords()">View Archive</button>
+              </div>
+              <div class="record-card">
+                <div class="record-icon">📊</div>
+                <h3>System Logs</h3>
+                <p>View system activity logs</p>
+                <button class="btn-secondary" onclick="showSystemLogs()">View Logs</button>
+              </div>
+            </div>
+            
+            <!-- Approved Permits Table (hidden by default) -->
+            <div id="approvedPermitsContainer" style="display:none; margin-top: 32px;">
+              <div class="section-header">
+                <h3 class="section-title">Approved Permits</h3>
+                <button class="btn-secondary" onclick="hideApprovedPermits()">Close</button>
+              </div>
+              <div class="table-wrapper">
+                <div class="table-scroll-container">
+                  <table class="modern-data-table">
+                    <thead>
+                      <tr>
+                        <th>Application ID</th>
+                        <th>Applicant Name</th>
+                        <th>Permit Type</th>
+                        <th>Date Approved</th>
+                        <th>Approved By</th>
+                        <th>Approved At</th>
+                        <th>Documents</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="approvedPermitsTable">
+                      <!-- Approved permits will be loaded here -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Archived Records Table (hidden by default) -->
+            <div id="archivedRecordsContainer" style="display:none; margin-top: 32px;">
+              <div class="section-header">
+                <h3 class="section-title">Archived Records (Rejected Applications)</h3>
+                <button class="btn-secondary" onclick="hideArchivedRecords()">Close</button>
+              </div>
+              <div class="table-wrapper">
+                <div class="table-scroll-container">
+                  <table class="modern-data-table">
+                    <thead>
+                      <tr>
+                        <th>Application ID</th>
+                        <th>Applicant Name</th>
+                        <th>Permit Type</th>
+                        <th>Date Rejected</th>
+                        <th>Rejected By</th>
+                        <th>Rejection Reason</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="archivedRecordsTable">
+                      <!-- Archived records will be loaded here -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            
+            <!-- System Logs Table (hidden by default) -->
+            <div id="systemLogsContainer" style="display:none; margin-top: 32px;">
+              <div class="section-header">
+                <h3 class="section-title">System Activity Logs</h3>
+                <button class="btn-secondary" onclick="hideSystemLogs()">Close</button>
+              </div>
+              <div class="table-wrapper">
+                <div class="table-scroll-container">
+                  <table class="modern-data-table">
+                    <thead>
+                      <tr>
+                        <th>Timestamp</th>
+                        <th>Application ID</th>
+                        <th>Applicant Name</th>
+                        <th>Action</th>
+                        <th>Performed By</th>
+                      </tr>
+                    </thead>
+                    <tbody id="systemLogsTable">
+                      <!-- System logs will be loaded here -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Manage Users Section -->
+          <section id="usersSection" class="page-section">
+            <div class="section-header">
+              <h2 class="section-title">Manage Users</h2>
+              <button class="btn-primary" id="createStaffBtn">+ Create Staff Account</button>
+            </div>
+            <div class="users-tabs">
+              <button class="user-tab active" data-user-type="staff">Staff</button>
+              <button class="user-tab" data-user-type="customer">Customers</button>
+              <button class="user-tab" data-user-type="all">All Users</button>
+            </div>
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTable">
+                  <!-- Users will be loaded here -->
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- Reports Section -->
+          <section id="reportsSection" class="page-section">
+            <div class="section-header">
+              <h2 class="section-title">Reports & Analytics</h2>
+            </div>
+            <div class="reports-grid">
+              <div class="report-card">
+                <h3>Application Trends</h3>
+                <div id="applicationTrends">
+                  <p style="color: #666; padding: 16px;">Loading data...</p>
+                </div>
+              </div>
+              <div class="report-card">
+                <h3>Permit Type Distribution</h3>
+                <div id="permitTypeDistribution">
+                  <p style="color: #666; padding: 16px;">Loading data...</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Staff Performance Section - Full Width -->
+            <div class="report-card" style="grid-column: 1 / -1;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>Staff Performance Dashboard</h3>
+                <div class="filter-controls" style="display: flex; gap: 8px; align-items: center;">
+                  <select id="staffDateRange" class="filter-select" style="padding: 6px 12px; border: 1px solid #e5e7eb; border-radius: 4px;">
+                    <option value="all">All Time</option>
+                    <option value="7">Last 7 Days</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                  </select>
+                  <select id="staffRoleFilter" class="filter-select" style="padding: 6px 12px; border: 1px solid #e5e7eb; border-radius: 4px;">
+                    <option value="all">All Roles</option>
+                    <option value="admin">Admin</option>
+                    <option value="staff">Staff</option>
+                  </select>
+                  <select id="staffPerformanceFilter" class="filter-select" style="padding: 6px 12px; border: 1px solid #e5e7eb; border-radius: 4px;">
+                    <option value="all">All Performance</option>
+                    <option value="high">High (80%+)</option>
+                    <option value="average">Average (50-79%)</option>
+                    <option value="low">Low (&lt;50%)</option>
+                  </select>
+                  <button class="btn-secondary" onclick="applyStaffFilters()" style="padding: 6px 12px;">Apply</button>
+                  <button class="btn-secondary" onclick="exportStaffPerformance()" style="padding: 6px 12px;">Export</button>
+                </div>
+              </div>
+              
+              <!-- Summary Stats -->
+              <div id="staffPerformanceSummary" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+                <!-- Will be populated by JS -->
+              </div>
+              
+              <!-- Staff List -->
+              <div id="staffPerformance">
+                <p style="color: #666; padding: 16px;">Loading data...</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Settings Section -->
+          <section id="settingsSection" class="page-section">
+            <div class="settings-management-header">
+              <div class="settings-header-info">
+                <h2 class="section-title">System Settings</h2>
+                <p class="section-subtitle">Configure security, sessions, maintenance, and notifications</p>
+              </div>
+              <div class="settings-header-status">
+                <div class="status-item">
+                  <span class="status-indicator online"></span>
+                  <span class="status-text">System Online</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="settings-tabs-container">
+              <div class="content-tabs">
+                <button class="content-tab active" data-settings-type="security">
+                  <span class="tab-icon">🔐</span>
+                  <span class="tab-text">Security</span>
+                </button>
+                <button class="content-tab" data-settings-type="session">
+                  <span class="tab-icon">⏱️</span>
+                  <span class="tab-text">Session</span>
+                </button>
+                <button class="content-tab" data-settings-type="maintenance">
+                  <span class="tab-icon">🔧</span>
+                  <span class="tab-text">Maintenance</span>
+                </button>
+                <button class="content-tab" data-settings-type="notifications">
+                  <span class="tab-icon">🔔</span>
+                  <span class="tab-text">Notifications</span>
+                </button>
+              </div>
+            </div>
+            
+            <div class="content-editor-container">
+              <div id="securityEditor" class="content-editor active">
+                <div class="content-editor-header">
+                  <div class="editor-header-info">
+                    <h3 class="editor-title">
+                      <span class="editor-icon">🔐</span>
+                      Security Settings
+                    </h3>
+                    <p class="editor-description">Manage your account security and password</p>
+                  </div>
+                </div>
+                <form class="modern-form settings-form" id="changePasswordForm">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="currentPassword" class="form-label">
+                        <span class="label-icon">🔑</span>
+                        Current Password
+                      </label>
+                      <input type="password" id="currentPassword" class="form-input" placeholder="Enter current password" autocomplete="current-password" />
+                      <div class="form-help">
+                        <small>Enter your current password to verify your identity</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="newPassword" class="form-label">
+                        <span class="label-icon">🔒</span>
+                        New Password
+                      </label>
+                      <input type="password" id="newPassword" class="form-input" placeholder="Enter new password" autocomplete="new-password" />
+                      <div class="form-help">
+                        <small>Use at least 8 characters with a mix of letters, numbers, and symbols</small>
+                      </div>
+                      
+                      <!-- Password Strength Indicator -->
+                      <div id="passwordStrengthIndicator" class="password-strength-indicator" style="display: none;">
+                        <div class="strength-header">
+                          <span id="passwordStrengthText" class="strength-text">Password strength: weak</span>
+                        </div>
+                        <div class="password-strength">
+                          <div id="passwordStrengthBar" class="password-strength-bar weak"></div>
+                        </div>
+                      </div>
+                      
+                      <!-- Password Requirements -->
+                      <div id="passwordRequirements" class="password-requirements"></div>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="confirmPassword" class="form-label">
+                        <span class="label-icon">✅</span>
+                        Confirm New Password
+                      </label>
+                      <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm new password" autocomplete="new-password" />
+                      <div class="form-help">
+                        <small>Re-enter your new password to confirm</small>
+                      </div>
+                      
+                      <!-- Password Match Indicator -->
+                      <div id="passwordMatchIndicator" class="password-match" style="display: none;">
+                        <span class="match-icon">✗</span>
+                        <span class="match-text">Passwords do not match</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <div class="form-left"></div>
+                    <div class="form-right">
+                      <button type="button" class="btn-primary" onclick="changePassword()">
+                        <span class="btn-icon">🔐</span>
+                        Change Password
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div id="sessionEditor" class="content-editor">
+                <div class="content-editor-header">
+                  <div class="editor-header-info">
+                    <h3 class="editor-title">
+                      <span class="editor-icon">⏱️</span>
+                      Session Timeout
+                    </h3>
+                    <p class="editor-description">Configure automatic session timeout settings</p>
+                  </div>
+                </div>
+                <form class="modern-form settings-form">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="sessionTimeout" class="form-label">
+                        <span class="label-icon">⏰</span>
+                        Session Timeout (minutes)
+                      </label>
+                      <input type="number" id="sessionTimeout" class="form-input" value="60" min="15" max="480" />
+                      <div class="form-help">
+                        <small>Set how long users stay logged in before automatic logout (15-480 minutes)</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <div class="form-left"></div>
+                    <div class="form-right">
+                      <button type="button" class="btn-primary" onclick="saveSecuritySettings()">
+                        <span class="btn-icon">💾</span>
+                        Save Changes
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div id="maintenanceEditor" class="content-editor">
+                <div class="content-editor-header">
+                  <div class="editor-header-info">
+                    <h3 class="editor-title">
+                      <span class="editor-icon">🔧</span>
+                      Maintenance Mode
+                    </h3>
+                    <p class="editor-description">Control system maintenance and availability</p>
+                  </div>
+                </div>
+                <form class="modern-form settings-form">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label checkbox-label">
+                        <input type="checkbox" id="maintenanceMode" />
+                        <span class="checkbox-text">
+                          <span class="label-icon">🔧</span>
+                          Enable Maintenance Mode
+                        </span>
+                      </label>
+                      <div class="form-help">
+                        <small>When enabled, users will see a maintenance message instead of the normal site</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="maintenanceMessage" class="form-label">
+                        <span class="label-icon">📝</span>
+                        Maintenance Message
+                      </label>
+                      <textarea id="maintenanceMessage" class="form-textarea" rows="3" placeholder="System is under maintenance. Please check back later."></textarea>
+                      <div class="form-help">
+                        <small>Custom message to display to users during maintenance</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <div class="form-left"></div>
+                    <div class="form-right">
+                      <button type="button" class="btn-primary" onclick="saveMaintenanceSettings()">
+                        <span class="btn-icon">💾</span>
+                        Save Changes
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div id="notificationsEditor" class="content-editor">
+                <div class="content-editor-header">
+                  <div class="editor-header-info">
+                    <h3 class="editor-title">
+                      <span class="editor-icon">🔔</span>
+                      Notification Settings
+                    </h3>
+                    <p class="editor-description">Configure email notifications and alerts</p>
+                  </div>
+                </div>
+                <form class="modern-form settings-form">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <div class="checkbox-group">
+                        <label class="form-label checkbox-label">
+                          <input type="checkbox" checked />
+                          <span class="checkbox-text">
+                            <span class="label-icon">📧</span>
+                            Email notifications for new applications
+                          </span>
+                        </label>
+                        <div class="form-help">
+                          <small>Receive email when users submit new permit applications</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <div class="checkbox-group">
+                        <label class="form-label checkbox-label">
+                          <input type="checkbox" checked />
+                          <span class="checkbox-text">
+                            <span class="label-icon">✅</span>
+                            Email notifications for approvals
+                          </span>
+                        </label>
+                        <div class="form-help">
+                          <small>Get notified when applications are approved</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <div class="checkbox-group">
+                        <label class="form-label checkbox-label">
+                          <input type="checkbox" />
+                          <span class="checkbox-text">
+                            <span class="label-icon">❌</span>
+                            Email notifications for rejections
+                          </span>
+                        </label>
+                        <div class="form-help">
+                          <small>Receive alerts when applications are rejected</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <div class="checkbox-group">
+                        <label class="form-label checkbox-label">
+                          <input type="checkbox" />
+                          <span class="checkbox-text">
+                            <span class="label-icon">📊</span>
+                            Daily summary reports
+                          </span>
+                        </label>
+                        <div class="form-help">
+                          <small>Receive daily email summaries of all system activities</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <div class="form-left"></div>
+                    <div class="form-right">
+                      <button type="button" class="btn-primary" onclick="saveNotificationSettings()">
+                        <span class="btn-icon">💾</span>
+                        Save Changes
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </section>
+
+          <!-- Content Management Section -->
+          <section id="contentSection" class="page-section">
+            <div class="content-management-header">
+              <div class="content-header-info">
+                <h2 class="section-title">Content Management</h2>
+                <p class="section-subtitle">Manage website content, announcements, and system information</p>
+              </div>
+              <div class="content-header-stats">
+                <div class="stat-item">
+                  <span class="stat-number" id="totalContentItems">0</span>
+                  <span class="stat-label">Total Items</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number" id="activeAnnouncements">0</span>
+                  <span class="stat-label">Active</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="content-tabs-container">
+              <div class="content-tabs">
+                <button class="content-tab active" data-content-type="announcements">
+                  <span class="tab-icon">📢</span>
+                  <span class="tab-text">Announcements</span>
+                </button>
+                <button class="content-tab" data-content-type="welcome">
+                  <span class="tab-icon">👋</span>
+                  <span class="tab-text">Welcome</span>
+                </button>
+                <button class="content-tab" data-content-type="contact">
+                  <span class="tab-icon">📞</span>
+                  <span class="tab-text">Contact</span>
+                </button>
+                <button class="content-tab" data-content-type="office">
+                  <span class="tab-icon">🕐</span>
+                  <span class="tab-text">Office Hours</span>
+                </button>
+                <button class="content-tab" data-content-type="permits">
+                  <span class="tab-icon">📋</span>
+                  <span class="tab-text">Permit Types</span>
+                </button>
+                <button class="content-tab" data-content-type="faq">
+                  <span class="tab-icon">❓</span>
+                  <span class="tab-text">FAQ</span>
+                </button>
+              </div>
+            </div>
+            
+            <div class="content-editor-container">
+              <div id="announcementsEditor" class="content-editor active">
+                <div class="content-editor-header">
+                  <div class="editor-header-info">
+                    <h3 class="editor-title">
+                      <span class="editor-icon">📢</span>
+                      Announcements
+                    </h3>
+                    <p class="editor-description">Create and manage website announcements</p>
+                  </div>
+                </div>
+                
+                <!-- Professional Announcement Editor -->
+                <div class="announcement-editor-container">
+                  <div class="editor-panel">
+                    <div class="editor-toolbar">
+                      <div class="toolbar-section">
+                        <h4 class="toolbar-title">Create Announcement</h4>
+                        <div class="editor-tools">
+                          <button type="button" class="tool-btn" data-command="bold" title="Bold">
+                            <strong>B</strong>
+                          </button>
+                          <button type="button" class="tool-btn" data-command="italic" title="Italic">
+                            <em>I</em>
+                          </button>
+                          <button type="button" class="tool-btn" data-command="underline" title="Underline">
+                            <u>U</u>
+                          </button>
+                          <button type="button" class="tool-btn" data-command="insertUnorderedList" title="Bullet List">
+                            • List
+                          </button>
+                          <button type="button" class="tool-btn" data-command="insertOrderedList" title="Numbered List">
+                            1. List
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <form id="announcementsForm" class="modern-form">
+                      <div class="form-row">
+                        <div class="form-group">
+                          <label for="announcementTitle" class="form-label">
+                            <span class="label-icon">📝</span>
+                            Announcement Title
+                          </label>
+                          <input type="text" id="announcementTitle" class="form-input" placeholder="Enter announcement title" />
+                        </div>
+                      </div>
+                      
+                      <div class="form-row">
+                        <div class="form-group">
+                          <label for="announcementContent" class="form-label">
+                            <span class="label-icon">📄</span>
+                            Announcement Content
+                          </label>
+                          <div class="rich-editor" contenteditable="true" id="announcementContent" placeholder="Write your announcement here..."></div>
+                        </div>
+                      </div>
+                      
+                      <!-- Image Upload Section -->
+                      <div class="form-row">
+                        <div class="form-group">
+                          <label class="form-label">
+                            <span class="label-icon">🖼️</span>
+                            Announcement Image (Optional)
+                          </label>
+                          <div class="image-upload-container">
+                            <input type="file" id="announcementImage" accept="image/*" style="display: none;">
+                            <button type="button" class="btn-upload" id="uploadImageBtn">
+                              <span class="btn-icon">📷</span>
+                              <span class="btn-text">Choose Image</span>
+                            </button>
+                            <div id="imagePreview" class="image-preview" style="display: none;">
+                              <img id="previewImg" src="" alt="Preview">
+                              <button type="button" class="remove-image-btn" id="removeImageBtn">×</button>
+                            </div>
+                          </div>
+                          <div class="form-help">
+                            <small>Supported formats: JPG, PNG, GIF. Maximum size: 5MB.</small>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="form-actions">
+                        <div class="form-left">
+                          <label class="checkbox-label">
+                            <input type="checkbox" id="announcementActive" checked />
+                            <span class="checkbox-text">Active</span>
+                          </label>
+                        </div>
+                        <div class="form-right">
+                          <button type="button" class="btn-secondary" id="debugImageData">Debug Image Data</button>
+                          <button type="submit" class="btn-primary">
+                            <span class="btn-icon">💾</span>
+                            Save Announcement
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                  
+                  <!-- Live Preview Panel -->
+                  <div class="preview-panel">
+                    <div class="preview-header">
+                      <h4 class="preview-title">
+                        <span class="preview-icon">👁️</span>
+                        Live Preview
+                      </h4>
+                      <span class="preview-badge">How it will look on the website</span>
+                    </div>
+                    <div class="preview-container">
+                      <div class="announcement-card preview-card">
+                        <div class="announcement-header">
+                          <h3 id="previewTitle">Your announcement title will appear here</h3>
+                          <span class="announcement-badge new-badge">NEW</span>
+                        </div>
+                        <div class="announcement-content">
+                          <div class="announcement-image" id="previewImageContainer" style="display: none;">
+                            <img id="previewImageDisplay" src="" alt="Announcement">
+                          </div>
+                          <div class="announcement-body" id="previewContent">
+                            <p>Your announcement content will appear here as you type...</p>
+                          </div>
+                        </div>
+                        <div class="announcement-footer">
+                          <span class="announcement-date">Posted: Today</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="content-list-section">
+                  <h4 class="list-title">Existing Announcements</h4>
+                  <div id="announcementsList">
+                    <!-- Announcements will be loaded here -->
+                  </div>
+                </div>
+              </div>
+              <div id="welcomeEditor" class="content-editor">
+                <div class="content-editor-header">
+                  <div class="editor-header-info">
+                    <h3 class="editor-title">
+                      <span class="editor-icon">👋</span>
+                      Welcome Message
+                    </h3>
+                    <p class="editor-description">Manage the homepage welcome message</p>
+                  </div>
+                </div>
+                <form id="welcomeForm" class="modern-form">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="welcomeTitle" class="form-label">
+                        <span class="label-icon">🏷️</span>
+                        Welcome Title
+                      </label>
+                      <input type="text" id="welcomeTitle" class="form-input" placeholder="Enter welcome title" />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="welcomeMessage" class="form-label">
+                        <span class="label-icon">💬</span>
+                        Welcome Message
+                      </label>
+                      <textarea id="welcomeMessage" class="form-textarea" rows="6" placeholder="Enter welcome message"></textarea>
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <div class="form-left"></div>
+                    <div class="form-right">
+                      <button type="submit" class="btn-primary">
+                        <span class="btn-icon">💾</span>
+                        Save Welcome Message
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div id="contactEditor" class="content-editor">
+                <div class="content-editor-header">
+                  <div class="editor-header-info">
+                    <h3 class="editor-title">
+                      <span class="editor-icon">📞</span>
+                      Contact Information
+                    </h3>
+                    <p class="editor-description">Update office contact details</p>
+                  </div>
+                </div>
+                <form id="contactForm" class="modern-form">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="contactAddress" class="form-label">
+                        <span class="label-icon">📍</span>
+                        Office Address
+                      </label>
+                      <input type="text" id="contactAddress" class="form-input" placeholder="Enter office address" />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="contactPhone" class="form-label">
+                        <span class="label-icon">📱</span>
+                        Phone Number
+                      </label>
+                      <input type="text" id="contactPhone" class="form-input" placeholder="Enter phone number" />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="contactEmail" class="form-label">
+                        <span class="label-icon">📧</span>
+                        Email Address
+                      </label>
+                      <input type="email" id="contactEmail" class="form-input" placeholder="Enter email" />
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <div class="form-left"></div>
+                    <div class="form-right">
+                      <button type="submit" class="btn-primary">
+                        <span class="btn-icon">💾</span>
+                        Save Contact Info
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div id="officeEditor" class="content-editor">
+                <div class="content-editor-header">
+                  <div class="editor-header-info">
+                    <h3 class="editor-title">
+                      <span class="editor-icon">🕐</span>
+                      Office Hours
+                    </h3>
+                    <p class="editor-description">Set office operating hours</p>
+                  </div>
+                </div>
+                <form id="officeForm" class="modern-form">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="officeWeekday" class="form-label">
+                        <span class="label-icon">📅</span>
+                        Weekday Hours
+                      </label>
+                      <input type="text" id="officeWeekday" class="form-input" placeholder="e.g., 8:00 AM - 5:00 PM" />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="officeSaturday" class="form-label">
+                        <span class="label-icon">🗓️</span>
+                        Saturday Hours
+                      </label>
+                      <input type="text" id="officeSaturday" class="form-input" placeholder="e.g., 8:00 AM - 12:00 PM" />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="officeSunday" class="form-label">
+                        <span class="label-icon">📆</span>
+                        Sunday Hours
+                      </label>
+                      <input type="text" id="officeSunday" class="form-input" placeholder="e.g., Closed" />
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <div class="form-left"></div>
+                    <div class="form-right">
+                      <button type="submit" class="btn-primary">
+                        <span class="btn-icon">💾</span>
+                        Save Office Hours
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div id="permitsEditor" class="content-editor">
+                <div class="content-editor-header">
+                  <div class="editor-header-info">
+                    <h3 class="editor-title">
+                      <span class="editor-icon">📋</span>
+                      Permit Types
+                    </h3>
+                    <p class="editor-description">Manage permit types and requirements</p>
+                  </div>
+                </div>
+                <form id="permitForm" class="modern-form">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="permitTypeName" class="form-label">
+                        <span class="label-icon">🏷️</span>
+                        Permit Type Name
+                      </label>
+                      <input type="text" id="permitTypeName" class="form-input" placeholder="Enter permit type name" />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="permitDescription" class="form-label">
+                        <span class="label-icon">📝</span>
+                        Description
+                      </label>
+                      <textarea id="permitDescription" class="form-textarea" rows="4" placeholder="Enter permit description"></textarea>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="permitRequirements" class="form-label">
+                        <span class="label-icon">📋</span>
+                        Requirements (one per line)
+                      </label>
+                      <textarea id="permitRequirements" class="form-textarea" rows="4" placeholder="Enter requirements"></textarea>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="permitProcessingTime" class="form-label">
+                        <span class="label-icon">⏱️</span>
+                        Processing Time
+                      </label>
+                      <input type="text" id="permitProcessingTime" class="form-input" placeholder="e.g., 3-5 working days" />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="permitFee" class="form-label">
+                        <span class="label-icon">💰</span>
+                        Fee
+                      </label>
+                      <input type="text" id="permitFee" class="form-input" placeholder="e.g., ₱500.00" />
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <div class="form-left"></div>
+                    <div class="form-right">
+                      <button type="submit" class="btn-primary">
+                        <span class="btn-icon">💾</span>
+                        Save Permit Type
+                      </button>
+                    </div>
+                  </div>
+                </form>
+                <div class="content-list-section">
+                  <h4 class="list-title">Existing Permit Types</h4>
+                  <div id="permitsList">
+                    <!-- Permit types will be loaded here -->
+                  </div>
+                </div>
+              </div>
+              <div id="faqEditor" class="content-editor">
+                <div class="content-editor-header">
+                  <div class="editor-header-info">
+                    <h3 class="editor-title">
+                      <span class="editor-icon">❓</span>
+                      FAQ
+                    </h3>
+                    <p class="editor-description">Manage frequently asked questions</p>
+                  </div>
+                </div>
+                <form id="faqForm" class="modern-form">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="faqQuestion" class="form-label">
+                        <span class="label-icon">❓</span>
+                        Question
+                      </label>
+                      <input type="text" id="faqQuestion" class="form-input" placeholder="Enter question" />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="faqAnswer" class="form-label">
+                        <span class="label-icon">💬</span>
+                        Answer
+                      </label>
+                      <textarea id="faqAnswer" class="form-textarea" rows="4" placeholder="Enter answer"></textarea>
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <div class="form-left"></div>
+                    <div class="form-right">
+                      <button type="submit" class="btn-primary">
+                        <span class="btn-icon">💾</span>
+                        Save FAQ
+                      </button>
+                    </div>
+                  </div>
+                </form>
+                <div class="content-list-section">
+                  <h4 class="list-title">Existing FAQs</h4>
+                  <div id="faqList">
+                    <!-- FAQs will be loaded here -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Audit Logs Section -->
+          <section id="auditSection" class="page-section">
+            <div class="audit-management-header">
+              <div class="audit-header-info">
+                <h2 class="section-title">Audit Logs</h2>
+                <p class="section-subtitle">Monitor system activities and security events</p>
+              </div>
+              <div class="audit-header-actions">
+                <button class="btn-secondary" onclick="exportAuditLogsToExcel()">
+                  <span class="btn-icon">📊</span>
+                  Export Logs
+                </button>
+              </div>
+            </div>
+            
+            <!-- Enhanced Filter Controls -->
+            <div class="audit-filters-container">
+              <div class="filter-controls">
+                <div class="filter-group">
+                  <input type="text" id="auditSearchInput" class="search-input" placeholder="🔍 Search logs..." />
+                </div>
+                <div class="filter-group">
+                  <select id="auditCategoryFilter" class="filter-select">
+                    <option value="all">📂 All Categories</option>
+                    <option value="user">👤 User Activities</option>
+                    <option value="system">⚙️ System Changes</option>
+                    <option value="data">📊 Data Changes</option>
+                    <option value="access">🔐 Access Logs</option>
+                    <option value="security">🚨 Security Events</option>
+                    <option value="system_events">📋 System Events</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <select id="auditActionFilter" class="filter-select">
+                    <option value="all">🎯 All Actions</option>
+                    <option value="login">🔑 Login</option>
+                    <option value="logout">🚪 Logout</option>
+                    <option value="password">🔒 Password Changes</option>
+                    <option value="create">➕ Create</option>
+                    <option value="update">✏️ Update</option>
+                    <option value="delete">🗑️ Delete</option>
+                    <option value="approve">✅ Approve</option>
+                    <option value="reject">❌ Reject</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <input type="date" id="auditDateFrom" class="filter-select" placeholder="From" />
+                </div>
+                <div class="filter-group">
+                  <input type="date" id="auditDateTo" class="filter-select" placeholder="To" />
+                </div>
+                <div class="filter-actions">
+                  <button class="btn-primary" onclick="applyAuditFilters()">
+                    <span class="btn-icon">🔍</span>
+                    Apply Filters
+                  </button>
+                  <button class="btn-secondary" onclick="clearAuditFilters()">
+                    <span class="btn-icon">🔄</span>
+                    Clear
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Audit Summary Stats -->
+            <div class="audit-summary">
+              <div class="audit-stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-info">
+                  <div class="stat-number" id="totalLogsCount">0</div>
+                  <div class="stat-label">Total Logs</div>
+                </div>
+              </div>
+              <div class="audit-stat-card">
+                <div class="stat-icon">👤</div>
+                <div class="stat-info">
+                  <div class="stat-number" id="userActivitiesCount">0</div>
+                  <div class="stat-label">User Activities</div>
+                </div>
+              </div>
+              <div class="audit-stat-card">
+                <div class="stat-icon">🚨</div>
+                <div class="stat-info">
+                  <div class="stat-number" id="securityEventsCount">0</div>
+                  <div class="stat-label">Security Events</div>
+                </div>
+              </div>
+              <div class="audit-stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-info">
+                  <div class="stat-number" id="todayLogsCount">0</div>
+                  <div class="stat-label">Today's Logs</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Modern Audit Logs Table -->
+            <div class="audit-table-container">
+              <div class="table-header-info">
+                <p class="table-info">Showing <span id="visibleAuditCount">5</span> of <span id="totalAuditCount">0</span> audit logs</p>
+              </div>
+              <div class="table-wrapper">
+                <div class="table-scroll-container">
+                  <table class="modern-data-table">
+                    <thead>
+                      <tr>
+                        <th>📅 Timestamp</th>
+                        <th>👤 User</th>
+                        <th>🎯 Action</th>
+                        <th>📝 Details</th>
+                        <th>🌐 IP Address</th>
+                        <th>⚙️ Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="auditLogsTable">
+                      <!-- Audit logs will be loaded here -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Footer -->
+          <footer class="dashboard-footer">
+            © 2026 DENR CENRO Sta. Cruz, Laguna. All rights reserved.
+          </footer>
+        </div>
+      </main>
+    </div>
+
+    <!-- Create Staff Modal -->
+    <div id="createStaffModal" class="modal-backdrop" style="display:none">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>Create Staff Account</h3>
+          <button class="modal-close" id="closeStaffModal">×</button>
+        </div>
+        <div class="modal-body">
+          <form id="createStaffForm">
+            <label for="staffEmail">Email</label>
+            <input id="staffEmail" type="email" placeholder="Enter staff email" required />
+            
+            <label for="staffPassword">Password</label>
+            <input id="staffPassword" type="password" placeholder="Enter password" autocomplete="new-password" required />
+            
+            <label for="staffName">Display Name</label>
+            <input id="staffName" type="text" placeholder="Enter staff name" required />
+            
+            <button type="submit" class="btn-primary">Create Staff Account</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Application Details Modal -->
+    <div id="applicationModal" class="modal-backdrop" style="display:none">
+      <div class="modal-dialog large-modal">
+        <div class="modal-header">
+          <h3>Application Details</h3>
+          <button class="modal-close" id="closeAppModal">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="application-details" id="applicationDetails">
+            <!-- Application details will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- View User Modal -->
+    <div id="viewUserModal" class="modal-backdrop" style="display:none">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>User Details</h3>
+          <button class="modal-close" id="closeViewUserModal">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="user-details" id="userDetails">
+            <!-- User details will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deactivate User Modal -->
+    <div id="deactivateUserModal" class="modal-backdrop" style="display:none">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>Deactivate User</h3>
+          <button class="modal-close" id="closeDeactivateModal">×</button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to deactivate this user?</p>
+          <p id="deactivateUserInfo" style="color: #666; margin-bottom: 16px;"></p>
+          <div class="modal-actions">
+            <button class="btn-secondary" id="cancelDeactivate">Cancel</button>
+            <button class="btn-danger" id="confirmDeactivate">Deactivate</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="custom-modal" style="display: none;">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header logout-modal-header">
+          <div class="modal-icon">🚪</div>
+          <h3 class="modal-title">Logout</h3>
+          <button class="modal-close" id="logoutModalCloseBtn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <span class="logout-warning-icon">⚠️</span>
+          <p>Are you sure you want to logout? You will need to sign in again to access your account.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary modal-btn-cancel" id="cancelLogout">Cancel</button>
+          <button class="btn-primary modal-btn-logout" id="confirmLogout">Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script type="module" src="/assets/js/admin-dashboard.js"></script>
+    <script src="/assets/js/professional-editor.js"></script>
+    
+    <!-- Sidebar Toggle Script -->
+    <script>
+      // Make toggleSidebar globally accessible
+      function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.querySelector('.main-content');
+        const toggleIcon = document.querySelector('.toggle-icon');
+        
+        if (sidebar.classList.contains('collapsed')) {
+          sidebar.classList.remove('collapsed');
+          mainContent.classList.remove('expanded');
+          toggleIcon.textContent = '☰'; // 3 dashes when expanded
+          localStorage.setItem('sidebarCollapsed', 'false');
+        } else {
+          sidebar.classList.add('collapsed');
+          mainContent.classList.add('expanded');
+          toggleIcon.textContent = '⋮'; // 3 dots when collapsed
+          localStorage.setItem('sidebarCollapsed', 'true');
+        }
+      }
+
+      // Restore sidebar state on page load
+      document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.querySelector('.main-content');
+        const toggleIcon = document.querySelector('.toggle-icon');
+        const sidebarState = localStorage.getItem('sidebarCollapsed');
+        
+        if (sidebarState === 'true') {
+          sidebar.classList.add('collapsed');
+          mainContent.classList.add('expanded');
+          toggleIcon.textContent = '⋮'; // 3 dots when collapsed
+        }
+
+        // Update date and time
+        updateDateTime();
+        setInterval(updateDateTime, 1000); // Update every second
+      });
+
+      // Function to update date and time
+      function updateDateTime() {
+        const now = new Date();
+        const dateElement = document.getElementById('currentDate');
+        const timeElement = document.getElementById('currentTime');
+        
+        if (dateElement) {
+          // Format date: Month Day, Year
+          const options = { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          };
+          const dateString = now.toLocaleDateString('en-US', options);
+          dateElement.textContent = dateString;
+        }
+        
+        if (timeElement) {
+          // Format time: HH:MM:SS AM/PM
+          const timeString = now.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+          });
+          timeElement.textContent = timeString;
+        }
+      }
+    </script>
+  </body>
+</html>

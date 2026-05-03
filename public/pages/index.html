@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>DENR Permit — Web Portal</title>
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link rel="stylesheet" href="/assets/css/about-enhanced.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  </head>
+  <body>
+    <header class="site-header-hero">
+      <div class="container nav-inner">
+        <div class="brand-left">
+          <img src="/assets/images/logo.png" alt="DENR" class="logo" />
+          <span class="brand-title">DENR-CENRO Sta. Cruz</span>
+        </div>
+        <nav class="top-nav">
+          <a href="/pages/index.html" class="home-link">Home</a>
+          <a href="/pages/about.html">About</a>
+          <a href="/pages/services.html">Services</a>
+          <a href="/pages/faq.html">FAQ</a>
+          <a href="/pages/contact.html">Contact Us</a>
+        </nav>
+        <div class="nav-cta">
+          <button class="btn-getstarted" onclick="openAuthModal('signup')">Get Started</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="home" class="hero hero-with-video">
+        <div class="hero-video-fixed">
+          <video autoplay muted loop playsinline>
+            <source src="/assets/images/forest.mp4" type="video/mp4">
+          </video>
+          <div class="hero-overlay"></div>
+        </div>
+        <div class="hero-content container">
+          <div class="hero-badge">🌱 Environmental Permit Management</div>
+          <h1>Protecting Nature Through Digital Innovation</h1>
+          <p>Streamlining permit applications, status tracking, and records management for DENR-CENRO Sta. Cruz, Laguna. Experience faster, more efficient environmental compliance.</p>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <span class="stat-number">50K+</span>
+              <span class="stat-label">Permits Issued</span>
+            </div>
+            <div class="hero-stat">
+              <span class="stat-number">37+</span>
+              <span class="stat-label">Years of Service</span>
+            </div>
+            <div class="hero-stat">
+              <span class="stat-number">100%</span>
+              <span class="stat-label">Digital</span>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <button class="hero-btn primary" onclick="openAuthModal('signup')">
+              <span>📝</span> Apply for Permit
+            </button>
+            <button class="hero-btn secondary" onclick="window.location.href='/pages/about.html'">
+              <span>🔍</span> Learn More
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Latest Updates Section -->
+      <section id="announcementsSection" class="section visible">
+        <div class="container">
+          <div class="latest-updates-header">
+            <div class="latest-updates-badge">
+              <span class="badge-icon">📢</span>
+              <span class="badge-text">Latest Updates</span>
+            </div>
+            <h2 class="latest-updates-title">Announcements & News</h2>
+            <p class="latest-updates-description">Stay informed about the latest environmental policies, permit updates, and important notices from DENR-CENRO Sta. Cruz.</p>
+          </div>
+          
+          <!-- Modern Announcements Container -->
+          <div class="latest-updates-container">
+            <!-- Navigation Controls -->
+            <div class="updates-navigation">
+              <button class="nav-btn nav-prev" id="prevBtn" aria-label="Previous announcement">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+              <button class="nav-btn nav-next" id="nextBtn" aria-label="Next announcement">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+            </div>
+            
+            <!-- Updates Slider -->
+            <div class="updates-slider">
+              <div class="updates-track" id="sliderTrack">
+                <!-- Admin announcements will be loaded here dynamically -->
+              </div>
+            </div>
+            
+            <!-- Progress Indicators -->
+            <div class="updates-indicators" id="sliderDots">
+              <!-- Indicators will be generated dynamically -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Auth Modal -->
+      <div id="authModal" class="modal-backdrop" style="display:none">
+        <div class="modal-dialog auth-modal">
+          <div class="modal-header modal-header-green auth-header">
+            <div class="auth-left">
+              <div class="auth-icon">👤+</div>
+              <div>
+                <h3 id="authModalTitle">Login to Your Account</h3>
+                <div class="auth-sub">Access your DENR permit dashboard</div>
+              </div>
+            </div>
+            <button class="modal-close large" id="authClose">×</button>
+          </div>
+          <div class="modal-body auth-body">
+            <p id="authMsg" class="muted">Access your DENR permit account or create a new Customer account.</p>
+
+            <!-- Sign-in layout -->
+            <form id="authSigninForm" class="auth-form">
+              <label for="authEmail">Email/Username</label>
+              <input id="authEmail" name="authEmail" type="email" placeholder="Enter email or username" required />
+
+              <label for="authPassword">Password</label>
+              <div class="input-eye">
+                <input id="authPassword" name="authPassword" type="password" placeholder="Enter password" autocomplete="current-password" required />
+                <button type="button" class="eye-btn" data-target="authPassword">👁️</button>
+              </div>
+
+              <div class="row-between" style="margin-top:12px">
+                <label class="checkbox"><input id="rememberMe" type="checkbox"/> Remember me</label>
+                <a href="#" id="forgotLink">Forgot password?</a>
+              </div>
+
+              <button id="authSigninBtn" class="verify-btn login-cta" type="button">Login</button>
+              <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+                <button id="authResendBtn" class="verify-btn" type="button" style="display:none;min-width:140px">Resend Verification</button>
+                <div style="flex:1;text-align:center;color:#6b7280">Don't have an account? <a href="#" id="showSignup">Register here</a>.</div>
+              </div>
+            </form>
+
+            <!-- Signup layout (scrollable, matches screenshots) -->
+            <form id="authSignupForm" class="auth-form" style="display:none">
+              <div class="name-grid">
+                <div>
+                  <label for="firstName">First Name</label>
+                  <input id="firstName" placeholder="Enter your first name" />
+                </div>
+                <div>
+                  <label for="surname">Surname</label>
+                  <input id="surname" placeholder="Enter your surname" />
+                </div>
+              </div>
+              <div class="name-grid">
+                <div>
+                  <label for="middleName">Middle Name</label>
+                  <input id="middleName" placeholder="Enter your middle name" />
+                </div>
+                <div>
+                  <label for="suffix">Suffix (Optional)</label>
+                  <select id="suffix"><option>None</option><option>Jr.</option><option>Sr.</option><option>III</option></select>
+                </div>
+              </div>
+
+              <label for="signupEmail">Email</label>
+              <input id="signupEmail" type="email" placeholder="Enter your email address" />
+
+              <label for="mobile">Mobile Number</label>
+              <input id="mobile" placeholder="09XXXXXXXXX" />
+
+              <label for="address">Address</label>
+              <textarea id="address" rows="4" placeholder="Enter your complete address"></textarea>
+
+              <div style="margin:12px 0;color:#1f6f3a;font-weight:600;display:flex;align-items:center;gap:8px;cursor:pointer" id="showMapPin">📍 Show Map to Pin Location</div>
+
+              <div id="mapContainer" style="display:none; margin: 16px 0;">
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                  <input id="mapSearchInput" type="text" placeholder="Search for address..." style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" />
+                  <button id="mapSearchBtn" type="button" style="padding: 10px 16px; background: #1f6f3a; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Search</button>
+                </div>
+                <div id="map" style="height: 300px; width: 100%; border-radius: 8px; border: 2px solid #1f6f3a;"></div>
+                <div style="margin-top: 12px; display: flex; gap: 16px; flex-wrap: wrap;">
+                  <div style="flex: 1;">
+                    <label for="latitude">Latitude</label>
+                    <input id="latitude" type="text" readonly placeholder="Click on map to pin location" style="background: #f5f5f5;" />
+                  </div>
+                  <div style="flex: 1;">
+                    <label for="longitude">Longitude</label>
+                    <input id="longitude" type="text" readonly placeholder="Click on map to pin location" style="background: #f5f5f5;" />
+                  </div>
+                </div>
+                <button type="button" id="hideMapPin" style="margin-top: 8px; padding: 8px 16px; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer;">Hide Map</button>
+              </div>
+
+              <div class="pw-grid">
+                <div>
+                  <label for="signupPassword">Password</label>
+                  <div class="input-eye"><input id="signupPassword" type="password" placeholder="Create a password" autocomplete="new-password" /><button type="button" class="eye-btn" data-target="signupPassword">👁️</button></div>
+                </div>
+                <div>
+                  <label for="signupConfirm">Confirm Password</label>
+                  <div class="input-eye"><input id="signupConfirm" type="password" placeholder="Confirm your password" autocomplete="new-password" /><button type="button" class="eye-btn" data-target="signupConfirm">👁️</button></div>
+                </div>
+              </div>
+
+              <button id="authSignupBtn" class="verify-btn create-cta" type="button">CREATE ACCOUNT</button>
+              <div style="text-align:center; margin-top:20px; padding-top:16px; border-top:1px solid #e5e7eb;">
+                <span style="color:#6b7280; font-size:14px;">Already have an account? </span>
+                <a href="#" id="showSignin" style="color: var(--denr-green); text-decoration: none; font-weight: 600; font-size:14px;">Login here</a>
+              </div>
+            </form>
+
+            <div style="height:8px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Forgot Password Modal -->
+      <div id="forgotPasswordModal" class="modal-backdrop" style="display:none">
+        <div class="modal-dialog auth-modal">
+          <div class="modal-header modal-header-green auth-header">
+            <div class="auth-left">
+              <div class="auth-icon">🔑</div>
+              <div>
+                <h3>Reset Password</h3>
+                <div class="auth-sub">We'll send you a link to reset your password</div>
+              </div>
+            </div>
+            <button class="modal-close large" id="forgotPasswordClose">×</button>
+          </div>
+          <div class="modal-body auth-body">
+            <p id="forgotPasswordMsg" class="muted">Enter your email address and we'll send you a password reset link.</p>
+            
+            <form id="forgotPasswordForm" class="auth-form">
+              <label for="forgotPasswordEmail">Email Address</label>
+              <input id="forgotPasswordEmail" type="email" placeholder="Enter your email address" required />
+              
+              <button id="forgotPasswordSubmitBtn" class="verify-btn login-cta" type="button">Send Reset Link</button>
+              
+              <div style="text-align:center; margin-top:16px">
+                <a href="#" id="backToLogin" style="color: var(--denr-green); text-decoration: none; font-weight: 500;">← Back to Login</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div id="verifyModal" class="modal-backdrop" style="display:none">
+        <div class="modal-dialog verify-modal">
+          <div class="modal-header modal-header-green">
+            <h3>Verify Permit</h3>
+            <button class="modal-close" id="verifyClose">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="verify-tabs">
+              <button class="tab-btn active" data-tab="manual">Manual Entry</button>
+              <button class="tab-btn" data-tab="ocr">OCR Scan</button>
+            </div>
+
+            <!-- Manual Entry Tab -->
+            <div class="tab-content active" id="manualTab">
+              <p>Enter the permit ID number to verify the status and validity of a permit.</p>
+              <form id="verifyForm">
+                <label for="permit_id">Permit ID Number</label>
+                <div class="input-with-scan">
+                  <input id="permit_id" name="permit_id" placeholder="Enter permit ID number (e.g., DENR-20260424-502361)" required list="permitSuggestions" autocomplete="off" />
+                  <button type="button" class="scan-btn" onclick="startQRScanner()" title="Scan QR Code">📷</button>
+                  <button type="button" class="scan-btn" onclick="openCamera('manual')" title="Take Picture of Permit">📸</button>
+                </div>
+                <datalist id="permitSuggestions">
+                </datalist>
+                <div id="recentVerifications" style="margin-top:12px; display:none;">
+                  <label style="font-size:12px; color:#6b7280; font-weight:500;">Recent Verifications:</label>
+                  <div id="recentList" style="margin-top:4px;"></div>
+                </div>
+                <button id="verifySubmit" class="verify-btn" type="submit">Verify Permit</button>
+              </form>
+            </div>
+
+            <!-- OCR Scan Tab -->
+            <div class="tab-content" id="ocrTab">
+              <p>Upload an image of your permit document to automatically extract the permit ID.</p>
+              <div class="ocr-upload-area" id="ocrUploadArea">
+                <div class="upload-placeholder" id="uploadPlaceholder">
+                  <span class="upload-icon">📄</span>
+                  <p>Drag & drop permit image here or click to browse</p>
+                  <small>Supported formats: JPG, PNG, PDF</small>
+                  <button type="button" class="camera-upload-btn" onclick="openCamera('ocr')">📸 Take Picture</button>
+                </div>
+                <img id="previewImage" style="display:none; max-width:100%; max-height:300px; margin:16px 0; border-radius:8px;" />
+                <input type="file" id="ocrFileInput" accept="image/*,.pdf" style="display:none" />
+              </div>
+              <div id="ocrProgress" style="display:none; margin:16px 0;">
+                <div class="progress-bar-container">
+                  <div class="progress-bar-fill" id="ocrProgressBar"></div>
+                </div>
+                <p id="ocrStatus" style="text-align:center; margin-top:8px; font-size:13px; color:#666;">Scanning document...</p>
+              </div>
+              <div id="ocrResult" style="display:none; margin:16px 0;">
+                <label>Extracted Permit ID:</label>
+                <input type="text" id="extractedPermitId" readonly style="width:100%; padding:10px; margin-top:4px; background:#f3f4f6; border:1px solid #d1d5db; border-radius:6px;" />
+                <button id="useExtractedId" class="verify-btn" style="margin-top:12px; width:100%;">Use This Permit ID</button>
+              </div>
+            </div>
+
+            <div id="verifyResult" style="display:none; margin-top:16px"></div>
+            <p style="text-align:center; margin-top:16px">Don't have a permit ID? <a href="#" onclick="openAuthModal('signup'); return false;">Apply for a permit</a></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Camera Modal -->
+      <div id="cameraModal" class="modal-backdrop" style="display:none">
+        <div class="modal-dialog camera-modal">
+          <div class="modal-header modal-header-green">
+            <h3>Take Picture of Permit</h3>
+            <button class="modal-close" id="cameraClose">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="camera-container">
+              <video id="cameraVideo" autoplay playsinline style="width:100%; height:auto; border-radius:8px;"></video>
+              <canvas id="cameraCanvas" style="display:none;"></canvas>
+              
+              <!-- Guide Overlay -->
+              <div class="camera-guide">
+                <div class="guide-frame">
+                  <div class="guide-corner top-left"></div>
+                  <div class="guide-corner top-right"></div>
+                  <div class="guide-corner bottom-left"></div>
+                  <div class="guide-corner bottom-right"></div>
+                  <div class="guide-text">Position permit document within frame</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="camera-controls" style="display:flex; gap:12px; margin-top:16px; justify-content:center;">
+              <button id="captureBtn" class="verify-btn" style="flex:1;">📸 Capture</button>
+              <button id="switchCameraBtn" class="verify-btn" style="flex:1; background:#666;">🔄 Switch Camera</button>
+              <button id="cancelCameraBtn" class="verify-btn" style="flex:1; background:#666;">✖ Cancel</button>
+            </div>
+            
+            <div id="capturedPreview" style="display:none; margin-top:16px;">
+              <label>Captured Image:</label>
+              <img id="capturedImage" style="width:100%; max-height:300px; border-radius:8px; margin-top:8px;" />
+              <div style="display:flex; gap:12px; margin-top:12px;">
+                <button id="useCapturedBtn" class="verify-btn" style="flex:1;">✓ Use This Image</button>
+                <button id="retakeBtn" class="verify-btn" style="flex:1; background:#666;">🔄 Retake</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-content-grid">
+            <div class="footer-section">
+              <h4>Quick Links</h4>
+              <ul class="footer-links">
+                <li><a href="/pages/index.html">Home</a></li>
+                <li><a href="/pages/about.html">About Us</a></li>
+                <li><a href="/pages/services.html">Services</a></li>
+                <li><a href="/pages/permit-types.html">Permit Types</a></li>
+                <li><a href="/pages/faq.html">FAQ</a></li>
+                <li><a href="/pages/contact.html">Contact Us</a></li>
+              </ul>
+            </div>
+            
+            <div class="footer-section">
+              <h4>Services</h4>
+              <ul class="footer-links">
+                <li><a href="/pages/permit-types.html">Forest Management Permits</a></li>
+                <li><a href="/pages/permit-types.html">Wildlife Documentation</a></li>
+                <li><a href="/pages/permit-types.html">Business Certificates</a></li>
+                <li><a href="/pages/permit-types.html">Transport Clearances</a></li>
+                <li><a href="/pages/permit-types.html">Product Certification</a></li>
+              </ul>
+            </div>
+            
+            <div class="footer-section">
+              <h4>Contact Information</h4>
+              <div class="footer-contact">
+                <div class="contact-item">
+                  <strong>Address:</strong>
+                  <span>So. Maunawain, Brgy. Duhat, Sta. Cruz, Laguna</span>
+                </div>
+                <div class="contact-item">
+                  <strong>Telephone:</strong>
+                  <span>(049) 536-8903</span>
+                </div>
+                <div class="contact-item">
+                  <strong>Email:</strong>
+                  <span>cenrostacruz@denr.gov.ph</span>
+                </div>
+                <div class="contact-item">
+                  <strong>Office Hours:</strong>
+                  <span>Monday - Friday: 8:00 AM - 5:00 PM</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        
+        <div class="footer-bottom">
+          <div class="footer-bottom-content">
+            <div class="footer-copyright">
+              <p>&copy; 2024 Department of Environment and Natural Resources - CENRO Sta. Cruz. All rights reserved.</p>
+              <p>Republic of the Philippines</p>
+            </div>
+            <div class="footer-seal">
+              <div class="seal-text">
+                <strong>Official Government Website</strong>
+                <span>Republic of the Philippines</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Image Modal Viewer -->
+    <div id="imageModal" class="image-modal">
+      <div class="modal-content">
+        <span class="close-modal" id="closeImageModal">&times;</span>
+        <img id="modalImage" src="" alt="Announcement Image">
+        <div class="modal-caption" id="modalCaption"></div>
+      </div>
+    </div>
+
+    <script type="module" src="/assets/js/app.js"></script>
+    <script src="/assets/js/dynamic-slider.js"></script>
+    <script src="/assets/js/image-modal.js"></script>
+    <script src="/assets/js/contact-enhanced.js"></script>
+  </body>
+</html>
