@@ -1,0 +1,1417 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Customer Dashboard — DENR Permit System</title>
+    <link rel="stylesheet" href="/assets/css/styles.css" />
+    <link rel="stylesheet" href="/assets/css/customer-dashboard.css" />
+    <link rel="stylesheet" href="/assets/css/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  </head>
+  <body>
+    <!-- Page Loader Overlay -->
+    <div id="pageLoader" class="page-loader">
+      <div class="loader-content">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Top Navigation Header -->
+    <header class="site-header-hero">
+      <div class="container nav-inner">
+        <div class="brand-left">
+          <a href="#dashboard" class="logo-link" data-section="dashboardSection">
+            <img src="/assets/images/logo.png" alt="DENR" class="logo" />
+          </a>
+          <span class="brand-title">DENR-CENRO Sta. Cruz</span>
+        </div>
+        <nav class="top-nav dashboard-nav">
+          <a href="#dashboard" class="nav-item active" data-section="dashboardSection">Dashboard</a>
+          <a href="#new-application" class="nav-item" data-section="newApplicationSection">Apply for Document</a>
+          <a href="#my-applications" class="nav-item" data-section="myApplicationsSection">All Applications</a>
+        </nav>
+        <div class="nav-cta">
+          <button class="notification-bell" id="notificationBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+            </svg>
+            <span class="notification-badge">3</span>
+          </button>
+          <div class="user-avatar" id="userAvatarBtn">
+            <div class="avatar-circle" id="userInitials">CL</div>
+            <div class="user-dropdown" id="userDropdown" style="display: none;">
+              <div class="dropdown-header">
+                <div class="dropdown-avatar" id="dropdownInitials">CL</div>
+                <div class="dropdown-info">
+                  <div class="dropdown-name" id="dropdownName">Customer Name</div>
+                  <div class="dropdown-email" id="dropdownEmail">customer@email.com</div>
+                </div>
+              </div>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-menu">
+                <a href="#" class="dropdown-item" onclick="navigateToSection('profileSection'); return false;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                  <span>My Profile</span>
+                </a>
+                <a href="#" class="dropdown-item" onclick="navigateToSection('settingsSection'); return false;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                  </svg>
+                  <span>Settings</span>
+                </a>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item dropdown-logout" id="dropdownLogoutBtn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                  </svg>
+                  <span>Logout</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+      <div class="container dashboard-container">
+          <!-- Dashboard Overview Section -->
+          <section id="dashboardSection" class="page-section active">
+            <!-- Welcome Section Container -->
+            <div class="dashboard-container-wrapper">
+              <section class="welcome-section">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
+                  <div style="flex: 1;">
+                    <h2 class="welcome-title">Welcome, <span id="welcomeName">Customer</span>!</h2>
+                    <p class="welcome-subtitle">Apply for environmental permits and track your application status</p>
+                    <div class="time-greeting">
+                      <span class="greeting-icon" id="greetingIcon">👋</span>
+                      <span id="timeGreeting">Good morning!</span>
+                    </div>
+                    <div class="welcome-datetime">
+                      <div class="datetime-item">
+                        <span class="datetime-icon">📅</span>
+                        <div>
+                          <span class="datetime-label">Date:</span>
+                          <span class="datetime-text" id="currentDate">Loading...</span>
+                        </div>
+                      </div>
+                      <div class="datetime-item">
+                        <span class="datetime-icon">🕐</span>
+                        <div>
+                          <span class="datetime-label">Time:</span>
+                          <span class="datetime-text" id="currentTime">Loading...</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <a href="application-form.html" class="btn-primary" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); cursor: pointer; z-index: 10; position: relative; text-decoration: none; padding: 12px 28px; border-radius: 10px; display: inline-block; white-space: nowrap; align-self: flex-start; margin-left: 432px;">+ Create Application Form</a>
+                </div>
+              </section>
+            </div>
+
+            <!-- Quick Stats Container -->
+            <div class="dashboard-container-wrapper" style="margin-top: 24px;">
+              <section class="quick-stats">
+                <div class="stat-card blue">
+                  <div class="stat-icon">�</div>
+                  <div class="stat-content">
+                    <div class="stat-value" id="totalApps">0</div>
+                    <div class="stat-label">Total Applications</div>
+                  </div>
+                </div>
+                <div class="stat-card yellow">
+                  <div class="stat-icon">⏳</div>
+                  <div class="stat-content">
+                    <div class="stat-value" id="pendingApps">0</div>
+                    <div class="stat-label">Pending</div>
+                  </div>
+                </div>
+                <div class="stat-card green">
+                  <div class="stat-icon">✓</div>
+                  <div class="stat-content">
+                    <div class="stat-value" id="approvedApps">0</div>
+                    <div class="stat-label">Approved</div>
+                  </div>
+                </div>
+                <div class="stat-card red">
+                  <div class="stat-icon">✕</div>
+                  <div class="stat-content">
+                    <div class="stat-value" id="rejectedApps">0</div>
+                    <div class="stat-label">Rejected</div>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <!-- Profile Completion Status Container -->
+            <div class="dashboard-container-wrapper" style="margin-top: 24px;">
+              <section class="profile-completion-section">
+                <div class="profile-completion-card">
+                  <div class="completion-header">
+                    <div class="completion-info">
+                      <h4 class="completion-title">Profile Completion</h4>
+                      <p class="completion-subtitle">Complete your profile for better service</p>
+                    </div>
+                    <div class="completion-percentage">
+                      <span id="completionPercent">75</span>%
+                    </div>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" id="completionProgress" style="width: 75%;"></div>
+                  </div>
+                  <div class="completion-items">
+                    <div class="completion-item completed">
+                      <span class="completion-icon">✓</span>
+                      <span>Basic Information</span>
+                    </div>
+                    <div class="completion-item completed">
+                      <span class="completion-icon">✓</span>
+                      <span>Contact Details</span>
+                    </div>
+                    <div class="completion-item">
+                      <span class="completion-icon">○</span>
+                      <span>Profile Picture</span>
+                    </div>
+                    <div class="completion-item">
+                      <span class="completion-icon">○</span>
+                      <span>Address Verification</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <!-- Upcoming Reminders Container -->
+            <div class="dashboard-container-wrapper" style="margin-top: 24px;">
+              <section class="reminders-section">
+                <h3 class="section-title">Upcoming Reminders</h3>
+                <div class="reminders-list" id="remindersList"></div>
+              </section>
+            </div>
+
+            <!-- Application Status Timeline Container -->
+            <div class="dashboard-container-wrapper" style="margin-top: 24px;">
+              <section class="timeline-section">
+                <h3 class="section-title">Application Status Timeline</h3>
+                <div class="timeline-container" id="timelineContainer"></div>
+              </section>
+            </div>
+
+            <!-- Activity Feed Container -->
+            <div class="dashboard-container-wrapper" style="margin-top: 24px;">
+              <section class="activity-section">
+                <h3 class="section-title">Recent Activity</h3>
+                <div class="activity-list" id="activityList"></div>
+              </section>
+            </div>
+
+            <!-- Quick Actions Container -->
+            <div class="dashboard-container-wrapper" style="margin-top: 24px;">
+              <section class="quick-actions-section">
+                <h3 class="section-title">Quick Actions</h3>
+                <div class="quick-actions-grid">
+                  <button class="quick-action-btn" onclick="navigateToSection('newApplicationSection')">
+                    <div class="action-icon">📝</div>
+                    <div class="action-text">Apply New Permit</div>
+                  </button>
+                  <button class="quick-action-btn" onclick="navigateToSection('myApplicationsSection')">
+                    <div class="action-icon">📂</div>
+                    <div class="action-text">View Applications</div>
+                  </button>
+                  <button class="quick-action-btn" onclick="navigateToSection('profileSection')">
+                    <div class="action-icon">👤</div>
+                    <div class="action-text">Update Profile</div>
+                  </button>
+                  <button class="quick-action-btn" onclick="navigateToSection('helpSection')">
+                    <div class="action-icon">❓</div>
+                    <div class="action-text">Get Help</div>
+                  </button>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <!-- My Applications Section -->
+          <section class="applications-section page-section" id="myApplicationsSection">
+            <!-- Welcome Section Container -->
+            <div class="dashboard-container-wrapper">
+              <section class="welcome-section">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
+                  <div style="flex: 1;">
+                    <h2 class="welcome-title">My Applications</h2>
+                    <p class="welcome-subtitle">View and manage your environmental permit applications</p>
+                    <div class="time-greeting">
+                      <span class="greeting-icon">📋</span>
+                      <span>Track your application status anytime</span>
+                    </div>
+                    <div class="welcome-datetime">
+                      <div class="datetime-item">
+                        <span class="datetime-icon">📅</span>
+                        <div>
+                          <span class="datetime-label">Date:</span>
+                          <span class="datetime-text" id="myAppsDate">Loading...</span>
+                        </div>
+                      </div>
+                      <div class="datetime-item">
+                        <span class="datetime-icon">🕐</span>
+                        <div>
+                          <span class="datetime-label">Time:</span>
+                          <span class="datetime-text" id="myAppsTime">Loading...</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button class="btn-primary" id="newAppBtn" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); white-space: nowrap; align-self: flex-start; margin-left: 576px;">+ New Application</button>
+                </div>
+              </section>
+            </div>
+
+            <div class="applications-content-wrapper">
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+              <div class="filter-row">
+                <div class="filter-group">
+                  <label for="filterStatus">Status</label>
+                  <select id="filterStatus">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="under-review">Under Review</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="filterPermitType">Permit Type</label>
+                  <select id="filterPermitType">
+                    <option value="">All Types</option>
+                    <option value="Mining Permit">Mining Permit</option>
+                    <option value="Tree Cutting Permit">Tree Cutting Permit</option>
+                    <option value="Tree Planting Permit">Tree Planting Permit</option>
+                    <option value="Wildlife Permit">Wildlife Permit</option>
+                    <option value="Rolling Permit">Rolling Permit</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="filterDateFrom">Date From</label>
+                  <input type="date" id="filterDateFrom">
+                </div>
+                <div class="filter-group">
+                  <label for="filterDateTo">Date To</label>
+                  <input type="date" id="filterDateTo">
+                </div>
+                <div class="filter-group">
+                  <label for="searchApplication">Search</label>
+                  <input type="text" id="searchApplication" placeholder="Search by ID or permit type...">
+                </div>
+                <div class="filter-actions">
+                  <button class="btn-primary" id="applyFilterBtn">Filter</button>
+                  <button class="btn-secondary" id="clearFilterBtn">Clear</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-container-applications">
+              <table class="data-table-enhanced">
+                <thead>
+                  <tr>
+                    <th>Application ID</th>
+                    <th>Permit Type</th>
+                    <th>Date Submitted</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="applicationsTable">
+                  <!-- Applications will be loaded here -->
+                </tbody>
+              </table>
+            </div>
+            </div>
+          </section>
+
+          <!-- New Application Form Section -->
+          <section class="page-section" id="newApplicationSection">
+            <!-- Welcome Section Container -->
+            <div class="dashboard-container-wrapper">
+              <section class="welcome-section">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; pointer-events: auto;">
+                  <div>
+                    <h2 class="welcome-title">New Permit Application</h2>
+                    <p class="welcome-subtitle">Complete the form below to apply for an environmental permit</p>
+                    <div class="time-greeting">
+                      <span class="greeting-icon">📝</span>
+                      <span>Step-by-step guidance provided</span>
+                    </div>
+                    <div class="welcome-datetime">
+                      <div class="datetime-item">
+                        <span class="datetime-icon">📅</span>
+                        <div>
+                          <span class="datetime-label">Date:</span>
+                          <span class="datetime-text" id="appCurrentDate">Loading...</span>
+                        </div>
+                      </div>
+                      <div class="datetime-item">
+                        <span class="datetime-icon">🕐</span>
+                        <div>
+                          <span class="datetime-label">Time:</span>
+                          <span class="datetime-text" id="appCurrentTime">Loading...</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+              <div style="padding: 16px 48px 0 48px;">
+                <a href="#my-applications" class="nav-link" id="cancelNewApp" style="background: #ffffff; color: #046307; border: 2px solid #ffffff; padding: 12px 24px; font-weight: 600; border-radius: 8px; cursor: pointer; text-decoration: none; display: inline-block;">← Back to Dashboard</a>
+              </div>
+            </div>
+
+            <!-- Step Indicator -->
+            <div class="dashboard-container-wrapper application-progress-container">
+              <div class="step-indicator">
+                <div class="progress-header">
+                  <h3 class="progress-title">Application Progress</h3>
+                  <p class="progress-subtitle">Complete all 5 steps to submit your application</p>
+                </div>
+                <div class="steps-container">
+                  <!-- Step 1: Document Selection -->
+                  <div class="step-item completed" data-step="1">
+                    <div class="step-icon-wrapper">
+                      <div class="step-number-badge">1</div>
+                      <div class="step-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                          <polyline points="14 2 14 8 20 8"></polyline>
+                          <line x1="16" y1="13" x2="8" y2="13"></line>
+                          <line x1="16" y1="17" x2="8" y2="17"></line>
+                          <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="step-label">Document Selection</div>
+                    <div class="step-description">Select document type<br>and category</div>
+                  </div>
+
+                  <!-- Step 2: Applicant Information -->
+                  <div class="step-item active" data-step="2">
+                    <div class="step-icon-wrapper">
+                      <div class="step-number-badge">2</div>
+                      <div class="step-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="step-label">Applicant Information</div>
+                    <div class="step-description">Provide personal and<br>contact information</div>
+                  </div>
+
+                  <!-- Step 3: Business/Organization Details -->
+                  <div class="step-item" data-step="3">
+                    <div class="step-icon-wrapper">
+                      <div class="step-number-badge">3</div>
+                      <div class="step-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="3" y1="9" x2="21" y2="9"></line>
+                          <line x1="9" y1="21" x2="9" y2="9"></line>
+                          <line x1="9" y1="12" x2="15" y2="12"></line>
+                          <line x1="12" y1="15" x2="15" y2="15"></line>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="step-label">Business/Organization<br>Details</div>
+                    <div class="step-description">Provide business<br>registration and<br>organization information</div>
+                  </div>
+
+                  <!-- Step 4: Document Upload -->
+                  <div class="step-item" data-step="4">
+                    <div class="step-icon-wrapper">
+                      <div class="step-number-badge">4</div>
+                      <div class="step-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="17 8 12 3 7 8"></polyline>
+                          <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="step-label">Document Upload</div>
+                    <div class="step-description">Upload required<br>documents (5 documents<br>needed)</div>
+                  </div>
+
+                  <!-- Step 5: Review & Submit -->
+                  <div class="step-item" data-step="5">
+                    <div class="step-icon-wrapper">
+                      <div class="step-number-badge">5</div>
+                      <div class="step-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M9 11l3 3L22 4"></path>
+                          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="step-label">Review & Submit</div>
+                    <div class="step-description">Review your application<br>and submit</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dashboard-container-wrapper">
+              <form id="newApplicationForm" class="application-form" novalidate>
+                <!-- Step 1: Document Information -->
+                <div class="form-step active" data-step="1">
+                  <div class="step-card">
+                    <h4 class="step-title">Document Information</h4>
+                    <p class="step-description">Select Document Type</p>
+
+                    <div class="form-group">
+                      <label for="documentType">Document Type *</label>
+                      <select id="documentType">
+                        <option value="">Select document type</option>
+                        <option value="Permit">Permit</option>
+                        <option value="Certificate">Certificate</option>
+                        <option value="Certification">Certification</option>
+                        <option value="Clearance">Clearance</option>
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="permitType">Document Category *</label>
+                      <select id="permitType">
+                        <option value="">Select document type first</option>
+                      </select>
+                    </div>
+
+                    <div id="documentRequirementsList"></div>
+
+                    <div class="permit-info-box" id="permitTypeInfo" style="display: none;">
+                      <h5>Document Information</h5>
+                      <p id="permitTypeDescription"></p>
+                    </div>
+                    <div class="form-actions">
+                      <button type="button" class="btn-secondary" disabled>Previous</button>
+                      <button type="button" class="btn-primary" id="nextStep1">Next</button>
+                      <button type="button" class="btn-cancel" id="cancelNewAppForm">Cancel</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Step 2: Applicant Information -->
+                <div class="form-step" data-step="2" style="display: none;">
+                <div class="step-card">
+                  <h4 class="step-title">Applicant Information</h4>
+                  <p class="step-description">Provide personal and contact details</p>
+                  
+                  <!-- Applicant Type Selection -->
+                  <div class="form-group">
+                    <label>Applicant Type *</label>
+                    <div class="applicant-type-selector">
+                      <label class="radio-option">
+                        <input type="radio" name="applicantType" value="personal" id="personalType" checked>
+                        <span class="radio-label">Personal Application</span>
+                      </label>
+                      <label class="radio-option">
+                        <input type="radio" name="applicantType" value="company" id="companyType">
+                        <span class="radio-label">Company Application</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Personal Information Fields -->
+                  <div id="personalFields" class="applicant-fields">
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="firstName">First Name *</label>
+                        <input type="text" id="firstName" placeholder="Enter your first name" maxlength="50" />
+                      </div>
+                      <div class="form-group">
+                        <label for="lastName">Last Name *</label>
+                        <input type="text" id="lastName" placeholder="Enter your last name" maxlength="50" />
+                      </div>
+                    </div>
+                    
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="middleName">Middle Name</label>
+                        <input type="text" id="middleName" placeholder="Enter your middle name (optional)" maxlength="50" />
+                      </div>
+                      <div class="form-group">
+                        <label for="suffix">Suffix</label>
+                        <select id="suffix">
+                          <option value="">Select suffix (optional)</option>
+                          <option value="Jr">Jr</option>
+                          <option value="Sr">Sr</option>
+                          <option value="I">I</option>
+                          <option value="II">II</option>
+                          <option value="III">III</option>
+                          <option value="IV">IV</option>
+                          <option value="V">V</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="applicantMobileIndividual">Mobile Number *</label>
+                        <input type="tel" id="applicantMobileIndividual" placeholder="Enter mobile number" pattern="[0-9]{11,13}" maxlength="13" />
+                        <small>09 prefix = 11 digits | 63 prefix = 13 digits</small>
+                      </div>
+                      <div class="form-group">
+                        <label>&nbsp;</label>
+                        <small>&nbsp;</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Company Information Fields -->
+                  <div id="companyFields" class="applicant-fields" style="display: none;">
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="companyName">Company Name *</label>
+                        <input type="text" id="companyName" placeholder="Enter company name" maxlength="100" />
+                      </div>
+                      <div class="form-group">
+                        <label for="representativeName">Authorized Representative Name *</label>
+                        <input type="text" id="representativeName" placeholder="Enter authorized representative name" maxlength="100" />
+                      </div>
+                    </div>
+                    
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="applicantMobileCompany">Mobile Number *</label>
+                        <input type="tel" id="applicantMobileCompany" placeholder="Enter mobile number" pattern="[0-9]{11,13}" maxlength="13" />
+                        <small>09 prefix = 11 digits | 63 prefix = 13 digits</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="prevStep2">Previous</button>
+                    <button type="button" class="btn-primary" id="nextStep2">Next</button>
+                    <button type="button" class="btn-cancel" id="cancelNewAppForm2">Cancel</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 3: Location Details -->
+                <div class="form-step" data-step="3" style="display: none;">
+                <div class="step-card">
+                  <h4 class="step-title">Location Details</h4>
+                  <p class="step-description">Provide location and map pin</p>
+                  
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="district">District *</label>
+                      <select id="district">
+                        <option value="">Select District</option>
+                        <option value="District 4 - Laguna">District 4 - Laguna</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="municipal">Municipal *</label>
+                      <select id="municipal">
+                        <option value="">Select Municipal</option>
+                        <option value="Cavinti">Cavinti</option>
+                        <option value="Famy">Famy</option>
+                        <option value="Kalayaan">Kalayaan</option>
+                        <option value="Luisiana">Luisiana</option>
+                        <option value="Lumban">Lumban</option>
+                        <option value="Mabitac">Mabitac</option>
+                        <option value="Magdalena">Magdalena</option>
+                        <option value="Majayjay">Majayjay</option>
+                        <option value="Paete">Paete</option>
+                        <option value="Pagsanjan">Pagsanjan</option>
+                        <option value="Pakil">Pakil</option>
+                        <option value="Pangil">Pangil</option>
+                        <option value="Pila">Pila</option>
+                        <option value="Santa Cruz">Santa Cruz</option>
+                        <option value="Santa Maria">Santa Maria</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="barangay">Barangay *</label>
+                      <select id="barangay">
+                        <option value="">Select Municipal first</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="streetAddress">Street Address *</label>
+                      <input type="text" id="streetAddress" placeholder="Enter house number and street name" maxlength="100" />
+                      <small>Include house number and street name</small>
+                    </div>
+                  </div>
+
+                  <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="prevStep3">Previous</button>
+                    <button type="button" class="btn-primary" id="nextStep3">Next</button>
+                    <button type="button" class="btn-cancel" id="cancelNewAppForm3">Cancel</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 4: Application Details -->
+              <div class="form-step" data-step="4" style="display: none;">
+                <div class="step-card">
+                  <h4 class="step-title">Application Details</h4>
+                  <p class="step-description">Describe purpose and environmental impact (optional)</p>
+
+                  <div class="permit-info-box" id="permitInfoBox" style="display:none;">
+                    <h5>Document Information</h5>
+                    <div class="info-grid">
+                      <div class="info-item">
+                        <div>Classification</div>
+                        <div id="documentClassification">-</div>
+                      </div>
+                      <div class="info-item">
+                        <div>Fees</div>
+                        <div id="documentFees">-</div>
+                      </div>
+                      <div class="info-item">
+                        <div>Minimum Processing Time</div>
+                        <div id="documentProcessingTime">-</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="applicationDetailsInput">Application Details (optional)</label>
+                    <textarea id="applicationDetailsInput" rows="5" placeholder="Describe your application in detail..."></textarea>
+                  </div>
+
+                  <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="prevStep4">Previous</button>
+                    <button type="button" class="btn-primary" id="nextStep4">Next</button>
+                    <button type="button" class="btn-cancel" id="cancelNewAppForm4">Cancel</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 5: Documents & Review -->
+              <div class="form-step" data-step="5" style="display: none;">
+                <div class="step-card">
+                  <h4 class="step-title" id="step5Title">Documents & Review</h4>
+                  <p class="step-description" id="step5Description">Upload documents and submit application</p>
+
+                  <div class="file-size-notice">
+                    <small>Maximum file size: 5MB per document. Larger files will be rejected.</small>
+                  </div>
+
+                  <div id="dynamicDocumentUploads">
+                    <!-- Dynamic upload fields will be generated here -->
+                  </div>
+
+                  <div class="document-requirements-box" id="requirementsBox5">
+                    <h5>Documents Checklist</h5>
+                    <ul id="requirementsList5">
+                      <li>Valid ID (Government-issued)</li>
+                      <li>Certificate of Land Ownership or Tax Declaration</li>
+                      <li>Barangay Clearance</li>
+                      <li>Sketch Plan/Location Map</li>
+                      <li>Project Description (if applicable)</li>
+                    </ul>
+                  </div>
+
+                  <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="prevStep5">Previous</button>
+                    <button type="button" class="btn-primary" id="submitStep5">Submit Application</button>
+                    <button type="button" class="btn-cancel" id="cancelNewAppForm5">Cancel</button>
+                  </div>
+                </div>
+              </div>
+              </form>
+            </div>
+          </section>
+
+          <!-- Profile Section -->
+          <section class="profile-section page-section" id="profileSection">
+            <div class="dashboard-container-wrapper" style="margin-top: 24px;">
+              <div class="profile-card">
+              <div class="profile-header">
+                <div class="profile-avatar-container">
+                  <div class="profile-avatar" id="profileAvatar">
+                    <span id="profileAvatarInitials">CU</span>
+                  </div>
+                  <button type="button" class="profile-avatar-edit" id="editAvatarBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                      <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                  </button>
+                  <input type="file" id="profilePicture" accept="image/*" style="display: none;" />
+                </div>
+                <div class="profile-info">
+                  <h4 id="profileName">Customer Name</h4>
+                  <p id="profileEmailDisplay">customer@example.com</p>
+                  <span class="profile-badge" id="profileStatus">Verified</span>
+                </div>
+              </div>
+
+              <form id="profileForm" class="profile-form" novalidate>
+                <div class="form-section-title">
+                  <h5>Personal Information</h5>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="profileFirstName">First Name *</label>
+                    <input type="text" id="profileFirstName" readonly required placeholder="Enter your first name" maxlength="30" />
+                  </div>
+                  <div class="form-group">
+                    <label for="profileSurname">Surname *</label>
+                    <input type="text" id="profileSurname" readonly required placeholder="Enter your surname" maxlength="30" />
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="profileMiddleName">Middle Name *</label>
+                    <input type="text" id="profileMiddleName" readonly placeholder="Enter your middle name" maxlength="30" />
+                  </div>
+                  <div class="form-group">
+                    <label for="profileSuffix">Suffix</label>
+                    <select id="profileSuffix" readonly>
+                      <option value="">None</option>
+                      <option value="Jr.">Jr.</option>
+                      <option value="Sr.">Sr.</option>
+                      <option value="I">I</option>
+                      <option value="II">II</option>
+                      <option value="III">III</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-section-title" style="margin-top: 24px;">
+                  <h5>Contact Information</h5>
+                  <p>Your contact details for permit notifications</p>
+                </div>
+
+                <div class="form-group">
+                  <label for="profileEmail">Email Address</label>
+                  <input type="email" id="profileEmail" readonly value="renzcagayat11@gmail.com" />
+                  <small>Contact admin to change email address</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="profileMobile">Mobile Number *</label>
+                  <input type="tel" id="profileMobile" readonly required placeholder="Enter mobile number" />
+                </div>
+
+                <div class="form-section-title" style="margin-top: 24px;">
+                  <h5>Address Information</h5>
+                  <p>Your complete address details</p>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="profileDistrict">District *</label>
+                    <select id="profileDistrict" readonly required>
+                      <option value="">Select District</option>
+                      <option value="District 4 - Laguna">District 4 - Laguna</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="profileMunicipal">Municipal *</label>
+                    <select id="profileMunicipal" readonly required>
+                      <option value="">Select Municipal</option>
+                      <option value="Cavinti">Cavinti</option>
+                      <option value="Famy">Famy</option>
+                      <option value="Kalayaan">Kalayaan</option>
+                      <option value="Luisiana">Luisiana</option>
+                      <option value="Lumban">Lumban</option>
+                      <option value="Mabitac">Mabitac</option>
+                      <option value="Magdalena">Magdalena</option>
+                      <option value="Majayjay">Majayjay</option>
+                      <option value="Paete">Paete</option>
+                      <option value="Pagsanjan">Pagsanjan</option>
+                      <option value="Pakil">Pakil</option>
+                      <option value="Pangil">Pangil</option>
+                      <option value="Pila">Pila</option>
+                      <option value="Santa Cruz">Santa Cruz</option>
+                      <option value="Santa Maria">Santa Maria</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="profileBarangay">Barangay *</label>
+                    <select id="profileBarangay" readonly required>
+                      <option value="">Select Municipal first</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="profileStreetAddress">Street Address *</label>
+                    <input type="text" id="profileStreetAddress" readonly required placeholder="Enter house number and street name" maxlength="20" />
+                    <small>Include house number and street name</small>
+                  </div>
+                </div>
+
+                
+                <div class="form-actions">
+                  <button type="submit" class="btn-primary">Edit Profile</button>
+                  <button type="button" class="btn-secondary" id="cancelProfileBtn">Cancel</button>
+                </div>
+              </form>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Settings Section -->
+          <section class="settings-section page-section" id="settingsSection">
+            <div class="dashboard-container-wrapper" style="margin-top: 24px;">
+              <div class="profile-card">
+              <!-- Tab Navigation -->
+              <div class="settings-tabs-nav">
+                <button class="settings-tab-btn active" data-tab="notifications">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                  </svg>
+                  Notifications
+                </button>
+                <button class="settings-tab-btn" data-tab="security">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                  Security
+                </button>
+                <button class="settings-tab-btn" data-tab="preferences">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                  </svg>
+                  Preferences
+                </button>
+                <button class="settings-tab-btn danger-tab" data-tab="privacy">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  Data & Privacy
+                </button>
+              </div>
+
+              <!-- Tab Content -->
+              <div class="settings-tab-content">
+                <!-- Notifications Tab -->
+                <div class="settings-tab-pane active" id="notifications">
+                  <div class="settings-card-simple">
+                    <div style="margin-bottom: 32px;">
+                      <h4 class="settings-card-title" style="margin-bottom: 8px;">Notification Preferences</h4>
+                      <p style="color: #6b7280; font-size: 14px; line-height: 1.5;">Manage how you receive updates about your permit applications</p>
+                    </div>
+                    
+                    <div class="settings-toggle-list">
+                      <div class="settings-toggle-item">
+                        <div style="display: flex; align-items: flex-start; gap: 16px; flex: 1;">
+                          <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            </svg>
+                          </div>
+                          <div class="toggle-info" style="flex: 1;">
+                            <span class="toggle-label" style="font-size: 16px; margin-bottom: 6px;">Application Status Updates</span>
+                            <span class="toggle-desc" style="font-size: 14px;">Get notified when your application status changes</span>
+                          </div>
+                        </div>
+                        <label class="toggle-switch">
+                          <input type="checkbox" id="notifyStatusChange" checked>
+                          <span class="toggle-slider"></span>
+                        </label>
+                      </div>
+                      
+                      <div class="settings-toggle-item">
+                        <div style="display: flex; align-items: flex-start; gap: 16px; flex: 1;">
+                          <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                          </div>
+                          <div class="toggle-info" style="flex: 1;">
+                            <span class="toggle-label" style="font-size: 16px; margin-bottom: 6px;">Approval Notifications</span>
+                            <span class="toggle-desc" style="font-size: 14px;">Email when your permit is approved</span>
+                          </div>
+                        </div>
+                        <label class="toggle-switch">
+                          <input type="checkbox" id="notifyApproved" checked>
+                          <span class="toggle-slider"></span>
+                        </label>
+                      </div>
+                      
+                      <div class="settings-toggle-item">
+                        <div style="display: flex; align-items: flex-start; gap: 16px; flex: 1;">
+                          <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <circle cx="12" cy="12" r="10"></circle>
+                              <line x1="15" y1="9" x2="9" y2="15"></line>
+                              <line x1="9" y1="9" x2="15" y2="15"></line>
+                            </svg>
+                          </div>
+                          <div class="toggle-info" style="flex: 1;">
+                            <span class="toggle-label" style="font-size: 16px; margin-bottom: 6px;">Rejection Notifications</span>
+                            <span class="toggle-desc" style="font-size: 14px;">Email if your application is rejected</span>
+                          </div>
+                        </div>
+                        <label class="toggle-switch">
+                          <input type="checkbox" id="notifyRejected">
+                          <span class="toggle-slider"></span>
+                        </label>
+                      </div>
+                      
+                      <div class="settings-toggle-item">
+                        <div style="display: flex; align-items: flex-start; gap: 16px; flex: 1;">
+                          <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                              <line x1="16" y1="2" x2="16" y2="6"></line>
+                              <line x1="8" y1="2" x2="8" y2="6"></line>
+                              <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                          </div>
+                          <div class="toggle-info" style="flex: 1;">
+                            <span class="toggle-label" style="font-size: 16px; margin-bottom: 6px;">Weekly Summary</span>
+                            <span class="toggle-desc" style="font-size: 14px;">Receive weekly application summary</span>
+                          </div>
+                        </div>
+                        <label class="toggle-switch">
+                          <input type="checkbox" id="notifyWeekly">
+                          <span class="toggle-slider"></span>
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end;">
+                      <button type="button" class="btn-primary" id="saveNotificationBtn" style="padding: 12px 32px; font-size: 15px; font-weight: 600; border-radius: 8px;">Save Preferences</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Security Tab -->
+                <div class="settings-tab-pane" id="security">
+                  <div class="settings-card-simple">
+                    <div style="margin-bottom: 32px;">
+                      <h4 class="settings-card-title" style="margin-bottom: 8px;">Security Settings</h4>
+                      <p style="color: #6b7280; font-size: 14px; line-height: 1.5;">Manage your account security and authentication preferences</p>
+                    </div>
+                    
+                    <!-- Password Change Section -->
+                    <div class="settings-toggle-list">
+                      <div class="settings-toggle-item">
+                        <div style="display: flex; align-items: flex-start; gap: 16px; flex: 1;">
+                          <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                          </div>
+                          <div class="toggle-info" style="flex: 1;">
+                            <span class="toggle-label" style="font-size: 16px; margin-bottom: 6px;">Change Password</span>
+                            <span class="toggle-desc" style="font-size: 14px;">Update your password regularly for better security</span>
+                          </div>
+                        </div>
+                        <button type="button" class="btn-secondary" onclick="togglePasswordChange()">Manage</button>
+                      </div>
+                      
+                      <div class="settings-toggle-item">
+                        <div style="display: flex; align-items: flex-start; gap: 16px; flex: 1;">
+                          <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                          </div>
+                          <div class="toggle-info" style="flex: 1;">
+                            <span class="toggle-label" style="font-size: 16px; margin-bottom: 6px;">Two-Factor Authentication</span>
+                            <span class="toggle-desc" style="font-size: 14px;">Add extra security to your account with 2FA</span>
+                          </div>
+                        </div>
+                        <label class="toggle-switch">
+                          <input type="checkbox" id="enable2FA" onchange="toggle2FASetup()">
+                          <span class="toggle-slider"></span>
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <!-- Password Change Form (Hidden by default) -->
+                    <div class="password-change-form" id="passwordChangeForm" style="display: none; margin-top: 12px; padding: 20px; background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border-radius: 12px; border: 1px solid #e9ecef; max-width: 480px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+                      <div style="display: flex; align-items: center; margin-bottom: 16px;">
+                        <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                          </svg>
+                        </div>
+                        <h5 style="margin: 0; font-size: 16px; font-weight: 600; color: #1f2937;">Change Password</h5>
+                      </div>
+                      
+                      <div class="password-strength-indicator" id="passwordStrengthIndicator" style="display: none; margin-bottom: 16px;">
+                        <div style="background: #f3f4f6; border-radius: 8px; padding: 12px;">
+                          <div style="font-size: 12px; font-weight: 500; color: #6b7280; margin-bottom: 6px;">Password Strength</div>
+                          <div class="strength-bar" style="height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden;">
+                            <div class="strength-fill" id="strengthFill" style="height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+                          </div>
+                          <div class="strength-text" id="strengthText" style="font-size: 11px; color: #6b7280; margin-top: 4px;"></div>
+                        </div>
+                      </div>
+                      
+                      <form class="settings-form" id="changePasswordForm">
+                        <div style="margin-bottom: 16px;">
+                          <label for="currentPassword" style="display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px;">Current Password</label>
+                          <div class="password-input-wrapper" style="position: relative;">
+                            <input type="password" id="currentPassword" placeholder="Enter current password" autocomplete="current-password" maxlength="20" style="width: 100%; padding: 10px 40px 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; transition: all 0.2s; box-sizing: border-box;" />
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('currentPassword')" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; opacity: 0.5; transition: opacity 0.2s;">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 16px;">
+                          <label for="newPassword" style="display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px;">New Password</label>
+                          <div class="password-input-wrapper" style="position: relative;">
+                            <input type="password" id="newPassword" placeholder="Enter new password" autocomplete="new-password" oninput="checkPasswordStrength()" maxlength="20" style="width: 100%; padding: 10px 65px 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; transition: all 0.2s; box-sizing: border-box;" />
+                            <div style="position: absolute; right: 45px; top: 8px; font-size: 11px; color: #6b7280; font-weight: 500; pointer-events: none; background: white; padding: 2px 4px; border-radius: 3px;">
+                              <span id="newPasswordCounter">0</span>/20
+                            </div>
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('newPassword')" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; opacity: 0.5; transition: opacity 0.2s;">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                        
+                        <div class="password-requirements" id="passwordRequirements" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                          <div style="font-size: 12px; font-weight: 500; color: #475569; margin-bottom: 8px;">Password Requirements:</div>
+                          <div class="requirement" id="req-length" style="display: flex; align-items: center; margin-bottom: 6px; font-size: 12px; color: #64748b;">
+                            <span class="req-icon" style="margin-right: 8px; font-size: 14px;">❌</span>
+                            <span>At least 8 characters</span>
+                          </div>
+                          <div class="requirement" id="req-uppercase" style="display: flex; align-items: center; margin-bottom: 6px; font-size: 12px; color: #64748b;">
+                            <span class="req-icon" style="margin-right: 8px; font-size: 14px;">❌</span>
+                            <span>One uppercase letter</span>
+                          </div>
+                          <div class="requirement" id="req-lowercase" style="display: flex; align-items: center; margin-bottom: 6px; font-size: 12px; color: #64748b;">
+                            <span class="req-icon" style="margin-right: 8px; font-size: 14px;">❌</span>
+                            <span>One lowercase letter</span>
+                          </div>
+                          <div class="requirement" id="req-number" style="display: flex; align-items: center; margin-bottom: 6px; font-size: 12px; color: #64748b;">
+                            <span class="req-icon" style="margin-right: 8px; font-size: 14px;">❌</span>
+                            <span>One number</span>
+                          </div>
+                          <div class="requirement" id="req-special" style="display: flex; align-items: center; margin-bottom: 0; font-size: 12px; color: #64748b;">
+                            <span class="req-icon" style="margin-right: 8px; font-size: 14px;">❌</span>
+                            <span>One special character (!@#$%^&*)</span>
+                          </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                          <label for="confirmPassword" style="display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px;">Confirm New Password</label>
+                          <div class="password-input-wrapper" style="position: relative;">
+                            <input type="password" id="confirmPassword" placeholder="Confirm new password" autocomplete="new-password" oninput="checkPasswordMatch()" maxlength="20" style="width: 100%; padding: 10px 40px 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; transition: all 0.2s; box-sizing: border-box;" />
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('confirmPassword')" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; opacity: 0.5; transition: opacity 0.2s;">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                        
+                        <div class="password-match-indicator" id="passwordMatchIndicator" style="display: none; align-items: center; padding: 8px 12px; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 6px; margin-bottom: 16px;">
+                          <span class="match-icon" id="matchIcon" style="margin-right: 8px; font-size: 14px;">⚠️</span>
+                          <span class="match-text" id="matchText" style="font-size: 12px; color: #92400e;">Passwords do not match</span>
+                        </div>
+                        
+                        <div style="display: flex; gap: 12px;">
+                          <button type="button" class="btn-secondary" onclick="togglePasswordChange()" style="flex: 1; padding: 10px 16px; border: 1px solid #d1d5db; background: white; color: #6b7280; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s;">Cancel</button>
+                          <button type="button" class="btn-primary" onclick="changePassword()" id="changePasswordBtn" disabled style="flex: 1; padding: 10px 16px; background: linear-gradient(135deg, #2d7a46 0%, #22c55e 100%); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s;">Change Password</button>
+                        </div>
+                      </form>
+                    </div>
+                    
+                    <!-- 2FA Setup Section -->
+                    <div class="twofa-setup-section" id="twoFASetupSection" style="display: none;">
+                      <div class="password-change-form" style="margin-top: 12px; padding: 24px; background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border-radius: 12px; border: 1px solid #e9ecef; max-width: 550px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+                        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                          <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 14px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                          </div>
+                          <h5 style="margin: 0; font-size: 18px; font-weight: 600; color: #1f2937;">Two-Factor Authentication Setup</h5>
+                        </div>
+                        
+                        <!-- 2FA Methods Table -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                          <!-- Email Verification -->
+                          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px;">
+                            <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                              <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 7px; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                  <polyline points="22,6 12,13 2,6"></polyline>
+                                </svg>
+                              </div>
+                              <h6 style="margin: 0; font-size: 16px; font-weight: 600; color: #374151;">Email Verification</h6>
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                              <input type="email" id="email2FA" placeholder="Enter your email" style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                              <button type="button" class="btn-secondary" onclick="sendEmail2FA()" id="sendEmailBtn" style="flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; background: white; color: #6b7280; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">Send Code</button>
+                            </div>
+                            <div id="emailVerification" style="display: none; margin-top: 12px;">
+                              <input type="text" id="emailCode" placeholder="Enter 6-digit code" maxlength="6" style="width: 100%; padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; margin-bottom: 8px; box-sizing: border-box;" />
+                              <button type="button" class="btn-primary" onclick="verifyEmailCode()" style="width: 100%; padding: 8px 12px; background: linear-gradient(135deg, #2d7a46 0%, #22c55e 100%); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">Verify Email</button>
+                            </div>
+                          </div>
+                          
+                          <!-- Phone Verification -->
+                          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px;">
+                            <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                              <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 7px; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                </svg>
+                              </div>
+                              <h6 style="margin: 0; font-size: 16px; font-weight: 600; color: #374151;">Phone Verification</h6>
+                            </div>
+                            <div style="margin-bottom: 12px;">
+                              <input type="tel" id="phone2FA" placeholder="Enter your phone number" style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; box-sizing: border-box;" />
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                              <button type="button" class="btn-secondary" onclick="sendSMS2FA()" id="sendSMSBtn" style="flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; background: white; color: #6b7280; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">Send Code</button>
+                            </div>
+                            <div id="phoneVerification" style="display: none; margin-top: 12px;">
+                              <input type="text" id="phoneCode" placeholder="Enter 6-digit code" maxlength="6" style="width: 100%; padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; margin-bottom: 8px; box-sizing: border-box;" />
+                              <button type="button" class="btn-primary" onclick="verifyPhoneCode()" style="width: 100%; padding: 8px 12px; background: linear-gradient(135deg, #2d7a46 0%, #22c55e 100%); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">Verify Phone</button>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- 2FA Status -->
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px;">
+                          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                              <span style="font-size: 14px; font-weight: 500; color: #475569;">Email 2FA:</span>
+                              <span class="status-value" id="email2FAStatus" style="font-size: 14px; font-weight: 600; color: #dc3545;">Not Enabled</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                              <span style="font-size: 14px; font-weight: 500; color: #475569;">Phone 2FA:</span>
+                              <span class="status-value" id="phone2FAStatus" style="font-size: 14px; font-weight: 600; color: #dc3545;">Not Enabled</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end;">
+                      <button type="button" class="btn-primary" id="saveSecurityBtn" style="padding: 12px 32px; font-size: 15px; font-weight: 600; border-radius: 8px;">Save Settings</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Preferences Tab -->
+                <div class="settings-tab-pane" id="preferences">
+                  <div class="settings-card-simple">
+                    <div style="margin-bottom: 32px;">
+                      <h4 class="settings-card-title" style="margin-bottom: 8px;">Preferences</h4>
+                      <p style="color: #6b7280; font-size: 14px; line-height: 1.5;">Customize your account settings and communication preferences</p>
+                    </div>
+                    
+                    <div class="settings-toggle-list">
+                      <div class="settings-toggle-item">
+                        <div style="display: flex; align-items: flex-start; gap: 16px; flex: 1;">
+                          <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"></path>
+                            </svg>
+                          </div>
+                          <div class="toggle-info" style="flex: 1;">
+                            <span class="toggle-label" style="font-size: 16px; margin-bottom: 6px;">Language</span>
+                            <span class="toggle-desc" style="font-size: 14px;">Choose your preferred language for the interface</span>
+                          </div>
+                        </div>
+                        <select class="form-select" id="languageSelect" style="min-width: 120px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;">
+                          <option value="en">English</option>
+                          <option value="tl">Filipino</option>
+                        </select>
+                      </div>
+                      
+                      <div class="settings-toggle-item">
+                        <div style="display: flex; align-items: flex-start; gap: 16px; flex: 1;">
+                          <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                              <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                          </div>
+                          <div class="toggle-info" style="flex: 1;">
+                            <span class="toggle-label" style="font-size: 16px; margin-bottom: 6px;">Email for Communications</span>
+                            <span class="toggle-desc" style="font-size: 14px;">Set your email for notifications and updates</span>
+                          </div>
+                        </div>
+                        <input type="email" class="form-input" id="contactEmail" placeholder="Enter email" style="min-width: 200px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;">
+                      </div>
+                    </div>
+                    
+                    <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end;">
+                      <button type="button" class="btn-primary" id="savePreferencesBtn" style="padding: 12px 32px; font-size: 15px; font-weight: 600; border-radius: 8px;">Save Preferences</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Privacy Tab -->
+                <div class="settings-tab-pane" id="privacy">
+                  <div class="settings-card-simple">
+                    <div style="margin-bottom: 32px;">
+                      <h4 class="settings-card-title" style="margin-bottom: 8px;">Data & Privacy</h4>
+                      <p style="color: #6b7280; font-size: 14px; line-height: 1.5;">Manage your personal data and account privacy settings</p>
+                    </div>
+                    
+                    <div class="settings-toggle-list">
+                      <div class="settings-toggle-item">
+                        <div style="display: flex; align-items: flex-start; gap: 16px; flex: 1;">
+                          <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                              <polyline points="14 2 14 8 20 8"></polyline>
+                              <line x1="16" y1="13" x2="8" y2="13"></line>
+                              <line x1="16" y1="17" x2="8" y2="17"></line>
+                              <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                          </div>
+                          <div class="toggle-info" style="flex: 1;">
+                            <span class="toggle-label" style="font-size: 16px; margin-bottom: 6px;">Request My Data</span>
+                            <span class="toggle-desc" style="font-size: 14px;">Get a copy of all your personal data</span>
+                          </div>
+                        </div>
+                        <button type="button" class="btn-secondary" id="requestDataBtn" style="padding: 8px 20px; font-size: 14px; font-weight: 500; border-radius: 8px;">Request</button>
+                      </div>
+                      
+                      <div class="settings-toggle-item" style="background: #fef2f2; border-color: #fecaca; border: 1px solid #fecaca; border-radius: 12px; padding: 20px;">
+                        <div style="display: flex; align-items: flex-start; gap: 16px; flex: 1;">
+                          <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="3 6 5 6 21 6"></polyline>
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                          </div>
+                          <div class="toggle-info" style="flex: 1;">
+                            <span class="toggle-label" style="font-size: 16px; margin-bottom: 6px; color: #dc2626; font-weight: 600;">Delete Account</span>
+                            <span class="toggle-desc" style="font-size: 14px; color: #7f1d1d;">Permanently delete your account and all data</span>
+                          </div>
+                        </div>
+                        <button type="button" class="btn-cancel" id="deleteAccountBtn" style="padding: 8px 20px; font-size: 14px; font-weight: 500; border-radius: 8px; background: #dc2626; color: white; border: 1px solid #dc2626;">Delete</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Help Section -->
+          <section class="help-section page-section" id="helpSection">
+            <div class="section-header">
+              <h3 class="section-title">Help & Support</h3>
+            </div>
+
+            <div class="help-content">
+              <div class="help-card">
+                <h4>📞 Contact Us</h4>
+                <p><strong>Phone:</strong> (049) 536-8903</p>
+                <p><strong>Email:</strong> cenrostacruz@denr.gov.ph</p>
+                <p><strong>Address:</strong> So. Maunawain, Brgy. Duhat, Sta. Cruz, Laguna</p>
+              </div>
+
+              <div class="help-card">
+                <h4>❓ Frequently Asked Questions</h4>
+                <div class="faq-item">
+                  <h5>How long does it take to process my application?</h5>
+                  <p>Processing time varies by permit type. Most applications are processed within 5-15 business days.</p>
+                </div>
+                <div class="faq-item">
+                  <h5>What documents do I need to submit?</h5>
+                  <p>Required documents vary by permit type. Please refer to the specific permit requirements or contact our office.</p>
+                </div>
+                <div class="faq-item">
+                  <h5>How can I check my application status?</h5>
+                  <p>You can check your application status in the "My Applications" section of this dashboard.</p>
+                </div>
+              </div>
+
+              <div class="help-card">
+                <h4>📅 Office Hours</h4>
+                <p><strong>Monday - Friday:</strong> 8:00 AM - 5:00 PM</p>
+                <p><strong>Saturday:</strong> 8:00 AM - 12:00 PM</p>
+                <p><strong>Sunday:</strong> Closed</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <!-- Application Detail Modal -->
+    <div id="applicationModal" class="modal-backdrop" style="display:none">
+      <div class="modal-dialog large-modal">
+        <div class="modal-header">
+          <h3>Application Details</h3>
+          <button class="modal-close" id="closeAppModal">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="application-details" id="applicationDetails">
+            <!-- Application details will be loaded here -->
+          </div>
+          <div class="modal-actions" id="modalActions">
+            <button class="btn-secondary" id="btnPrint">Print Application</button>
+            <button class="btn-primary" id="btnDownloadDocs">Download Documents</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Viewer Modal -->
+    <div id="imageViewerModal" class="modal-backdrop" style="display:none">
+      <div class="image-viewer-dialog">
+        <div class="image-viewer-header">
+          <h3 id="imageViewerTitle">Document Preview</h3>
+          <button class="modal-close" id="closeImageViewer">&times;</button>
+        </div>
+        <div class="image-viewer-body">
+          <img id="imageViewerImage" src="" alt="Document Preview" />
+        </div>
+      </div>
+    </div>
+
+    <script src="/assets/js/file-upload-utils.js"></script>
+    <script type="module" src="/assets/js/customer-dashboard.js"></script>
+  </body>
+</html>

@@ -1,0 +1,1665 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Staff Dashboard — DENR Permit System</title>
+    <link rel="stylesheet" href="/assets/css/staff-dashboard.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <img src="/assets/images/logo.png" alt="DENR" class="sidebar-logo" />
+          <div class="sidebar-title">DENR-CENRO<br>Sta. Cruz</div>
+          <button class="sidebar-toggle-simple" onclick="toggleSidebar()">
+            <span class="toggle-icon">⋮</span>
+          </button>
+        </div>
+        <nav class="sidebar-nav">
+          <a href="#dashboard" class="nav-item active" data-section="dashboardSection">
+            <span class="nav-icon">📊</span>
+            <span>Dashboard</span>
+          </a>
+          <a href="#applications" class="nav-item" data-section="applicationsSection">
+            <span class="nav-icon">📋</span>
+            <span>Applications</span>
+          </a>
+          <a href="#ocr" class="nav-item" data-section="ocrSection">
+            <span class="nav-icon">📄</span>
+            <span>Document OCR</span>
+          </a>
+          <a href="#records" class="nav-item" data-section="recordsSection">
+            <span class="nav-icon">📋</span>
+            <span>My Records</span>
+          </a>
+          <a href="#performance" class="nav-item" data-section="performanceSection">
+            <span class="nav-icon">📈</span>
+            <span>My Performance</span>
+          </a>
+          <a href="#settings" class="nav-item" data-section="settingsSection">
+            <span class="nav-icon">⚙️</span>
+            <span>Settings</span>
+          </a>
+          <a href="#help" class="nav-item" data-section="helpSection">
+            <span class="nav-icon">❓</span>
+            <span>Help</span>
+          </a>
+        </nav>
+        <div class="sidebar-footer">
+          <button id="logoutBtn" class="logout-btn">
+            <span>🚪</span>
+            <span>Logout</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+          <div class="header-left">
+            <h1 class="page-title">Staff Dashboard</h1>
+          </div>
+          <div class="header-right">
+            <div class="notification-wrapper">
+              <button class="notification-btn">
+                <span>🔔</span>
+                <span class="notification-badge" id="notificationCount">0</span>
+              </button>
+            </div>
+            <div class="user-avatar">
+              <div class="avatar-circle" id="userInitials">ST</div>
+              <div class="user-info">
+                <div class="user-name" id="userName">Staff User</div>
+                <div class="user-role">Staff</div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="content-area">
+          <!-- Dashboard Overview Section -->
+          <section id="dashboardSection" class="page-section active">
+            <!-- Welcome Section -->
+            <section class="welcome-section">
+              <h2 class="welcome-title">Welcome back, <span id="welcomeName">Staff</span>!</h2>
+              <p class="welcome-subtitle">Manage and process permit applications from customers</p>
+            </section>
+
+            <!-- Quick Stats -->
+            <section class="quick-stats">
+              <div class="stat-card blue">
+                <div class="stat-icon">�</div>
+                <div class="stat-content">
+                  <div class="stat-value" id="totalApps">0</div>
+                  <div class="stat-label">Total Applications</div>
+                </div>
+              </div>
+              <div class="stat-card yellow">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-content">
+                  <div class="stat-value" id="pendingApps">0</div>
+                  <div class="stat-label">Pending Review</div>
+                </div>
+              </div>
+              <div class="stat-card green">
+                <div class="stat-icon">✓</div>
+                <div class="stat-content">
+                  <div class="stat-value" id="approvedApps">0</div>
+                  <div class="stat-label">Approved Today</div>
+                </div>
+              </div>
+              <div class="stat-card red">
+                <div class="stat-icon">✕</div>
+                <div class="stat-content">
+                  <div class="stat-value" id="rejectedApps">0</div>
+                  <div class="stat-label">Rejected Today</div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Recent Applications Summary -->
+            <section class="applications-section">
+              <div class="section-header">
+                <h3 class="section-title">Recent Applications</h3>
+                <button class="btn-secondary" onclick="navigateToSection('applicationsSection')">View All</button>
+              </div>
+              <div class="applications-table-container">
+                <div class="table-wrapper">
+                  <div class="table-scroll-container" style="max-height: 300px;">
+                    <table class="modern-data-table">
+                      <thead>
+                        <tr>
+                          <th>Application ID</th>
+                          <th>Applicant Name</th>
+                          <th>Permit Type</th>
+                          <th>Date Submitted</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody id="recentApplicationsTable">
+                        <!-- Applications will be loaded here -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <!-- Applications Section -->
+          <section id="applicationsSection" class="page-section">
+            <div class="section-header">
+              <h3 class="section-title">All Applications</h3>
+              <div class="filter-controls">
+                <select id="statusFilter" class="filter-select">
+                  <option value="all">All Status</option>
+                  <option value="pending" selected>Pending</option>
+                  <option value="under review">Under Review</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+                <select id="typeFilter" class="filter-select">
+                  <option value="all">All Types</option>
+                  <option value="Mining Permit">Mining Permit</option>
+                  <option value="Tree Cutting Permit">Tree Cutting Permit</option>
+                  <option value="Tree Planting Permit">Tree Planting Permit</option>
+                  <option value="Wildlife Permit">Wildlife Permit</option>
+                  <option value="Rolling">Rolling</option>
+                </select>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by ID or name..." />
+              </div>
+            </div>
+            <div class="applications-table-container">
+              <div class="table-header-info">
+                <p class="table-info">Showing <span id="visibleCount">5</span> of <span id="totalCount">0</span> applications</p>
+              </div>
+              <div class="table-wrapper">
+                <div class="table-scroll-container">
+                  <table class="modern-data-table">
+                    <thead>
+                      <tr>
+                        <th>Application ID</th>
+                        <th>Applicant Name</th>
+                        <th>Permit Type</th>
+                        <th>Date Submitted</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="applicationsTable">
+                      <!-- Applications will be loaded here -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- OCR Document Processing Section -->
+          <section id="ocrSection" class="page-section">
+            <div class="ocr-modern-container">
+              <!-- OCR Header -->
+              <div class="ocr-header">
+                <div class="ocr-title-section">
+                  <h3 class="ocr-title">
+                    <span class="ocr-icon">🔍</span>
+                    Document OCR Processing
+                  </h3>
+                  <p class="ocr-subtitle">Advanced AI-powered text extraction with accuracy analysis</p>
+                </div>
+                <button class="btn-secondary" onclick="showOCRHistory()">
+                  <span class="btn-icon">📊</span>
+                  OCR History
+                </button>
+              </div>
+
+              <!-- OCR Upload Area -->
+              <div class="ocr-upload-container">
+                <div class="upload-area-modern" id="uploadArea">
+                  <div class="upload-content">
+                    <div class="upload-icon-large">�</div>
+                    <h4 class="upload-title">Upload Document for OCR</h4>
+                    <p class="upload-description">Drag & drop your document here or click to browse</p>
+                    <div class="upload-specs">
+                      <div class="spec-item">
+                        <span class="spec-icon">🖼️</span>
+                        <span class="spec-text">JPG, PNG</span>
+                      </div>
+                      <div class="spec-item">
+                        <span class="spec-icon">📏</span>
+                        <span class="spec-text">Max 10MB (auto-compressed)</span>
+                      </div>
+                      <div class="spec-item">
+                        <span class="spec-icon">⚡</span>
+                        <span class="spec-text">AI Processing</span>
+                      </div>
+                    </div>
+                    <input type="file" id="documentInput" accept=".jpg,.jpeg,.png" style="display: none;" />
+                    <button class="btn-primary btn-large" onclick="document.getElementById('documentInput').click()">
+                      <span class="btn-icon">📁</span>
+                      Choose File
+                    </button>
+                  </div>
+                </div>
+
+                <!-- File Preview -->
+                <div id="filePreview" class="file-preview-modern" style="display: none;">
+                  <div class="preview-header-modern">
+                    <div class="preview-info">
+                      <h4 class="preview-title">Document Ready</h4>
+                      <p id="fileName" class="preview-filename"></p>
+                    </div>
+                    <div class="preview-actions">
+                      <button class="btn-secondary" onclick="clearFile()">
+                        <span class="btn-icon">❌</span>
+                        Remove
+                      </button>
+                      <button class="btn-primary btn-accent" onclick="processOCR()">
+                        <span class="btn-icon">🚀</span>
+                        Process OCR
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- OCR Progress -->
+              <div class="ocr-progress-modern" id="ocrProgressSection" style="display: none;">
+                <div class="progress-header">
+                  <h4 class="progress-title">
+                    <span class="progress-icon">⚡</span>
+                    AI Processing Document
+                  </h4>
+                  <div class="progress-percentage" id="progressPercentage">0%</div>
+                </div>
+                <div class="progress-bar-modern">
+                  <div class="progress-fill-modern" id="progressFill"></div>
+                </div>
+                <p id="progressText" class="progress-status">Initializing OCR engine...</p>
+                <div class="progress-steps">
+                  <div class="step" id="step-validate">
+                    <span class="step-icon">✓</span>
+                    <span class="step-text">Validating</span>
+                  </div>
+                  <div class="step" id="step-compress">
+                    <span class="step-icon">⚡</span>
+                    <span class="step-text">Optimizing</span>
+                  </div>
+                  <div class="step" id="step-extract">
+                    <span class="step-icon">🔍</span>
+                    <span class="step-text">Extracting</span>
+                  </div>
+                  <div class="step" id="step-analyze">
+                    <span class="step-icon">📊</span>
+                    <span class="step-text">Analyzing</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- OCR Results -->
+              <div class="ocr-results-modern" id="ocrResultsSection" style="display: none;">
+                <div class="results-header-modern">
+                  <div class="results-title-section">
+                    <h4 class="results-title">
+                      <span class="results-icon">✅</span>
+                      OCR Analysis Complete
+                    </h4>
+                    <div class="accuracy-badge" id="accuracyBadge">
+                      <span class="accuracy-value">95%</span>
+                      <span class="accuracy-label">Accuracy</span>
+                    </div>
+                  </div>
+                  <div class="results-actions-modern">
+                    <button class="btn-secondary" onclick="downloadAsWord()">
+                      <span class="btn-icon">📄</span>
+                      Download Word
+                    </button>
+                    <button class="btn-primary" onclick="saveOCRResults()">
+                      <span class="btn-icon">💾</span>
+                      Save to Database
+                    </button>
+                  </div>
+                </div>
+
+                <div class="results-content-modern">
+                  <div class="results-grid">
+                    <!-- Document Preview -->
+                    <div class="preview-panel">
+                      <div class="panel-header">
+                        <h5 class="panel-title">
+                          <span class="panel-icon">🖼️</span>
+                          Original Document
+                        </h5>
+                      </div>
+                      <div class="preview-container">
+                        <img id="documentPreview" class="document-preview-modern" alt="Document preview" />
+                      </div>
+                    </div>
+
+                    <!-- Extracted Text -->
+                    <div class="text-panel">
+                      <div class="panel-header">
+                        <h5 class="panel-title">
+                          <span class="panel-icon">📝</span>
+                          Extracted Text
+                        </h5>
+                        <div class="text-controls">
+                          <div class="text-stats">
+                            <span class="stat-item">
+                              <span class="stat-label">Words:</span>
+                              <span class="stat-value" id="wordCount">0</span>
+                            </span>
+                            <span class="stat-item">
+                              <span class="stat-label">Chars:</span>
+                              <span class="stat-value" id="charCount">0</span>
+                            </span>
+                          </div>
+                          <div class="format-toggle" id="formatToggleContainer" style="display: none;">
+                            <button class="toggle-btn active" id="plainTextBtn" onclick="switchTextView('plain')">
+                              Plain Text
+                            </button>
+                            <button class="toggle-btn" id="formattedTextBtn" onclick="switchTextView('formatted')">
+                              Formatted
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="text-container">
+                        <textarea id="extractedText" class="extracted-text-modern text-view" placeholder="Extracted text will appear here..." rows="15"></textarea>
+                        <div id="formattedTextView" class="extracted-text-modern formatted-view text-view" style="display: none;">
+                          <div class="formatted-content" id="formattedContent"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- OCR Analytics -->
+                  <div class="ocr-analytics">
+                    <div class="analytics-header">
+                      <h5 class="analytics-title">
+                        <span class="analytics-icon">📊</span>
+                        Processing Analytics
+                      </h5>
+                    </div>
+                    <div class="analytics-grid">
+                      <div class="metric-card">
+                        <div class="metric-icon">⏱️</div>
+                        <div class="metric-content">
+                          <div class="metric-value" id="processingTime">0s</div>
+                          <div class="metric-label">Processing Time</div>
+                        </div>
+                      </div>
+                      <div class="metric-card">
+                        <div class="metric-icon">🔍</div>
+                        <div class="metric-content">
+                          <div class="metric-value" id="confidenceScore">N/A</div>
+                          <div class="metric-label">Confidence</div>
+                        </div>
+                      </div>
+                      <div class="metric-card">
+                        <div class="metric-icon">📏</div>
+                        <div class="metric-content">
+                          <div class="metric-value" id="fileSize">0KB</div>
+                          <div class="metric-label">File Size</div>
+                        </div>
+                      </div>
+                      <div class="metric-card">
+                        <div class="metric-icon">🤖</div>
+                        <div class="metric-content">
+                          <div class="metric-value">OCR.space</div>
+                          <div class="metric-label">OCR Engine</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          <!-- OCR History Section (hidden by default) -->
+          <div id="ocrHistorySection" style="display:none; margin-top: 32px;">
+            <div class="section-header">
+              <h4 class="section-title">OCR Document History</h4>
+              <button class="btn-secondary" onclick="hideOCRHistory()">Close History</button>
+            </div>
+            
+            <style>
+              .search-row {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                flex-wrap: wrap;
+              }
+              .search-row input, .search-row select {
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                font-size: 14px;
+                min-width: 150px;
+              }
+              .search-row input[type="text"] {
+                flex: 1;
+                min-width: 250px;
+              }
+              .status-badge.completed {
+                background-color: #10b981;
+                color: white;
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: 600;
+              }
+              .status-badge.processing {
+                background-color: #f59e0b;
+                color: white;
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: 600;
+              }
+              .status-badge.failed {
+                background-color: #ef4444;
+                color: white;
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: 600;
+              }
+              .status-badge.pending {
+                background-color: #6b7280;
+                color: white;
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: 600;
+              }
+              .table-actions {
+                display: flex;
+                gap: 4px;
+                flex-wrap: wrap;
+              }
+              .table-actions button {
+                padding: 4px 8px;
+                font-size: 12px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                white-space: nowrap;
+              }
+              .btn-danger {
+                background-color: #ef4444;
+                color: white;
+              }
+              .btn-danger:hover {
+                background-color: #dc2626;
+              }
+            </style>
+            
+            <!-- Search and Filter Controls -->
+            <div class="search-controls" style="margin-bottom: 20px;">
+              <div class="search-row">
+                <input type="text" id="ocrSearchInput" placeholder="Search by filename or text content...">
+                <select id="confidenceFilter">
+                  <option value="">All Confidence</option>
+                  <option value="90">90%+</option>
+                  <option value="80">80%+</option>
+                  <option value="70">70%+</option>
+                  <option value="50">50%+</option>
+                </select>
+                <input type="date" id="dateFromFilter" placeholder="From">
+                <input type="date" id="dateToFilter" placeholder="To">
+                <button class="btn-primary" onclick="filterOCRHistory()">Search</button>
+                <button class="btn-secondary" onclick="clearOCRFilters()">Clear</button>
+              </div>
+            </div>
+
+            <!-- OCR History Table -->
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Filename</th>
+                    <th>Confidence</th>
+                    <th>Processing Time</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="ocrHistoryTable">
+                  <!-- OCR history will be loaded here -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div class="pagination-controls" style="margin-top: 20px; text-align: center;">
+              <button class="btn-secondary" id="prevPageBtn" onclick="loadOCRHistoryPage('prev')" disabled>Previous</button>
+              <span id="pageInfo" style="margin: 0 20px;">Page 1 of 1</span>
+              <button class="btn-secondary" id="nextPageBtn" onclick="loadOCRHistoryPage('next')" disabled>Next</button>
+            </div>
+          </div>
+
+          </section>
+
+          <!-- Records Section -->
+          <section id="recordsSection" class="page-section">
+            <div class="section-header">
+              <h2 class="section-title">Records & Documents</h2>
+            </div>
+            <div class="records-grid">
+              <div class="record-card">
+                <div class="record-icon">📄</div>
+                <h3>Approved Permits</h3>
+                <p>View permits you have approved</p>
+                <button class="btn-secondary" onclick="showStaffApproved()">View All</button>
+              </div>
+              <div class="record-card">
+                <div class="record-icon">📁</div>
+                <h3>Archived Records</h3>
+                <p>View applications you have rejected</p>
+                <button class="btn-secondary" onclick="showStaffRejected()">View Archive</button>
+              </div>
+                          </div>
+
+            <!-- Staff Approved Table (hidden by default) -->
+            <div id="staffApprovedContainer" style="display:none; margin-top: 32px;">
+              <div class="section-header">
+                <h3 class="section-title">Approved Permits</h3>
+                <button class="btn-secondary" onclick="hideStaffApproved()">Close</button>
+              </div>
+              <div class="applications-table-container">
+                <div class="table-wrapper">
+                  <div class="table-scroll-container">
+                    <table class="modern-data-table">
+                      <thead>
+                        <tr>
+                          <th>Application ID</th>
+                          <th>Applicant Name</th>
+                          <th>Permit Type</th>
+                          <th>Date Approved</th>
+                          <th>Pickup Date</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody id="staffApprovedTable">
+                        <!-- Approved permits will be loaded here -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Staff Rejected Table (hidden by default) -->
+            <div id="staffRejectedContainer" style="display:none; margin-top: 32px;">
+              <div class="section-header">
+                <h3 class="section-title">Archived Records (Rejected Applications)</h3>
+                <button class="btn-secondary" onclick="hideStaffRejected()">Close</button>
+              </div>
+              <div class="applications-table-container">
+                <div class="table-wrapper">
+                  <div class="table-scroll-container">
+                    <table class="modern-data-table">
+                      <thead>
+                        <tr>
+                          <th>Application ID</th>
+                          <th>Applicant Name</th>
+                          <th>Permit Type</th>
+                          <th>Date Rejected</th>
+                          <th>Rejection Reason</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody id="staffRejectedTable">
+                        <!-- Rejected applications will be loaded here -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Staff Logs Table (hidden by default) -->
+            <div id="staffLogsContainer" style="display:none; margin-top: 32px;">
+              <div class="section-header">
+                <h3 class="section-title">System Activity Logs</h3>
+                <button class="btn-secondary" onclick="hideStaffLogs()">Close</button>
+              </div>
+              <div class="applications-table-container">
+                <div class="table-wrapper">
+                  <div class="table-scroll-container">
+                    <table class="modern-data-table">
+                      <thead>
+                        <tr>
+                          <th>Date & Time</th>
+                          <th>Action</th>
+                          <th>Application ID</th>
+                          <th>Details</th>
+                        </tr>
+                      </thead>
+                      <tbody id="staffLogsTable">
+                        <!-- System logs will be loaded here -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- My Performance Section -->
+          <section id="performanceSection" class="page-section">
+            <div class="section-header">
+              <h3 class="section-title">My Performance</h3>
+            </div>
+            <div class="performance-grid">
+              <div class="performance-card">
+                <h4>Today's Activity</h4>
+                <div class="stat-row">
+                  <span>Applications Reviewed:</span>
+                  <strong id="todayReviewed">0</strong>
+                </div>
+                <div class="stat-row">
+                  <span>Approved:</span>
+                  <strong id="todayApproved">0</strong>
+                </div>
+                <div class="stat-row">
+                  <span>Rejected:</span>
+                  <strong id="todayRejected">0</strong>
+                </div>
+              </div>
+              <div class="performance-card">
+                <h4>This Week</h4>
+                <div class="stat-row">
+                  <span>Applications Reviewed:</span>
+                  <strong id="weekReviewed">0</strong>
+                </div>
+                <div class="stat-row">
+                  <span>Approved:</span>
+                  <strong id="weekApproved">0</strong>
+                </div>
+                <div class="stat-row">
+                  <span>Rejected:</span>
+                  <strong id="weekRejected">0</strong>
+                </div>
+              </div>
+              <div class="performance-card">
+                <h4>All Time</h4>
+                <div class="stat-row">
+                  <span>Applications Reviewed:</span>
+                  <strong id="totalReviewed">0</strong>
+                </div>
+                <div class="stat-row">
+                  <span>Approval Rate:</span>
+                  <strong id="approvalRate">0%</strong>
+                </div>
+              </div>
+            </div>
+            <h4 style="margin-top:32px; margin-bottom:16px;">My Recent Actions</h4>
+            <div class="applications-table-container">
+              <div class="table-wrapper">
+                <div class="table-scroll-container" style="max-height: 300px;">
+                  <table class="modern-data-table">
+                    <thead>
+                      <tr>
+                        <th>Application ID</th>
+                        <th>Action</th>
+                        <th>Date</th>
+                      </tr>
+                    </thead>
+                    <tbody id="myActionsTable">
+                      <!-- Actions will be loaded here -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Settings Section -->
+          <section id="settingsSection" class="page-section">
+            <div class="settings-management-header">
+              <div class="settings-header-info">
+                <h3 class="section-title">Settings</h3>
+                <p class="section-subtitle">Manage your profile, security, and notification preferences</p>
+              </div>
+              <div class="settings-header-status">
+                <div class="status-item">
+                  <span class="status-indicator online"></span>
+                  <span class="status-text">Account Active</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="settings-tabs-container">
+              <div class="content-tabs">
+                <button class="content-tab active" data-settings-type="profile">
+                  <span class="tab-icon">👤</span>
+                  <span class="tab-text">Profile</span>
+                </button>
+                <button class="content-tab" data-settings-type="security">
+                  <span class="tab-icon">🔐</span>
+                  <span class="tab-text">Security</span>
+                </button>
+                <button class="content-tab" data-settings-type="notifications">
+                  <span class="tab-icon">🔔</span>
+                  <span class="tab-text">Notifications</span>
+                </button>
+              </div>
+            </div>
+            
+            <div class="content-editor-container">
+              <div id="profileEditor" class="content-editor active">
+                <div class="content-editor-header">
+                  <div class="editor-header-info">
+                    <h4 class="editor-title">
+                      <span class="editor-icon">👤</span>
+                      Profile Information
+                    </h4>
+                    <p class="editor-description">Manage your personal information and contact details</p>
+                  </div>
+                </div>
+                
+                <div class="profile-header-modern">
+                  <div class="profile-avatar-section">
+                    <div class="avatar-container">
+                      <img id="settingsAvatar" src="/assets/images/default-avatar.png" alt="Profile" class="profile-avatar-img" />
+                      <button class="btn-upload-modern" onclick="document.getElementById('avatarInput').click()">
+                        <span class="upload-icon">📷</span>
+                        Change Photo
+                      </button>
+                      <input type="file" id="avatarInput" accept="image/*" style="display: none;" onchange="handleAvatarUpload(event)" />
+                    </div>
+                    <div class="profile-info-section">
+                      <h5 id="settingsDisplayNameDisplay" class="profile-name">Staff Name</h5>
+                      <p id="settingsEmailDisplay" class="profile-email">staff@denr.gov.ph</p>
+                      <div class="profile-role-badge">
+                        <span class="role-icon">👨‍💼</span>
+                        <span class="role-text">Staff</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <form class="modern-form settings-form">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="settingsDisplayName" class="form-label">
+                        <span class="label-icon">👤</span>
+                        Full Name
+                      </label>
+                      <input type="text" id="settingsDisplayName" class="form-input" placeholder="Enter your full name" />
+                      <div class="form-help">
+                        <small>This name will be displayed in your profile and communications</small>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="settingsPhone" class="form-label">
+                        <span class="label-icon">📱</span>
+                        Phone Number
+                      </label>
+                      <input type="tel" id="settingsPhone" class="form-input" placeholder="Enter your phone number" />
+                      <div class="form-help">
+                        <small>Include country code for international numbers</small>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="settingsEmail" class="form-label">
+                        <span class="label-icon">📧</span>
+                        Email Address
+                      </label>
+                      <input type="email" id="settingsEmail" class="form-input" readonly />
+                      <div class="form-help">
+                        <small>Email address cannot be changed. Contact administrator for assistance.</small>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-actions">
+                    <div class="form-left"></div>
+                    <div class="form-right">
+                      <button type="button" class="btn-primary" onclick="saveProfileSettings()">
+                        <span class="btn-icon">💾</span>
+                        Save Profile
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              
+              <div id="securityEditor" class="content-editor">
+                <div class="content-editor-header">
+                  <div class="editor-header-info">
+                    <h4 class="editor-title">
+                      <span class="editor-icon">🔐</span>
+                      Security Settings
+                    </h4>
+                    <p class="editor-description">Manage your password and account security</p>
+                  </div>
+                </div>
+                
+                <form class="modern-form settings-form" id="changePasswordForm">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="currentPassword" class="form-label">
+                        <span class="label-icon">🔑</span>
+                        Current Password
+                      </label>
+                      <div class="password-input-wrapper">
+                        <input type="password" id="currentPassword" class="form-input" placeholder="Enter current password" autocomplete="current-password" />
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('currentPassword')">
+                          <span class="toggle-icon">👁️</span>
+                        </button>
+                      </div>
+                      <div class="form-help">
+                        <small>Enter your current password to verify your identity</small>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="newPassword" class="form-label">
+                        <span class="label-icon">🔒</span>
+                        New Password
+                      </label>
+                      <div class="password-input-wrapper">
+                        <input type="password" id="newPassword" class="form-input" placeholder="Enter new password" autocomplete="new-password" oninput="checkPasswordStrength()" />
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('newPassword')">
+                          <span class="toggle-icon">👁️</span>
+                        </button>
+                      </div>
+                      <div class="form-help">
+                        <small>Use at least 8 characters with a mix of letters, numbers, and symbols</small>
+                      </div>
+                      
+                      <!-- Password Strength Indicator -->
+                      <div class="password-strength-indicator" id="passwordStrengthIndicator" style="display: none;">
+                        <div class="strength-header">
+                          <span id="passwordStrengthText" class="strength-text">Password strength: weak</span>
+                        </div>
+                        <div class="password-strength">
+                          <div id="strengthFill" class="password-strength-bar weak"></div>
+                        </div>
+                      </div>
+                      
+                      <!-- Password Requirements -->
+                      <div class="password-requirements" id="passwordRequirements">
+                        <div class="requirement" id="req-length">
+                          <span class="req-icon">❌</span> At least 8 characters
+                        </div>
+                        <div class="requirement" id="req-uppercase">
+                          <span class="req-icon">❌</span> One uppercase letter
+                        </div>
+                        <div class="requirement" id="req-lowercase">
+                          <span class="req-icon">❌</span> One lowercase letter
+                        </div>
+                        <div class="requirement" id="req-number">
+                          <span class="req-icon">❌</span> One number
+                        </div>
+                        <div class="requirement" id="req-special">
+                          <span class="req-icon">❌</span> One special character (!@#$%^&*)
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="confirmPassword" class="form-label">
+                        <span class="label-icon">✅</span>
+                        Confirm New Password
+                      </label>
+                      <div class="password-input-wrapper">
+                        <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm new password" autocomplete="new-password" oninput="checkPasswordMatch()" />
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('confirmPassword')">
+                          <span class="toggle-icon">👁️</span>
+                        </button>
+                      </div>
+                      <div class="form-help">
+                        <small>Re-enter your new password to confirm</small>
+                      </div>
+                      
+                      <!-- Password Match Indicator -->
+                      <div class="password-match-indicator" id="passwordMatchIndicator">
+                        <span class="match-icon" id="matchIcon">⚠️</span>
+                        <span class="match-text" id="matchText">Passwords do not match</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-actions">
+                    <div class="form-left"></div>
+                    <div class="form-right">
+                      <button type="button" class="btn-primary" onclick="changePassword()" id="changePasswordBtn" disabled>
+                        <span class="btn-icon">🔐</span>
+                        Change Password
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              
+              <div id="notificationsEditor" class="content-editor">
+                <div class="content-editor-header">
+                  <div class="editor-header-info">
+                    <h4 class="editor-title">
+                      <span class="editor-icon">🔔</span>
+                      Notification Preferences
+                    </h4>
+                    <p class="editor-description">Configure how and when you receive notifications</p>
+                  </div>
+                </div>
+                
+                <form class="modern-form settings-form">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <div class="notification-group">
+                        <h5 class="group-title">📧 Email Notifications</h5>
+                        <div class="checkbox-list">
+                          <label class="checkbox-item">
+                            <input type="checkbox" id="notifyNewApplications" checked />
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-label">New applications submitted</span>
+                            <small class="checkbox-desc">Get notified when new applications are submitted</small>
+                          </label>
+                          <label class="checkbox-item">
+                            <input type="checkbox" id="notifyUrgentApplications" checked />
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-label">Urgent applications</span>
+                            <small class="checkbox-desc">Priority notifications for urgent applications</small>
+                          </label>
+                          <label class="checkbox-item">
+                            <input type="checkbox" id="notifyDailySummary" />
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-label">Daily summary reports</span>
+                            <small class="checkbox-desc">Receive daily activity summaries</small>
+                          </label>
+                          <label class="checkbox-item">
+                            <input type="checkbox" id="notifyWeeklyReport" checked />
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-label">Weekly performance reports</span>
+                            <small class="checkbox-desc">Get weekly performance analytics</small>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-actions">
+                    <div class="form-left"></div>
+                    <div class="form-right">
+                      <button type="button" class="btn-primary" onclick="saveNotificationSettings()">
+                        <span class="btn-icon">🔔</span>
+                        Save Preferences
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </section>
+
+          <!-- Help Section -->
+          <section id="helpSection" class="page-section">
+            <div class="section-header">
+              <h3 class="section-title">Help & Support</h3>
+            </div>
+            <div class="help-content">
+              <div class="help-card">
+                <h4>📞 Contact Admin</h4>
+                <p>If you encounter any issues, contact the system administrator.</p>
+                <p><strong>Email:</strong> admin@denr.gov.ph</p>
+              </div>
+              <div class="help-card">
+                <h4>❓ Frequently Asked Questions</h4>
+                <div class="faq-item">
+                  <h5>How do I approve an application?</h5>
+                  <p>Go to Applications, click "View" on an application, then click "Approve" in the modal.</p>
+                </div>
+                <div class="faq-item">
+                  <h5>What happens when I reject an application?</h5>
+                  <p>You must provide a reason for rejection. The applicant will be notified via email.</p>
+                </div>
+                <div class="faq-item">
+                  <h5>Can I change my decision after approving?</h5>
+                  <p>No, once approved or rejected, the decision cannot be changed. Contact admin for assistance.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <!-- OCR Document Details Modal -->
+    <div id="ocrDocumentModal" class="modal-backdrop" style="display:none">
+      <div class="modal-dialog large-modal">
+        <div class="modal-header">
+          <h3>OCR Document Details</h3>
+          <button class="modal-close" id="closeOCRDocumentModal">×</button>
+        </div>
+        <div class="modal-body">
+          <style>
+            .ocr-details-container {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 24px;
+              max-height: 600px;
+            }
+            .document-preview-section {
+              background: white;
+              border-radius: 16px;
+              padding: 24px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+              border: 1px solid #e2e8f0;
+            }
+            .document-preview-section h4 {
+              margin: 0 0 16px 0;
+              color: #1e293b;
+              font-size: 16px;
+              font-weight: 700;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            }
+            .document-preview-section h4::before {
+              content: '🖼️';
+            }
+            .document-image {
+              width: 100%;
+              max-height: 400px;
+              object-fit: contain;
+              border-radius: 12px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+              cursor: pointer;
+              transition: transform 0.3s ease;
+            }
+            .document-image:hover {
+              transform: scale(1.02);
+            }
+            .text-editor-section {
+              background: white;
+              border-radius: 16px;
+              padding: 24px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+              border: 1px solid #e2e8f0;
+            }
+            .text-editor-section h4 {
+              margin: 0 0 16px 0;
+              color: #1e293b;
+              font-size: 16px;
+              font-weight: 700;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            }
+            .text-editor-section h4::before {
+              content: '📝';
+            }
+            .text-editor {
+              width: 100%;
+              min-height: 400px;
+              padding: 16px;
+              border: 2px solid #e2e8f0;
+              border-radius: 12px;
+              font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+              font-size: 14px;
+              resize: vertical;
+              background: #f8fafc;
+              transition: all 0.2s ease;
+            }
+            .text-editor:focus {
+              outline: none;
+              border-color: #10b981;
+              box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+            }
+            .metadata-section {
+              grid-column: 1 / -1;
+              background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+              border-radius: 16px;
+              padding: 24px;
+              margin-top: 24px;
+              border: 1px solid #e2e8f0;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            }
+            .metadata-section h4 {
+              margin: 0 0 20px 0;
+              color: #1e293b;
+              font-size: 18px;
+              font-weight: 700;
+              display: flex;
+              align-items: center;
+              gap: 10px;
+            }
+            .metadata-section h4::before {
+              content: '📋';
+            }
+            .metadata-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+              gap: 20px;
+            }
+            .metadata-item {
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+              padding: 16px;
+              background: white;
+              border-radius: 12px;
+              border: 1px solid #e2e8f0;
+              transition: all 0.2s ease;
+            }
+            .metadata-item:hover {
+              border-color: #cbd5e1;
+              transform: translateY(-2px);
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            }
+            .metadata-label {
+              font-weight: 600;
+              color: #64748b;
+              font-size: 12px;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+            .metadata-value {
+              color: #1e293b;
+              font-size: 15px;
+              font-weight: 500;
+            }
+            .metadata-value.filename {
+              font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+              background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+              padding: 6px 10px;
+              border-radius: 6px;
+              border: 1px solid #cbd5e1;
+              font-size: 13px;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              max-width: 100%;
+            }
+            .metadata-value.confidence {
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+              padding: 6px 12px;
+              border-radius: 20px;
+              border: 1px solid #10b981;
+              color: #065f46;
+              font-weight: 600;
+            }
+            .metadata-value.confidence::before {
+              content: '📊';
+            }
+            .metadata-value.processing-time {
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+              padding: 6px 12px;
+              border-radius: 20px;
+              border: 1px solid #3b82f6;
+              color: #1e3a8a;
+              font-weight: 600;
+            }
+            .metadata-value.processing-time::before {
+              content: '⏱️';
+            }
+            .metadata-value.file-size {
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+              padding: 6px 12px;
+              border-radius: 20px;
+              border: 1px solid #f59e0b;
+              color: #92400e;
+              font-weight: 600;
+            }
+            .metadata-value.file-size::before {
+              content: '💾';
+            }
+            .metadata-value.processed-date {
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+              padding: 6px 12px;
+              border-radius: 20px;
+              border: 1px solid #ec4899;
+              color: #831843;
+              font-weight: 600;
+            }
+            .metadata-value.processed-date::before {
+              content: '📅';
+            }
+            .export-buttons {
+              display: flex;
+              gap: 12px;
+              flex-wrap: wrap;
+            }
+            .save-indicator {
+              display: inline-flex;
+              align-items: center;
+              gap: 4px;
+              margin-left: 8px;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 12px;
+              font-weight: 600;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+            .save-indicator.saved {
+              background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+              color: white;
+              box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+            }
+            .save-indicator.saved::before {
+              content: '✓';
+            }
+            .save-indicator.unsaved {
+              background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+              color: white;
+              box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+            }
+            .save-indicator.unsaved::before {
+              content: '●';
+            }
+          </style>
+          
+          <div class="ocr-details-container">
+            <!-- Document Preview -->
+            <div class="document-preview-section">
+              <h4>Original Document</h4>
+              <img id="ocrDocumentImage" class="document-image" alt="Document preview" />
+              <div style="margin-top: 12px; text-align: center;">
+                <small id="ocrImageInfo">Loading image...</small>
+              </div>
+            </div>
+            
+            <!-- Text Editor -->
+            <div class="text-editor-section">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h4>Extracted Text <span id="saveIndicator" class="save-indicator saved">Saved</span></h4>
+                <button class="btn-secondary" onclick="resetOCRText()">Reset</button>
+              </div>
+              <textarea id="ocrTextEditor" class="text-editor" placeholder="Extracted text will appear here..."></textarea>
+              <div style="margin-top: 8px; text-align: right;">
+                <small id="textCharCount">0 characters</small>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Metadata Section -->
+          <div class="metadata-section">
+            <h4 style="margin: 0 0 16px 0;">Document Information</h4>
+            <div class="metadata-grid">
+              <div class="metadata-item">
+                <span class="metadata-label">📄 Filename</span>
+                <span class="metadata-value filename" id="ocrFileName">-</span>
+              </div>
+              <div class="metadata-item">
+                <span class="metadata-label">📊 Confidence</span>
+                <span class="metadata-value confidence" id="ocrConfidence">-</span>
+              </div>
+              <div class="metadata-item">
+                <span class="metadata-label">⏱️ Processing Time</span>
+                <span class="metadata-value processing-time" id="ocrProcessingTime">-</span>
+              </div>
+              <div class="metadata-item">
+                <span class="metadata-label">💾 File Size</span>
+                <span class="metadata-value file-size" id="ocrFileSize">-</span>
+              </div>
+              <div class="metadata-item">
+                <span class="metadata-label">📅 Processed Date</span>
+                <span class="metadata-value processed-date" id="ocrProcessedDate">-</span>
+              </div>
+              <div class="metadata-item">
+                <span class="metadata-label">🏷️ Status</span>
+                <span class="metadata-value" id="ocrStatus">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="copyOCRText()">Copy Text</button>
+          <div class="export-buttons">
+            <button class="btn-secondary" onclick="exportOCRDocument('word')">Export as Word</button>
+            <button class="btn-secondary" onclick="exportOCRDocument('pdf')">Export as PDF</button>
+            <button class="btn-secondary" onclick="exportOCRDocument('txt')">Export as TXT</button>
+          </div>
+          <button class="btn-primary" onclick="saveOCRDocumentChanges()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Application Detail Modal -->
+    <div id="applicationModal" class="modal-backdrop" style="display:none">
+      <div class="modal-dialog large-modal">
+        <div class="modal-header">
+          <h3>Application Details</h3>
+          <button class="modal-close" id="closeAppModal">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="application-details" id="applicationDetails">
+            <!-- Application details will be loaded here -->
+          </div>
+          <div class="modal-actions" id="modalActions">
+            <button class="btn-secondary" id="btnUnderReview">Mark Under Review</button>
+            <button class="btn-success" id="btnApprove">Approve</button>
+            <button class="btn-danger" id="btnReject">Reject</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Approve with Schedule Modal -->
+    <div id="approveScheduleModal" class="modal-backdrop" style="display:none">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>Schedule Permit Pickup</h3>
+          <button class="modal-close" id="closeScheduleModal">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="schedule-form">
+            <div class="schedule-header">
+              <h4 style="margin: 0 0 8px 0; color: #1e293b; font-size: 18px;">
+                <span style="margin-right: 8px;">📅</span>Schedule Pickup Details
+              </h4>
+              <p style="margin: 0 0 20px 0; color: #64748b; font-size: 14px;">Select when the customer can pick up their approved permit</p>
+            </div>
+            
+            <div class="schedule-grid">
+              <div class="form-group">
+                <label for="pickupDate">
+                  <span style="margin-right: 4px;">📆</span>Pickup Date *
+                </label>
+                <input type="date" id="pickupDate" required min="" style="padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; width: 100%;" />
+              </div>
+              
+              <div class="form-group">
+                <label for="pickupTime">
+                  <span style="margin-right: 4px;">🕐</span>Pickup Time *
+                </label>
+                <select id="pickupTime" required style="padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; width: 100%;">
+                  <option value="">Select Time</option>
+                  <option value="08:00">8:00 AM</option>
+                  <option value="09:00">9:00 AM</option>
+                  <option value="10:00">10:00 AM</option>
+                  <option value="11:00">11:00 AM</option>
+                  <option value="13:00">1:00 PM</option>
+                  <option value="14:00">2:00 PM</option>
+                  <option value="15:00">3:00 PM</option>
+                  <option value="16:00">4:00 PM</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="pickupNotes">
+                <span style="margin-right: 4px;">📝</span>Additional Notes (Optional)
+              </label>
+              <textarea id="pickupNotes" rows="3" placeholder="Any special instructions for the customer..." style="padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; width: 100%; resize: vertical;"></textarea>
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-secondary" id="cancelSchedule">Cancel</button>
+            <button class="btn-success" id="confirmSchedule">Confirm & Approve</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div id="rejectModal" class="modal-backdrop" style="display:none">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>Reject Application</h3>
+          <button class="modal-close" id="closeRejectModal">×</button>
+        </div>
+        <div class="modal-body">
+          <label for="rejectReason">Reason for Rejection</label>
+          <textarea id="rejectReason" rows="4" placeholder="Enter the reason for rejecting this application..."></textarea>
+          <div class="modal-actions">
+            <button class="btn-secondary" id="cancelReject">Cancel</button>
+            <button class="btn-danger" id="confirmReject">Reject Application</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Needs Revision Modal -->
+    <div id="needsRevisionModal" class="modal-backdrop" style="display:none">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>Request Revision</h3>
+          <button class="modal-close" id="closeNeedsRevisionModal">×</button>
+        </div>
+        <div class="modal-body">
+          <label for="revisionComments">Revision Comments</label>
+          <textarea id="revisionComments" rows="4" placeholder="Enter what needs to be revised (e.g., missing documents, incorrect information)..."></textarea>
+          <div class="modal-actions">
+            <button class="btn-secondary" id="cancelNeedsRevision">Cancel</button>
+            <button class="btn-warning" id="confirmNeedsRevision" style="background: #f59e0b; color: white;">Request Revision</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Documents Modal -->
+    <div id="documentsModal" class="modal-backdrop" style="display:none">
+      <div class="modal-dialog large-modal">
+        <div class="modal-header">
+          <h3>Application Documents</h3>
+          <button class="modal-close" id="closeDocumentsModal">×</button>
+        </div>
+        <div class="modal-body">
+          <div id="documentsContent">
+            <!-- Documents will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mark Under Review Confirmation Modal -->
+    <div id="underReviewModal" class="modal-backdrop" style="display:none">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>Mark Application as Under Review</h3>
+          <button class="modal-close" id="closeUnderReviewModal">×</button>
+        </div>
+        <div class="modal-body">
+          <style>
+            .confirmation-content {
+              text-align: center;
+              padding: 20px 0;
+            }
+            .confirmation-icon {
+              font-size: 48px;
+              margin-bottom: 16px;
+            }
+            .confirmation-content h4 {
+              margin: 0 0 8px 0;
+              color: #333;
+              font-size: 18px;
+            }
+            .confirmation-content p {
+              margin: 0 0 24px 0;
+              color: #666;
+            }
+            .application-summary {
+              background: #f8f9fa;
+              border-radius: 8px;
+              padding: 16px;
+              margin: 20px 0;
+              text-align: left;
+            }
+            .summary-row {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 8px 0;
+              border-bottom: 1px solid #e9ecef;
+            }
+            .summary-row:last-child {
+              border-bottom: none;
+            }
+            .summary-row .label {
+              font-weight: 600;
+              color: #495057;
+            }
+            .summary-row .value {
+              color: #212529;
+              font-weight: 500;
+            }
+            .confirmation-note {
+              background: #fff3cd;
+              border: 1px solid #ffeaa7;
+              border-radius: 6px;
+              padding: 12px;
+              margin: 20px 0;
+              font-size: 14px;
+              color: #856404;
+              text-align: left;
+            }
+            .confirmation-note strong {
+              color: #856404;
+            }
+          </style>
+          <div class="confirmation-content">
+            <div class="confirmation-icon">📋</div>
+            <h4>Confirm Action</h4>
+            <p>Are you sure you want to mark this application as "Under Review"?</p>
+            
+            <div class="application-summary">
+              <div class="summary-row">
+                <span class="label">Application ID:</span>
+                <span class="value" id="underReviewAppId">-</span>
+              </div>
+              <div class="summary-row">
+                <span class="label">Applicant Name:</span>
+                <span class="value" id="underReviewAppName">-</span>
+              </div>
+              <div class="summary-row">
+                <span class="label">Permit Type:</span>
+                <span class="value" id="underReviewPermitType">-</span>
+              </div>
+            </div>
+            
+            <div class="confirmation-note">
+              <strong>Note:</strong> This action will be logged in the system and the application will move from "Recent Applications" to the main "Applications" table.
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" id="cancelUnderReview">Cancel</button>
+          <button class="btn-primary" id="confirmUnderReview">Mark as Under Review</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="custom-modal" style="display: none;">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header logout-modal-header">
+          <div class="modal-icon">🚪</div>
+          <h3 class="modal-title">Logout</h3>
+          <button class="modal-close" id="logoutModalCloseBtn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <span class="logout-warning-icon">⚠️</span>
+          <p>Are you sure you want to logout? You will need to sign in again to access your account.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary modal-btn-cancel" id="cancelLogout">Cancel</button>
+          <button class="btn-primary modal-btn-logout" id="confirmLogout">Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Viewer Modal -->
+    <div id="imageViewerModal" class="modal-backdrop" style="display:none">
+      <div class="image-viewer-dialog">
+        <div class="image-viewer-header">
+          <h3 id="imageViewerTitle">Document Preview</h3>
+          <button class="modal-close" id="closeImageViewer">×</button>
+        </div>
+        <div class="image-viewer-body">
+          <div class="image-viewer-toolbar">
+            <button class="toolbar-btn" id="zoomInBtn" title="Zoom In">🔍</button>
+            <button class="toolbar-btn" id="zoomOutBtn" title="Zoom Out">🔍</button>
+            <button class="toolbar-btn" id="resetZoomBtn" title="Reset Zoom">🔄</button>
+            <button class="toolbar-btn" id="downloadBtn" title="Download Image">💾</button>
+            <button class="toolbar-btn" id="fullscreenBtn" title="Fullscreen">⛶</button>
+          </div>
+          <div class="image-viewer-content">
+            <img id="imageViewerImage" src="" alt="Document Preview" />
+          </div>
+        </div>
+        <div class="image-viewer-footer">
+          <div class="image-info">
+            <span id="imageDimensions">Loading dimensions...</span>
+            <span id="imageSize">Loading size...</span>
+          </div>
+          <div class="image-actions">
+            <button class="btn-secondary" id="rotateLeftBtn" title="Rotate Left">↺ Rotate Left</button>
+            <button class="btn-secondary" id="rotateRightBtn" title="Rotate Right">↻ Rotate Right</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/assets/js/file-upload-utils.js"></script>
+    <script type="module" src="/assets/js/staff-dashboard.js"></script>
+    
+    <!-- Sidebar Toggle Function -->
+    <script>
+      function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const toggleIcon = document.querySelector('.toggle-icon');
+        
+        if (sidebar.classList.contains('collapsed')) {
+          sidebar.classList.remove('collapsed');
+          toggleIcon.textContent = '•';
+          localStorage.setItem('sidebarCollapsed', 'false');
+        } else {
+          sidebar.classList.add('collapsed');
+          toggleIcon.textContent = '≡';
+          localStorage.setItem('sidebarCollapsed', 'true');
+        }
+      }
+
+      // Load sidebar state from localStorage
+      document.addEventListener('DOMContentLoaded', function() {
+        const sidebarCollapsed = localStorage.getItem('sidebarCollapsed');
+        const sidebar = document.querySelector('.sidebar');
+        const toggleIcon = document.querySelector('.toggle-icon');
+        
+        if (sidebarCollapsed === 'true' && sidebar) {
+          sidebar.classList.add('collapsed');
+          if (toggleIcon) {
+            toggleIcon.textContent = '≡';
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

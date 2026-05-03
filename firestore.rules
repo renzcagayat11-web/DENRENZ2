@@ -1,0 +1,83 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Public read of applications list is allowed for authenticated users
+    match /applications/{appId} {
+      allow create: if request.auth != null && request.resource.data.applicantUid == request.auth.uid;
+      allow read: if request.auth != null;
+      // staff or admin can update status
+      allow update: if request.auth != null && (request.auth.token.role == 'staff' || request.auth.token.role == 'admin');
+      allow delete: if false; // forbid deletes from client
+    }
+
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || request.auth.token.role == 'admin');
+      allow write: if request.auth != null && request.auth.uid == userId; // users can write their profile
+    }
+
+    // Reminders collection - users can read their own reminders
+    match /reminders/{reminderId} {
+      allow read: if request.auth != null && resource.data.applicantUid == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.applicantUid == request.auth.uid;
+      allow update: if request.auth != null && resource.data.applicantUid == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.applicantUid == request.auth.uid;
+    }
+
+    // Status history collection - users can read status history for their applications
+    match /statusHistory/{historyId} {
+      allow read: if request.auth != null && 
+        exists(/databases/$(database)/documents/applications/$(resource.data.applicationId)) &&
+        get(/databases/$(database)/documents/applications/$(resource.data.applicationId)).data.applicantUid == request.auth.uid;
+      allow create: if request.auth != null && (request.auth.token.role == 'staff' || request.auth.token.role == 'admin');
+      allow update: if request.auth != null && (request.auth.token.role == 'staff' || request.auth.token.role == 'admin');
+      allow delete: if false;
+    }
+
+    // Welcome collection - public read access for announcements
+    match /welcome/{welcomeId} {
+      allow read: if true; // Public access for welcome announcements
+      allow create: if request.auth != null && (request.auth.token.role == 'staff' || request.auth.token.role == 'admin');
+      allow update: if request.auth != null && (request.auth.token.role == 'staff' || request.auth.token.role == 'admin');
+      allow delete: if request.auth != null && (request.auth.token.role == 'staff' || request.auth.token.role == 'admin');
+    }
+
+    // Website content collection - public read access
+    match /websiteContent/{contentId} {
+      allow read: if true; // Public access for website content
+      allow create: if request.auth != null && (request.auth.token.role == 'staff' || request.auth.token.role == 'admin');
+      allow update: if request.auth != null && (request.auth.token.role == 'staff' || request.auth.token.role == 'admin');
+      allow delete: if request.auth != null && (request.auth.token.role == 'staff' || request.auth.token.role == 'admin');
+    }
+
+    // FAQs collection - public read access
+    match /faqs/{faqId} {
+      allow read: if true; // Public access for FAQs
+      allow create: if request.auth != null && (request.auth.token.role == 'staff' || request.auth.token.role == 'admin');
+      allow update: if request.auth != null && (request.auth.token.role == 'staff' || request.auth.token.role == 'admin');
+      allow delete: if request.auth != null && (request.auth.token.role == 'staff' || request.auth.token.role == 'admin');
+    }
+
+    // Audit logs collection - admin and staff access (staff read-only)
+    // TEMPORARY BYPASS FOR TESTING - Remove this in production
+    match /auditLogs/{logId} {
+      allow read: if request.auth != null; // Anyone authenticated can read
+      allow create: if request.auth != null; // Anyone authenticated can create
+      allow update: if false; // Audit logs should be immutable
+      allow delete: if false; // Audit logs should never be deleted
+    }
+
+    // OCR documents collection - staff and admin access
+    match /ocrDocuments/{docId} {
+      allow read: if request.auth != null && (request.auth.token.role == 'staff' || request.auth.token.role == 'admin');
+      allow create: if request.auth != null && (request.auth.token.role == 'staff' || request.auth.token.role == 'admin');
+      allow update: if request.auth != null && (request.auth.token.role == 'staff' || request.auth.token.role == 'admin');
+      allow delete: if request.auth != null && request.auth.token.role == 'admin';
+    }
+
+    // default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
