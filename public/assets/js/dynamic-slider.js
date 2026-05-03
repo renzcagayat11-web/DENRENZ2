@@ -175,16 +175,22 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const imageHtml = announcement.image ? `
       <div class="announcement-image">
-        <img src="${announcement.image}" 
-             alt="${announcement.title}" 
-             onload="console.log('✅ Image loaded successfully for: ${announcement.title}');"
-             onerror="console.log('❌ Image failed to load for: ${announcement.title}'); console.log('Image src length:', this.src.length); this.style.display='none'; this.nextElementSibling.style.display='flex';">
-        <div class="fallback-content" style="display: none;">
+        <img src="${announcement.image}"
+             alt="${announcement.title}"
+             loading="lazy"
+             onload="console.log('✅ Image loaded successfully for: ${announcement.title}'); this.classList.add('loaded');"
+             onerror="console.log('❌ Image failed to load for: ${announcement.title}'); this.style.display='none'; this.classList.add('failed'); this.parentElement.classList.add('image-failed');">
+        <div class="fallback-content">
           <div style="font-size: 48px; opacity: 0.3;">📢</div>
           <div style="color: #16a34a; font-size: 14px; font-weight: 500;">Announcement</div>
         </div>
       </div>
-    ` : '';
+    ` : `<div class="announcement-image no-image">
+        <div class="fallback-content" style="display: flex;">
+          <div style="font-size: 48px; opacity: 0.3;">📢</div>
+          <div style="color: #16a34a; font-size: 14px; font-weight: 500;">No Image</div>
+        </div>
+      </div>`;
     
     console.log(`🖼️ Image HTML generated: ${imageHtml ? 'Yes' : 'No'}`);
     
