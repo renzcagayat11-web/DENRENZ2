@@ -27,10 +27,17 @@
           </a>
           <span class="brand-title">DENR-CENRO Sta. Cruz</span>
         </div>
-        <nav class="top-nav dashboard-nav">
-          <a href="javascript:void(0)" class="nav-item active" data-section="dashboardSection" onclick="console.log('CLICK: Dashboard'); navigateToSection('dashboardSection'); return false;">Dashboard</a>
-          <a href="javascript:void(0)" class="nav-item" data-section="newApplicationSection" onclick="console.log('CLICK: Apply'); navigateToSection('newApplicationSection'); return false;">Apply for Document</a>
-          <a href="javascript:void(0)" class="nav-item" data-section="myApplicationsSection" onclick="console.log('CLICK: All Apps'); navigateToSection('myApplicationsSection'); return false;">All Applications</a>
+        <!-- Mobile Hamburger Menu Button -->
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+        
+        <nav class="top-nav dashboard-nav" id="topNav">
+          <a href="javascript:void(0)" class="nav-item active" data-section="dashboardSection" onclick="navigateToSection('dashboardSection'); return false;">Dashboard</a>
+          <a href="javascript:void(0)" class="nav-item" data-section="newApplicationSection" onclick="navigateToSection('newApplicationSection'); return false;">Apply for Document</a>
+          <a href="javascript:void(0)" class="nav-item" data-section="myApplicationsSection" onclick="navigateToSection('myApplicationsSection'); return false;">All Applications</a>
         </nav>
         <div class="nav-cta">
           <button class="notification-bell" id="notificationBtn">
@@ -1486,5 +1493,73 @@
     
     <script src="/assets/js/file-upload-utils.js"></script>
     <script type="module" src="/assets/js/customer-dashboard.js"></script>
+    
+    <!-- Mobile Menu Toggle Script -->
+    <script>
+      (function() {
+        'use strict';
+        
+        function initMobileMenu() {
+          const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+          const topNav = document.getElementById('topNav');
+          
+          if (!mobileMenuToggle || !topNav) {
+            console.log('[MOBILE MENU] Elements not found');
+            return;
+          }
+          
+          console.log('[MOBILE MENU] Initializing...');
+          
+          // Toggle menu on hamburger click
+          mobileMenuToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            mobileMenuToggle.classList.toggle('active');
+            topNav.classList.toggle('active');
+            
+            console.log('[MOBILE MENU] Toggled:', topNav.classList.contains('active'));
+          });
+          
+          // Close menu when clicking a nav item
+          const navItems = topNav.querySelectorAll('.nav-item');
+          navItems.forEach(function(item) {
+            item.addEventListener('click', function() {
+              mobileMenuToggle.classList.remove('active');
+              topNav.classList.remove('active');
+              console.log('[MOBILE MENU] Closed via nav item');
+            });
+          });
+          
+          // Close menu when clicking outside
+          document.addEventListener('click', function(e) {
+            if (!mobileMenuToggle.contains(e.target) && !topNav.contains(e.target)) {
+              if (topNav.classList.contains('active')) {
+                mobileMenuToggle.classList.remove('active');
+                topNav.classList.remove('active');
+                console.log('[MOBILE MENU] Closed via outside click');
+              }
+            }
+          });
+          
+          // Close menu on window resize (if going to desktop)
+          window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+              mobileMenuToggle.classList.remove('active');
+              topNav.classList.remove('active');
+            }
+          });
+          
+          console.log('[MOBILE MENU] Initialized successfully');
+        }
+        
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initMobileMenu);
+        } else {
+          initMobileMenu();
+        }
+      })();
+    </script>
   </body>
 </html>
