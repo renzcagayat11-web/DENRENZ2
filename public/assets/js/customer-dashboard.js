@@ -7162,30 +7162,32 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-// Navigation
-const navItems = document.querySelectorAll('.nav-item');
-navItems.forEach(nav => {
-  nav.addEventListener('click', (e) => {
-    e.preventDefault();
+// Navigation - wrapped in DOMContentLoaded to ensure DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(nav => {
+    nav.addEventListener('click', (e) => {
+      e.preventDefault();
 
-    navItems.forEach(nav => nav.classList.remove('active'));
-    nav.classList.add('active');
+      navItems.forEach(nav => nav.classList.remove('active'));
+      nav.classList.add('active');
 
-    const sectionId = nav.getAttribute('data-section');
-    if (sectionId) {
-      navigateToSection(sectionId);
-    }
+      const sectionId = nav.getAttribute('data-section');
+      if (sectionId) {
+        navigateToSection(sectionId);
+      }
+    });
   });
+
+  // Logo click handler - navigate to dashboard
+  const logoLink = document.querySelector('.logo-link');
+  if (logoLink) {
+    logoLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigateToSection('dashboardSection');
+    });
+  }
 });
-
-// Logo click handler - navigate to dashboard
-const logoLink = document.querySelector('.logo-link');
-if (logoLink) {
-  logoLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    navigateToSection('dashboardSection');
-  });
-}
 
 // Restore saved section and form data on page load (for refresh/reload behavior)
 window.addEventListener('load', function() {
