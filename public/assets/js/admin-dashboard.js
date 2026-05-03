@@ -812,27 +812,27 @@ if (createStaffForm) {
   });
 }
 
-// Navigation handling - wrapped in DOMContentLoaded to ensure DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-  const navItems = document.querySelectorAll('.nav-item');
-  navItems.forEach(item => {
-    item.addEventListener('click', (e) => {
-      e.preventDefault();
-      
-      // Remove active class from all items
-      navItems.forEach(nav => nav.classList.remove('active'));
-      
-      // Add active class to clicked item
-      item.classList.add('active');
-      
-      // Get the section to show
-      const sectionId = item.getAttribute('data-section');
-      if (sectionId) {
-        navigateToSection(sectionId);
-      }
-    });
-  });
-});
+// Navigation handling - DISABLED: Emergency script in HTML handles navigation
+// document.addEventListener('DOMContentLoaded', function() {
+//   const navItems = document.querySelectorAll('.nav-item');
+//   navItems.forEach(item => {
+//     item.addEventListener('click', (e) => {
+//       e.preventDefault();
+//       
+//       // Remove active class from all items
+//       navItems.forEach(nav => nav.classList.remove('active'));
+//       
+//       // Add active class to clicked item
+//       item.classList.add('active');
+//       
+//       // Get the section to show
+//       const sectionId = item.getAttribute('data-section');
+//       if (sectionId) {
+//         navigateToSection(sectionId);
+//       }
+//     });
+//   });
+// });
 
 // Page navigation function
 window.navigateToSection = function(sectionId) {

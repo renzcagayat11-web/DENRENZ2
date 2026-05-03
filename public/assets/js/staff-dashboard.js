@@ -2344,23 +2344,23 @@ if (logoutModal) {
   });
 }
 
-// Navigation - wrapped in DOMContentLoaded to ensure DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-  const navItems = document.querySelectorAll('.nav-item');
-  navItems.forEach(item => {
-    item.addEventListener('click', (e) => {
-      e.preventDefault();
-
-      navItems.forEach(nav => nav.classList.remove('active'));
-      item.classList.add('active');
-
-      const sectionId = item.getAttribute('data-section');
-      if (sectionId) {
-        navigateToSection(sectionId);
-      }
-    });
-  });
-});
+// Navigation - DISABLED: Emergency script in HTML handles navigation
+// document.addEventListener('DOMContentLoaded', function() {
+//   const navItems = document.querySelectorAll('.nav-item');
+//   navItems.forEach(item => {
+//     item.addEventListener('click', (e) => {
+//       e.preventDefault();
+//
+//       navItems.forEach(nav => nav.classList.remove('active'));
+//       item.classList.add('active');
+//
+//       const sectionId = item.getAttribute('data-section');
+//       if (sectionId) {
+//         navigateToSection(sectionId);
+//       }
+//     });
+//   });
+// });
 
 // Document Upload Processing (OCR API Integration Ready)
 let uploadedFile = null;

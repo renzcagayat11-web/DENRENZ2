@@ -21,31 +21,31 @@
           </button>
         </div>
         <nav class="sidebar-nav">
-          <a href="#dashboard" class="nav-item active" data-section="dashboardSection" onclick="navigateToSection('dashboardSection'); return false;">
+          <a href="javascript:void(0)" class="nav-item active" data-section="dashboardSection">
             <span class="nav-icon">📊</span>
             <span>Dashboard</span>
           </a>
-          <a href="#applications" class="nav-item" data-section="applicationsSection" onclick="navigateToSection('applicationsSection'); return false;">
+          <a href="javascript:void(0)" class="nav-item" data-section="applicationsSection">
             <span class="nav-icon">📋</span>
             <span>Applications</span>
           </a>
-          <a href="#ocr" class="nav-item" data-section="ocrSection" onclick="navigateToSection('ocrSection'); return false;">
+          <a href="javascript:void(0)" class="nav-item" data-section="ocrSection">
             <span class="nav-icon">📄</span>
             <span>Document OCR</span>
           </a>
-          <a href="#records" class="nav-item" data-section="recordsSection" onclick="navigateToSection('recordsSection'); return false;">
+          <a href="javascript:void(0)" class="nav-item" data-section="recordsSection">
             <span class="nav-icon">📋</span>
             <span>My Records</span>
           </a>
-          <a href="#performance" class="nav-item" data-section="performanceSection" onclick="navigateToSection('performanceSection'); return false;">
+          <a href="javascript:void(0)" class="nav-item" data-section="performanceSection">
             <span class="nav-icon">📈</span>
             <span>My Performance</span>
           </a>
-          <a href="#settings" class="nav-item" data-section="settingsSection" onclick="navigateToSection('settingsSection'); return false;">
+          <a href="javascript:void(0)" class="nav-item" data-section="settingsSection">
             <span class="nav-icon">⚙️</span>
             <span>Settings</span>
           </a>
-          <a href="#help" class="nav-item" data-section="helpSection" onclick="navigateToSection('helpSection'); return false;">
+          <a href="javascript:void(0)" class="nav-item" data-section="helpSection">
             <span class="nav-icon">❓</span>
             <span>Help</span>
           </a>
@@ -1662,57 +1662,91 @@
       });
     </script>
     
-    <!-- EMERGENCY NAVIGATION -->
+    <!-- EMERGENCY NAVIGATION - MUST RUN FIRST -->
     <script>
-      (function() {
-        'use strict';
+      // Execute immediately, not in IIFE
+      console.log('[STAFF NAV] Script executing immediately');
+      
+      // Define navigation function globally
+      window.navigateToSection = function(sectionId) {
+        console.log('[STAFF NAV] Navigating to:', sectionId);
         
-        window.navigateToSection = function(sectionId) {
-          console.log('[NAV] Navigating to:', sectionId);
-          var sections = document.querySelectorAll('.page-section');
-          for (var i = 0; i < sections.length; i++) {
-            sections[i].classList.remove('active');
-          }
-          var target = document.getElementById(sectionId);
-          if (target) {
-            target.classList.add('active');
-            console.log('[NAV] Section activated');
-          }
-          var navItems = document.querySelectorAll('.nav-item');
-          for (var j = 0; j < navItems.length; j++) {
-            navItems[j].classList.remove('active');
-            if (navItems[j].getAttribute('data-section') === sectionId) {
-              navItems[j].classList.add('active');
-            }
-          }
-          try { localStorage.setItem('currentSection', sectionId); } catch(e) {}
-        };
-        
-        function attachNavHandlers() {
-          console.log('[NAV] Attaching handlers...');
-          var navItems = document.querySelectorAll('.nav-item');
-          console.log('[NAV] Found nav items:', navItems.length);
-          for (var k = 0; k < navItems.length; k++) {
-            (function(item) {
-              item.onclick = function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                var sectionId = item.getAttribute('data-section');
-                if (sectionId && window.navigateToSection) {
-                  window.navigateToSection(sectionId);
-                }
-                return false;
-              };
-            })(navItems[k]);
-          }
+        // Hide all sections
+        var sections = document.querySelectorAll('.page-section');
+        console.log('[STAFF NAV] Found sections:', sections.length);
+        for (var i = 0; i < sections.length; i++) {
+          sections[i].classList.remove('active');
         }
         
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', attachNavHandlers);
+        // Show target section
+        var target = document.getElementById(sectionId);
+        if (target) {
+          target.classList.add('active');
+          console.log('[STAFF NAV] Section activated:', sectionId);
         } else {
-          attachNavHandlers();
+          console.error('[STAFF NAV] Section NOT FOUND:', sectionId);
         }
-      })();
+        
+        // Update nav active state
+        var navItems = document.querySelectorAll('.nav-item');
+        for (var j = 0; j < navItems.length; j++) {
+          navItems[j].classList.remove('active');
+          if (navItems[j].getAttribute('data-section') === sectionId) {
+            navItems[j].classList.add('active');
+          }
+        }
+        
+        // Save to localStorage
+        try { localStorage.setItem('currentSection', sectionId); } catch(e) {}
+      };
+      
+      // Attach handlers immediately
+      function attachEmergencyNavHandlers() {
+        console.log('[STAFF NAV] Attaching handlers...');
+        var navItems = document.querySelectorAll('.nav-item');
+        console.log('[STAFF NAV] Found nav items:', navItems.length);
+        
+        if (navItems.length === 0) {
+          console.error('[STAFF NAV] NO NAV ITEMS FOUND!');
+          return;
+        }
+        
+        for (var k = 0; k < navItems.length; k++) {
+          (function(item) {
+            // Remove any existing onclick
+            item.onclick = null;
+            
+            // Add new click handler
+            item.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('[STAFF NAV] Click detected');
+              
+              var sectionId = item.getAttribute('data-section');
+              console.log('[STAFF NAV] Section ID:', sectionId);
+              
+              if (sectionId && window.navigateToSection) {
+                window.navigateToSection(sectionId);
+              }
+              return false;
+            });
+          })(navItems[k]);
+        }
+        console.log('[STAFF NAV] Handlers attached successfully');
+      }
+      
+      // Run immediately if DOM is ready, otherwise wait
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', attachEmergencyNavHandlers);
+      } else {
+        attachEmergencyNavHandlers();
+      }
+      
+      // Also run after a short delay to ensure it works
+      setTimeout(attachEmergencyNavHandlers, 500);
+      setTimeout(attachEmergencyNavHandlers, 1000);
+      
+      console.log('[STAFF NAV] Setup complete');
     </script>
   </body>
 </html>
