@@ -1,13 +1,14 @@
+const path = require('path');
+
 // Load environment variables
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const { initFirebase } = require('./firebase');
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const path = require('path');
 const multer = require('multer');
-const { uploadFromBase64, deleteFile, uploadSingle } = require('./cloudinary');
+const { uploadFromBase64, deleteFile, uploadSingle, uploadSingleMemory } = require('./cloudinary');
 
 const admin = initFirebase();
 if (!admin) {
@@ -396,7 +397,29 @@ app.get('/admin/audit-logs', verifyToken, async (req, res) => {
 
 
 // Direct file upload route (preferred method)
-app.post('/upload-file-to-cloudinary', uploadSingle, async (req, res) => {
+app.post('/upload-file-to-cloudinary', (req, res, next) => {
+  uploadSingleMemory(req, res, function(err) {
+    if (err instanceof multer.MulterError) {
+      // A Multer error occurred when uploading.
+      console.error('Multer error:', err);
+      return res.status(400).json({
+        success: false,
+        error: 'File upload error',
+        details: err.message
+      });
+    } else if (err) {
+      // An unknown error occurred when uploading.
+      console.error('Upload middleware error:', err);
+      return res.status(400).json({
+        success: false,
+        error: 'File validation error',
+        details: err.message
+      });
+    }
+    // Everything went fine, continue to the actual upload handler
+    next();
+  });
+}, async (req, res) => {
   try {
     console.log('Upload request received at:', new Date().toISOString());
     
@@ -404,6 +427,7 @@ app.post('/upload-file-to-cloudinary', uploadSingle, async (req, res) => {
     if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
       console.error('Cloudinary not configured - missing environment variables');
       return res.status(500).json({ 
+        success: false,
         error: 'Cloudinary not configured',
         details: 'Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in your .env file'
       });
@@ -411,7 +435,10 @@ app.post('/upload-file-to-cloudinary', uploadSingle, async (req, res) => {
 
     if (!req.file) {
       console.error('No file in request');
-      return res.status(400).json({ error: 'No file uploaded' });
+      return res.status(400).json({ 
+        success: false,
+        error: 'No file uploaded' 
+      });
     }
     
     console.log('File received:', req.file.originalname, 'Size:', req.file.size, 'Type:', req.file.mimetype);
@@ -425,21 +452,32 @@ app.post('/upload-file-to-cloudinary', uploadSingle, async (req, res) => {
     const result = await uploadFromBase64(base64Data, req.file.originalname, folder);
     console.log('Upload successful:', result.public_id);
     
-    res.json({
+    // Ensure we always return a proper JSON response
+    const response = {
       success: true,
       url: result.url,
       public_id: result.public_id,
       format: result.format,
       size: result.size,
       original_filename: result.original_filename
-    });
+    };
+    
+    console.log('Sending response:', JSON.stringify(response, null, 2));
+    res.json(response);
     
   } catch (error) {
     console.error('Direct file upload error:', error);
-    res.status(500).json({ 
+    console.error('Error stack:', error.stack);
+    
+    // Ensure we always return a proper JSON error response
+    const errorResponse = { 
+      success: false,
       error: 'Failed to upload file to Cloudinary',
       details: error.message 
-    });
+    };
+    
+    console.log('Sending error response:', JSON.stringify(errorResponse, null, 2));
+    res.status(500).json(errorResponse);
   }
 });
 

@@ -125,7 +125,32 @@ let currentImagePublicId = null;
         body: formData
       });
 
-      const uploadResult = await uploadResponse.json();
+      console.log('📡 Response status:', uploadResponse.status);
+      console.log('📡 Response headers:', uploadResponse.headers);
+
+      // Check if response is OK before parsing JSON
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        console.error('❌ Server returned error:', uploadResponse.status, errorText);
+        throw new Error(`Server error: ${uploadResponse.status} - ${errorText}`);
+      }
+
+      // Check if response has content before parsing JSON
+      const responseText = await uploadResponse.text();
+      console.log('📡 Raw response:', responseText);
+      
+      if (!responseText || responseText.trim() === '') {
+        throw new Error('Empty response from server');
+      }
+
+      let uploadResult;
+      try {
+        uploadResult = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('❌ JSON parse error:', parseError);
+        console.error('❌ Response that failed to parse:', responseText);
+        throw new Error(`Invalid JSON response: ${parseError.message}`);
+      }
       
       if (uploadResult.success) {
         console.log('✅ Image uploaded to Cloudinary');
@@ -140,7 +165,11 @@ let currentImagePublicId = null;
       }
     } catch (error) {
       console.error('❌ Cloudinary upload error:', error);
-      alert('Failed to upload image. Please try again.');
+      console.error('❌ Error details:', {
+        message: error.message,
+        stack: error.stack
+      });
+      showNotification(`Failed to upload image: ${error.message}`, 'error');
     }
   }
   
