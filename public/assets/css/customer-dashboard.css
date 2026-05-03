@@ -6205,7 +6205,7 @@ textarea:hover {
 
 /* Mobile Menu Toggle Button - Hidden by default on desktop */
 .mobile-menu-toggle {
-  display: none;
+  display: none !important;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -6219,6 +6219,7 @@ textarea:hover {
   padding: 10px;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  z-index: 1000;
 }
 
 .mobile-menu-toggle:hover {
@@ -6255,7 +6256,7 @@ textarea:hover {
 /* Mobile Navigation Styles */
 @media (max-width: 768px) {
   .mobile-menu-toggle {
-    display: flex;
+    display: flex !important;
     order: 2;
     margin-left: auto;
     margin-right: 12px;

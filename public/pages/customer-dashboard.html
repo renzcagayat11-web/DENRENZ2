@@ -28,7 +28,7 @@
           <span class="brand-title">DENR-CENRO Sta. Cruz</span>
         </div>
         <!-- Mobile Hamburger Menu Button -->
-        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu" style="display:none;">
           <span class="hamburger-line"></span>
           <span class="hamburger-line"></span>
           <span class="hamburger-line"></span>
@@ -1499,14 +1499,40 @@
       (function() {
         'use strict';
         
+        console.log('[MOBILE MENU] Script loaded');
+        
+        // Force show mobile menu button on small screens
+        function checkMobile() {
+          const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+          if (mobileMenuToggle) {
+            if (window.innerWidth <= 768) {
+              mobileMenuToggle.style.display = 'flex';
+              console.log('[MOBILE MENU] Button forced visible (mobile)');
+            } else {
+              mobileMenuToggle.style.display = 'none';
+              console.log('[MOBILE MENU] Button hidden (desktop)');
+            }
+          }
+        }
+        
+        // Check on load and resize
+        window.addEventListener('load', checkMobile);
+        window.addEventListener('resize', checkMobile);
+        
         function initMobileMenu() {
           const mobileMenuToggle = document.getElementById('mobileMenuToggle');
           const topNav = document.getElementById('topNav');
           
+          console.log('[MOBILE MENU] Toggle element:', mobileMenuToggle);
+          console.log('[MOBILE MENU] Nav element:', topNav);
+          
           if (!mobileMenuToggle || !topNav) {
-            console.log('[MOBILE MENU] Elements not found');
+            console.error('[MOBILE MENU] Elements not found!');
             return;
           }
+          
+          // Initial check
+          checkMobile();
           
           console.log('[MOBILE MENU] Initializing...');
           
