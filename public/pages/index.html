@@ -441,5 +441,35 @@
     <script src="/assets/js/dynamic-slider.js"></script>
     <script src="/assets/js/image-modal.js"></script>
     <script src="/assets/js/contact-enhanced.js"></script>
+    <script>
+      // Force video autoplay - handles browser autoplay restrictions
+      (function forceVideoAutoplay() {
+        const video = document.querySelector('.hero-video-fixed video');
+        if (!video) return;
+        
+        function attemptPlay() {
+          video.play().then(() => {
+            console.log('✅ Hero video playing');
+          }).catch(err => {
+            console.log('⚠️ Video autoplay blocked:', err.message);
+            // Retry on first user interaction
+            const events = ['click', 'touchstart', 'scroll', 'keydown'];
+            const playHandler = () => {
+              video.play().catch(() => {});
+              events.forEach(e => document.removeEventListener(e, playHandler));
+            };
+            events.forEach(e => document.addEventListener(e, playHandler, { once: true }));
+          });
+        }
+        
+        // Try immediately and after a short delay
+        attemptPlay();
+        setTimeout(attemptPlay, 100);
+        setTimeout(attemptPlay, 500);
+        
+        // Also try when video metadata is loaded
+        video.addEventListener('loadedmetadata', attemptPlay);
+      })();
+    </script>
   </body>
 </html>
