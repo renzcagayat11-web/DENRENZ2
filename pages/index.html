@@ -114,26 +114,33 @@
         <div class="modal-dialog auth-modal">
           <div class="modal-header modal-header-green auth-header">
             <div class="auth-left">
-              <div class="auth-icon">👤+</div>
+              <div class="auth-icon">
+                <img src="/assets/images/logo.png" alt="DENR Logo" class="auth-logo-img">
+              </div>
               <div>
-                <h3 id="authModalTitle">Login to Your Account</h3>
-                <div class="auth-sub">Access your DENR permit dashboard</div>
+                <h3 id="authModalTitle">Sign Up</h3>
+                <div class="auth-sub">Create your DENR permit account</div>
               </div>
             </div>
-            <button class="modal-close large" id="authClose">×</button>
+            <button class="modal-close large" id="authClose">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
           </div>
           <div class="modal-body auth-body">
             <p id="authMsg" class="muted">Access your DENR permit account or create a new Customer account.</p>
 
             <!-- Sign-in layout -->
-            <form id="authSigninForm" class="auth-form">
+            <form id="authSigninForm" class="auth-form" style="display:none">
               <label for="authEmail">Email/Username</label>
-              <input id="authEmail" name="authEmail" type="email" placeholder="Enter email or username" required />
+              <input id="authEmail" name="authEmail" type="email" placeholder="Enter email or username" required maxlength="254" />
 
               <label for="authPassword">Password</label>
               <div class="input-eye">
-                <input id="authPassword" name="authPassword" type="password" placeholder="Enter password" autocomplete="current-password" required />
-                <button type="button" class="eye-btn" data-target="authPassword">👁️</button>
+                <input id="authPassword" name="authPassword" type="password" placeholder="Enter password" autocomplete="current-password" required maxlength="20" />
+                <button type="button" class="eye-btn" data-target="authPassword"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
               </div>
 
               <div class="row-between" style="margin-top:12px">
@@ -149,30 +156,44 @@
             </form>
 
             <!-- Signup layout (scrollable, matches screenshots) -->
-            <form id="authSignupForm" class="auth-form" style="display:none">
+            <form id="authSignupForm" class="auth-form">
               <div class="name-grid">
                 <div>
                   <label for="firstName">First Name</label>
-                  <input id="firstName" placeholder="Enter your first name" />
+                  <input id="firstName" placeholder="Enter your first name" maxlength="20" pattern="[A-Za-z\s]+" oninput="this.value=this.value.replace(/[^A-Za-z\s]/g,'')" />
                 </div>
                 <div>
                   <label for="surname">Surname</label>
-                  <input id="surname" placeholder="Enter your surname" />
+                  <input id="surname" placeholder="Enter your surname" maxlength="20" pattern="[A-Za-z\s]+" oninput="this.value=this.value.replace(/[^A-Za-z\s]/g,'')" />
                 </div>
               </div>
               <div class="name-grid">
                 <div>
                   <label for="middleName">Middle Name</label>
-                  <input id="middleName" placeholder="Enter your middle name" />
+                  <input id="middleName" placeholder="Enter your middle name" maxlength="20" pattern="[A-Za-z\s]+" oninput="this.value=this.value.replace(/[^A-Za-z\s]/g,'')" />
                 </div>
                 <div>
                   <label for="suffix">Suffix (Optional)</label>
-                  <select id="suffix"><option>None</option><option>Jr.</option><option>Sr.</option><option>III</option></select>
+                  <select id="suffix">
+                    <option value="">None</option>
+                    <option value="Jr.">Jr.</option>
+                    <option value="Sr.">Sr.</option>
+                    <option value="I">I</option>
+                    <option value="II">II</option>
+                    <option value="III">III</option>
+                    <option value="IV">IV</option>
+                    <option value="V">V</option>
+                    <option value="VI">VI</option>
+                    <option value="VII">VII</option>
+                    <option value="VIII">VIII</option>
+                    <option value="IX">IX</option>
+                    <option value="X">X</option>
+                  </select>
                 </div>
               </div>
 
               <label for="signupEmail">Email</label>
-              <input id="signupEmail" type="email" placeholder="Enter your email address" />
+              <input id="signupEmail" type="email" placeholder="Enter your email address" maxlength="254" />
 
               <label for="mobile">Mobile Number</label>
               <input id="mobile" placeholder="09XXXXXXXXX" />
@@ -188,27 +209,17 @@
                   <button id="mapSearchBtn" type="button" style="padding: 10px 16px; background: #1f6f3a; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Search</button>
                 </div>
                 <div id="map" style="height: 300px; width: 100%; border-radius: 8px; border: 2px solid #1f6f3a;"></div>
-                <div style="margin-top: 12px; display: flex; gap: 16px; flex-wrap: wrap;">
-                  <div style="flex: 1;">
-                    <label for="latitude">Latitude</label>
-                    <input id="latitude" type="text" readonly placeholder="Click on map to pin location" style="background: #f5f5f5;" />
-                  </div>
-                  <div style="flex: 1;">
-                    <label for="longitude">Longitude</label>
-                    <input id="longitude" type="text" readonly placeholder="Click on map to pin location" style="background: #f5f5f5;" />
-                  </div>
-                </div>
                 <button type="button" id="hideMapPin" style="margin-top: 8px; padding: 8px 16px; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer;">Hide Map</button>
               </div>
 
               <div class="pw-grid">
                 <div>
                   <label for="signupPassword">Password</label>
-                  <div class="input-eye"><input id="signupPassword" type="password" placeholder="Create a password" autocomplete="new-password" /><button type="button" class="eye-btn" data-target="signupPassword">👁️</button></div>
+                  <div class="input-eye"><input id="signupPassword" type="password" placeholder="Create a password" autocomplete="new-password" maxlength="20" /><button type="button" class="eye-btn" data-target="signupPassword"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div>
                 </div>
                 <div>
                   <label for="signupConfirm">Confirm Password</label>
-                  <div class="input-eye"><input id="signupConfirm" type="password" placeholder="Confirm your password" autocomplete="new-password" /><button type="button" class="eye-btn" data-target="signupConfirm">👁️</button></div>
+                  <div class="input-eye"><input id="signupConfirm" type="password" placeholder="Confirm your password" autocomplete="new-password" maxlength="20" /><button type="button" class="eye-btn" data-target="signupConfirm"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div>
                 </div>
               </div>
 
@@ -229,13 +240,20 @@
         <div class="modal-dialog auth-modal">
           <div class="modal-header modal-header-green auth-header">
             <div class="auth-left">
-              <div class="auth-icon">🔑</div>
+              <div class="auth-icon">
+                <img src="/assets/images/logo.png" alt="DENR Logo" class="auth-logo-img">
+              </div>
               <div>
                 <h3>Reset Password</h3>
                 <div class="auth-sub">We'll send you a link to reset your password</div>
               </div>
             </div>
-            <button class="modal-close large" id="forgotPasswordClose">×</button>
+            <button class="modal-close large" id="forgotPasswordClose">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
           </div>
           <div class="modal-body auth-body">
             <p id="forgotPasswordMsg" class="muted">Enter your email address and we'll send you a password reset link.</p>

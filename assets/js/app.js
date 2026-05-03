@@ -248,6 +248,75 @@ function showFieldError(fieldId, message) {
   field.addEventListener('input', () => clearFieldError(fieldId), { once: true });
 }
 
+// Show alert below textbox (for all validation)
+function showFieldAlert(fieldId, message) {
+  const field = document.getElementById(fieldId);
+  if (!field) return;
+  
+  // Remove existing alert and error
+  clearFieldAlert(fieldId);
+  clearFieldError(fieldId);
+  
+  // Add error styling to field
+  field.classList.add('field-error');
+  
+  // Create alert message element
+  const alertElement = document.createElement('div');
+  alertElement.className = 'field-alert-message';
+  alertElement.textContent = message;
+  
+  // Insert alert message after field
+  field.parentNode.insertBefore(alertElement, field.nextSibling);
+  
+  // Focus on the field
+  field.focus();
+  
+  // Auto-remove error after user starts typing
+  field.addEventListener('input', () => { clearFieldAlert(fieldId); clearFieldError(fieldId); }, { once: true });
+}
+
+function clearFieldAlert(fieldId) {
+  const field = document.getElementById(fieldId);
+  if (!field) return;
+  
+  // Remove alert message
+  const alertMessage = field.parentNode.querySelector('.field-alert-message');
+  if (alertMessage) {
+    alertMessage.remove();
+  }
+  // Remove error styling
+  field.classList.remove('field-error');
+}
+
+// Mobile number input validation - only allow numbers, max 13 digits
+function setupMobileValidation(inputElement) {
+  if (inputElement) {
+    inputElement.addEventListener('input', (e) => {
+      // Remove any non-numeric characters
+      let value = e.target.value.replace(/[^0-9]/g, '');
+      // Limit to 13 digits maximum
+      if (value.length > 13) {
+        value = value.slice(0, 13);
+      }
+      e.target.value = value;
+    });
+
+    inputElement.addEventListener('blur', (e) => {
+      const value = e.target.value;
+      if (value && value.length >= 2) {
+        const prefix = value.substring(0, 2);
+        if (prefix !== '09' && prefix !== '63') {
+          showFieldError(e.target.id, 'Mobile number must start with 09 or 63.');
+        } else if (prefix === '09' && value.length !== 11) {
+          showFieldError(e.target.id, 'Mobile number starting with 09 must be exactly 11 digits.');
+        } else if (prefix === '63' && value.length !== 13) {
+          showFieldError(e.target.id, 'Mobile number starting with 63 must be exactly 13 digits.');
+        }
+      }
+    });
+  }
+}
+
 function clearFieldError(fieldId) {
   const field = document.getElementById(fieldId);
   if (!field) return;
@@ -333,13 +402,114 @@ document.addEventListener('DOMContentLoaded', () => {
   const authEmail = document.getElementById('authEmail');
   const authPassword = document.getElementById('authPassword');
 
+  // Setup mobile number validation
+  if (mobile) {
+    setupMobileValidation(mobile);
+  }
+
   if (authSignupBtn) {
     authSignupBtn.addEventListener('click', async () => {
       try {
+        // Clear previous errors
+        clearFieldAlert('firstName');
+        clearFieldAlert('surname');
+        clearFieldAlert('middleName');
+        clearFieldAlert('signupEmail');
+        clearFieldAlert('mobile');
+        clearFieldAlert('address');
+        clearFieldAlert('signupPassword');
+        clearFieldAlert('signupConfirm');
+        
+        let isValid = true;
+        
+        // Validate first name
+        const fname = firstName.value.trim();
+        if (!fname) {
+          showFieldAlert('firstName', 'First name is required.');
+          isValid = false;
+        } else if (fname.length < 2) {
+          showFieldAlert('firstName', 'First name must be at least 2 characters.');
+          isValid = false;
+        }
+        
+        // Validate surname
+        const sname = surname.value.trim();
+        if (!sname) {
+          showFieldAlert('surname', 'Surname is required.');
+          isValid = false;
+        } else if (sname.length < 2) {
+          showFieldAlert('surname', 'Surname must be at least 2 characters.');
+          isValid = false;
+        }
+        
+        // Validate middle name
+        const mname = middleName.value.trim();
+        if (mname && mname.length < 2) {
+          showFieldAlert('middleName', 'Middle name must be at least 2 characters if provided.');
+          isValid = false;
+        }
+        
+        // Validate email
         const email = (signupEmail.value || authEmail.value || '').trim();
-        const pass = signupPassword.value; const confirm = signupConfirm.value;
-        if(!email || !pass) return authMsg.textContent = 'Please enter email and password.';
-        if(pass !== confirm) return authMsg.textContent = 'Passwords do not match.';
+        if (!email) {
+          showFieldAlert('signupEmail', 'Email address is required.');
+          isValid = false;
+        } else if (email.length < 6) {
+          showFieldAlert('signupEmail', 'Email must be at least 6 characters.');
+          isValid = false;
+        } else if (!validateEmail(email)) {
+          showFieldAlert('signupEmail', 'Please enter a valid email address.');
+          isValid = false;
+        }
+        
+        // Validate mobile number (handled by setupMobileValidation)
+        const mob = mobile.value.trim();
+        if (!mob) {
+          showFieldAlert('mobile', 'Mobile number is required.');
+          isValid = false;
+        } else if (mob.length < 11) {
+          showFieldAlert('mobile', 'Mobile number must be at least 11 digits.');
+          isValid = false;
+        }
+        
+        // Validate address
+        const addr = address.value.trim();
+        if (!addr) {
+          showFieldAlert('address', 'Address is required.');
+          isValid = false;
+        } else if (addr.length < 10) {
+          showFieldAlert('address', 'Please enter a complete address (at least 10 characters).');
+          isValid = false;
+        }
+        
+        // Validate password - show alert below textbox
+        const pass = signupPassword.value;
+        
+        if (!pass) {
+          showFieldAlert('signupPassword', 'Password is required.');
+          isValid = false;
+        } else if (pass.length < 8) {
+          showFieldAlert('signupPassword', 'Password must be at least 8 characters long (max 20).');
+          isValid = false;
+        } else if (pass.length > 20) {
+          showFieldAlert('signupPassword', 'Password must be at most 20 characters long.');
+          isValid = false;
+        } else {
+          clearFieldAlert('signupPassword');
+        }
+        
+        // Validate password confirmation
+        const confirm = signupConfirm.value;
+        if (!confirm) {
+          showFieldAlert('signupConfirm', 'Please confirm your password.');
+          isValid = false;
+        } else if (pass !== confirm) {
+          showFieldAlert('signupConfirm', 'Passwords do not match.');
+          isValid = false;
+        }
+        
+        if (!isValid) return;
+        
         // create user
         const cred = await createUserWithEmailAndPassword(auth, email, pass);
         // store profile fields as customer
@@ -369,6 +539,21 @@ document.addEventListener('DOMContentLoaded', () => {
         signupPassword.value = ''; signupConfirm.value = '';
       } catch (err) { authMsg.textContent = 'Sign up error: ' + err.message }
     });
+
+    // Allow Enter key to trigger signup
+    const triggerSignupOnEnter = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        authSignupBtn.click();
+      }
+    };
+    if (firstName) firstName.addEventListener('keypress', triggerSignupOnEnter);
+    if (surname) surname.addEventListener('keypress', triggerSignupOnEnter);
+    if (signupEmail) signupEmail.addEventListener('keypress', triggerSignupOnEnter);
+    if (mobile) mobile.addEventListener('keypress', triggerSignupOnEnter);
+    if (address) address.addEventListener('keypress', triggerSignupOnEnter);
+    if (signupPassword) signupPassword.addEventListener('keypress', triggerSignupOnEnter);
+    if (signupConfirm) signupConfirm.addEventListener('keypress', triggerSignupOnEnter);
   }
 
   if (authSigninBtn) {
@@ -382,24 +567,27 @@ document.addEventListener('DOMContentLoaded', () => {
         let isValid = true;
         
         // Clear previous errors
-        clearFieldError('authEmail');
-        clearFieldError('authPassword');
+        clearFieldAlert('authEmail');
+        clearFieldAlert('authPassword');
         
         // Email validation
         if (!email) {
-          showFieldError('authEmail', 'Please enter your email address.');
+          showFieldAlert('authEmail', 'Please enter your email address.');
+          isValid = false;
+        } else if (email.length < 6) {
+          showFieldAlert('authEmail', 'Email must be at least 6 characters.');
           isValid = false;
         } else if (!validateEmail(email)) {
-          showFieldError('authEmail', 'Please enter a valid email address.');
+          showFieldAlert('authEmail', 'Please enter a valid email address.');
           isValid = false;
         }
         
         // Password validation
         if (!pass) {
-          showFieldError('authPassword', 'Please enter your password.');
+          showFieldAlert('authPassword', 'Please enter your password.');
           isValid = false;
         } else if (pass.length < 6) {
-          showFieldError('authPassword', 'Password must be at least 6 characters long.');
+          showFieldAlert('authPassword', 'Password must be at least 6 characters long.');
           isValid = false;
         }
         
@@ -616,20 +804,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // eye toggle for password fields
-  document.querySelectorAll('.eye-btn').forEach(b=> b.addEventListener('click', (e)=>{ 
-    const t = e.currentTarget.dataset.target; 
-    const inp = document.getElementById(t); 
-    if(!inp) return; 
-    inp.type = inp.type === 'password' ? 'text' : 'password'; 
-  }));
-
+  
   // show map pin placeholder
   if (showMapPin) {
     showMapPin.addEventListener('click', () => {
       const mapContainer = document.getElementById('mapContainer');
-      const latitudeInput = document.getElementById('latitude');
-      const longitudeInput = document.getElementById('longitude');
       const addressInput = document.getElementById('address');
       
       mapContainer.style.display = 'block';
@@ -652,10 +831,6 @@ document.addEventListener('DOMContentLoaded', () => {
           
           // Add new marker
           window.currentMarker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(window.signupMap);
-          
-          // Update coordinate fields
-          latitudeInput.value = e.latlng.lat.toFixed(6);
-          longitudeInput.value = e.latlng.lng.toFixed(6);
           
           // Reverse geocoding - get address from coordinates
           try {
@@ -706,13 +881,9 @@ document.addEventListener('DOMContentLoaded', () => {
           // Add marker at found location
           window.currentMarker = L.marker([lat, lon]).addTo(window.signupMap);
           
-          // Update coordinate fields
-          const latitudeInput = document.getElementById('latitude');
-          const longitudeInput = document.getElementById('longitude');
+          // Update address field
           const addressInput = document.getElementById('address');
           
-          latitudeInput.value = lat.toFixed(6);
-          longitudeInput.value = lon.toFixed(6);
           addressInput.value = result.display_name || searchTerm;
         } else {
           alert('Address not found. Please try a different search term.');
@@ -743,6 +914,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // Modal close handlers
   if (authCloseBtn) authCloseBtn.addEventListener('click', closeAuthModal);
   if (authModalEl) authModalEl.addEventListener('click', (e)=>{ if(e.target===authModalEl) closeAuthModal(); });
+});
+
+// eye toggle for password fields (works for both signin and signup)
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.eye-btn').forEach(b=> b.addEventListener('click', (e)=>{ 
+    const t = e.currentTarget.dataset.target; 
+    const inp = document.getElementById(t); 
+    if(!inp) return; 
+    const isPassword = inp.type === 'password';
+    inp.type = isPassword ? 'text' : 'password';
+    // Update icon
+    e.currentTarget.innerHTML = isPassword 
+      ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>'
+      : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+  }));
 });
 q('#writeBtn').addEventListener('click', async () => {
   out.textContent = 'Creating application...';
@@ -866,12 +1052,11 @@ onAuthStateChanged(auth, async user => {
           const currentPage = window.location.pathname;
           const isAuthPage = currentPage.includes('index.html') || currentPage === '/' || currentPage.endsWith('/');
           console.log('🔍 AUTH STATE DEBUG: Customer redirect check - currentPage:', currentPage, 'isAuthPage:', isAuthPage, 'justLoggedOut:', sessionStorage.getItem('justLoggedOut'));
-          console.log('🔍 AUTH STATE DEBUG: CUSTOMER REDIRECT DISABLED FOR TESTING - Would redirect to customer-dashboard.html');
-          // if (!sessionStorage.getItem('justLoggedOut') && isAuthPage) {
-          //   console.log('🔍 AUTH STATE DEBUG: Redirecting customer to dashboard');
-          //   window.location.href = '/customer-dashboard.html';
-          //   return;
-          // }
+          if (!sessionStorage.getItem('justLoggedOut') && isAuthPage) {
+            console.log('🔍 AUTH STATE DEBUG: Redirecting customer to dashboard');
+            window.location.href = '/pages/customer-dashboard.html';
+            return;
+          }
           authResendBtn.style.display = 'none';
           userInfo.textContent = `${user.email} (role: ${role})`;
           q('#customerSection').style.display = '';
@@ -881,12 +1066,11 @@ onAuthStateChanged(auth, async user => {
         const currentPage = window.location.pathname;
         const isAuthPage = currentPage.includes('index.html') || currentPage === '/' || currentPage.endsWith('/');
         console.log('🔍 AUTH STATE DEBUG: Admin redirect check - currentPage:', currentPage, 'isAuthPage:', isAuthPage, 'justLoggedOut:', sessionStorage.getItem('justLoggedOut'));
-        console.log('🔍 AUTH STATE DEBUG: ADMIN REDIRECT DISABLED FOR TESTING - Would redirect to admin-dashboard.html');
-        // if (!sessionStorage.getItem('justLoggedOut') && isAuthPage) {
-        //   console.log('🔍 AUTH STATE DEBUG: Redirecting admin to dashboard');
-        //   window.location.href = '/admin-dashboard.html';
-        //   return;
-        // }
+        if (!sessionStorage.getItem('justLoggedOut') && isAuthPage) {
+          console.log('🔍 AUTH STATE DEBUG: Redirecting admin to dashboard');
+          window.location.href = '/pages/admin-dashboard.html';
+          return;
+        }
         authResendBtn.style.display = 'none';
         userInfo.textContent = `${user.email} (role: ${role})`;
         q('#customerSection').style.display = '';
@@ -895,12 +1079,11 @@ onAuthStateChanged(auth, async user => {
         const currentPage = window.location.pathname;
         const isAuthPage = currentPage.includes('index.html') || currentPage === '/' || currentPage.endsWith('/');
         console.log('🔍 AUTH STATE DEBUG: Staff redirect check - currentPage:', currentPage, 'isAuthPage:', isAuthPage, 'justLoggedOut:', sessionStorage.getItem('justLoggedOut'));
-        console.log('🔍 AUTH STATE DEBUG: STAFF REDIRECT DISABLED FOR TESTING - Would redirect to staff-dashboard.html');
-        // if (!sessionStorage.getItem('justLoggedOut') && isAuthPage) {
-        //   console.log('🔍 AUTH STATE DEBUG: Redirecting staff to dashboard');
-        //   window.location.href = '/staff-dashboard.html';
-        //   return;
-        // }
+        if (!sessionStorage.getItem('justLoggedOut') && isAuthPage) {
+          console.log('🔍 AUTH STATE DEBUG: Redirecting staff to dashboard');
+          window.location.href = '/pages/staff-dashboard.html';
+          return;
+        }
         authResendBtn.style.display = 'none';
         userInfo.textContent = `${user.email} (role: ${role})`;
         q('#customerSection').style.display = '';
@@ -936,13 +1119,11 @@ const showSigninLink = document.getElementById('showSignin');
 if(showSigninLink) showSigninLink.addEventListener('click', (e)=>{ e.preventDefault(); authSignupForm.style.display='none'; authSigninForm.style.display=''; document.getElementById('authModalTitle').textContent='Login to Your Account'; });
 
 // eye toggle for password fields
-qa('.eye-btn').forEach(b=> b.addEventListener('click', (e)=>{ const t = e.currentTarget.dataset.target; const inp = document.getElementById(t); if(!inp) return; inp.type = inp.type === 'password' ? 'text' : 'password'; }));
+qa('.eye-btn').forEach(b=> b.addEventListener('click', (e)=>{ const t = e.currentTarget.dataset.target; const inp = document.getElementById(t); if(!inp) return; const isPassword = inp.type === 'password'; inp.type = isPassword ? 'text' : 'password'; e.currentTarget.innerHTML = isPassword ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>' : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>'; }));
 
 // show map pin placeholder
 if(showMapPin) showMapPin.addEventListener('click', () => {
   const mapContainer = document.getElementById('mapContainer');
-  const latitudeInput = document.getElementById('latitude');
-  const longitudeInput = document.getElementById('longitude');
   const addressInput = document.getElementById('address');
   
   mapContainer.style.display = 'block';
@@ -965,10 +1146,6 @@ if(showMapPin) showMapPin.addEventListener('click', () => {
       
       // Add new marker
       window.currentMarker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(window.signupMap);
-      
-      // Update coordinate fields
-      latitudeInput.value = e.latlng.lat.toFixed(6);
-      longitudeInput.value = e.latlng.lng.toFixed(6);
       
       // Reverse geocoding - get address from coordinates
       try {
@@ -1018,13 +1195,9 @@ if (mapSearchBtn && mapSearchInput) {
         // Add marker at found location
         window.currentMarker = L.marker([lat, lon]).addTo(window.signupMap);
         
-        // Update coordinate fields
-        const latitudeInput = document.getElementById('latitude');
-        const longitudeInput = document.getElementById('longitude');
+        // Update address field
         const addressInput = document.getElementById('address');
         
-        latitudeInput.value = lat.toFixed(6);
-        longitudeInput.value = lon.toFixed(6);
         addressInput.value = result.display_name || searchTerm;
       } else {
         alert('Address not found. Please try a different search term.');
