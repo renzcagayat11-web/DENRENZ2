@@ -4296,19 +4296,32 @@ const documentTypeDetails = {
   }
 };
 
+// Step 1: Document Selection
+document.getElementById('nextStep1')?.addEventListener('click', () => {
+  goToStep(2);
+});
+
+// Step 2: Applicant Information
+document.getElementById('nextStep2')?.addEventListener('click', () => {
+  goToStep(3);
+});
+document.getElementById('prevStep2')?.addEventListener('click', () => {
+  goToStep(1);
+});
+
 // Step 3: Location Details
-document.getElementById('nextStep3').addEventListener('click', () => {
+document.getElementById('nextStep3')?.addEventListener('click', () => {
   goToStep(4);
 });
-document.getElementById('prevStep3').addEventListener('click', () => {
+document.getElementById('prevStep3')?.addEventListener('click', () => {
   goToStep(2);
 });
 
 // Step 4: Application Details
-document.getElementById('nextStep4').addEventListener('click', () => {
+document.getElementById('nextStep4')?.addEventListener('click', () => {
   goToStep(5);
 });
-document.getElementById('prevStep4').addEventListener('click', () => {
+document.getElementById('prevStep4')?.addEventListener('click', () => {
   goToStep(3);
 });
 
@@ -4377,10 +4390,10 @@ function updateRequirementsList5(documentType, permitType) {
 }
 
 // Step 5: Documents & Review
-document.getElementById('prevStep5').addEventListener('click', () => {
+document.getElementById('prevStep5')?.addEventListener('click', () => {
   goToStep(4);
 });
-document.getElementById('submitStep5').addEventListener('click', async (e) => {
+document.getElementById('submitStep5')?.addEventListener('click', async (e) => {
   e.preventDefault();
   
   // Spam protection - disable button during submission
