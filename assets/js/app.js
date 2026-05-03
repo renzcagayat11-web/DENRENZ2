@@ -363,7 +363,6 @@ const suffix = q('#suffix');
 const mobile = q('#mobile');
 const address = q('#address');
 const forgotLink = q('#forgotLink');
-const rememberMe = q('#rememberMe');
 const signoutBtn = q('#signoutBtn');
 const out = q('#out');
 const userInfo = q('#userInfo');
@@ -377,56 +376,8 @@ qa('.nav-btn').forEach(btn => btn.addEventListener('click', (e) => {
   q('#' + target).style.display = '';
 }));
 
-// Remember Me functionality
-function loadSavedCredentials() {
-  const savedEmail = localStorage.getItem('rememberedEmail');
-  const savedPassword = localStorage.getItem('rememberedPassword');
-  const rememberChecked = localStorage.getItem('rememberMeChecked') === 'true';
-  
-  if (authEmail && savedEmail) {
-    authEmail.value = savedEmail;
-  }
-  if (authPassword && savedPassword && rememberChecked) {
-    authPassword.value = savedPassword;
-  }
-  if (rememberMe && rememberChecked) {
-    rememberMe.checked = true;
-  }
-}
-
-function saveCredentials(email, password, remember) {
-  if (remember && email && password) {
-    localStorage.setItem('rememberedEmail', email);
-    localStorage.setItem('rememberedPassword', password);
-    localStorage.setItem('rememberMeChecked', 'true');
-  } else {
-    localStorage.removeItem('rememberedEmail');
-    localStorage.removeItem('rememberedPassword');
-    localStorage.removeItem('rememberMeChecked');
-  }
-}
-
-function clearSavedCredentials() {
-  localStorage.removeItem('rememberedEmail');
-  localStorage.removeItem('rememberedPassword');
-  localStorage.removeItem('rememberMeChecked');
-}
-
 // Auth modal handlers - wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', () => {
-  // Load saved credentials when page loads
-  loadSavedCredentials();
-  
-  // Add event listener for remember me checkbox
-  if (rememberMe) {
-    rememberMe.addEventListener('change', (e) => {
-      if (!e.target.checked) {
-        // User unchecked remember me, clear saved credentials
-        clearSavedCredentials();
-      }
-    });
-  }
-  
   // Re-select elements after DOM is ready
   const authSigninBtn = document.getElementById('authSigninBtn');
   const authSignupBtn = document.getElementById('authSignupBtn');
@@ -448,7 +399,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const mobile = document.getElementById('mobile');
   const address = document.getElementById('address');
   const forgotLink = document.getElementById('forgotLink');
-  const rememberMe = document.getElementById('rememberMe');
   const authEmail = document.getElementById('authEmail');
   const authPassword = document.getElementById('authPassword');
 
@@ -627,7 +577,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (authSigninBtn) {
+    console.log('🔍 LOGIN BUTTON DEBUG: Login button found and adding event listener');
     authSigninBtn.addEventListener('click', async () => {
+      console.log('🔍 LOGIN BUTTON DEBUG: Login button clicked!');
       try {
         console.log('🔍 LOGIN DEBUG: Starting login process');
         const email = authEmail.value.trim(); 
@@ -699,13 +651,6 @@ document.addEventListener('DOMContentLoaded', () => {
             authMsg.textContent = 'Email not verified. Please check your inbox and click the verification link.'; 
             authResendBtn.style.display = '';
             return;
-          }
-          
-          // Save credentials if remember me is checked
-          if (rememberMe && rememberMe.checked) {
-            saveCredentials(email, pass, true);
-          } else {
-            saveCredentials(email, pass, false);
           }
           
           // Admin and staff can sign in without verification
@@ -877,8 +822,6 @@ document.addEventListener('DOMContentLoaded', () => {
       await signOut(auth);
       out.textContent = 'Signed out';
       sessionStorage.removeItem('justLoggedOut');
-      // Clear remembered credentials on sign out
-      clearSavedCredentials();
     });
   }
 
@@ -1211,7 +1154,13 @@ window.openAuthModal = function(mode){
   const authMsg = document.getElementById('authMsg');
   
   // Hide resend button and clear message when opening modal normally
-  if (authResendBtn) authResendBtn.style.display = 'none';
+  if (authResendBtn) {
+    authResendBtn.style.display = 'none';
+    authResendBtn.style.visibility = 'hidden';
+    setTimeout(() => {
+      authResendBtn.style.display = 'none';
+    }, 10);
+  }
   if (authMsg) authMsg.textContent = '';
   
   if(mode==='signup'){ 
