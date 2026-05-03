@@ -1411,6 +1411,79 @@
       </div>
     </div>
 
+    <!-- EMERGENCY NAVIGATION - Must load before module script -->
+    <script>
+      (function() {
+        'use strict';
+        
+        // Define navigation function immediately
+        window.navigateToSection = function(sectionId) {
+          console.log('[NAV] Navigating to:', sectionId);
+          
+          // Get all sections
+          var sections = document.querySelectorAll('.page-section');
+          console.log('[NAV] Total sections found:', sections.length);
+          
+          // Hide all sections
+          for (var i = 0; i < sections.length; i++) {
+            sections[i].classList.remove('active');
+          }
+          
+          // Show target section
+          var target = document.getElementById(sectionId);
+          if (target) {
+            target.classList.add('active');
+            console.log('[NAV] Success: Section activated');
+          } else {
+            console.error('[NAV] Error: Section not found -', sectionId);
+          }
+          
+          // Update nav active state
+          var navItems = document.querySelectorAll('.nav-item');
+          for (var j = 0; j < navItems.length; j++) {
+            navItems[j].classList.remove('active');
+            if (navItems[j].getAttribute('data-section') === sectionId) {
+              navItems[j].classList.add('active');
+            }
+          }
+          
+          // Save to localStorage
+          try {
+            localStorage.setItem('currentSection', sectionId);
+          } catch(e) {}
+        };
+        
+        // Attach click handlers when DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', attachNavHandlers);
+        } else {
+          attachNavHandlers();
+        }
+        
+        function attachNavHandlers() {
+          console.log('[NAV] Attaching handlers...');
+          var navItems = document.querySelectorAll('.nav-item');
+          console.log('[NAV] Found nav items:', navItems.length);
+          
+          for (var k = 0; k < navItems.length; k++) {
+            (function(item) {
+              item.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var sectionId = item.getAttribute('data-section');
+                console.log('[NAV] Clicked:', sectionId);
+                if (sectionId && window.navigateToSection) {
+                  window.navigateToSection(sectionId);
+                }
+                return false;
+              };
+            })(navItems[k]);
+          }
+          console.log('[NAV] Handlers attached successfully');
+        }
+      })();
+    </script>
+    
     <script src="/assets/js/file-upload-utils.js"></script>
     <script type="module" src="/assets/js/customer-dashboard.js"></script>
   </body>
