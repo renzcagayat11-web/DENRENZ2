@@ -425,7 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Validate first name
         const fname = firstName.value.trim();
         if (!fname) {
-          showFieldAlert('firstName', 'First name is required.');
+          showFieldAlert('firstName', 'Please enter your first name.');
           isValid = false;
         } else if (fname.length < 2) {
           showFieldAlert('firstName', 'First name must be at least 2 characters.');
@@ -435,64 +435,64 @@ document.addEventListener('DOMContentLoaded', () => {
         // Validate surname
         const sname = surname.value.trim();
         if (!sname) {
-          showFieldAlert('surname', 'Surname is required.');
+          showFieldAlert('surname', 'Please enter your surname.');
           isValid = false;
         } else if (sname.length < 2) {
           showFieldAlert('surname', 'Surname must be at least 2 characters.');
           isValid = false;
         }
         
-        // Validate middle name
+        // Validate middle name (optional field)
         const mname = middleName.value.trim();
         if (mname && mname.length < 2) {
-          showFieldAlert('middleName', 'Middle name must be at least 2 characters if provided.');
+          showFieldAlert('middleName', 'Middle name must be at least 2 characters.');
           isValid = false;
         }
         
         // Validate email
         const email = (signupEmail.value || authEmail.value || '').trim();
         if (!email) {
-          showFieldAlert('signupEmail', 'Email address is required.');
+          showFieldAlert('signupEmail', 'Please enter your email address.');
           isValid = false;
         } else if (email.length < 6) {
-          showFieldAlert('signupEmail', 'Email must be at least 6 characters.');
+          showFieldAlert('signupEmail', 'Email is too short.');
           isValid = false;
         } else if (!validateEmail(email)) {
-          showFieldAlert('signupEmail', 'Please enter a valid email address.');
+          showFieldAlert('signupEmail', 'Please enter a valid email (e.g., user@email.com).');
           isValid = false;
         }
         
-        // Validate mobile number (handled by setupMobileValidation)
+        // Validate mobile number
         const mob = mobile.value.trim();
         if (!mob) {
-          showFieldAlert('mobile', 'Mobile number is required.');
+          showFieldAlert('mobile', 'Please enter your mobile number.');
           isValid = false;
         } else if (mob.length < 11) {
-          showFieldAlert('mobile', 'Mobile number must be at least 11 digits.');
+          showFieldAlert('mobile', 'Mobile number must be 11 digits starting with 09.');
           isValid = false;
         }
         
         // Validate address
         const addr = address.value.trim();
         if (!addr) {
-          showFieldAlert('address', 'Address is required.');
+          showFieldAlert('address', 'Please enter your complete address.');
           isValid = false;
         } else if (addr.length < 10) {
-          showFieldAlert('address', 'Please enter a complete address (at least 10 characters).');
+          showFieldAlert('address', 'Address must be at least 10 characters.');
           isValid = false;
         }
         
-        // Validate password - show alert below textbox
+        // Validate password
         const pass = signupPassword.value;
         
         if (!pass) {
-          showFieldAlert('signupPassword', 'Password is required.');
+          showFieldAlert('signupPassword', 'Please create a password.');
           isValid = false;
         } else if (pass.length < 8) {
-          showFieldAlert('signupPassword', 'Password must be at least 8 characters long (max 20).');
+          showFieldAlert('signupPassword', 'Password must be 8-20 characters.');
           isValid = false;
         } else if (pass.length > 20) {
-          showFieldAlert('signupPassword', 'Password must be at most 20 characters long.');
+          showFieldAlert('signupPassword', 'Password must not exceed 20 characters.');
           isValid = false;
         } else {
           clearFieldAlert('signupPassword');
@@ -575,10 +575,10 @@ document.addEventListener('DOMContentLoaded', () => {
           showFieldAlert('authEmail', 'Please enter your email address.');
           isValid = false;
         } else if (email.length < 6) {
-          showFieldAlert('authEmail', 'Email must be at least 6 characters.');
+          showFieldAlert('authEmail', 'Email is too short.');
           isValid = false;
         } else if (!validateEmail(email)) {
-          showFieldAlert('authEmail', 'Please enter a valid email address.');
+          showFieldAlert('authEmail', 'Please enter a valid email (e.g., user@email.com).');
           isValid = false;
         }
         
@@ -587,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
           showFieldAlert('authPassword', 'Please enter your password.');
           isValid = false;
         } else if (pass.length < 6) {
-          showFieldAlert('authPassword', 'Password must be at least 6 characters long.');
+          showFieldAlert('authPassword', 'Password must be at least 6 characters.');
           isValid = false;
         }
         

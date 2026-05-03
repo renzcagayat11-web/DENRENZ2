@@ -1580,10 +1580,12 @@ main{margin:0;padding:0;width:100%;min-width:100%;max-width:none}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes modalSlideUp{from{opacity:0;transform:translateY(40px) scale(0.95)}to{opacity:1;transform:translateY(0) scale(1)}}
 
-/* Field Error Styles */
-.field-error{border-color:#ef4444 !important;box-shadow:0 0 0 3px rgba(239,68,68,0.1) !important}
-.field-error-message{color:#ef4444;font-size:12px;margin-top:4px;font-weight:500;animation:slideDown 0.2s ease}
-.field-alert-message{color:#f59e0b;font-size:12px;margin-top:4px;font-weight:500;padding:8px 12px;background:#fffbeb;border:1px solid #fcd34d;border-radius:6px;animation:slideDown 0.2s ease}
+/* Field Error Styles - Professional */
+.field-error{border-color:#dc2626 !important;box-shadow:0 0 0 3px rgba(220,38,38,0.15) !important}
+.field-error-message{color:#dc2626;font-size:13px;margin-top:6px;font-weight:500;display:flex;align-items:center;gap:4px;animation:slideDown 0.2s ease}
+.field-error-message::before{content:"⚠";font-size:14px}
+.field-alert-message{color:#991b1b;font-size:13px;margin-top:6px;font-weight:500;padding:10px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;animation:slideDown 0.2s ease;display:flex;align-items:center;gap:6px}
+.field-alert-message::before{content:"⚠";font-size:14px;color:#dc2626}
 @keyframes slideDown{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
 
 /* custom scrollbar for modal body */
