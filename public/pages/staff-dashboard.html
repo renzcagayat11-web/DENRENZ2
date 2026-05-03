@@ -15,7 +15,6 @@
       // Define navigation IMMEDIATELY before DOM loads
       window.navigateToSection = function(sectionId) {
         console.log('[STAFF NAV] Navigating to:', sectionId);
-        alert('Navigating to: ' + sectionId); // DEBUG - remove after testing
         
         // Hide all sections
         var sections = document.querySelectorAll('.page-section');
@@ -52,6 +51,13 @@
       
       console.log('[STAFF NAV] Navigation function defined immediately');
     </script>
+    
+    <!-- NAVIGATION TEST BUTTON - Remove after testing -->
+    <div style="position:fixed; top:0; right:0; z-index:9999; background:red; color:white; padding:5px;">
+      <button onclick="navigateToSection('applicationsSection'); console.log('TEST CLICK');" style="background:white; color:black; padding:5px 10px; border:none; cursor:pointer;">
+        TEST NAV TO APPLICATIONS
+      </button>
+    </div>
     
     <div class="dashboard-container">
       <!-- Sidebar -->
@@ -1705,97 +1711,5 @@
       });
     </script>
     
-    <!-- EMERGENCY NAVIGATION - MUST RUN FIRST -->
-    <script>
-      // Execute immediately, not in IIFE
-      console.log('[STAFF NAV] Script executing immediately');
-      
-      // Define navigation function globally
-      window.navigateToSection = function(sectionId) {
-        console.log('[STAFF NAV] Navigating to:', sectionId);
-        
-        // Hide all sections - use both CSS class AND inline style
-        var sections = document.querySelectorAll('.page-section');
-        console.log('[STAFF NAV] Found sections:', sections.length);
-        for (var i = 0; i < sections.length; i++) {
-          sections[i].classList.remove('active');
-          sections[i].style.display = 'none'; // FORCE hide with inline style
-        }
-        
-        // Show target section
-        var target = document.getElementById(sectionId);
-        if (target) {
-          target.classList.add('active');
-          target.style.display = 'block'; // FORCE show with inline style
-          console.log('[STAFF NAV] Section activated:', sectionId);
-        } else {
-          console.error('[STAFF NAV] Section NOT FOUND:', sectionId);
-          alert('Section not found: ' + sectionId);
-        }
-        
-        // Update nav active state
-        var navItems = document.querySelectorAll('.nav-item');
-        for (var j = 0; j < navItems.length; j++) {
-          navItems[j].classList.remove('active');
-          if (navItems[j].getAttribute('data-section') === sectionId) {
-            navItems[j].classList.add('active');
-          }
-        }
-        
-        // Save to localStorage
-        try { localStorage.setItem('currentSection', sectionId); } catch(e) {}
-        
-        // Scroll to top
-        window.scrollTo(0, 0);
-      };
-      
-      // Attach handlers immediately
-      function attachEmergencyNavHandlers() {
-        console.log('[STAFF NAV] Attaching handlers...');
-        var navItems = document.querySelectorAll('.nav-item');
-        console.log('[STAFF NAV] Found nav items:', navItems.length);
-        
-        if (navItems.length === 0) {
-          console.error('[STAFF NAV] NO NAV ITEMS FOUND!');
-          return;
-        }
-        
-        for (var k = 0; k < navItems.length; k++) {
-          (function(item) {
-            // Remove any existing onclick
-            item.onclick = null;
-            
-            // Add new click handler
-            item.addEventListener('click', function(e) {
-              e.preventDefault();
-              e.stopPropagation();
-              console.log('[STAFF NAV] Click detected');
-              
-              var sectionId = item.getAttribute('data-section');
-              console.log('[STAFF NAV] Section ID:', sectionId);
-              
-              if (sectionId && window.navigateToSection) {
-                window.navigateToSection(sectionId);
-              }
-              return false;
-            });
-          })(navItems[k]);
-        }
-        console.log('[STAFF NAV] Handlers attached successfully');
-      }
-      
-      // Run immediately if DOM is ready, otherwise wait
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', attachEmergencyNavHandlers);
-      } else {
-        attachEmergencyNavHandlers();
-      }
-      
-      // Also run after a short delay to ensure it works
-      setTimeout(attachEmergencyNavHandlers, 500);
-      setTimeout(attachEmergencyNavHandlers, 1000);
-      
-      console.log('[STAFF NAV] Setup complete');
-    </script>
   </body>
 </html>
