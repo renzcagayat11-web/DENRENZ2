@@ -9,11 +9,11 @@
     <meta http-equiv="Expires" content="0" />
     <title>DENR Permit — Web Portal</title>
     <link rel="stylesheet" href="assets/css/styles.css">
-    <!-- <link rel="stylesheet" href="assets/css/about-enhanced.css"> TEMPORARILY DISABLED -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   </head>
-  <body>
+  <body style="background-color: #0b5f2c;">
+    <main style="background-color: #0b5f2c;">
     <header class="site-header-hero">
       <div class="container nav-inner">
         <div class="brand-left">
@@ -34,9 +34,8 @@
     </header>
 
     <main>
-      <section id="home" class="hero" style="background: linear-gradient(135deg, #0b5f2c 0%, #0a7a3c 50%, #059669 100%) !important; overflow: hidden;">
-        <div class="hero-background" style="background: linear-gradient(135deg, rgba(11,95,44,0.95) 0%, rgba(10,122,60,0.9) 50%, rgba(5,150,105,0.85) 100%) !important;"></div>
-        <div class="hero-content container">
+      <section id="home" class="hero" style="background: linear-gradient(135deg, #0b5f2c 0%, #0a7a3c 50%, #059669 100%) !important; overflow: hidden; min-height: 100vh; position: relative; opacity: 1 !important; visibility: visible !important; transform: none !important;">
+        <div class="hero-content container" style="position: relative; z-index: 10;">
           <div class="hero-badge">🌱 Environmental Permit Management</div>
           <h1>Protecting Nature Through Digital Innovation</h1>
           <p>Streamlining permit applications, status tracking, and records management for DENR-CENRO Sta. Cruz, Laguna. Experience faster, more efficient environmental compliance.</p>
@@ -66,7 +65,7 @@
       </section>
 
       <!-- Latest Updates Section -->
-      <section id="announcementsSection" class="section visible">
+      <section id="announcementsSection" class="section visible" style="opacity: 1 !important; transform: translateY(0) !important; display: block !important; visibility: visible !important;">
         <div class="container">
           <div class="latest-updates-header">
             <div class="latest-updates-badge">

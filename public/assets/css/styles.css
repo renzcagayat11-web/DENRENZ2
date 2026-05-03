@@ -424,6 +424,9 @@ main{margin:0;padding:0;width:100%;min-width:100%;max-width:none}
   overflow:hidden;
   border-radius: 16px 16px 0 0;
   background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 .announcement-image img{
@@ -432,6 +435,9 @@ main{margin:0;padding:0;width:100%;min-width:100%;max-width:none}
   object-fit:contain;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), filter 0.4s ease;
   filter: brightness(0.95);
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .announcement-image:hover img{
@@ -1638,6 +1644,16 @@ main{margin:0;padding:0;width:100%;min-width:100%;max-width:none}
 .section.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Hero section always visible - fix for first load */
+#home,
+#home.hero,
+.hero {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  display: block !important;
+  visibility: visible !important;
 }
 
 /* Announcements section always visible */
