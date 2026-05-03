@@ -1600,33 +1600,27 @@ function getCleanDocumentName(originalName, fileType, index) {
   }
 }
 
-// Helper function to get status icon
-function getStatusIcon(status) {
-  switch(status.toLowerCase()) {
-    case 'pending':
-      return '⏳';
-    case 'under review':
-      return '👁️';
-    case 'approved':
-      return '✅';
-    case 'rejected':
-      return '❌';
-    default:
-      return '📋';
-  }
-}
-
-// Page Navigation
+// Page Navigation - UPDATED with inline styles for reliability
 window.navigateToSection = function(sectionId) {
+  console.log('[STAFF NAV] Navigating to:', sectionId);
+  
+  // Hide all sections - use both class and inline style
   document.querySelectorAll('.page-section').forEach(section => {
     section.classList.remove('active');
+    section.style.display = 'none'; // FORCE hide
   });
 
+  // Show target section
   const targetSection = document.getElementById(sectionId);
   if (targetSection) {
     targetSection.classList.add('active');
+    targetSection.style.display = 'block'; // FORCE show
+    console.log('[STAFF NAV] SUCCESS: Section', sectionId, 'is now visible');
+  } else {
+    console.error('[STAFF NAV] ERROR: Section not found:', sectionId);
   }
 
+  // Update page title
   const pageTitle = document.querySelector('.page-title');
   if (pageTitle) {
     const sectionNames = {
@@ -1641,6 +1635,15 @@ window.navigateToSection = function(sectionId) {
     pageTitle.textContent = sectionNames[sectionId] || 'Staff Dashboard';
   }
 
+  // Update nav items active state
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.remove('active');
+    if (item.getAttribute('data-section') === sectionId) {
+      item.classList.add('active');
+    }
+  });
+
+  // Load section-specific data
   if (sectionId === 'applicationsSection') {
     filterAndDisplayApplications();
   } else if (sectionId === 'performanceSection') {
@@ -1648,6 +1651,12 @@ window.navigateToSection = function(sectionId) {
   } else if (sectionId === 'settingsSection') {
     loadSettingsData();
   }
+  
+  // Save to localStorage
+  try { localStorage.setItem('currentSection', sectionId); } catch(e) {}
+  
+  // Scroll to top
+  window.scrollTo(0, 0);
 };
 
 // Load performance data
