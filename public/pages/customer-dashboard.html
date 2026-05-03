@@ -1431,18 +1431,21 @@
           var sections = document.querySelectorAll('.page-section');
           console.log('[NAV] Total sections found:', sections.length);
           
-          // Hide all sections
+          // Hide all sections - CSS class AND inline style
           for (var i = 0; i < sections.length; i++) {
             sections[i].classList.remove('active');
+            sections[i].style.display = 'none'; // FORCE hide with inline style
           }
           
           // Show target section
           var target = document.getElementById(sectionId);
           if (target) {
             target.classList.add('active');
+            target.style.display = 'block'; // FORCE show with inline style
             console.log('[NAV] Success: Section activated');
           } else {
             console.error('[NAV] Error: Section not found -', sectionId);
+            alert('Section not found: ' + sectionId);
           }
           
           // Update nav active state
@@ -1458,6 +1461,9 @@
           try {
             localStorage.setItem('currentSection', sectionId);
           } catch(e) {}
+          
+          // Scroll to top
+          window.scrollTo(0, 0);
         };
         
         // Attach click handlers when DOM is ready

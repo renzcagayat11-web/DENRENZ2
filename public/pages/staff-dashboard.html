@@ -1671,20 +1671,23 @@
       window.navigateToSection = function(sectionId) {
         console.log('[STAFF NAV] Navigating to:', sectionId);
         
-        // Hide all sections
+        // Hide all sections - use both CSS class AND inline style
         var sections = document.querySelectorAll('.page-section');
         console.log('[STAFF NAV] Found sections:', sections.length);
         for (var i = 0; i < sections.length; i++) {
           sections[i].classList.remove('active');
+          sections[i].style.display = 'none'; // FORCE hide with inline style
         }
         
         // Show target section
         var target = document.getElementById(sectionId);
         if (target) {
           target.classList.add('active');
+          target.style.display = 'block'; // FORCE show with inline style
           console.log('[STAFF NAV] Section activated:', sectionId);
         } else {
           console.error('[STAFF NAV] Section NOT FOUND:', sectionId);
+          alert('Section not found: ' + sectionId);
         }
         
         // Update nav active state
@@ -1698,6 +1701,9 @@
         
         // Save to localStorage
         try { localStorage.setItem('currentSection', sectionId); } catch(e) {}
+        
+        // Scroll to top
+        window.scrollTo(0, 0);
       };
       
       // Attach handlers immediately
