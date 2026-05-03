@@ -32,7 +32,8 @@
     <main>
       <section id="home" class="hero hero-with-video">
         <div class="hero-video-fixed">
-          <video autoplay muted loop playsinline>
+          <video autoplay muted loop playsinline poster="/assets/images/forest-poster.jpg" onerror="this.style.display='none'; this.nextElementSibling.style.background='linear-gradient(135deg, #0b5f2c 0%, #0a7a3c 50%, #059669 100%)';">
+            <source src="assets/images/forest.mp4" type="video/mp4">
             <source src="/assets/images/forest.mp4" type="video/mp4">
           </video>
           <div class="hero-overlay"></div>
