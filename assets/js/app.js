@@ -1101,8 +1101,20 @@ onAuthStateChanged(auth, async user => {
 // Open auth modal with optional mode 'signin' or 'signup'
 window.openAuthModal = function(mode){
   const m = document.getElementById('authModal'); if(!m) return; m.style.display='flex';
-  if(mode==='signup'){ document.getElementById('authModalTitle').textContent='Sign Up'; authSignupBtn.style.display=''; authSigninBtn.style.display=''; }
-  else { document.getElementById('authModalTitle').textContent='Sign In'; authSignupBtn.style.display=''; authSigninBtn.style.display=''; }
+  const authSigninForm = document.getElementById('authSigninForm');
+  const authSignupForm = document.getElementById('authSignupForm');
+  const authModalTitle = document.getElementById('authModalTitle');
+  
+  if(mode==='signup'){ 
+    if(authModalTitle) authModalTitle.textContent='Sign Up'; 
+    if(authSignupForm) authSignupForm.style.display=''; 
+    if(authSigninForm) authSigninForm.style.display='none'; 
+  }
+  else { 
+    if(authModalTitle) authModalTitle.textContent='Sign In'; 
+    if(authSignupForm) authSignupForm.style.display='none'; 
+    if(authSigninForm) authSigninForm.style.display=''; 
+  }
   (document.getElementById('authEmail')||{}).focus();
 };
 
