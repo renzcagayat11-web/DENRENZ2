@@ -3815,7 +3815,12 @@ window.editApplication = function(appId) {
   // Navigate to new application section first to ensure form is loaded
   navigateToSection('newApplicationSection');
   
-  // Wait longer for the section and form steps to load properly, then populate the form
+  // IMPORTANT: Reset form to step 1 so form elements are visible
+  resetFormSteps();
+  goToStep(1);
+  console.log('Reset form to step 1 for editing');
+  
+  // Wait for the section and form steps to load properly, then populate the form
   setTimeout(() => {
     try {
       console.log('Starting form population for edit mode...');
@@ -3825,27 +3830,25 @@ window.editApplication = function(appId) {
       const permitTypeEl = document.getElementById('permitType');
       const applicantNameEl = document.getElementById('applicantName');
       const applicantAddressEl = document.getElementById('applicantAddress');
-      const applicantMobileIndividualEl = document.getElementById('applicantMobileIndividual');
-      const applicantMobileCompanyEl = document.getElementById('applicantMobileCompany');
-      const applicationDetailsEl = document.getElementById('applicationDetailsInput');
-      const appLatitudeEl = document.getElementById('appLatitude');
-      const appLongitudeEl = document.getElementById('appLongitude');
       
-      if (!documentTypeEl || !permitTypeEl || !applicantNameEl || !applicantAddressEl) {
-        console.error('Form elements not found, retrying...');
-        // Retry after a short delay
+      if (!documentTypeEl || !permitTypeEl) {
+        console.error('❌ Form elements not found even after reset. Retrying with longer delay...');
+        // Retry after a longer delay
         setTimeout(() => {
-          populateEditForm(app);
-        }, 500);
+          resetFormSteps();
+          goToStep(1);
+          setTimeout(() => populateEditForm(app), 300);
+        }, 800);
         return;
       }
       
+      console.log('✅ Form elements found, proceeding with population...');
       // Call the population function
       populateEditForm(app);
     } catch (error) {
-      console.error('Error populating edit form:', error);
+      console.error('❌ Error populating edit form:', error);
     }
-  }, 500);
+  }, 600);
 };
 
 // Function to populate edit form with existing application data
