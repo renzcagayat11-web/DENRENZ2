@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Admin Dashboard — DENR Permit System</title>
     <link rel="stylesheet" href="/assets/css/admin-dashboard.css" />
+    <!-- RBAC Auth Guard - Prevents Unauthorized Access -->
+    <script type="module">
+      import { initAuthGuard, protectRoute } from '/assets/js/auth-guard.js';
+      
+      // Initialize auth state immediately
+      initAuthGuard();
+      
+      // Protect this route - ADMIN ONLY
+      // If staff/customer tries to access, they'll be redirected to their own dashboard
+      protectRoute({
+        allowedRoles: ['admin'],
+        loginRedirect: '/index.html'
+      });
+    </script>
   </head>
   <body>
     <div class="dashboard-container">

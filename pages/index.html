@@ -458,5 +458,22 @@
     <script src="/assets/js/dynamic-slider.js"></script>
     <script src="/assets/js/image-modal.js"></script>
     <script src="/assets/js/contact-enhanced.js"></script>
+    
+    <!-- Unauthorized Access Alert Handler -->
+    <script>
+      (function() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('unauthorized')) {
+          // Show alert after a short delay to ensure page is loaded
+          setTimeout(() => {
+            alert('⚠️ Access Denied\n\nYou do not have permission to access that page.\nPlease sign in with the correct account.');
+            // Clean up URL
+            const url = new URL(window.location.href);
+            url.searchParams.delete('unauthorized');
+            window.history.replaceState({}, '', url);
+          }, 500);
+        }
+      })();
+    </script>
   </body>
 </html>

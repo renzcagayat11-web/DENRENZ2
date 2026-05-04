@@ -123,10 +123,58 @@ async function verifyToken(req, res, next) {
   }
 }
 
+// RBAC Middleware: Check if user has required role(s)
+function requireRole(...allowedRoles) {
+  return async (req, res, next) => {
+    try {
+      // Must be called after verifyToken
+      if (!req.user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Get role from custom claims or Firestore
+      let userRole = req.user.role;
+      
+      // If role not in token claims, fetch from Firestore
+      if (!userRole) {
+        const db = admin.firestore();
+        const userDoc = await db.collection('users').doc(req.user.uid).get();
+        userRole = userDoc.exists ? userDoc.data().role : 'customer';
+      }
+
+      // Check if user's role is allowed
+      if (!allowedRoles.includes(userRole)) {
+        console.warn(`[RBAC] Access denied. User ${req.user.uid} with role '${userRole}' attempted to access resource requiring: ${allowedRoles.join(', ')}`);
+        console.warn(`[RBAC] Request: ${req.method} ${req.path}`);
+        return res.status(403).json({ 
+          error: 'Access denied', 
+          message: `This resource requires one of the following roles: ${allowedRoles.join(', ')}`,
+          yourRole: userRole
+        });
+      }
+
+      // Attach role to request for downstream use
+      req.userRole = userRole;
+      next();
+    } catch (err) {
+      console.error('[RBAC] Role verification error:', err);
+      res.status(500).json({ error: 'Role verification failed' });
+    }
+  };
+}
+
+// RBAC Middleware: Admin only
+const requireAdmin = requireRole('admin');
+
+// RBAC Middleware: Staff or Admin
+const requireStaff = requireRole('staff', 'admin');
+
+// RBAC Middleware: Customer only
+const requireCustomer = requireRole('customer');
+
 // Admin endpoint: create a Staff account (only Admin role allowed)
-app.post('/admin/createStaff', verifyToken, async (req, res) => {
+app.post('/admin/createStaff', verifyToken, requireAdmin, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Forbidden: admin only' });
 
     const { email, password, displayName } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'email and password required' });
@@ -163,11 +211,8 @@ app.get('/admin/verify-role', verifyToken, async (req, res) => {
 });
 
 // Admin analytics: detailed dashboard statistics
-app.get('/admin/analytics', verifyToken, async (req, res) => {
+app.get('/admin/analytics', verifyToken, requireStaff, async (req, res) => {
   try {
-    if (req.user.role !== 'admin' && req.user.role !== 'staff') {
-      return res.status(403).json({ error: 'Forbidden: admin/staff only' });
-    }
     const db = admin.firestore();
     const appsSnap = await db.collection('applications').get();
     
@@ -204,16 +249,8 @@ app.get('/admin/analytics', verifyToken, async (req, res) => {
 });
 
 // Staff endpoint: update application status
-app.post('/staff/updateApplicationStatus', verifyToken, async (req, res) => {
+app.post('/staff/updateApplicationStatus', verifyToken, requireStaff, async (req, res) => {
   try {
-    // TEMPORARY BYPASS FOR TESTING - Remove this in production
-    console.log('🔧 TEMPORARY: Bypassing role check for testing');
-    console.log('👤 User:', req.user.email, 'Role:', req.user.role || 'NO ROLE');
-    
-    // Original check (commented out for testing)
-    // if (req.user.role !== 'staff' && req.user.role !== 'admin') {
-    //   return res.status(403).json({ error: 'Forbidden: staff/admin only' });
-    // }
 
     const { applicationId, status, rejectionReason, pickupSchedule } = req.body;
     if (!applicationId || !status) {
@@ -295,11 +332,8 @@ app.post('/staff/updateApplicationStatus', verifyToken, async (req, res) => {
 });
 
 // Admin endpoint: get all users
-app.get('/admin/users', verifyToken, async (req, res) => {
+app.get('/admin/users', verifyToken, requireAdmin, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Forbidden: admin only' });
-    }
 
     const { userType } = req.query;
     const db = admin.firestore();
@@ -323,11 +357,8 @@ app.get('/admin/users', verifyToken, async (req, res) => {
 });
 
 // Admin endpoint: update user status
-app.post('/admin/users/:userId/status', verifyToken, async (req, res) => {
+app.post('/admin/users/:userId/status', verifyToken, requireAdmin, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Forbidden: admin only' });
-    }
 
     const { userId } = req.params;
     const { status } = req.body;
@@ -371,11 +402,8 @@ app.post('/admin/audit-log', verifyToken, async (req, res) => {
 });
 
 // Admin endpoint: get audit logs
-app.get('/admin/audit-logs', verifyToken, async (req, res) => {
+app.get('/admin/audit-logs', verifyToken, requireAdmin, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Forbidden: admin only' });
-    }
 
     const db = admin.firestore();
     const snapshot = await db.collection('auditLogs')
@@ -791,3 +819,6 @@ app.post('/debug/create-audit-log', verifyToken, async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
+
+// Export middleware and app for testing and external use
+module.exports = { app, verifyToken, requireRole, requireAdmin, requireStaff, requireCustomer };

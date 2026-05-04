@@ -8,6 +8,20 @@
     <link rel="stylesheet" href="/assets/css/customer-dashboard.css" />
     <link rel="stylesheet" href="/assets/css/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- RBAC Auth Guard - Prevents Unauthorized Access -->
+    <script type="module">
+      import { initAuthGuard, protectRoute } from '/assets/js/auth-guard.js';
+      
+      // Initialize auth state immediately
+      initAuthGuard();
+      
+      // Protect this route - CUSTOMER ONLY
+      // If staff/admin tries to access, they'll be redirected to their own dashboard
+      protectRoute({
+        allowedRoles: ['customer'],
+        loginRedirect: '/index.html'
+      });
+    </script>
   </head>
   <body>
     <!-- Page Loader Overlay -->

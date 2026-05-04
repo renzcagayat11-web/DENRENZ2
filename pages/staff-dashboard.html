@@ -8,6 +8,20 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+    <!-- RBAC Auth Guard - Prevents Unauthorized Access -->
+    <script type="module">
+      import { initAuthGuard, protectRoute } from '/assets/js/auth-guard.js';
+      
+      // Initialize auth state immediately
+      initAuthGuard();
+      
+      // Protect this route - STAFF ONLY
+      // If admin/customer tries to access, they'll be redirected to their own dashboard
+      protectRoute({
+        allowedRoles: ['staff'],
+        loginRedirect: '/index.html'
+      });
+    </script>
   </head>
   <body>
     <div class="dashboard-container">
