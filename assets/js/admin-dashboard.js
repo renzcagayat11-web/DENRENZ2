@@ -862,14 +862,7 @@ window.navigateToSection = function(sectionId) {
     } else if (sectionId === 'reportsSection') {
       loadReports();
     } else if (sectionId === 'contentSection') {
-      // Ensure content section is properly initialized
-      const contentSection = document.getElementById('contentSection');
-      if (contentSection) {
-        contentSection.style.display = 'block';
-        loadContentManagement();
-      } else {
-        console.error('Content section not found');
-      }
+      loadContentManagement();
     } else if (sectionId === 'settingsSection') {
       setupSettingsTabs();
     } else if (sectionId === 'auditSection') {
@@ -2466,35 +2459,13 @@ window.exportStaffPerformance = function() {
 
 // Load content management
 async function loadContentManagement() {
-  try {
-    console.log('Loading content management...');
-    
-    // Ensure content section is visible
-    const contentSection = document.getElementById('contentSection');
-    if (contentSection) {
-      contentSection.style.display = 'block';
-    }
-    
-    // Load all content data
-    await Promise.all([
-      loadAnnouncements(),
-      loadWelcomeMessage(),
-      loadContactInfo(),
-      loadOfficeHours(),
-      loadPermitTypes(),
-      loadFAQs()
-    ]);
-    
-    // Setup tabs after data is loaded
-    setupContentTabs();
-    
-    // Setup announcement preview
-    setupAnnouncementPreview();
-    
-    console.log('Content management loaded successfully');
-  } catch (error) {
-    console.error('Error loading content management:', error);
-  }
+  loadAnnouncements();
+  loadWelcomeMessage();
+  loadContactInfo();
+  loadOfficeHours();
+  loadPermitTypes();
+  loadFAQs();
+  setupContentTabs();
 }
 
 // Setup content tabs
@@ -2518,17 +2489,9 @@ function setupContentTabs() {
       const editor = document.getElementById(editorId);
       if (editor) {
         editor.classList.add('active');
-      } else {
-        console.warn('Editor not found:', editorId);
       }
     });
   });
-  
-  // Initialize first tab as active
-  const firstTab = document.querySelector('.content-tab[data-content-type="announcements"]');
-  if (firstTab) {
-    firstTab.click();
-  }
 }
 
 // Setup settings tabs
@@ -2594,47 +2557,6 @@ async function loadAnnouncements() {
   } catch (error) {
     console.error('Error loading announcements:', error);
     listDiv.innerHTML = '<p style="color: #ef4444; padding: 16px;">Error loading announcements</p>';
-  }
-}
-
-// Setup live preview for announcement editor
-function setupAnnouncementPreview() {
-  const titleInput = document.getElementById('announcementTitle');
-  const contentInput = document.getElementById('announcementContent');
-  const previewTitle = document.getElementById('previewTitle');
-  const previewContent = document.getElementById('previewContent');
-  const previewImageContainer = document.getElementById('previewImageContainer');
-  const previewImageDisplay = document.getElementById('previewImageDisplay');
-  
-  if (titleInput && previewTitle) {
-    titleInput.addEventListener('input', (e) => {
-      const value = e.target.value.trim();
-      previewTitle.textContent = value || 'Your announcement title will appear here';
-    });
-  }
-  
-  if (contentInput && previewContent) {
-    contentInput.addEventListener('input', (e) => {
-      const value = e.target.value.trim();
-      if (value) {
-        previewContent.innerHTML = value;
-      } else {
-        previewContent.innerHTML = '<p>Your announcement content will appear here as you type...</p>';
-      }
-    });
-  }
-  
-  // Initialize preview with current values
-  if (titleInput && previewTitle) {
-    previewTitle.textContent = titleInput.value.trim() || 'Your announcement title will appear here';
-  }
-  if (contentInput && previewContent) {
-    const content = contentInput.value.trim();
-    if (content) {
-      previewContent.innerHTML = content;
-    } else {
-      previewContent.innerHTML = '<p>Your announcement content will appear here as you type...</p>';
-    }
   }
 }
 
