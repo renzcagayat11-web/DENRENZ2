@@ -162,7 +162,7 @@
                   <option value="all">All Status</option>
                   <option value="pending" selected>Pending</option>
                   <option value="under review">Under Review</option>
-                  <option value="needs revision">Needs Revision</option>
+                  <option value="needs resubmit">Needs Resubmit</option>
                   <option value="approved">Approved</option>
                   <option value="rejected">Rejected</option>
                 </select>
@@ -1446,19 +1446,19 @@
       </div>
     </div>
 
-    <!-- Needs Revision Modal -->
-    <div id="needsRevisionModal" class="modal-backdrop" style="display:none">
+    <!-- Needs Resubmit Modal -->
+    <div id="needsResubmitModal" class="modal-backdrop" style="display:none">
       <div class="modal-dialog">
         <div class="modal-header">
-          <h3>Request Revision</h3>
-          <button class="modal-close" id="closeNeedsRevisionModal">×</button>
+          <h3>Request Resubmission</h3>
+          <button class="modal-close" id="closeNeedsResubmitModal">×</button>
         </div>
         <div class="modal-body">
-          <label for="revisionComments">Revision Comments</label>
-          <textarea id="revisionComments" rows="4" placeholder="Enter what needs to be revised (e.g., missing documents, incorrect information)..."></textarea>
+          <label for="resubmitComments">Resubmission Comments</label>
+          <textarea id="resubmitComments" rows="4" placeholder="Enter what needs to be resubmitted (e.g., missing documents, incorrect information)..."></textarea>
           <div class="modal-actions">
-            <button class="btn-secondary" id="cancelNeedsRevision">Cancel</button>
-            <button class="btn-warning" id="confirmNeedsRevision" style="background: #f59e0b; color: white;">Request Revision</button>
+            <button class="btn-secondary" id="cancelNeedsResubmit">Cancel</button>
+            <button class="btn-warning" id="confirmNeedsResubmit" style="background: #f59e0b; color: white;">Request Resubmit</button>
           </div>
         </div>
       </div>

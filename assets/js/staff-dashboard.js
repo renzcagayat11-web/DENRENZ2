@@ -386,9 +386,9 @@ function loadRecentApplications() {
     
     tbody.innerHTML = '';
     
-    // Show only pending, under review, and needs revision applications
+    // Show only pending, under review, and needs resubmit applications
     const pendingApps = allApplications.filter(app => 
-      app.status === 'pending' || app.status === 'under review' || app.status === 'needs revision'
+      app.status === 'pending' || app.status === 'under review' || app.status === 'needs resubmit'
     );
     const recentApps = pendingApps.slice(0, 5);
     
@@ -441,14 +441,14 @@ async function fetchApplications() {
       
       console.log(`✅ Recent Applications: ${allApplications.length} loaded`);
       
-      // Check for revision submissions (status changed from needs revision to pending)
+      // Check for resubmissions (status changed from needs resubmit to pending)
       allApplications.forEach(updatedApp => {
         const oldApp = oldApplications.find(app => app.id === updatedApp.id);
         if (oldApp && 
-            oldApp.status === 'needs revision' && 
+            oldApp.status === 'needs resubmit' && 
             updatedApp.status === 'pending' && 
             updatedApp.revisionSubmittedAt) {
-          showRevisionNotification(updatedApp);
+          showResubmitNotification(updatedApp);
         }
       });
       
@@ -477,8 +477,8 @@ async function fetchApplications() {
   }
 }
 
-// Show notification for new revision submission
-function showRevisionNotification(application) {
+// Show notification for new resubmission
+function showResubmitNotification(application) {
   const notification = document.createElement('div');
   notification.style.cssText = `
     position: fixed;
@@ -498,9 +498,9 @@ function showRevisionNotification(application) {
     <div style="display: flex; align-items: start; gap: 12px;">
       <div style="font-size: 20px;">🔄</div>
       <div style="flex: 1;">
-        <div style="font-weight: 600; margin-bottom: 4px;">New Revision Submitted</div>
+        <div style="font-weight: 600; margin-bottom: 4px;">New Resubmission</div>
         <div style="font-size: 14px; opacity: 0.9;">
-          <strong>${application.applicantName || 'Customer'}</strong> has submitted revisions for <strong>${application.permitType || 'Application'}</strong>
+          <strong>${application.applicantName || 'Customer'}</strong> has submitted resubmission for <strong>${application.permitType || 'Application'}</strong>
         </div>
         <div style="font-size: 12px; opacity: 0.8; margin-top: 4px;">
           ID: ${application.applicationId || application.id}
@@ -595,7 +595,7 @@ function filterAndDisplayApplications() {
   
   // Start with active applications only (pending and under review)
   let filtered = allApplications.filter(app => 
-    app.status === 'pending' || app.status === 'under review' || app.status === 'needs revision'
+    app.status === 'pending' || app.status === 'under review' || app.status === 'needs resubmit'
   );
   
   // Filter by status (from active applications only)
@@ -634,27 +634,27 @@ function displayApplications(applications) {
     const statusClass = getStatusClass(app.status);
     const dateFormatted = formatDate(app.createdAt);
     
-    // Check if application was revised
-    const isRevised = app.revisionSubmittedAt || app.revisionRequestedAt;
-    const revisionCount = app.revisionCount || 0;
+    // Check if application was resubmitted
+    const isResubmitted = app.revisionSubmittedAt || app.revisionRequestedAt;
+    const resubmitCount = app.revisionCount || 0;
     
     row.innerHTML = `
       <td>
         ${app.applicationId || app.id || 'N/A'}
-        ${isRevised ? `<span class="revision-badge" style="background: #f59e0b; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 4px;">🔄 Revised</span>` : ''}
+        ${isResubmitted ? `<span class="resubmit-badge" style="background: #f59e0b; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 4px;">🔄 Resubmitted</span>` : ''}
       </td>
       <td>${app.applicantName || 'N/A'}</td>
       <td>${app.permitType || 'N/A'}</td>
       <td>${dateFormatted}</td>
       <td>
         <span class="status-badge ${statusClass}">${app.status || 'PENDING'}</span>
-        ${isRevised ? `<div style="font-size: 11px; color: #6b7280; margin-top: 2px;">Revised ${revisionCount + 1}x</div>` : ''}
+        ${isResubmitted ? `<div style="font-size: 11px; color: #6b7280; margin-top: 2px;">Resubmitted ${resubmitCount + 1}x</div>` : ''}
       </td>
       <td>
         <button class="action-btn btn-view" onclick="viewApplication('${app.id}')">View</button>
         ${app.status === 'pending' || app.status === 'under review' ? `<button class="action-btn btn-approve" onclick="quickApprove('${app.id}')">Approve</button>` : ''}
         ${app.status === 'pending' || app.status === 'under review' ? `<button class="action-btn btn-reject" onclick="quickReject('${app.id}')">Reject</button>` : ''}
-        ${app.status === 'pending' || app.status === 'under review' ? `<button class="action-btn btn-review" onclick="quickNeedsRevision('${app.id}')" style="background: #f59e0b; color: white;">Needs Revision</button>` : ''}
+        ${app.status === 'pending' || app.status === 'under review' ? `<button class="action-btn btn-review" onclick="quickNeedsResubmit('${app.id}')" style="background: #f59e0b; color: white;">Needs Resubmit</button>` : ''}
       </td>
     `;
     
@@ -708,7 +708,7 @@ function getStatusClass(status) {
   const statusMap = {
     'pending': 'pending',
     'under review': 'under-review',
-    'needs revision': 'needs-revision',
+    'needs resubmit': 'needs-resubmit',
     'approved': 'approved',
     'rejected': 'rejected'
   };
@@ -719,7 +719,7 @@ function getStatusIcon(status) {
   const icons = {
     'pending': '⏳',
     'under review': '🔍',
-    'needs revision': '📝',
+    'needs resubmit': '📝',
     'approved': '✅',
     'rejected': '❌'
   };
@@ -931,17 +931,17 @@ window.viewApplication = async function(appId) {
     </div>
     ` : ''}
 
-    <!-- Revision History Section -->
+    <!-- Resubmit History Section -->
     ${(currentApplication.revisionRequestedAt || currentApplication.revisionSubmittedAt) ? `
     <div class="detail-section">
       <div class="section-header">
-        <h3 class="section-title">🔄 Revision History</h3>
+        <h3 class="section-title">🔄 Resubmission History</h3>
       </div>
       <div class="section-content">
         <div class="revision-history" style="background: #fffbeb; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px;">
           ${currentApplication.revisionRequestedAt ? `
           <div style="margin-bottom: 12px;">
-            <div style="font-weight: 600; color: #92400e; margin-bottom: 4px;">📝 Revision Requested</div>
+            <div style="font-weight: 600; color: #92400e; margin-bottom: 4px;">📝 Resubmission Requested</div>
             <div style="color: #6b7280; font-size: 14px;">${formatDate(currentApplication.revisionRequestedAt)}</div>
             <div style="color: #6b7280; font-size: 14px;">By: ${currentApplication.revisionRequestedBy || 'Staff'}</div>
             ${currentApplication.revisionComments ? `
@@ -955,11 +955,11 @@ window.viewApplication = async function(appId) {
           
           ${currentApplication.revisionSubmittedAt ? `
           <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #fbbf24;">
-            <div style="font-weight: 600; color: #059669; margin-bottom: 4px;">✅ Revision Submitted</div>
+            <div style="font-weight: 600; color: #059669; margin-bottom: 4px;">✅ Resubmission Submitted</div>
             <div style="color: #6b7280; font-size: 14px;">${formatDate(currentApplication.revisionSubmittedAt)}</div>
             <div style="color: #6b7280; font-size: 14px;">By: ${currentApplication.revisionSubmittedBy || 'Customer'}</div>
             <div style="margin-top: 4px; font-size: 12px; color: #6b7280;">
-              Total Revisions: ${(currentApplication.revisionCount || 0) + 1}
+              Total Resubmissions: ${(currentApplication.revisionCount || 0) + 1}
             </div>
           </div>
           ` : ''}
@@ -987,7 +987,7 @@ window.viewApplication = async function(appId) {
           <div class="timeline-item">
             <div class="timeline-marker completed" style="background: #f59e0b;">📝</div>
             <div class="timeline-content">
-              <div class="timeline-title">Revision Requested</div>
+              <div class="timeline-title">Resubmission Requested</div>
               <div class="timeline-date">${formatDate(currentApplication.revisionRequestedAt)}</div>
               <div style="color: #92400e; font-size: 12px; margin-top: 2px;">By: ${currentApplication.revisionRequestedBy || 'Staff'}</div>
             </div>
@@ -998,7 +998,7 @@ window.viewApplication = async function(appId) {
           <div class="timeline-item">
             <div class="timeline-marker completed" style="background: #10b981;">✅</div>
             <div class="timeline-content">
-              <div class="timeline-title">Revision Submitted</div>
+              <div class="timeline-title">Resubmission Submitted</div>
               <div class="timeline-date">${formatDate(currentApplication.revisionSubmittedAt)}</div>
               <div style="color: #059669; font-size: 12px; margin-top: 2px;">By: ${currentApplication.revisionSubmittedBy || 'Customer'}</div>
             </div>
@@ -1101,11 +1101,19 @@ window.quickReject = async function(appId) {
   rejectModal.style.display = 'flex';
 };
 
-// Quick needs revision from table
-window.quickNeedsRevision = async function(appId) {
+// Quick needs resubmit from table
+window.quickNeedsResubmit = async function(appId) {
   currentApplication = allApplications.find(app => app.id === appId);
-  const needsRevisionModal = document.getElementById('needsRevisionModal');
-  needsRevisionModal.style.display = 'flex';
+  const needsResubmitModal = document.getElementById('needsResubmitModal');
+  if (needsResubmitModal) {
+    needsResubmitModal.style.display = 'flex';
+  } else {
+    // Fallback to old modal ID if not updated yet
+    const needsRevisionModal = document.getElementById('needsRevisionModal');
+    if (needsRevisionModal) {
+      needsRevisionModal.style.display = 'flex';
+    }
+  }
 };
 
 // Log system activity - DEPRECATED: Server now handles audit logging
@@ -1126,7 +1134,7 @@ async function updateApplicationStatus(appId, newStatus, rejectionReason = null,
     }
 
     // Disable action buttons to prevent double-submit
-    const actionButtons = document.querySelectorAll('.action-btn, #confirmReject, #confirmUnderReview, #confirmSchedule, #confirmNeedsRevision');
+    const actionButtons = document.querySelectorAll('.action-btn, #confirmReject, #confirmUnderReview, #confirmSchedule, #confirmNeedsResubmit');
     actionButtons.forEach(btn => {
       btn.disabled = true;
       btn.style.opacity = '0.5';
@@ -1155,13 +1163,13 @@ async function updateApplicationStatus(appId, newStatus, rejectionReason = null,
       }
     }
 
-    if (newStatus === 'needs revision') {
+    if (newStatus === 'needs resubmit') {
       updateData.revisionRequestedBy = auth.currentUser.email;
       updateData.revisionRequestedAt = serverTimestamp();
       if (revisionComments) {
         updateData.revisionComments = revisionComments;
       }
-      // Don't increment revision count here - increment when customer submits revision
+      // Don't increment resubmit count here - increment when customer submits resubmission
     }
 
     // Update local data
@@ -1174,10 +1182,10 @@ async function updateApplicationStatus(appId, newStatus, rejectionReason = null,
       if (revisionComments) {
         allApplications[appIndex].revisionComments = revisionComments;
       }
-      if (newStatus === 'needs revision') {
+      if (newStatus === 'needs resubmit') {
         allApplications[appIndex].revisionRequestedBy = auth.currentUser.email;
         allApplications[appIndex].revisionRequestedAt = new Date();
-        // Don't increment revision count here - increment when customer submits revision
+        // Don't increment resubmit count here - increment when customer submits resubmission
       }
       allApplications[appIndex].reviewedBy = auth.currentUser.email;
       allApplications[appIndex].reviewedAt = new Date();
@@ -1278,25 +1286,26 @@ document.getElementById('confirmReject').addEventListener('click', async () => {
   }
 });
 
-// Needs Revision modal
-document.getElementById('closeNeedsRevisionModal').addEventListener('click', () => {
-  document.getElementById('needsRevisionModal').style.display = 'none';
+// Needs Resubmit modal
+document.getElementById('closeNeedsResubmitModal').addEventListener('click', () => {
+  document.getElementById('needsResubmitModal').style.display = 'none';
 });
 
-document.getElementById('cancelNeedsRevision').addEventListener('click', () => {
-  document.getElementById('needsRevisionModal').style.display = 'none';
+document.getElementById('cancelNeedsResubmit').addEventListener('click', () => {
+  document.getElementById('needsResubmitModal').style.display = 'none';
 });
 
-document.getElementById('confirmNeedsRevision').addEventListener('click', async () => {
-  const comments = document.getElementById('revisionComments').value;
+document.getElementById('confirmNeedsResubmit').addEventListener('click', async () => {
+  const comments = document.getElementById('resubmitComments').value;
   if (!comments.trim()) {
-    alert('Please provide revision comments.');
+    alert('Please provide resubmit comments.');
     return;
   }
+  
   if (currentApplication) {
-    await updateApplicationStatus(currentApplication.id, 'needs revision', null, comments);
-    document.getElementById('needsRevisionModal').style.display = 'none';
-    document.getElementById('revisionComments').value = ''; // Clear the textarea
+    await updateApplicationStatus(currentApplication.id, 'needs resubmit', null, comments);
+    document.getElementById('needsResubmitModal').style.display = 'none';
+    document.getElementById('resubmitComments').value = ''; // Clear the textarea
   }
 });
 

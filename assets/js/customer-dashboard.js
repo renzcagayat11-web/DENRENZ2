@@ -2008,7 +2008,7 @@ window.fetchUserApplications = async function() {
           id: doc.id,
           ...doc.data()
         };
-        console.log('Customer dashboard: App:', appData.applicationId, 'Status:', appData.status, 'Revision count:', appData.revisionCount);
+        console.log('Customer dashboard: App:', appData.applicationId, 'Status:', appData.status, 'Resubmit count:', appData.revisionCount);
         userApplications.push(appData);
       });
       
@@ -2054,17 +2054,17 @@ function displayApplications() {
   }
   
   userApplications.forEach((app, index) => {
-    console.log(`Customer dashboard: Processing application ${index + 1}:`, app.applicationId, 'Status:', app.status, 'Can edit:', app.status === 'needs revision');
+    console.log(`Customer dashboard: Processing application ${index + 1}:`, app.applicationId, 'Status:', app.status, 'Can resubmit:', app.status === 'needs revision' || app.status === 'needs resubmit');
     const row = document.createElement('tr');
     const statusClass = getStatusClass(app.status);
     const dateFormatted = formatDate(app.createdAt);
 
     const isPending = app.status === 'pending';
-    const needsRevision = app.status === 'needs revision';
-    const canEdit = needsRevision;  // Only allow edit when staff requests revision
-    const canDelete = app.status === 'pending' || app.status === 'under review' || app.status === 'rejected' || needsRevision;
+    const needsResubmit = app.status === 'needs revision' || app.status === 'needs resubmit';
+    const canEdit = needsResubmit;  // Only allow edit when staff requests resubmit
+    const canDelete = app.status === 'pending' || app.status === 'under review' || app.status === 'rejected' || needsResubmit;
     
-    console.log(`Customer dashboard: App ${app.applicationId} - needsRevision: ${needsRevision}, canEdit: ${canEdit}`);
+    console.log(`Customer dashboard: App ${app.applicationId} - needsResubmit: ${needsResubmit}, canEdit: ${canEdit}`);
 
     // Pickup schedule removed from table view - shown only in detailed modal
 
@@ -2079,7 +2079,7 @@ function displayApplications() {
         <div class="table-actions">
           <button class="action-btn btn-view" onclick="viewApplication('${app.id}')">View</button>
           ${canEdit ? `
-          <button class="action-btn btn-edit" onclick="editApplication('${app.id}')">Revise</button>
+          <button class="action-btn btn-edit" onclick="editApplication('${app.id}')">Resubmit</button>
           ` : ''}
           ${canDelete ? `
           <button class="action-btn btn-delete" onclick="deleteApplication('${app.id}')">🗑️</button>
@@ -2400,10 +2400,10 @@ function generateApplicationDetailsHTML(app) {
       </div>
     ` : ''}
     
-    <!-- Revision Comments Section - Show when status is "needs revision" -->
-    ${app.status === 'needs revision' && app.revisionComments ? `
+    <!-- Resubmit Comments Section - Show when status is "needs resubmit" -->
+    ${(app.status === 'needs revision' || app.status === 'needs resubmit') && app.revisionComments ? `
       <div class="detail-section">
-        <h4 class="section-title" style="color: #f59e0b;">📝 Revision Required</h4>
+        <h4 class="section-title" style="color: #f59e0b;">📝 Resubmission Required</h4>
         <div style="background: #fffbeb; border: 1px solid #fbbf24; border-radius: 8px; padding: 16px;">
           <div style="font-weight: 600; color: #92400e; margin-bottom: 8px;">
             Please address the following:
@@ -2488,12 +2488,12 @@ function generateApplicationDetailsHTML(app) {
         </div>
         `}
         
-        <!-- Revision Timeline Events -->
+        <!-- Resubmit Timeline Events -->
         ${app.revisionRequestedAt ? `
         <div class="timeline-item">
           <div class="timeline-marker completed" style="background: #f59e0b;">📝</div>
           <div class="timeline-content">
-            <div class="timeline-title">Revision Requested</div>
+            <div class="timeline-title">Resubmission Requested</div>
             <div class="timeline-date">${formatDate(app.revisionRequestedAt)}</div>
             <div style="color: #92400e; font-size: 12px; margin-top: 2px;">By: ${app.revisionRequestedBy || 'Staff'}</div>
           </div>
@@ -2504,9 +2504,9 @@ function generateApplicationDetailsHTML(app) {
         <div class="timeline-item">
           <div class="timeline-marker completed" style="background: #10b981;">✅</div>
           <div class="timeline-content">
-            <div class="timeline-title">Revision Submitted</div>
+            <div class="timeline-title">Resubmission Submitted</div>
             <div class="timeline-date">${formatDate(app.revisionSubmittedAt)}</div>
-            <div style="color: #059669; font-size: 12px; margin-top: 2px;">Revision #${app.revisionCount || 1}</div>
+            <div style="color: #059669; font-size: 12px; margin-top: 2px;">Resubmit #${app.revisionCount || 1}</div>
           </div>
         </div>
         ` : ''}
@@ -3450,9 +3450,9 @@ function displayApplicationsWithFilter(applications) {
     const dateFormatted = formatDate(app.createdAt);
 
     const isPending = app.status === 'pending';
-    const needsRevision = app.status === 'needs revision';
-    const canEdit = needsRevision;  // Only allow edit when staff requests revision
-    const canDelete = app.status === 'pending' || app.status === 'under review' || app.status === 'rejected' || needsRevision;
+    const needsResubmit = app.status === 'needs revision' || app.status === 'needs resubmit';
+    const canEdit = needsResubmit;  // Only allow edit when staff requests resubmit
+    const canDelete = app.status === 'pending' || app.status === 'under review' || app.status === 'rejected' || needsResubmit;
 
     row.innerHTML = `
       <td>${app.applicationId || app.id}</td>
@@ -3465,7 +3465,7 @@ function displayApplicationsWithFilter(applications) {
         <div class="table-actions">
           <button class="action-btn btn-view" onclick="viewApplication('${app.id}')">View</button>
           ${canEdit ? `
-          <button class="action-btn btn-edit" onclick="editApplication('${app.id}')">Revise</button>
+          <button class="action-btn btn-edit" onclick="editApplication('${app.id}')">Resubmit</button>
           ` : ''}
           ${canDelete ? `
           <button class="action-btn btn-delete" onclick="deleteApplication('${app.id}')">🗑️</button>
@@ -3500,7 +3500,8 @@ function getStatusClass(status) {
   const statusMap = {
     'pending': 'pending',
     'under review': 'under-review',
-    'needs revision': 'needs-revision',
+    'needs revision': 'needs-resubmit',
+    'needs resubmit': 'needs-resubmit',
     'approved': 'approved',
     'rejected': 'rejected'
   };
