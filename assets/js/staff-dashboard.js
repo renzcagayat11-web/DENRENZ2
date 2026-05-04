@@ -428,7 +428,9 @@ async function fetchApplications() {
     
     // Set up real-time listener
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const oldApplications = [...allApplications];
       allApplications = [];
+      
       querySnapshot.forEach((doc) => {
         const appData = doc.data();
         allApplications.push({
@@ -438,6 +440,17 @@ async function fetchApplications() {
       });
       
       console.log(`✅ Recent Applications: ${allApplications.length} loaded`);
+      
+      // Check for revision submissions (status changed from needs revision to pending)
+      allApplications.forEach(updatedApp => {
+        const oldApp = oldApplications.find(app => app.id === updatedApp.id);
+        if (oldApp && 
+            oldApp.status === 'needs revision' && 
+            updatedApp.status === 'pending' && 
+            updatedApp.revisionSubmittedAt) {
+          showRevisionNotification(updatedApp);
+        }
+      });
       
       // Sort by createdAt manually
       allApplications.sort((a, b) => {
@@ -463,6 +476,69 @@ async function fetchApplications() {
     filterAndDisplayApplications();
   }
 }
+
+// Show notification for new revision submission
+function showRevisionNotification(application) {
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #10b981;
+    color: white;
+    padding: 16px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 10000;
+    max-width: 350px;
+    animation: slideIn 0.3s ease-out;
+  `;
+  
+  notification.innerHTML = `
+    <div style="display: flex; align-items: start; gap: 12px;">
+      <div style="font-size: 20px;">🔄</div>
+      <div style="flex: 1;">
+        <div style="font-weight: 600; margin-bottom: 4px;">New Revision Submitted</div>
+        <div style="font-size: 14px; opacity: 0.9;">
+          <strong>${application.applicantName || 'Customer'}</strong> has submitted revisions for <strong>${application.permitType || 'Application'}</strong>
+        </div>
+        <div style="font-size: 12px; opacity: 0.8; margin-top: 4px;">
+          ID: ${application.applicationId || application.id}
+        </div>
+        <button onclick="this.parentElement.parentElement.parentElement.remove(); viewApplication('${application.id}')" 
+                style="margin-top: 8px; background: white; color: #10b981; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 500; cursor: pointer;">
+          Review Now
+        </button>
+      </div>
+      <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; font-size: 18px; cursor: pointer; opacity: 0.8;">×</button>
+    </div>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  // Auto-remove after 10 seconds
+  setTimeout(() => {
+    if (notification.parentElement) {
+      notification.remove();
+    }
+  }, 10000);
+}
+
+// Add CSS animation for notifications
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+`;
+document.head.appendChild(style);
 
 // Load sample applications for demo mode
 function loadSampleApplications() {
@@ -558,12 +634,22 @@ function displayApplications(applications) {
     const statusClass = getStatusClass(app.status);
     const dateFormatted = formatDate(app.createdAt);
     
+    // Check if application was revised
+    const isRevised = app.revisionSubmittedAt || app.revisionRequestedAt;
+    const revisionCount = app.revisionCount || 0;
+    
     row.innerHTML = `
-      <td>${app.applicationId || app.id || 'N/A'}</td>
+      <td>
+        ${app.applicationId || app.id || 'N/A'}
+        ${isRevised ? `<span class="revision-badge" style="background: #f59e0b; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 4px;">🔄 Revised</span>` : ''}
+      </td>
       <td>${app.applicantName || 'N/A'}</td>
       <td>${app.permitType || 'N/A'}</td>
       <td>${dateFormatted}</td>
-      <td><span class="status-badge ${statusClass}">${app.status || 'PENDING'}</span></td>
+      <td>
+        <span class="status-badge ${statusClass}">${app.status || 'PENDING'}</span>
+        ${isRevised ? `<div style="font-size: 11px; color: #6b7280; margin-top: 2px;">Revised ${revisionCount + 1}x</div>` : ''}
+      </td>
       <td>
         <button class="action-btn btn-view" onclick="viewApplication('${app.id}')">View</button>
         ${app.status === 'pending' || app.status === 'under review' ? `<button class="action-btn btn-approve" onclick="quickApprove('${app.id}')">Approve</button>` : ''}
@@ -845,6 +931,43 @@ window.viewApplication = async function(appId) {
     </div>
     ` : ''}
 
+    <!-- Revision History Section -->
+    ${(currentApplication.revisionRequestedAt || currentApplication.revisionSubmittedAt) ? `
+    <div class="detail-section">
+      <div class="section-header">
+        <h3 class="section-title">🔄 Revision History</h3>
+      </div>
+      <div class="section-content">
+        <div class="revision-history" style="background: #fffbeb; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px;">
+          ${currentApplication.revisionRequestedAt ? `
+          <div style="margin-bottom: 12px;">
+            <div style="font-weight: 600; color: #92400e; margin-bottom: 4px;">📝 Revision Requested</div>
+            <div style="color: #6b7280; font-size: 14px;">${formatDate(currentApplication.revisionRequestedAt)}</div>
+            <div style="color: #6b7280; font-size: 14px;">By: ${currentApplication.revisionRequestedBy || 'Staff'}</div>
+            ${currentApplication.revisionComments ? `
+            <div style="margin-top: 8px; padding: 8px; background: white; border-radius: 4px; border-left: 3px solid #f59e0b;">
+              <div style="font-weight: 500; color: #1e293b; margin-bottom: 2px;">Required Changes:</div>
+              <div style="color: #374151;">${currentApplication.revisionComments}</div>
+            </div>
+            ` : ''}
+          </div>
+          ` : ''}
+          
+          ${currentApplication.revisionSubmittedAt ? `
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #fbbf24;">
+            <div style="font-weight: 600; color: #059669; margin-bottom: 4px;">✅ Revision Submitted</div>
+            <div style="color: #6b7280; font-size: 14px;">${formatDate(currentApplication.revisionSubmittedAt)}</div>
+            <div style="color: #6b7280; font-size: 14px;">By: ${currentApplication.revisionSubmittedBy || 'Customer'}</div>
+            <div style="margin-top: 4px; font-size: 12px; color: #6b7280;">
+              Total Revisions: ${(currentApplication.revisionCount || 0) + 1}
+            </div>
+          </div>
+          ` : ''}
+        </div>
+      </div>
+    </div>
+    ` : ''}
+
     <!-- Status Timeline Section -->
     <div class="detail-section">
       <div class="section-header">
@@ -859,6 +982,29 @@ window.viewApplication = async function(appId) {
               <div class="timeline-date">${formatDate(currentApplication.createdAt)}</div>
             </div>
           </div>
+          
+          ${currentApplication.revisionRequestedAt ? `
+          <div class="timeline-item">
+            <div class="timeline-marker completed" style="background: #f59e0b;">📝</div>
+            <div class="timeline-content">
+              <div class="timeline-title">Revision Requested</div>
+              <div class="timeline-date">${formatDate(currentApplication.revisionRequestedAt)}</div>
+              <div style="color: #92400e; font-size: 12px; margin-top: 2px;">By: ${currentApplication.revisionRequestedBy || 'Staff'}</div>
+            </div>
+          </div>
+          ` : ''}
+          
+          ${currentApplication.revisionSubmittedAt ? `
+          <div class="timeline-item">
+            <div class="timeline-marker completed" style="background: #10b981;">✅</div>
+            <div class="timeline-content">
+              <div class="timeline-title">Revision Submitted</div>
+              <div class="timeline-date">${formatDate(currentApplication.revisionSubmittedAt)}</div>
+              <div style="color: #059669; font-size: 12px; margin-top: 2px;">By: ${currentApplication.revisionSubmittedBy || 'Customer'}</div>
+            </div>
+          </div>
+          ` : ''}
+          
           ${currentApplication.status !== 'pending' ? `
           <div class="timeline-item">
             <div class="timeline-marker completed">👁️</div>
@@ -876,6 +1022,7 @@ window.viewApplication = async function(appId) {
             </div>
           </div>
           `}
+          
           ${currentApplication.status === 'approved' ? `
           <div class="timeline-item">
             <div class="timeline-marker completed">✅</div>
@@ -1014,17 +1161,8 @@ async function updateApplicationStatus(appId, newStatus, rejectionReason = null,
       if (revisionComments) {
         updateData.revisionComments = revisionComments;
       }
+      // Don't increment revision count here - increment when customer submits revision
     }
-
-    await updateDoc(appRef, updateData);
-    console.log('✅ Application updated in Firestore!');
-
-    // Create audit log directly in frontend
-    const action = newStatus === 'approved' ? 'Approved Application' : 
-                   newStatus === 'rejected' ? 'Rejected Application' : 
-                   newStatus === 'needs revision' ? 'Requested Revision' :
-                   'Marked Under Review';
-    await createApprovalAuditLog(appId, action);
 
     // Update local data
     const appIndex = allApplications.findIndex(app => app.id === appId);
@@ -1035,6 +1173,11 @@ async function updateApplicationStatus(appId, newStatus, rejectionReason = null,
       }
       if (revisionComments) {
         allApplications[appIndex].revisionComments = revisionComments;
+      }
+      if (newStatus === 'needs revision') {
+        allApplications[appIndex].revisionRequestedBy = auth.currentUser.email;
+        allApplications[appIndex].revisionRequestedAt = new Date();
+        // Don't increment revision count here - increment when customer submits revision
       }
       allApplications[appIndex].reviewedBy = auth.currentUser.email;
       allApplications[appIndex].reviewedAt = new Date();

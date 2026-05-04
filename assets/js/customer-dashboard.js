@@ -2059,7 +2059,7 @@ function displayApplications() {
 
     const isPending = app.status === 'pending';
     const needsRevision = app.status === 'needs revision';
-    const canEdit = isPending || needsRevision;
+    const canEdit = needsRevision;  // Only allow edit when staff requests revision
     const canDelete = app.status === 'pending' || app.status === 'under review' || app.status === 'rejected' || needsRevision;
 
     // Pickup schedule removed from table view - shown only in detailed modal
@@ -2075,7 +2075,7 @@ function displayApplications() {
         <div class="table-actions">
           <button class="action-btn btn-view" onclick="viewApplication('${app.id}')">View</button>
           ${canEdit ? `
-          <button class="action-btn btn-edit" onclick="editApplication('${app.id}')">${needsRevision ? 'Revise' : 'Edit'}</button>
+          <button class="action-btn btn-edit" onclick="editApplication('${app.id}')">Revise</button>
           ` : ''}
           ${canDelete ? `
           <button class="action-btn btn-delete" onclick="deleteApplication('${app.id}')">🗑️</button>
@@ -3402,7 +3402,7 @@ function displayApplicationsWithFilter(applications) {
 
     const isPending = app.status === 'pending';
     const needsRevision = app.status === 'needs revision';
-    const canEdit = isPending || needsRevision;
+    const canEdit = needsRevision;  // Only allow edit when staff requests revision
     const canDelete = app.status === 'pending' || app.status === 'under review' || app.status === 'rejected' || needsRevision;
 
     row.innerHTML = `
@@ -3416,7 +3416,7 @@ function displayApplicationsWithFilter(applications) {
         <div class="table-actions">
           <button class="action-btn btn-view" onclick="viewApplication('${app.id}')">View</button>
           ${canEdit ? `
-          <button class="action-btn btn-edit" onclick="editApplication('${app.id}')">${needsRevision ? 'Revise' : 'Edit'}</button>
+          <button class="action-btn btn-edit" onclick="editApplication('${app.id}')">Revise</button>
           ` : ''}
           ${canDelete ? `
           <button class="action-btn btn-delete" onclick="deleteApplication('${app.id}')">🗑️</button>
@@ -3766,9 +3766,11 @@ window.editApplication = function(appId) {
   // Navigate to new application section first to ensure form is loaded
   navigateToSection('newApplicationSection');
   
-  // Wait a bit for the section to load, then populate the form
+  // Wait longer for the section and form steps to load properly, then populate the form
   setTimeout(() => {
     try {
+      console.log('Starting form population for edit mode...');
+      
       // Check if form elements exist before trying to set values
       const documentTypeEl = document.getElementById('documentType');
       const permitTypeEl = document.getElementById('permitType');
@@ -3781,242 +3783,23 @@ window.editApplication = function(appId) {
       const appLongitudeEl = document.getElementById('appLongitude');
       
       if (!documentTypeEl || !permitTypeEl || !applicantNameEl || !applicantAddressEl) {
-        console.error('Form elements not found');
-        showAlert('Error loading application form. Please try again.', 'error');
+        console.error('Form elements not found, retrying...');
+        // Retry after a short delay
+        setTimeout(() => {
+          populateEditForm(app);
+        }, 500);
         return;
       }
       
-      // Set document type and permit type FIRST to trigger form updates
-      if (app.documentType) {
-        documentTypeEl.value = app.documentType;
-        // Trigger change event to update form steps
-        documentTypeEl.dispatchEvent(new Event('change'));
-      }
-      
-      if (app.permitType) {
-        permitTypeEl.value = app.permitType;
-        // Trigger change event to update form steps
-        permitTypeEl.dispatchEvent(new Event('change'));
-      }
-      
-      // Wait another moment for form steps to update, then populate other fields
-      setTimeout(() => {
-        try {
-          console.log('Populating form fields with application data:', app);
-          
-          // Parse applicant name to determine if personal or company
-          const applicantName = app.applicantName || '';
-          const isCompany = app.applicantType === 'company' || 
-                          (applicantName.length > 50 || !applicantName.includes(' '));
-          
-          console.log('Applicant name:', applicantName, 'Is company:', isCompany);
-          
-          // Set applicant type
-          if (isCompany) {
-            const companyTypeRadio = document.getElementById('companyType');
-            const personalTypeRadio = document.getElementById('personalType');
-            const companyNameField = document.getElementById('companyName');
-            const representativeNameField = document.getElementById('representativeName');
-            
-            if (companyTypeRadio) companyTypeRadio.checked = true;
-            if (personalTypeRadio) personalTypeRadio.checked = false;
-            if (companyNameField) companyNameField.value = applicantName;
-            if (representativeNameField) representativeNameField.value = app.representativeName || '';
-            
-            console.log('Company fields populated');
-          } else {
-            const personalTypeRadio = document.getElementById('personalType');
-            const companyTypeRadio = document.getElementById('companyType');
-            
-            if (personalTypeRadio) personalTypeRadio.checked = true;
-            if (companyTypeRadio) companyTypeRadio.checked = false;
-            
-            // Parse name into parts including suffix
-            const nameParts = applicantName.split(' ');
-            const suffixes = ['Jr', 'Sr', 'I', 'II', 'III', 'IV', 'V'];
-            
-            let firstName = nameParts[0] || '';
-            let lastName = '';
-            let middleName = '';
-            let suffix = '';
-            
-            // Check if last part is a suffix
-            const lastPart = nameParts[nameParts.length - 1] || '';
-            if (suffixes.includes(lastPart)) {
-              suffix = lastPart;
-              lastName = nameParts[nameParts.length - 2] || '';
-              // Middle name is everything between first and last name
-              if (nameParts.length > 3) {
-                middleName = nameParts.slice(1, -2).join(' ');
-              }
-            } else {
-              lastName = lastPart;
-              // Middle name is everything between first and last name
-              if (nameParts.length > 2) {
-                middleName = nameParts.slice(1, -1).join(' ');
-              }
-            }
-            
-            // Populate name fields
-            const firstNameField = document.getElementById('firstName');
-            const lastNameField = document.getElementById('lastName');
-            const middleNameField = document.getElementById('middleName');
-            const suffixField = document.getElementById('suffix');
-            
-            if (firstNameField) firstNameField.value = firstName;
-            if (lastNameField) lastNameField.value = lastName;
-            if (middleNameField) middleNameField.value = middleName;
-            if (suffixField) suffixField.value = suffix;
-            
-            console.log('Personal name fields populated:', { firstName, lastName, middleName, suffix });
-          }
-          
-          // Parse address into components - improved parsing
-          const fullAddress = app.applicantAddress || '';
-          if (fullAddress) {
-            console.log('Parsing address:', fullAddress);
-            
-            // Try different address formats
-            let streetAddress = '';
-            let barangay = '';
-            let municipal = '';
-            let district = '';
-            
-            // Format: "Street, Barangay, Municipal, District"
-            const addressParts = fullAddress.split(', ').map(part => part.trim());
-            
-            if (addressParts.length >= 4) {
-              streetAddress = addressParts[0] || '';
-              barangay = addressParts[1] || '';
-              municipal = addressParts[2] || '';
-              district = addressParts[3] || '';
-            } else if (addressParts.length === 3) {
-              // Try to identify which part is which
-              streetAddress = addressParts[0] || '';
-              barangay = addressParts[1] || '';
-              municipal = addressParts[2] || '';
-              district = 'District 4 - Laguna'; // Default
-            } else if (addressParts.length === 2) {
-              streetAddress = addressParts[0] || '';
-              municipal = addressParts[1] || '';
-              barangay = 'Not specified';
-              district = 'District 4 - Laguna'; // Default
-            }
-            
-            // Populate address fields
-            const streetAddressField = document.getElementById('streetAddress');
-            const barangayField = document.getElementById('barangay');
-            const municipalField = document.getElementById('municipal');
-            const districtField = document.getElementById('district');
-            
-            if (streetAddressField) streetAddressField.value = streetAddress;
-            if (municipalField) municipalField.value = municipal;
-            if (districtField) districtField.value = district;
-            
-            // For barangay, we need to trigger the municipal change to populate barangay options first
-            if (municipalField && barangayField) {
-              // Trigger municipal change to populate barangay options
-              municipalField.dispatchEvent(new Event('change'));
-              
-              // Then set the barangay value after a short delay
-              setTimeout(() => {
-                if (barangayField) {
-                  barangayField.value = barangay;
-                  console.log('Barangay set after municipal change:', barangay);
-                }
-              }, 100);
-            }
-            
-            console.log('Address fields populated:', { streetAddress, barangay, municipal, district });
-          }
-          
-          // Populate mobile number based on applicant type
-          if (app.applicantType === 'company' || app.applicantName?.length > 50) {
-            if (applicantMobileCompanyEl) {
-              applicantMobileCompanyEl.value = app.applicantMobile || '';
-              console.log('Company mobile number populated:', app.applicantMobile);
-            }
-          } else {
-            if (applicantMobileIndividualEl) {
-              applicantMobileIndividualEl.value = app.applicantMobile || '';
-              console.log('Individual mobile number populated:', app.applicantMobile);
-            }
-          }
-          
-          // Populate application details
-          if (applicationDetailsEl) {
-            applicationDetailsEl.value = app.applicationDetails || '';
-            console.log('Application details populated');
-          }
-          
-          // Populate coordinates
-          if (app.latitude && appLatitudeEl) {
-            appLatitudeEl.value = app.latitude;
-            console.log('Latitude populated:', app.latitude);
-          }
-          if (app.longitude && appLongitudeEl) {
-            appLongitudeEl.value = app.longitude;
-            console.log('Longitude populated:', app.longitude);
-          }
-          
-          // Populate project-specific fields if they exist
-          if (app.projectTitle) {
-            const projectTitleField = document.getElementById('projectTitle');
-            if (projectTitleField) projectTitleField.value = app.projectTitle;
-          }
-          
-          if (app.projectLocation) {
-            const projectLocationField = document.getElementById('projectLocation');
-            if (projectLocationField) projectLocationField.value = app.projectLocation;
-          }
-          
-          if (app.projectCost) {
-            const projectCostField = document.getElementById('projectCost');
-            if (projectCostField) projectCostField.value = app.projectCost;
-          }
-          
-          if (app.projectDescription) {
-            const projectDescriptionField = document.getElementById('projectDescription');
-            if (projectDescriptionField) projectDescriptionField.value = app.projectDescription;
-          }
-          
-          console.log('All form fields populated successfully');
-          
-          // Update document upload fields
-          if (app.documentType && app.permitType) {
-            updateDocumentUploadFields(app.documentType, app.permitType);
-            
-            // Display existing documents after a longer delay to ensure DOM is ready
-            setTimeout(() => {
-              console.log('About to display existing documents...');
-              console.log('App documents:', app.documents);
-              displayExistingDocuments(app.documents || []);
-            }, 500);
-          }
-          
-          // Change submit button text
-          const submitBtn = document.querySelector('#newApplicationForm button[type="submit"]');
-          if (submitBtn) {
-            submitBtn.textContent = 'Update Application';
-          }
-          
-          // Show success message
-          showAlert('Application loaded for editing. Make your changes and submit to update.', 'info');
-          
-        } catch (error) {
-          console.error('Error populating form fields:', error);
-          showAlert('Error loading application data. Please try again.', 'error');
-        }
-      }, 200);
-      
+      // Call the population function
+      populateEditForm(app);
     } catch (error) {
       console.error('Error populating edit form:', error);
-      showAlert('Error loading application data. Please try again.', 'error');
     }
-  }, 100);
+  }, 500);
 };
 
-// Function to display existing documents when editing
+// Function to display existing documents
 function displayExistingDocuments(documents) {
   console.log('Displaying existing documents:', documents);
   
@@ -6506,14 +6289,28 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
     let appRef;
     if (isEditing) {
       appRef = doc(db, 'applications', isEditing);
-      await updateDoc(appRef, { ...applicationData, updatedAt: serverTimestamp() });
+      // Explicitly set status to pending when revising
+      const currentCount = window.editingApplicationData?.revisionCount || 0;
+      await updateDoc(appRef, { 
+        ...applicationData, 
+        status: 'pending',  // Force status to pending for revised applications
+        revisionSubmittedAt: serverTimestamp(),  // Track when revision was submitted
+        revisionSubmittedBy: auth.currentUser?.email || 'customer',  // Track who submitted revision
+        revisionCount: currentCount + 1,  // Increment revision count when customer submits
+        updatedAt: serverTimestamp() 
+      });
+      console.log('Application updated with status: pending');
     } else {
       appRef = await addDoc(collection(db, 'applications'), applicationData);
     }
     
     // INSTANT: Show success and redirect
     if (isEditing) {
-      showAlert('Application updated successfully! New documents are being uploaded in background...', 'success');
+      showAlert('Application updated successfully! Status is now pending for review. New documents are being uploaded in background...', 'success');
+      // Immediately refresh applications to show updated status
+      setTimeout(() => {
+        fetchUserApplications();
+      }, 1000);
     } else {
       showAlert('Application submitted successfully! Uploading documents in background...', 'success');
     }
