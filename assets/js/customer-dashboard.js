@@ -1,9 +1,9 @@
 import { auth, db } from './firebase-config.js';
 import { 
   signOut, 
-  onAuthStateChanged,
   getIdToken 
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { protectRoute, logout as authGuardLogout } from './auth-guard.js';
 import { 
   collection, 
   getDocs, 
@@ -486,114 +486,76 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Check authentication on page load
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    console.log('Customer dashboard: User authenticated:', user.email);
-    console.log('Customer dashboard: User UID:', user.uid);
+// Using auth-guard for proper Firebase Auth state handling
+protectRoute({
+  allowedRoles: ['customer'], // Only customers allowed
+  loginRedirect: '/pages/index.html',
+  onAuthenticated: async (state) => {
+    console.log('Customer dashboard: User authenticated, role:', state.role);
     
-    // Check if email is verified for customers
+    // Check email verification
+    if (!state.user.emailVerified) {
+      showAlert('Please verify your email before accessing the dashboard. Check your inbox for the verification link.', 'warning');
+      window.location.href = '/pages/index.html';
+      return;
+    }
+    
+    // Handle role-based redirects if needed
+    if (state.role === 'admin') {
+      window.location.href = '/pages/admin-dashboard.html';
+      return;
+    } else if (state.role === 'staff') {
+      window.location.href = '/pages/staff-dashboard.html';
+      return;
+    }
+    
+    // Sync user data with Firestore
     try {
-      console.log('Customer dashboard: Fetching user document from Firestore...');
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const userDoc = await getDoc(doc(db, 'users', state.user.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        console.log('Customer dashboard: User document found:', userData);
-        currentUserData = {
-          ...userData,
-          uid: user.uid // Add uid from Firebase Auth
-        };
+        currentUserData = { ...userData, uid: state.user.uid };
         
-        // Sync emailVerified from Firebase Auth to database if different
-        if (userData.emailVerified !== user.emailVerified) {
-          await updateDoc(doc(db, 'users', user.uid), {
-            emailVerified: user.emailVerified,
+        // Sync emailVerified if different
+        if (userData.emailVerified !== state.user.emailVerified) {
+          await updateDoc(doc(db, 'users', state.user.uid), {
+            emailVerified: state.user.emailVerified,
             updatedAt: serverTimestamp()
           });
-          currentUserData.emailVerified = user.emailVerified;
+          currentUserData.emailVerified = state.user.emailVerified;
         }
-        
-        // Check Firebase Auth emailVerified property
-        if (userData.role === 'customer' && !user.emailVerified) {
-          console.log('Customer dashboard: Email not verified, redirecting...');
-          showAlert('Please verify your email before accessing the dashboard. Check your inbox for the verification link.', 'warning');
-          window.location.href = 'index.html';
-          return;
-        }
-        
-        console.log('Customer dashboard: User role:', userData.role);
-        if (userData.role !== 'customer') {
-          // Redirect to appropriate dashboard based on role
-          console.log('Customer dashboard: Redirecting to role-specific dashboard:', userData.role);
-          if (userData.role === 'admin') {
-            window.location.href = '/pages/admin-dashboard.html';
-          } else if (userData.role === 'staff') {
-            window.location.href = '/pages/staff-dashboard.html';
-          }
-          return;
-        }
-        
-        console.log('Customer dashboard: Loading dashboard data for customer...');
-        loadDashboardData();
-        updateUserInfo(user, userData);
-
-        // On login, let the window load event handle section restoration
-        // localStorage is already cleared on logout
       } else {
-        // User document doesn't exist, create it
-        console.warn('Customer dashboard: User document not found in database, creating user document');
+        // Create user document if missing
         currentUserData = {
-          uid: user.uid, // Add uid from Firebase Auth
-          firstName: user.displayName?.split(' ')[0] || '',
-          surname: user.displayName?.split(' ')[1] || '',
-          email: user.email,
-          role: 'customer', // Default role for new users
-          emailVerified: user.emailVerified,
+          uid: state.user.uid,
+          firstName: state.user.displayName?.split(' ')[0] || '',
+          surname: state.user.displayName?.split(' ')[1] || '',
+          email: state.user.email,
+          role: 'customer',
+          emailVerified: state.user.emailVerified,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         };
-        
-        console.log('Customer dashboard: Creating new user document:', currentUserData);
-        await setDoc(doc(db, 'users', user.uid), currentUserData);
-        console.log('Customer dashboard: User document created successfully');
-        
-        console.log('Customer dashboard: Loading dashboard data for new customer...');
-        loadDashboardData();
-        updateUserInfo(user, currentUserData);
+        await setDoc(doc(db, 'users', state.user.uid), currentUserData);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
-      // Use Firebase Auth data as fallback and create user document
+      // Use basic data as fallback
       currentUserData = {
-        uid: user.uid, // Add uid from Firebase Auth
-        firstName: user.displayName?.split(' ')[0] || '',
-        surname: user.displayName?.split(' ')[1] || '',
-        email: user.email,
+        uid: state.user.uid,
+        firstName: state.user.displayName?.split(' ')[0] || '',
+        surname: state.user.displayName?.split(' ')[1] || '',
+        email: state.user.email,
         role: 'customer',
-        emailVerified: user.emailVerified,
-        createdAt: serverTimestamp()
+        emailVerified: state.user.emailVerified
       };
-      
-      try {
-        await setDoc(doc(db, 'users', user.uid), currentUserData);
-      } catch (err) {
-        console.error('Error creating user document:', err);
-      }
-      
-      if (!user.emailVerified) {
-        showAlert('Please verify your email before accessing the dashboard. Check your inbox for the verification link.', 'warning');
-        window.location.href = 'index.html';
-        return;
-      }
-      
-      loadDashboardData();
-      updateUserInfo(user, currentUserData);
     }
-  } else {
-    // User not logged in - redirect to login page
-    // The justLoggedOut flag prevents auto-redirect loops
-    if (!sessionStorage.getItem('justLoggedOut')) {
-      window.location.href = 'index.html';
-    }
+    
+    loadDashboardData();
+    updateUserInfo(state.user, currentUserData);
+  },
+  onUnauthenticated: () => {
+    console.log('Customer dashboard: Not authenticated or access denied');
   }
 });
 
@@ -3364,18 +3326,15 @@ function updateDropdownUserInfo() {
 }
 
 // Logout function
-function logout() {
-  // Set flag so onAuthStateChanged and index.html know this is an explicit logout
-  sessionStorage.setItem('justLoggedOut', 'true');
-  // Clear current section so on login it goes to dashboard
-  localStorage.removeItem('currentSection');
-  auth.signOut().then(() => {
-    window.location.href = 'index.html';
-  }).catch((error) => {
+async function logout() {
+  try {
+    // Clear current section so on login it goes to dashboard
+    localStorage.removeItem('currentSection');
+    await authGuardLogout('/pages/index.html');
+  } catch (error) {
     console.error('Logout error:', error);
-    sessionStorage.removeItem('justLoggedOut');
     showAlert('Error logging out. Please try again.', 'error');
-  });
+  }
 }
 
 document.getElementById('applyFilterBtn')?.addEventListener('click', applyFilters);

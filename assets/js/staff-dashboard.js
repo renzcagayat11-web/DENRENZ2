@@ -31,12 +31,12 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 import { 
   signOut, 
-  onAuthStateChanged,
   getIdToken,
   updatePassword,
   reauthenticateWithCredential,
   EmailAuthProvider
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { protectRoute, logout as authGuardLogout } from './auth-guard.js';
 import { 
   collection, 
   getDocs, 
@@ -246,77 +246,45 @@ setTimeout(() => {
 }, 2000);
 
 // Check authentication and role on page load
-// Wait for Firebase to be fully initialized
-setTimeout(() => {
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      try {
-        // Get user role from token
-        const idTokenResult = await user.getIdTokenResult(true);
-        const role = idTokenResult.claims.role;
-
-        console.log('🔐 Token role:', role, 'for user:', user.email);
-
-        // If no role in token, try to fix it automatically
-        if (!role) {
-          console.log('⚠️ No role in token! Attempting to fix...');
-
-          // Check Firestore for user role
-          const userDoc = await getDoc(doc(db, 'users', user.uid));
-          const firestoreRole = userDoc.exists() ? userDoc.data().role : null;
-
-          console.log('📋 Firestore role:', firestoreRole);
-
-          if (firestoreRole === 'staff' || firestoreRole === 'admin') {
-            // Fix the token by setting custom claims via server
-            const idToken = await user.getIdToken();
-            const response = await fetch(`${API_BASE}/debug/set-staff-role`, {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${idToken}`
-              }
-            });
-
-            const result = await response.json();
-            console.log('🔧 Auto-fix result:', result);
-
-            if (result.success) {
-              alert('⚠️ Your account was missing staff role. It has been fixed!\n\nPlease LOGOUT and LOGIN again for changes to take effect.');
-              return;
-            }
-          } else {
-            // No role in Firestore either - set it
-            console.log('🔧 Setting staff role for new user...');
-            await fixStaffRole();
-            alert('⚠️ Your account was set up as staff.\n\nPlease LOGOUT and LOGIN again for changes to take effect.');
-            return;
-          }
+// Using auth-guard for proper Firebase Auth state handling
+protectRoute({
+  allowedRoles: ['staff', 'admin'],
+  loginRedirect: '/pages/index.html',
+  onAuthenticated: async (state) => {
+    console.log('Staff dashboard: User authenticated, role:', state.role);
+    
+    // Check for role issues and auto-fix if needed
+    const idTokenResult = await state.user.getIdTokenResult(true);
+    const tokenRole = idTokenResult.claims.role;
+    
+    if (!tokenRole) {
+      console.log('⚠️ No role in token! Attempting to fix...');
+      
+      // Check Firestore for user role
+      const userDoc = await getDoc(doc(db, 'users', state.user.uid));
+      const firestoreRole = userDoc.exists() ? userDoc.data().role : null;
+      
+      if (firestoreRole === 'staff' || firestoreRole === 'admin') {
+        const idToken = await state.user.getIdToken();
+        const response = await fetch(`${API_BASE}/debug/set-staff-role`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${idToken}` }
+        });
+        const result = await response.json();
+        if (result.success) {
+          alert('⚠️ Your account was missing staff role. It has been fixed!\n\nPlease LOGOUT and LOGIN again for changes to take effect.');
+          return;
         }
-
-        if (role === 'staff' || role === 'admin') {
-          console.log('✅ Valid role:', role);
-          loadDashboardData();
-          updateUserInfo(user, { role });
-        } else {
-          console.log('❌ Invalid role:', role);
-          alert('⚠️ Your account does not have staff role. Please contact admin.');
-          // auth.signOut();
-          // window.location.href = 'index.html';
-        }
-      } catch (error) {
-        console.error('🔍 STAFF DASHBOARD DEBUG: Token verification failed:', error);
-        console.log('🔍 STAFF DASHBOARD DEBUG: Would redirect to index, but DISABLED FOR TESTING');
-        // auth.signOut();
-        // window.location.href = 'index.html';
-      }
-    } else {
-      console.log('Staff dashboard: No user authenticated, redirecting...');
-      if (!sessionStorage.getItem('justLoggedOut')) {
-        window.location.href = 'index.html';
       }
     }
+    
+    loadDashboardData();
+    updateUserInfo(state.user, { role: state.role });
+  },
+  onUnauthenticated: () => {
+    console.log('Staff dashboard: Not authenticated or access denied');
+  }
 });
-}, 1000); // Wait 1 second for Firebase to be fully initialized
 
 // Update user info in header
 function updateUserInfo(user, userData) {
@@ -2533,8 +2501,7 @@ if (cancelLogout) {
 if (confirmLogout) {
   confirmLogout.addEventListener('click', async () => {
     try {
-      await signOut(auth);
-      window.location.href = 'index.html';
+      await authGuardLogout('/pages/index.html');
     } catch (error) {
       console.error('Logout error:', error);
     }

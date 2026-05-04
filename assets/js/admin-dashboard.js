@@ -2,12 +2,12 @@ import { auth, db } from './firebase-config.js';
 import { 
   signInWithEmailAndPassword, 
   signOut, 
-  onAuthStateChanged,
   getIdToken,
   updatePassword,
   reauthenticateWithCredential,
   EmailAuthProvider
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { protectRoute, logout as authGuardLogout, getCurrentUser, getCurrentRole } from './auth-guard.js';
 import { 
   collection, 
   getDocs, 
@@ -220,43 +220,16 @@ async function getClientIP() {
 }
 
 // Check authentication and role on page load
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    console.log('Admin dashboard: User authenticated, checking role...');
-    console.log('🔍 ADMIN DASHBOARD DEBUG: User logged in, TEMPORARILY SKIPPING ROLE VERIFICATION');
-    
-    // TEMPORARILY SKIP ROLE VERIFICATION FOR TESTING
-    try {
-      // Get user role from token instead of backend call
-      const idTokenResult = await user.getIdTokenResult(true);
-      const role = idTokenResult.claims.role || 'admin'; // Default to admin for testing
-      console.log('🔍 ADMIN DASHBOARD DEBUG: Role from token:', role);
-      
-      if (role === 'admin') {
-        console.log('🔍 ADMIN DASHBOARD DEBUG: Role verified, loading dashboard');
-        // Log successful login
-        // await logAudit('User Login', `Admin logged in successfully`, 'user', user.uid, null, null, 'success');
-        loadDashboardData();
-        updateUserInfo(user, { role });
-      } else {
-        console.log('🔍 ADMIN DASHBOARD DEBUG: Invalid role, would redirect to index');
-        // await logAudit('User Login', `Non-admin user attempted access`, 'user', user.uid, null, null, 'failure');
-        // alert('Access denied. Admin role required.');
-        // auth.signOut();
-        // window.location.href = 'index.html';
-      }
-    } catch (error) {
-      console.error('🔍 ADMIN DASHBOARD DEBUG: Token verification failed:', error);
-      console.log('🔍 ADMIN DASHBOARD DEBUG: Would redirect to index, but DISABLED FOR TESTING');
-      // alert('Authentication failed. Please try logging in again.');
-      // auth.signOut();
-      // window.location.href = 'index.html';
-    }
-  } else {
-    console.log('Admin dashboard: No user authenticated, redirecting...');
-    if (!sessionStorage.getItem('justLoggedOut')) {
-      window.location.href = 'index.html';
-    }
+protectRoute({
+  allowedRoles: ['admin'],
+  loginRedirect: '/pages/index.html',
+  onAuthenticated: async (state) => {
+    console.log('Admin dashboard: User authenticated, role:', state.role);
+    updateUserInfo(state.user, { role: state.role });
+    loadDashboardData();
+  },
+  onUnauthenticated: () => {
+    console.log('Admin dashboard: Not authenticated or access denied');
   }
 });
 
@@ -667,9 +640,8 @@ if (confirmLogout) {
   confirmLogout.addEventListener('click', async () => {
     try {
       await logAudit('User Logout', 'User logged out manually', 'user', auth.currentUser?.uid, null, null, 'success');
-      await signOut(auth);
       logoutModal.style.display = 'none';
-      window.location.href = 'index.html';
+      await authGuardLogout('/pages/index.html');
     } catch (error) {
       console.error('Logout error:', error);
     }
