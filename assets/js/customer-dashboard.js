@@ -1986,8 +1986,7 @@ window.fetchUserApplications = async function() {
       return;
     }
     
-    console.log('Customer dashboard: Fetching applications for user:', auth.currentUser.uid);
-    console.log('Customer dashboard: User email:', auth.currentUser.email);
+    console.log('Customer dashboard: Setting up real-time listener for user:', auth.currentUser.uid);
     
     const applicationsRef = collection(db, 'applications');
     const q = query(
@@ -1995,34 +1994,37 @@ window.fetchUserApplications = async function() {
       where('applicantUid', '==', auth.currentUser.uid)
     );
     
-    console.log('Customer dashboard: Executing query...');
-    const querySnapshot = await getDocs(q);
+    // Set up real-time listener for immediate status updates
+    if (window.userApplicationsUnsubscribe) {
+      window.userApplicationsUnsubscribe();
+    }
     
-    console.log('Customer dashboard: Query snapshot size:', querySnapshot.size);
-    console.log('Customer dashboard: Query snapshot docs:', querySnapshot.docs.length);
-    
-    userApplications = [];
-    querySnapshot.forEach((doc) => {
-      const appData = {
-        id: doc.id,
-        ...doc.data()
-      };
-      console.log('Customer dashboard: Found application:', appData.applicationId, 'Status:', appData.status);
-      userApplications.push(appData);
+    window.userApplicationsUnsubscribe = onSnapshot(q, (querySnapshot) => {
+      console.log('Customer dashboard: Real-time update received, count:', querySnapshot.size);
+      
+      userApplications = [];
+      querySnapshot.forEach((doc) => {
+        const appData = {
+          id: doc.id,
+          ...doc.data()
+        };
+        console.log('Customer dashboard: App:', appData.applicationId, 'Status:', appData.status, 'Revision count:', appData.revisionCount);
+        userApplications.push(appData);
+      });
+      
+      // Sort by createdAt manually
+      userApplications.sort((a, b) => {
+        const aTime = a.createdAt?.toMillis() || 0;
+        const bTime = b.createdAt?.toMillis() || 0;
+        return bTime - aTime;
+      });
+      
+      console.log('Customer dashboard: Calling displayApplications with', userApplications.length, 'applications');
+      displayApplications();
+    }, (error) => {
+      console.error('Customer dashboard: Real-time listener error:', error);
     });
     
-    console.log('Customer dashboard: Total user applications:', userApplications.length);
-    console.log('Customer dashboard: User applications data:', userApplications);
-    
-    // Sort by createdAt manually
-    userApplications.sort((a, b) => {
-      const aTime = a.createdAt?.toMillis() || 0;
-      const bTime = b.createdAt?.toMillis() || 0;
-      return bTime - aTime;
-    });
-    
-    console.log('Customer dashboard: Calling displayApplications...');
-    displayApplications();
   } catch (error) {
     console.error('Error fetching applications:', error);
     userApplications = [];
@@ -2052,7 +2054,7 @@ function displayApplications() {
   }
   
   userApplications.forEach((app, index) => {
-    console.log(`Customer dashboard: Processing application ${index + 1}:`, app.applicationId);
+    console.log(`Customer dashboard: Processing application ${index + 1}:`, app.applicationId, 'Status:', app.status, 'Can edit:', app.status === 'needs revision');
     const row = document.createElement('tr');
     const statusClass = getStatusClass(app.status);
     const dateFormatted = formatDate(app.createdAt);
@@ -2061,6 +2063,8 @@ function displayApplications() {
     const needsRevision = app.status === 'needs revision';
     const canEdit = needsRevision;  // Only allow edit when staff requests revision
     const canDelete = app.status === 'pending' || app.status === 'under review' || app.status === 'rejected' || needsRevision;
+    
+    console.log(`Customer dashboard: App ${app.applicationId} - needsRevision: ${needsRevision}, canEdit: ${canEdit}`);
 
     // Pickup schedule removed from table view - shown only in detailed modal
 
@@ -6289,17 +6293,41 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
     let appRef;
     if (isEditing) {
       appRef = doc(db, 'applications', isEditing);
+      console.log('Updating application with ID:', isEditing);
+      console.log('Current revision count:', window.editingApplicationData?.revisionCount || 0);
+      
       // Explicitly set status to pending when revising
       const currentCount = window.editingApplicationData?.revisionCount || 0;
-      await updateDoc(appRef, { 
+      const updateData = { 
         ...applicationData, 
         status: 'pending',  // Force status to pending for revised applications
         revisionSubmittedAt: serverTimestamp(),  // Track when revision was submitted
         revisionSubmittedBy: auth.currentUser?.email || 'customer',  // Track who submitted revision
         revisionCount: currentCount + 1,  // Increment revision count when customer submits
         updatedAt: serverTimestamp() 
-      });
-      console.log('Application updated with status: pending');
+      };
+      
+      console.log('Update data being sent:', updateData);
+      
+      try {
+        await updateDoc(appRef, updateData);
+        console.log('✅ Application updated successfully with status: pending');
+        
+        // Verify the update was successful
+        const verifyDoc = await getDoc(appRef);
+        const verifyData = verifyDoc.data();
+        console.log('✅ Verification - Status after update:', verifyData.status);
+        console.log('✅ Verification - Revision count:', verifyData.revisionCount);
+        
+        if (verifyData.status !== 'pending') {
+          console.error('❌ Status update failed! Expected: pending, Got:', verifyData.status);
+          showAlert('Error: Status update may not have completed. Please refresh and check your application status.', 'error');
+        }
+      } catch (updateError) {
+        console.error('❌ Error updating application:', updateError);
+        showAlert('Error updating application: ' + updateError.message, 'error');
+        throw updateError;
+      }
     } else {
       appRef = await addDoc(collection(db, 'applications'), applicationData);
     }
