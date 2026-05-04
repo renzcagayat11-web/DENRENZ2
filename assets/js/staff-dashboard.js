@@ -591,17 +591,23 @@ function loadSampleApplications() {
 // Filter and display applications
 function filterAndDisplayApplications() {
   const statusFilter = document.getElementById('statusFilter').value;
+  const typeFilter = document.getElementById('typeFilter')?.value || 'all';
   const searchInput = document.getElementById('searchInput').value.toLowerCase();
   
-  // Start with active applications only (pending and under review)
-  let filtered = allApplications.filter(app => 
-    app.status === 'pending' || app.status === 'under review' || app.status === 'needs resubmit'
-  );
+  // Start with all applications (show everything including approved/rejected in the table)
+  let filtered = [...allApplications];
   
-  // Filter by status (from active applications only)
+  // Filter by status
   if (statusFilter !== 'all') {
     filtered = filtered.filter(app => 
       app.status.toLowerCase() === statusFilter.toLowerCase()
+    );
+  }
+  
+  // Filter by permit type
+  if (typeFilter !== 'all') {
+    filtered = filtered.filter(app => 
+      app.permitType && app.permitType.toLowerCase() === typeFilter.toLowerCase()
     );
   }
   
@@ -610,9 +616,16 @@ function filterAndDisplayApplications() {
     filtered = filtered.filter(app =>
       (app.applicationId && app.applicationId.toLowerCase().includes(searchInput)) ||
       app.id.toLowerCase().includes(searchInput) ||
-      (app.applicantName && app.applicantName.toLowerCase().includes(searchInput))
+      (app.applicantName && app.applicantName.toLowerCase().includes(searchInput)) ||
+      (app.permitType && app.permitType.toLowerCase().includes(searchInput))
     );
   }
+  
+  // Update visible count
+  const visibleCount = document.getElementById('visibleCount');
+  const totalCount = document.getElementById('totalCount');
+  if (visibleCount) visibleCount.textContent = filtered.length;
+  if (totalCount) totalCount.textContent = allApplications.length;
   
   displayApplications(filtered);
 }
@@ -625,7 +638,7 @@ function displayApplications(applications) {
   tbody.innerHTML = '';
   
   if (applications.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 32px; color: #666;">No active applications found (approved permits are in Records, rejected in Archived)</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 32px; color: #666;">No applications found matching your filters. Try adjusting your search or filters.</td></tr>';
     return;
   }
   
@@ -2460,6 +2473,7 @@ function loadSettingsData() {
 
 // Filter event listeners
 document.getElementById('statusFilter').addEventListener('change', filterAndDisplayApplications);
+document.getElementById('typeFilter')?.addEventListener('change', filterAndDisplayApplications);
 document.getElementById('searchInput').addEventListener('input', filterAndDisplayApplications);
 
 // Logout
