@@ -649,7 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if(role === 'customer' && !cred.user.emailVerified){
             console.log('🔍 LOGIN DEBUG: Customer email not verified');
             authMsg.textContent = 'Email not verified. Please check your inbox and click the verification link.'; 
-            authResendBtn.style.display = '';
+            // Don't show resend button here - only show after signup
             return;
           }
           
@@ -706,25 +706,37 @@ document.addEventListener('DOMContentLoaded', () => {
       try{
         const user = auth.currentUser;
         if(!user) {
-          // Try to get email from the form for newly registered users
+          // Get email from the form for newly registered users
           const email = document.getElementById('authEmail')?.value || document.getElementById('signupEmail')?.value;
-          if(!email) return authMsg.textContent = 'Please enter your email address first.';
-          
-          // Try to sign in the user to get their user object for resending
-          try {
-            const tempCred = await signInWithEmailAndPassword(auth, email, 'temp'); // This will fail but we can handle it
-          } catch (signInErr) {
-            if (signInErr.code === 'auth/wrong-password' || signInErr.code === 'auth/user-not-found') {
-              authMsg.textContent = 'Account not found or incorrect password. Please check your credentials.';
-            } else {
-              authMsg.textContent = 'Error: '+signInErr.message;
-            }
+          if(!email) {
+            authMsg.textContent = 'Please enter your email address first.';
             return;
           }
+          
+          // For newly registered users, we need to sign them in temporarily to resend verification
+          try {
+            // Try to get the password from the signup form if available
+            const password = document.getElementById('signupPassword')?.value;
+            if (!password) {
+              authMsg.textContent = 'Please login first, then use the resend verification option.';
+              return;
+            }
+            
+            const tempCred = await signInWithEmailAndPassword(auth, email, password);
+            await sendEmailVerification(tempCred.user);
+            authMsg.textContent = 'Verification email resent. Please check your inbox.';
+            
+            // Sign out after resending to maintain security
+            await signOut(auth);
+          } catch (signInErr) {
+            console.error('Sign in error for resend:', signInErr);
+            authMsg.textContent = 'Unable to resend verification. Please check your credentials or contact support.';
+          }
+        } else {
+          // User is already signed in
+          await sendEmailVerification(user);
+          authMsg.textContent = 'Verification email resent. Please check your inbox.';
         }
-        
-        await sendEmailVerification(user);
-        authMsg.textContent = 'Verification email resent. Please check your inbox.';
       }catch(err){ 
         console.error('Resend verification error:', err);
         authMsg.textContent = 'Error resending verification: '+err.message;
@@ -1089,7 +1101,8 @@ onAuthStateChanged(auth, async user => {
       if(role === 'customer'){
         if(!user.emailVerified){
           userInfo.textContent = `${user.email} (unverified)`;
-          authMsg.textContent = 'Please verify your email to access customer features.'; authResendBtn.style.display = '';
+          authMsg.textContent = 'Please verify your email to access customer features.'; 
+          // Don't show resend button here - only show after signup
           q('#customerSection').style.display = 'none';
         } else {
           // Customer is logged in and verified - redirect to customer dashboard only if on login/auth pages
