@@ -2021,6 +2021,8 @@ window.fetchUserApplications = async function() {
       
       console.log('Customer dashboard: Calling displayApplications with', userApplications.length, 'applications');
       displayApplications();
+      updateStats(); // Update stats when data arrives
+      loadActivityFeed(); // Update activity feed too
     }, (error) => {
       console.error('Customer dashboard: Real-time listener error:', error);
     });
@@ -2029,6 +2031,7 @@ window.fetchUserApplications = async function() {
     console.error('Error fetching applications:', error);
     userApplications = [];
     displayApplications();
+    updateStats(); // Clear stats on error
   }
 };
 
