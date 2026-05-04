@@ -3258,29 +3258,65 @@ userAvatarBtn?.addEventListener('click', (e) => {
   userDropdown.style.display = userDropdown.style.display === 'none' ? 'block' : 'none';
 });
 
+// Logout Modal Elements
+const logoutModal = document.getElementById('logoutModal');
+const logoutModalCloseBtn = document.getElementById('logoutModalCloseBtn');
+const cancelLogout = document.getElementById('cancelLogout');
+const confirmLogout = document.getElementById('confirmLogout');
+
+// Show logout modal function
+function showLogoutModal() {
+  if (logoutModal) {
+    logoutModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+// Hide logout modal function
+function hideLogoutModal() {
+  if (logoutModal) {
+    logoutModal.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+}
+
+// Dropdown logout button click
 dropdownLogoutBtn?.addEventListener('click', (e) => {
   e.stopPropagation();
   userDropdown.style.display = 'none';
-  const logoutModal = document.getElementById('logoutModal');
-  if (logoutModal) {
-    showModal('logoutModal');
-  } else {
-    logout();
+  showLogoutModal();
+});
+
+// Close modal when clicking X
+logoutModalCloseBtn?.addEventListener('click', hideLogoutModal);
+
+// Cancel logout
+cancelLogout?.addEventListener('click', hideLogoutModal);
+
+// Confirm logout
+confirmLogout?.addEventListener('click', async () => {
+  try {
+    hideLogoutModal();
+    await logout();
+  } catch (error) {
+    console.error('Logout error:', error);
+    showAlert('Error logging out. Please try again.', 'error');
   }
 });
 
-// Logout handler - direct logout without modal
-const logoutBtn = document.getElementById('logoutBtn');
-if (logoutBtn) {
-  logoutBtn.addEventListener('click', async () => {
-    try {
-      await signOut(auth);
-      window.location.href = 'index.html';
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  });
-}
+// Close modal when clicking overlay
+logoutModal?.addEventListener('click', (e) => {
+  if (e.target === logoutModal) {
+    hideLogoutModal();
+  }
+});
+
+// Close modal on Escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && logoutModal?.style.display === 'flex') {
+    hideLogoutModal();
+  }
+});
 
 // Close dropdown when clicking on menu items
 document.querySelectorAll('.dropdown-item').forEach(item => {
