@@ -590,25 +590,44 @@ function loadSampleApplications() {
 
 // Filter and display applications
 function filterAndDisplayApplications() {
-  const statusFilter = document.getElementById('statusFilter').value;
-  const typeFilter = document.getElementById('typeFilter')?.value || 'all';
-  const searchInput = document.getElementById('searchInput').value.toLowerCase();
+  const statusFilter = document.getElementById('filterStatus').value;
+  const documentTypeFilter = document.getElementById('filterDocumentType').value;
+  const dateFromFilter = document.getElementById('filterDateFrom').value;
+  const dateToFilter = document.getElementById('filterDateTo').value;
+  const searchInput = document.getElementById('searchApplication').value.toLowerCase();
   
   // Start with all applications (show everything including approved/rejected in the table)
   let filtered = [...allApplications];
   
   // Filter by status
-  if (statusFilter !== 'all') {
+  if (statusFilter && statusFilter !== '') {
     filtered = filtered.filter(app => 
-      app.status.toLowerCase() === statusFilter.toLowerCase()
+      app.status && app.status.toLowerCase() === statusFilter.toLowerCase()
     );
   }
   
-  // Filter by permit type
-  if (typeFilter !== 'all') {
+  // Filter by document type
+  if (documentTypeFilter && documentTypeFilter !== '') {
     filtered = filtered.filter(app => 
-      app.permitType && app.permitType.toLowerCase() === typeFilter.toLowerCase()
+      app.documentType && app.documentType.toLowerCase() === documentTypeFilter.toLowerCase()
     );
+  }
+  
+  // Filter by date range
+  if (dateFromFilter) {
+    filtered = filtered.filter(app => {
+      if (!app.createdAt) return false;
+      const appDate = app.createdAt.toDate ? app.createdAt.toDate() : new Date(app.createdAt);
+      return appDate >= new Date(dateFromFilter);
+    });
+  }
+  
+  if (dateToFilter) {
+    filtered = filtered.filter(app => {
+      if (!app.createdAt) return false;
+      const appDate = app.createdAt.toDate ? app.createdAt.toDate() : new Date(app.createdAt);
+      return appDate <= new Date(dateToFilter);
+    });
   }
   
   // Filter by search
@@ -2472,9 +2491,19 @@ function loadSettingsData() {
 }
 
 // Filter event listeners
-document.getElementById('statusFilter').addEventListener('change', filterAndDisplayApplications);
-document.getElementById('typeFilter')?.addEventListener('change', filterAndDisplayApplications);
-document.getElementById('searchInput').addEventListener('input', filterAndDisplayApplications);
+document.getElementById('applyFilterBtn')?.addEventListener('click', filterAndDisplayApplications);
+document.getElementById('clearFilterBtn')?.addEventListener('click', clearFilters);
+document.getElementById('searchApplication')?.addEventListener('input', filterAndDisplayApplications);
+
+// Clear filters function
+function clearFilters() {
+  document.getElementById('filterStatus').value = '';
+  document.getElementById('filterDocumentType').value = '';
+  document.getElementById('filterDateFrom').value = '';
+  document.getElementById('filterDateTo').value = '';
+  document.getElementById('searchApplication').value = '';
+  filterAndDisplayApplications();
+}
 
 // Logout
 const logoutBtn = document.getElementById('logoutBtn');

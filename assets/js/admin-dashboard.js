@@ -4234,18 +4234,19 @@ if (createStaffBtn) {
 }
 
 // Application filters
-const appStatusFilter = document.getElementById('appStatusFilter');
-const appTypeFilter = document.getElementById('appTypeFilter');
-const appSearchInput = document.getElementById('appSearchInput');
+// Filter event listeners
+document.getElementById('applyFilterBtn')?.addEventListener('click', filterApplications);
+document.getElementById('clearFilterBtn')?.addEventListener('click', clearAdminFilters);
+document.getElementById('searchApplication')?.addEventListener('input', filterApplications);
 
-if (appStatusFilter) {
-  appStatusFilter.addEventListener('change', filterApplications);
-}
-if (appTypeFilter) {
-  appTypeFilter.addEventListener('change', filterApplications);
-}
-if (appSearchInput) {
-  appSearchInput.addEventListener('input', filterApplications);
+// Clear filters function
+function clearAdminFilters() {
+  document.getElementById('filterStatus').value = '';
+  document.getElementById('filterDocumentType').value = '';
+  document.getElementById('filterDateFrom').value = '';
+  document.getElementById('filterDateTo').value = '';
+  document.getElementById('searchApplication').value = '';
+  filterApplications();
 }
 
 function filterApplications() {
@@ -4256,25 +4257,45 @@ function filterApplications() {
   if (!tbody || !allApplications || allApplications.length === 0) return;
   
   // Get filter values
-  const statusFilter = document.getElementById('appStatusFilter')?.value || 'all';
-  const typeFilter = document.getElementById('appTypeFilter')?.value || 'all';
-  const searchValue = document.getElementById('appSearchInput')?.value?.toLowerCase() || '';
+  const statusFilter = document.getElementById('filterStatus')?.value || '';
+  const documentTypeFilter = document.getElementById('filterDocumentType')?.value || '';
+  const dateFromFilter = document.getElementById('filterDateFrom')?.value || '';
+  const dateToFilter = document.getElementById('filterDateTo')?.value || '';
+  const searchValue = document.getElementById('searchApplication')?.value?.toLowerCase() || '';
   
   // Filter applications
   let filteredApplications = allApplications.filter(app => {
     // Status filter
-    if (statusFilter !== 'all' && app.status !== statusFilter) {
+    if (statusFilter && statusFilter !== '' && app.status !== statusFilter) {
       return false;
     }
     
-    // Type filter
-    if (typeFilter !== 'all' && app.permitType !== typeFilter) {
+    // Document type filter
+    if (documentTypeFilter && documentTypeFilter !== '' && app.documentType !== documentTypeFilter) {
       return false;
+    }
+    
+    // Date from filter
+    if (dateFromFilter && dateFromFilter !== '') {
+      if (!app.createdAt) return false;
+      const appDate = app.createdAt.toDate ? app.createdAt.toDate() : new Date(app.createdAt);
+      if (appDate < new Date(dateFromFilter)) {
+        return false;
+      }
+    }
+    
+    // Date to filter
+    if (dateToFilter && dateToFilter !== '') {
+      if (!app.createdAt) return false;
+      const appDate = app.createdAt.toDate ? app.createdAt.toDate() : new Date(app.createdAt);
+      if (appDate > new Date(dateToFilter)) {
+        return false;
+      }
     }
     
     // Search filter
     if (searchValue) {
-      const searchText = `${app.applicationId || ''} ${app.applicantName || ''}`.toLowerCase();
+      const searchText = `${app.applicationId || ''} ${app.applicantName || ''} ${app.permitType || ''}`.toLowerCase();
       if (!searchText.includes(searchValue)) {
         return false;
       }

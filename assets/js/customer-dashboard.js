@@ -3383,7 +3383,7 @@ document.getElementById('clearFilterBtn')?.addEventListener('click', clearFilter
 
 function applyFilters() {
   const statusFilter = document.getElementById('filterStatus').value;
-  const permitTypeFilter = document.getElementById('filterPermitType').value;
+  const documentTypeFilter = document.getElementById('filterDocumentType').value;
   const dateFromFilter = document.getElementById('filterDateFrom').value;
   const dateToFilter = document.getElementById('filterDateTo').value;
   const searchFilter = document.getElementById('searchApplication').value.toLowerCase();
@@ -3395,7 +3395,7 @@ function applyFilters() {
       match = false;
     }
 
-    if (permitTypeFilter && app.permitType !== permitTypeFilter) {
+    if (documentTypeFilter && app.documentType !== documentTypeFilter) {
       match = false;
     }
 
@@ -3428,7 +3428,7 @@ function applyFilters() {
 
 function clearFilters() {
   document.getElementById('filterStatus').value = '';
-  document.getElementById('filterPermitType').value = '';
+  document.getElementById('filterDocumentType').value = '';
   document.getElementById('filterDateFrom').value = '';
   document.getElementById('filterDateTo').value = '';
   document.getElementById('searchApplication').value = '';

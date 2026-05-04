@@ -4387,3 +4387,68 @@ textarea:focus {
   width: 100%;
   min-height: 400px;
 }
+
+/* Professional Filter Section */
+.filter-section {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border: 2px solid rgba(4, 99, 7, 0.1);
+  border-radius: 16px;
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  box-shadow: 
+    0 4px 16px rgba(0, 102, 51, 0.06),
+    0 2px 8px rgba(0, 102, 51, 0.04);
+}
+
+.filter-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 180px;
+}
+
+.filter-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.filter-group select,
+.filter-group input[type="date"],
+.filter-group input[type="text"] {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  background: white;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+  outline: none;
+  border-color: #0b5f2c;
+  box-shadow: 0 0 0 3px rgba(4, 99, 7, 0.1);
+}
+
+.filter-actions {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.filter-actions button {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+}

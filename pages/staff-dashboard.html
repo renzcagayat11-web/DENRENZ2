@@ -157,24 +157,48 @@
           <section id="applicationsSection" class="page-section">
             <div class="section-header">
               <h3 class="section-title">All Applications</h3>
-              <div class="filter-controls">
-                <select id="statusFilter" class="filter-select">
-                  <option value="all">All Status</option>
-                  <option value="pending" selected>Pending</option>
-                  <option value="under review">Under Review</option>
-                  <option value="needs resubmit">Needs Resubmit</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
-                </select>
-                <select id="typeFilter" class="filter-select">
-                  <option value="all">All Types</option>
-                  <option value="Mining Permit">Mining Permit</option>
-                  <option value="Tree Cutting Permit">Tree Cutting Permit</option>
-                  <option value="Tree Planting Permit">Tree Planting Permit</option>
-                  <option value="Wildlife Permit">Wildlife Permit</option>
-                  <option value="Rolling">Rolling</option>
-                </select>
-                <input type="text" id="searchInput" class="search-input" placeholder="Search by ID or name..." />
+            </div>
+            
+            <!-- Filter Section -->
+            <div class="filter-section">
+              <div class="filter-row">
+                <div class="filter-group">
+                  <label for="filterStatus">Status</label>
+                  <select id="filterStatus">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="under review">Under Review</option>
+                    <option value="needs revision">Needs Resubmit</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="filterDocumentType">Document Type</label>
+                  <select id="filterDocumentType">
+                    <option value="">All Document Types</option>
+                    <option value="Permit">Permit</option>
+                    <option value="Certificate">Certificate</option>
+                    <option value="Certification">Certification</option>
+                    <option value="Clearance">Clearance</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="filterDateFrom">Date From</label>
+                  <input type="date" id="filterDateFrom">
+                </div>
+                <div class="filter-group">
+                  <label for="filterDateTo">Date To</label>
+                  <input type="date" id="filterDateTo">
+                </div>
+                <div class="filter-group">
+                  <label for="searchApplication">Search</label>
+                  <input type="text" id="searchApplication" placeholder="Search by ID or permit type...">
+                </div>
+                <div class="filter-actions">
+                  <button class="btn-primary" id="applyFilterBtn">Filter</button>
+                  <button class="btn-secondary" id="clearFilterBtn">Clear</button>
+                </div>
               </div>
             </div>
             <div class="applications-table-container">
