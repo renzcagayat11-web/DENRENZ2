@@ -567,7 +567,7 @@ function loadApplicationsTable() {
       <td>${dateFormatted}</td>
       <td><span class="status-badge ${statusClass}">${app.status || 'PENDING'}</span></td>
       <td>
-        <div class="table-actions">
+        <div class="action-buttons-group">
           <button class="btn-action view" onclick="viewApplication('${app.id}')">View</button>
         </div>
       </td>
@@ -968,7 +968,7 @@ async function loadAllApplications() {
         <td>${dateFormatted}</td>
         <td><span class="status-badge ${statusClass}">${app.status || 'PENDING'}</span></td>
         <td>
-          <div class="table-actions">
+          <div class="action-buttons-group">
             <button class="btn-action view" onclick="viewApplication('${app.id}')">View</button>
           </div>
         </td>
@@ -1697,7 +1697,7 @@ window.showApprovedPermits = async function() {
           <td>${approvedDate}</td>
           <td>${docCount} document(s)</td>
           <td>
-            <div class="table-actions">
+            <div class="action-buttons-group">
               <button class="btn-view" onclick="viewApplication('${app.id}')">View Details</button>
             </div>
           </td>
@@ -1782,7 +1782,7 @@ window.showArchivedRecords = async function() {
           <td>${rejectedBy}</td>
           <td style="color: #ef4444;">${rejectionReason}</td>
           <td>
-            <div class="table-actions">
+            <div class="action-buttons-group">
               <button class="btn-view" onclick="viewApplication('${app.id}')">View Details</button>
             </div>
           </td>
@@ -3724,7 +3724,7 @@ async function loadUsers(userType) {
         <td><span class="status-badge ${statusClass}">${userStatus}</span></td>
         <td>${createdDate}</td>
         <td>
-          <div class="table-actions">
+          <div class="action-buttons-group">
             <button class="btn-view" onclick="viewUser('${doc.id}')">View</button>
             <button class="btn-deactivate" onclick="deactivateUser('${doc.id}')">Deactivate</button>
           </div>
@@ -4311,7 +4311,7 @@ function filterApplications() {
       <td>${dateFormatted}</td>
       <td><span class="status-badge ${statusClass}">${app.status || 'PENDING'}</span></td>
       <td>
-        <div class="table-actions">
+        <div class="action-buttons-group">
           <button class="btn-action view" onclick="viewApplication('${app.id}')">View</button>
         </div>
       </td>

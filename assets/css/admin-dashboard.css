@@ -1013,6 +1013,14 @@ body {
   color: white;
 }
 
+.modern-data-table .status-badge.needs-resubmit {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  white-space: nowrap;
+  min-width: 120px;
+  text-align: center;
+}
+
 .modern-data-table .status-badge.approved {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
@@ -1025,16 +1033,32 @@ body {
 
 /* Modern Action Buttons */
 .modern-data-table .btn-action {
-  padding: 8px 16px;
-  border-radius: 8px;
+  padding: 6px 12px;
+  border-radius: 6px;
   border: none;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   margin: 0 2px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* Action buttons container - ensure single line */
+.modern-data-table td:last-child {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.modern-data-table .action-buttons-group {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
 }
 
 .modern-data-table .btn-action.view {
@@ -1091,9 +1115,9 @@ body {
   background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
 }
 
-/* Scroll Indicator */
+/* Scroll Indicator - Sticky at bottom */
 .scroll-indicator {
-  position: absolute;
+  position: sticky;
   bottom: 0;
   left: 0;
   right: 0;
@@ -2163,8 +2187,13 @@ body {
   }
   
   .modern-data-table .btn-action {
-    padding: 6px 12px;
-    font-size: 11px;
+    padding: 4px 8px;
+    font-size: 10px;
+    margin: 0 1px;
+  }
+  
+  .modern-data-table .action-buttons-group {
+    gap: 2px;
   }
   
   .table-header-info {
@@ -2520,9 +2549,12 @@ body {
 }
 
 /* Action Buttons in Table */
-.table-actions {
+.action-buttons-group {
   display: flex;
-  gap: 8px;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
 }
 
 .btn-view {

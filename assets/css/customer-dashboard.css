@@ -2651,10 +2651,14 @@ body* {
   border: 1px solid #93c5fd;
 }
 
-.status-badge.needs-revision {
+.status-badge.needs-revision,
+.status-badge.needs-resubmit {
   background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
   color: #92400e;
   border: 1px solid #fbbf24;
+  white-space: nowrap;
+  min-width: 120px;
+  text-align: center;
 }
 
 .status-badge.approved {
