@@ -2400,6 +2400,27 @@ function generateApplicationDetailsHTML(app) {
       </div>
     ` : ''}
     
+    <!-- Revision Comments Section - Show when status is "needs revision" -->
+    ${app.status === 'needs revision' && app.revisionComments ? `
+      <div class="detail-section">
+        <h4 class="section-title" style="color: #f59e0b;">📝 Revision Required</h4>
+        <div style="background: #fffbeb; border: 1px solid #fbbf24; border-radius: 8px; padding: 16px;">
+          <div style="font-weight: 600; color: #92400e; margin-bottom: 8px;">
+            Please address the following:
+          </div>
+          <div style="color: #78350f; line-height: 1.6; white-space: pre-wrap;">
+            ${app.revisionComments}
+          </div>
+          ${app.revisionRequestedAt ? `
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #fbbf24; font-size: 13px; color: #a16207;">
+              <strong>Requested by:</strong> ${app.revisionRequestedBy || 'Staff'}<br>
+              <strong>Date:</strong> ${formatDate(app.revisionRequestedAt)}
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    ` : ''}
+    
     ${documentsHTML}
     ${pickupHTML}
     
@@ -2466,6 +2487,30 @@ function generateApplicationDetailsHTML(app) {
           </div>
         </div>
         `}
+        
+        <!-- Revision Timeline Events -->
+        ${app.revisionRequestedAt ? `
+        <div class="timeline-item">
+          <div class="timeline-marker completed" style="background: #f59e0b;">📝</div>
+          <div class="timeline-content">
+            <div class="timeline-title">Revision Requested</div>
+            <div class="timeline-date">${formatDate(app.revisionRequestedAt)}</div>
+            <div style="color: #92400e; font-size: 12px; margin-top: 2px;">By: ${app.revisionRequestedBy || 'Staff'}</div>
+          </div>
+        </div>
+        ` : ''}
+        
+        ${app.revisionSubmittedAt ? `
+        <div class="timeline-item">
+          <div class="timeline-marker completed" style="background: #10b981;">✅</div>
+          <div class="timeline-content">
+            <div class="timeline-title">Revision Submitted</div>
+            <div class="timeline-date">${formatDate(app.revisionSubmittedAt)}</div>
+            <div style="color: #059669; font-size: 12px; margin-top: 2px;">Revision #${app.revisionCount || 1}</div>
+          </div>
+        </div>
+        ` : ''}
+        
         ${app.status === 'approved' ? `
         <div class="timeline-item">
           <div class="timeline-marker completed">✅</div>
@@ -3802,6 +3847,118 @@ window.editApplication = function(appId) {
     }
   }, 500);
 };
+
+// Function to populate edit form with existing application data
+function populateEditForm(app) {
+  console.log('Populating edit form with data:', app);
+  
+  try {
+    // Step 1: Document Type and Permit Type
+    const documentTypeEl = document.getElementById('documentType');
+    const permitTypeEl = document.getElementById('permitType');
+    
+    if (documentTypeEl && app.documentType) {
+      documentTypeEl.value = app.documentType;
+      documentTypeEl.dispatchEvent(new Event('change'));
+      console.log('Set document type:', app.documentType);
+    }
+    
+    if (permitTypeEl && app.permitType) {
+      setTimeout(() => {
+        permitTypeEl.value = app.permitType;
+        permitTypeEl.dispatchEvent(new Event('change'));
+        console.log('Set permit type:', app.permitType);
+      }, 100);
+    }
+    
+    // Step 2: Applicant Information
+    setTimeout(() => {
+      const applicantNameEl = document.getElementById('applicantName');
+      const applicantAddressEl = document.getElementById('applicantAddress');
+      const applicantMobileIndividualEl = document.getElementById('applicantMobileIndividual');
+      const applicantMobileCompanyEl = document.getElementById('applicantMobileCompany');
+      const applicationDetailsEl = document.getElementById('applicationDetailsInput');
+      
+      if (applicantNameEl && app.applicantName) {
+        applicantNameEl.value = app.applicantName;
+      }
+      if (applicantAddressEl && app.applicantAddress) {
+        applicantAddressEl.value = app.applicantAddress;
+      }
+      if (applicantMobileIndividualEl && app.applicantMobile) {
+        applicantMobileIndividualEl.value = app.applicantMobile;
+      }
+      if (applicantMobileCompanyEl && app.applicantMobile) {
+        applicantMobileCompanyEl.value = app.applicantMobile;
+      }
+      if (applicationDetailsEl && app.applicationDetails) {
+        applicationDetailsEl.value = app.applicationDetails;
+      }
+      
+      console.log('Populated applicant information');
+    }, 200);
+    
+    // Step 3: Project Details
+    setTimeout(() => {
+      const projectTitleEl = document.getElementById('projectTitle');
+      const projectLocationEl = document.getElementById('projectLocation');
+      const projectDescriptionEl = document.getElementById('projectDescription');
+      const projectCostEl = document.getElementById('projectCost');
+      
+      if (projectTitleEl && app.projectTitle) {
+        projectTitleEl.value = app.projectTitle;
+      }
+      if (projectLocationEl && app.projectLocation) {
+        projectLocationEl.value = app.projectLocation;
+      }
+      if (projectDescriptionEl && app.projectDescription) {
+        projectDescriptionEl.value = app.projectDescription;
+      }
+      if (projectCostEl && app.projectCost) {
+        projectCostEl.value = app.projectCost;
+      }
+      
+      console.log('Populated project details');
+    }, 300);
+    
+    // Step 4: Location coordinates
+    setTimeout(() => {
+      const appLatitudeEl = document.getElementById('appLatitude');
+      const appLongitudeEl = document.getElementById('appLongitude');
+      
+      if (appLatitudeEl && app.latitude) {
+        appLatitudeEl.value = app.latitude;
+      }
+      if (appLongitudeEl && app.longitude) {
+        appLongitudeEl.value = app.longitude;
+      }
+      
+      console.log('Populated location coordinates');
+    }, 400);
+    
+    // Step 5: Display existing documents
+    setTimeout(() => {
+      if (app.documents && app.documents.length > 0) {
+        displayExistingDocuments(app.documents);
+      }
+      console.log('Displayed existing documents:', app.documents?.length || 0);
+    }, 500);
+    
+    // Step 6: Update submit button text
+    setTimeout(() => {
+      const submitBtn = document.getElementById('submitStep5') || document.querySelector('#newApplicationForm button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.textContent = 'Update Application';
+        console.log('Updated submit button text');
+      }
+    }, 600);
+    
+    console.log('✅ Edit form population complete!');
+    
+  } catch (error) {
+    console.error('❌ Error in populateEditForm:', error);
+  }
+}
 
 // Function to display existing documents
 function displayExistingDocuments(documents) {
