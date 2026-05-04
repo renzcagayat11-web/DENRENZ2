@@ -7316,6 +7316,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Navigation - wrapped in DOMContentLoaded to ensure DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
+  // Section to hash mapping (reverse of hashSectionMap)
+  const sectionHashMap = {
+    'dashboardSection': 'dashboard',
+    'newApplicationSection': 'new-application',
+    'myApplicationsSection': 'my-applications',
+    'profileSection': 'profile',
+    'settingsSection': 'settings'
+  };
+  
   const navItems = document.querySelectorAll('.nav-item');
   navItems.forEach(nav => {
     nav.addEventListener('click', (e) => {
@@ -7327,6 +7336,12 @@ document.addEventListener('DOMContentLoaded', function() {
       const sectionId = nav.getAttribute('data-section');
       if (sectionId) {
         navigateToSection(sectionId);
+        
+        // Update URL hash to match section (for back/forward button support)
+        const hash = sectionHashMap[sectionId];
+        if (hash) {
+          window.history.pushState(null, null, '#' + hash);
+        }
       }
     });
   });
@@ -7337,6 +7352,7 @@ document.addEventListener('DOMContentLoaded', function() {
     logoLink.addEventListener('click', (e) => {
       e.preventDefault();
       navigateToSection('dashboardSection');
+      window.history.pushState(null, null, '#dashboard');
     });
   }
 });
@@ -7362,12 +7378,40 @@ window.addEventListener('load', function() {
     console.log('Error clearing old uploads:', e);
   }
   
-  const savedSection = localStorage.getItem('currentSection');
-  if (savedSection) {
-    navigateToSection(savedSection);
+  // Hash to section mapping for URL-based navigation
+  const hashSectionMap = {
+    'dashboard': 'dashboardSection',
+    'new-application': 'newApplicationSection',
+    'my-applications': 'myApplicationsSection',
+    'profile': 'profileSection',
+    'settings': 'settingsSection'
+  };
+  
+  // Check URL hash first, then fall back to localStorage
+  const hash = window.location.hash.replace('#', '');
+  const sectionFromHash = hashSectionMap[hash];
+  
+  if (sectionFromHash) {
+    // URL has a valid section hash - navigate there
+    navigateToSection(sectionFromHash);
   } else {
-    navigateToSection('dashboardSection');
+    // No hash or invalid hash - use saved section or default
+    const savedSection = localStorage.getItem('currentSection');
+    if (savedSection) {
+      navigateToSection(savedSection);
+    } else {
+      navigateToSection('dashboardSection');
+    }
   }
+  
+  // Handle hash changes (when user clicks nav links or uses back/forward buttons)
+  window.addEventListener('hashchange', function() {
+    const newHash = window.location.hash.replace('#', '');
+    const newSection = hashSectionMap[newHash];
+    if (newSection) {
+      navigateToSection(newSection);
+    }
+  });
 
   // Restore selected document type and permit type
   const savedDocumentType = localStorage.getItem('selectedDocumentType');
