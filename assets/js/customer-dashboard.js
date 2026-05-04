@@ -3828,8 +3828,9 @@ window.editApplication = function(appId) {
       // Check if form elements exist before trying to set values
       const documentTypeEl = document.getElementById('documentType');
       const permitTypeEl = document.getElementById('permitType');
+      const firstNameEl = document.getElementById('firstName');
+      const lastNameEl = document.getElementById('lastName');
       const applicantNameEl = document.getElementById('applicantName');
-      const applicantAddressEl = document.getElementById('applicantAddress');
       
       if (!documentTypeEl || !permitTypeEl) {
         console.error('❌ Form elements not found even after reset. Retrying with longer delay...');
@@ -3842,7 +3843,14 @@ window.editApplication = function(appId) {
         return;
       }
       
-      console.log('✅ Form elements found, proceeding with population...');
+      console.log('✅ Form elements found:', {
+        documentType: !!documentTypeEl,
+        permitType: !!permitTypeEl,
+        firstName: !!firstNameEl,
+        lastName: !!lastNameEl,
+        applicantName: !!applicantNameEl
+      });
+      console.log('✅ Proceeding with form population...');
       // Call the population function
       populateEditForm(app);
     } catch (error) {
@@ -3876,12 +3884,34 @@ function populateEditForm(app) {
     
     // Step 2: Applicant Information
     setTimeout(() => {
+      // Personal Information fields
+      const firstNameEl = document.getElementById('firstName');
+      const lastNameEl = document.getElementById('lastName');
+      const middleNameEl = document.getElementById('middleName');
+      const suffixEl = document.getElementById('suffix');
+      
+      // Company/Business fields
       const applicantNameEl = document.getElementById('applicantName');
       const applicantAddressEl = document.getElementById('applicantAddress');
       const applicantMobileIndividualEl = document.getElementById('applicantMobileIndividual');
       const applicantMobileCompanyEl = document.getElementById('applicantMobileCompany');
       const applicationDetailsEl = document.getElementById('applicationDetailsInput');
       
+      // Set personal information (from database fields: firstName, middleName, surname)
+      if (firstNameEl && app.firstName) {
+        firstNameEl.value = app.firstName;
+      }
+      if (lastNameEl && app.surname) {
+        lastNameEl.value = app.surname;
+      }
+      if (middleNameEl && app.middleName) {
+        middleNameEl.value = app.middleName;
+      }
+      if (suffixEl && app.suffix) {
+        suffixEl.value = app.suffix;
+      }
+      
+      // Set company/business information
       if (applicantNameEl && app.applicantName) {
         applicantNameEl.value = app.applicantName;
       }
@@ -3898,7 +3928,13 @@ function populateEditForm(app) {
         applicationDetailsEl.value = app.applicationDetails;
       }
       
-      console.log('Populated applicant information');
+      console.log('Populated applicant information:', {
+        firstName: app.firstName,
+        surname: app.surname,
+        middleName: app.middleName,
+        applicantName: app.applicantName,
+        applicantAddress: app.applicantAddress
+      });
     }, 200);
     
     // Step 3: Project Details
@@ -5720,25 +5756,34 @@ function handleFileSelect(index, file) {
     };
     
     try {
-      // Save to sessionStorage (survives page reload)
-      sessionStorage.setItem(`docUpload_${index}`, JSON.stringify(fileData));
+      // Save to sessionStorage only (localStorage has 5-10MB limit)
+      // Don't save large file data to localStorage to prevent quota exceeded error
+      if (fileData.data && fileData.data.length > 1000000) { // If larger than ~1MB
+        console.log(`File ${file.name} too large for storage (${(fileData.data.length / 1024 / 1024).toFixed(2)} MB), keeping in memory only`);
+        // Store only metadata, not the full data
+        const metadataOnly = {
+          ...fileData,
+          data: null, // Don't store large data
+          storedInMemory: true
+        };
+        sessionStorage.setItem(`docUpload_${index}`, JSON.stringify(metadataOnly));
+      } else {
+        sessionStorage.setItem(`docUpload_${index}`, JSON.stringify(fileData));
+      }
       console.log(`File ${file.name} saved to sessionStorage as docUpload_${index}`);
-      
-      // Also save to localStorage as backup
-      localStorage.setItem(`docUpload_${index}_backup`, JSON.stringify(fileData));
-      console.log(`File ${file.name} backup saved to localStorage`);
       
       // Update UI to show saved status
       if (filenameSpan) {
-        filenameSpan.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB) - Saved`;
+        filenameSpan.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB) - Ready`;
         filenameSpan.style.color = '#059669';
       }
       
     } catch (error) {
-      console.error('Error saving file:', error);
+      console.error('Error saving file to storage:', error);
+      // Don't show error to user, just log it - file is still in memory
       if (filenameSpan) {
-        filenameSpan.textContent = `${file.name} - Save failed`;
-        filenameSpan.style.color = '#dc2626';
+        filenameSpan.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB) - Ready`;
+        filenameSpan.style.color = '#059669';
       }
     }
   };
@@ -7335,6 +7380,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Restore saved section and form data on page load (for refresh/reload behavior)
 window.addEventListener('load', function() {
+  // Clear existing upload backups from localStorage on page load to free up space
+  try {
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (key && key.startsWith('docUpload_')) {
+        sessionStorage.removeItem(key);
+      }
+    }
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('docUpload_')) {
+        localStorage.removeItem(key);
+      }
+    }
+    console.log('Cleared old document uploads from storage');
+  } catch (e) {
+    console.log('Error clearing old uploads:', e);
+  }
+  
   const savedSection = localStorage.getItem('currentSection');
   if (savedSection) {
     navigateToSection(savedSection);
