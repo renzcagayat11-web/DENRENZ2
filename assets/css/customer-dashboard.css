@@ -2173,7 +2173,96 @@ body* {
 }
 
 .datetime-icon {
-  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: rgba(255, 255, 255, 0.95);
+  flex-shrink: 0;
+}
+
+.datetime-icon svg {
+  display: block;
+}
+
+.greeting-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: #fde68a; /* warm accent against the green hero */
+  flex-shrink: 0;
+}
+
+.greeting-icon svg {
+  display: block;
+}
+
+.time-greeting {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 12px;
+  margin-top: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
+}
+
+/* Welcome banner layout (replaces inline styles) */
+.welcome-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+.welcome-main {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.welcome-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  align-self: flex-start;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: background-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  cursor: pointer;
+}
+
+.welcome-cta-btn:hover,
+.welcome-cta-btn:focus-visible {
+  background: rgba(255, 255, 255, 0.26);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  outline: none;
+}
+
+.welcome-cta-btn svg {
+  flex-shrink: 0;
 }
 
 .datetime-text {
@@ -2268,10 +2357,28 @@ body* {
 }
 
 .stat-icon {
-  font-size: 48px;
-  opacity: 0.9;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.7);
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.06));
 }
+
+.stat-icon svg {
+  display: block;
+  width: 32px;
+  height: 32px;
+  stroke-width: 2;
+}
+
+.stat-card.blue .stat-icon { color: #0284c7; background: rgba(2, 132, 199, 0.10); }
+.stat-card.yellow .stat-icon { color: #b45309; background: rgba(234, 179, 8, 0.12); }
+.stat-card.green .stat-icon { color: #0b5f2c; background: rgba(11, 95, 44, 0.10); }
+.stat-card.red .stat-icon { color: #dc2626; background: rgba(220, 38, 38, 0.10); }
 
 .stat-content {
   flex: 1;
@@ -4239,6 +4346,12 @@ textarea:hover {
   box-shadow: 0 2px 4px rgba(4, 99, 7, 0.2);
 }
 
+.completion-icon svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
 /* Professional Quick Actions Section */
 .quick-actions-section {
   background: transparent;
@@ -4269,8 +4382,27 @@ textarea:hover {
 }
 
 .action-icon {
-  font-size: 40px;
-  opacity: 0.9;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  color: #0b5f2c;
+  margin: 0 auto 8px;
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+
+.action-icon svg {
+  display: block;
+  width: 28px;
+  height: 28px;
+}
+
+.quick-action-btn:hover .action-icon {
+  transform: translateY(-2px) scale(1.05);
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
 }
 
 .action-text {
@@ -5248,8 +5380,19 @@ textarea:hover {
 }
 
 .notice-icon {
-  font-size: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(11, 95, 44, 0.08);
+  color: #0b5f2c;
   flex-shrink: 0;
+}
+
+.notice-icon svg {
+  display: block;
 }
 
 .notice-content h5 {
@@ -5331,8 +5474,19 @@ textarea:hover {
 }
 
 .validation-icon {
-  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(220, 38, 38, 0.10);
+  color: #dc2626;
   flex-shrink: 0;
+}
+
+.validation-icon svg {
+  display: block;
 }
 
 .validation-text {
@@ -5356,8 +5510,19 @@ textarea:hover {
 }
 
 .awareness-icon {
-  font-size: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(11, 95, 44, 0.10);
+  color: #0b5f2c;
   flex-shrink: 0;
+}
+
+.awareness-icon svg {
+  display: block;
 }
 
 .awareness-content h5 {
@@ -5396,7 +5561,50 @@ textarea:hover {
 }
 
 .btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin-right: 8px;
+  vertical-align: middle;
+}
+
+.btn-icon svg {
+  display: block;
+}
+
+/* Back-to-dashboard row inside the New Application section */
+.new-app-back-row {
+  padding: 16px 48px 0;
+}
+
+.back-to-dashboard-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  color: #046307;
+  border: 2px solid #ffffff;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: background-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
+}
+
+.back-to-dashboard-btn:hover,
+.back-to-dashboard-btn:focus-visible {
+  background: #f0fdf4;
+  color: #0b5f2c;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  outline: none;
+}
+
+.back-to-dashboard-btn svg {
+  flex-shrink: 0;
 }
 
 /* DENR Form Specific Styles */

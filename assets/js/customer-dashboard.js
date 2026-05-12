@@ -447,33 +447,41 @@ function updateDateTime() {
   updateTimeBasedGreeting(now);
 }
 
-// Update time-based greeting
+// Update time-based greeting (uses inline Lucide SVGs to match the dashboard icon system)
 function updateTimeBasedGreeting(now) {
   const hour = now.getHours();
   const greetingElement = document.getElementById('timeGreeting');
   const greetingIcon = document.getElementById('greetingIcon');
-  
+
   if (!greetingElement || !greetingIcon) return;
-  
+
+  const SVG_ATTRS = 'xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+  const SVG = {
+    sunrise: `<svg ${SVG_ATTRS}><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/><polyline points="8 6 12 2 16 6"/></svg>`,
+    sun: `<svg ${SVG_ATTRS}><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
+    sunset: `<svg ${SVG_ATTRS}><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/><line x1="23" y1="22" x2="1" y2="22"/><polyline points="16 5 12 9 8 5"/></svg>`,
+    moon: `<svg ${SVG_ATTRS}><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
+  };
+
   let greeting = '';
-  let icon = '';
-  
+  let iconSvg = '';
+
   if (hour >= 5 && hour < 12) {
     greeting = 'Good morning!';
-    icon = '🌅';
+    iconSvg = SVG.sunrise;
   } else if (hour >= 12 && hour < 17) {
     greeting = 'Good afternoon!';
-    icon = '☀️';
+    iconSvg = SVG.sun;
   } else if (hour >= 17 && hour < 21) {
     greeting = 'Good evening!';
-    icon = '🌆';
+    iconSvg = SVG.sunset;
   } else {
     greeting = 'Good night!';
-    icon = '🌙';
+    iconSvg = SVG.moon;
   }
-  
+
   greetingElement.textContent = greeting;
-  greetingIcon.textContent = icon;
+  greetingIcon.innerHTML = iconSvg;
 }
 
 // Wait for DOM to be ready before updating date/time
@@ -1997,43 +2005,20 @@ window.fetchUserApplications = async function() {
   }
 };
 
-// Display applications in table
-function displayApplications() {
-  const tbody = document.getElementById('applicationsTable');
-  console.log('Customer dashboard: displayApplications called');
-  console.log('Customer dashboard: tbody element:', tbody);
-  console.log('Customer dashboard: userApplications length:', userApplications.length);
-  
-  if (!tbody) {
-    console.error('Customer dashboard: applicationsTable tbody not found!');
-    return;
-  }
-  
-  console.log('Customer dashboard: Clearing table...');
-  tbody.innerHTML = '';
-  
-  if (userApplications.length === 0) {
-    console.log('Customer dashboard: No applications to display, showing empty message');
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 32px; color: #666;">No applications yet. Click "New Application" to get started.</td></tr>';
-    return;
-  }
-  
-  userApplications.forEach((app, index) => {
-    console.log(`Customer dashboard: Processing application ${index + 1}:`, app.applicationId, 'Status:', app.status, 'Can resubmit:', app.status === 'needs revision' || app.status === 'needs resubmit');
-    const row = document.createElement('tr');
-    const statusClass = getStatusClass(app.status);
-    const dateFormatted = formatDate(app.createdAt);
+// ----- Applications table pagination -----
+const APPLICATIONS_PAGE_SIZE = 10;
+let applicationsCurrentPage = 1;
+// Tracks the active dataset (filtered or full) so pagination controls operate on the correct list
+let applicationsActiveDataset = null;
 
-    const isPending = app.status === 'pending';
-    const needsResubmit = app.status === 'needs revision' || app.status === 'needs resubmit';
-    const canEdit = needsResubmit;  // Only allow edit when staff requests resubmit
-    const canDelete = app.status === 'pending' || app.status === 'under review' || app.status === 'rejected' || needsResubmit;
-    
-    console.log(`Customer dashboard: App ${app.applicationId} - needsResubmit: ${needsResubmit}, canEdit: ${canEdit}`);
+function buildApplicationRowHtml(app) {
+  const statusClass = getStatusClass(app.status);
+  const dateFormatted = formatDate(app.createdAt);
+  const needsResubmit = app.status === 'needs revision' || app.status === 'needs resubmit';
+  const canEdit = needsResubmit;
+  const canDelete = app.status === 'pending' || app.status === 'under review' || app.status === 'rejected' || needsResubmit;
 
-    // Pickup schedule removed from table view - shown only in detailed modal
-
-    row.innerHTML = `
+  return `
       <td>${app.applicationId || app.id}</td>
       <td>${app.permitType || 'N/A'}</td>
       <td>${dateFormatted}</td>
@@ -2052,13 +2037,94 @@ function displayApplications() {
         </div>
       </td>
     `;
+}
 
+function renderApplicationsPagination(total) {
+  const nav = document.getElementById('applicationsPagination');
+  const info = document.getElementById('applicationsPaginationInfo');
+  const pages = document.getElementById('applicationsPaginationPages');
+  const prevBtn = document.getElementById('applicationsPaginationPrev');
+  const nextBtn = document.getElementById('applicationsPaginationNext');
+  if (!nav || !info || !pages || !prevBtn || !nextBtn) return;
+
+  // Hide pagination entirely when there are 10 or fewer entries
+  if (total <= APPLICATIONS_PAGE_SIZE) {
+    nav.hidden = true;
+    pages.innerHTML = '';
+    return;
+  }
+  nav.hidden = false;
+
+  const totalPages = Math.ceil(total / APPLICATIONS_PAGE_SIZE);
+  if (applicationsCurrentPage > totalPages) applicationsCurrentPage = totalPages;
+  if (applicationsCurrentPage < 1) applicationsCurrentPage = 1;
+
+  const startIdx = (applicationsCurrentPage - 1) * APPLICATIONS_PAGE_SIZE + 1;
+  const endIdx = Math.min(applicationsCurrentPage * APPLICATIONS_PAGE_SIZE, total);
+  info.textContent = `Showing ${startIdx}\u2013${endIdx} of ${total}`;
+
+  prevBtn.disabled = applicationsCurrentPage === 1;
+  nextBtn.disabled = applicationsCurrentPage === totalPages;
+
+  // Render numbered page buttons (compact: first, last, current ±1, with ellipsis)
+  const pageNumbers = [];
+  const pushNum = (n) => pageNumbers.push(n);
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) pushNum(i);
+  } else {
+    pushNum(1);
+    if (applicationsCurrentPage > 3) pushNum('…');
+    const from = Math.max(2, applicationsCurrentPage - 1);
+    const to = Math.min(totalPages - 1, applicationsCurrentPage + 1);
+    for (let i = from; i <= to; i++) pushNum(i);
+    if (applicationsCurrentPage < totalPages - 2) pushNum('…');
+    pushNum(totalPages);
+  }
+
+  pages.innerHTML = pageNumbers.map((p) => {
+    if (p === '…') return '<span class="apps-pagination__ellipsis" aria-hidden="true">\u2026</span>';
+    const isActive = p === applicationsCurrentPage;
+    return `<button type="button" class="apps-pagination__page${isActive ? ' is-active' : ''}" data-page="${p}"${isActive ? ' aria-current="page"' : ''}>${p}</button>`;
+  }).join('');
+}
+
+function renderApplicationsTable(applications, emptyMessage) {
+  const tbody = document.getElementById('applicationsTable');
+  if (!tbody) {
+    console.error('Customer dashboard: applicationsTable tbody not found!');
+    return;
+  }
+
+  applicationsActiveDataset = applications;
+  const total = applications.length;
+  tbody.innerHTML = '';
+
+  if (total === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 32px; color: #666;">${emptyMessage}</td></tr>`;
+    renderApplicationsPagination(0);
+    return;
+  }
+
+  const totalPages = Math.max(1, Math.ceil(total / APPLICATIONS_PAGE_SIZE));
+  if (applicationsCurrentPage > totalPages) applicationsCurrentPage = totalPages;
+  if (applicationsCurrentPage < 1) applicationsCurrentPage = 1;
+
+  const startIdx = (applicationsCurrentPage - 1) * APPLICATIONS_PAGE_SIZE;
+  const pageItems = applications.slice(startIdx, startIdx + APPLICATIONS_PAGE_SIZE);
+
+  pageItems.forEach((app) => {
+    const row = document.createElement('tr');
+    row.innerHTML = buildApplicationRowHtml(app);
     tbody.appendChild(row);
-    console.log(`Customer dashboard: Added row for application ${index + 1}`);
   });
-  
-  console.log('Customer dashboard: Total table rows added:', tbody.children.length);
-  console.log('Customer dashboard: Final table HTML length:', tbody.innerHTML.length);
+
+  renderApplicationsPagination(total);
+}
+
+// Display applications in table (full list, no filter)
+function displayApplications() {
+  applicationsCurrentPage = 1; // reset to first page when reloading the full list
+  renderApplicationsTable(userApplications, 'No applications yet. Click "New Application" to get started.');
 }
 
 // View application details - Similar to staff dashboard
