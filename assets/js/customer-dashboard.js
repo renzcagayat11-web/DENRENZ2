@@ -3868,6 +3868,13 @@ function populateEditForm(app) {
     const permitTypeEl = document.getElementById('permitType');
     
     if (documentTypeEl && app.documentType) {
+      const knownDocTypes = Object.keys(documentTypeOptions || {});
+      if (!knownDocTypes.includes(app.documentType)) {
+        const legacyOpt = document.createElement('option');
+        legacyOpt.value = app.documentType;
+        legacyOpt.textContent = `${app.documentType} (legacy record)`;
+        documentTypeEl.appendChild(legacyOpt);
+      }
       documentTypeEl.value = app.documentType;
       documentTypeEl.dispatchEvent(new Event('change'));
       console.log('Set document type:', app.documentType);
@@ -3875,6 +3882,13 @@ function populateEditForm(app) {
     
     if (permitTypeEl && app.permitType) {
       setTimeout(() => {
+        const hasOption = Array.from(permitTypeEl.options).some((o) => o.value === app.permitType);
+        if (!hasOption) {
+          const opt = document.createElement('option');
+          opt.value = app.permitType;
+          opt.textContent = `${app.permitType} (legacy record)`;
+          permitTypeEl.appendChild(opt);
+        }
         permitTypeEl.value = app.permitType;
         permitTypeEl.dispatchEvent(new Event('change'));
         console.log('Set permit type:', app.permitType);
@@ -4667,10 +4681,10 @@ function validateStep(step) {
     clearFieldError('permitType');
     
     if (!docType) {
-      showFieldError('documentType', 'Please select a document type.');
+      showFieldError('documentType', 'Please select a category type.');
       isValid = false;
     } else if (!docCategory) {
-      showFieldError('permitType', 'Please select a document category.');
+      showFieldError('permitType', 'Please select a permit type.');
       isValid = false;
     }
   }
@@ -5133,7 +5147,7 @@ function resetFormSteps() {
     
     if (descriptionElement) {
       const defaultDescriptions = {
-        1: 'Select the type of document you need',
+        1: 'Select category type and permit type',
         2: 'Provide location and contact information',
         3: 'Describe purpose and environmental impact',
         4: 'Upload documents and submit application'
@@ -5176,10 +5190,45 @@ function resetFormSteps() {
   if (step1Item) {
     step1Item.classList.add('active');
   }
+
+  if (typeof initializeStep1DocumentControls === 'function') {
+    initializeStep1DocumentControls();
+  }
 }
 
-// Document type options (Actual DENR Document Types)
-const documentTypeOptions = {
+// Category types (Document Information step 1)
+const CATEGORY_TYPES = ['Biodiversity', 'Lands', 'Forestry'];
+
+const categoryTypePermitOptions = {
+  Biodiversity: [
+    'R4A-B-01 – Issuance of Wildlife Farm Permit – Small Scale Farming',
+    'R4A-B-02 – Issuance of Wildlife Farm Permit – Medium to Large Scale Farming',
+    'R4A-B-03 – Issuance of Certificate of Wildlife Registration (CWR)',
+    'R4A-B-04 – Issuance of Local Transport Permit (Wildlife)',
+    'R4A-B-05 – Issuance of Special Local Transport Permit (SLTP) (Wildlife)',
+    'R4A-B-06 – Issuance of Wildlife Import Clearance (Non-CITES)',
+    'R4A-B-07 – Issuance of NIPAS Certification'
+  ],
+  Lands: [
+    'RO-L-01 – Issuance of Certification of Land Classification Status',
+    'RO-L-02 – Issuance of Survey Authority',
+    'RO-L-03 – Application for Free Patent (Agricultural)',
+    'RO-L-04 – Application for Free Patent (Residential)'
+  ],
+  Forestry: [
+    'RO-F-01 – Issuance of Private Tree Plantation Registration (PTPR)',
+    'RO-F-03a – Issuance of Certificate of Verification (COV) for transport of planted trees/non-timber products',
+    'RO-F-03b – Issuance of Certificate of Timber/Lumber Origin (CTO/CLO)',
+    'RO-F-04 – Application for Chainsaw Registration',
+    'RO-F-05 – Issuance of Special/Tree Cutting and/or Earth Balling Permit',
+    'RO-F-06 – Issuance of Tree Cutting Permit for Public Safety',
+    'RO-F-07 – Issuance of Private Land Timber Permit (PLTP/SPLTP)',
+    'R4A-F-08 – Issuance of Permit to Import Chainsaw'
+  ]
+};
+
+// Legacy document type keys (edit mode / older saved applications)
+const LEGACY_DOCUMENT_TYPE_OPTIONS = {
   Permit: [
     'Community-Based Forest Management Agreement (CBFMA)',
     'Permit to Import Chainsaw',
@@ -5201,12 +5250,109 @@ const documentTypeOptions = {
   ]
 };
 
-// Document type descriptions
+const documentTypeOptions = { ...categoryTypePermitOptions, ...LEGACY_DOCUMENT_TYPE_OPTIONS };
+
+// Document type descriptions (legacy categories only)
 const documentTypeDescriptions = {
   Permit: 'Official authorization para gawin ang isang activity. Focus: Future action.',
   Certificate: 'Official proof/document na may existing status, qualification, or registration ka. Focus: Current status.',
   Certification: 'Process or document na nagpapatunay na compliant ka sa certain standards. Focus: Validation.',
   Clearance: 'Official approval na wala kang violation or issue, kaya pwede kang mag-proceed. Focus: Risk check.'
+};
+
+const CATEGORY_AWARENESS_COPY = {
+  Biodiversity: {
+    title: '🌿 Biodiversity Awareness – Protect Wildlife and Nature',
+    body: 'All wildlife species are protected under Philippine environmental laws. Possessing, transporting, trading, or importing wildlife without proper DENR permits may result in fines, confiscation, and imprisonment under Republic Act No. 9147.'
+  },
+  Lands: {
+    title: '🌏 Land Awareness – Land Use Compliance',
+    body: 'All land classification, ownership, and development are regulated under the Public Land Act (CA No. 141) and the Property Registration Decree (PD No. 1529). Non-compliance with land requirements may result in application denial or legal penalties.'
+  },
+  Forestry: {
+    title: '🌳 Forestry Awareness – Protect Forest Resources',
+    body: 'All forestry activities such as tree cutting, chainsaw use, transport, and timber harvesting are regulated under Presidential Decree No. 705 (Revised Forestry Code of the Philippines) and related DENR regulations. Unauthorized activities may result in fines, confiscation, and imprisonment.'
+  }
+};
+
+/** Per–permit-type awareness (keys must match option values in categoryTypePermitOptions). */
+const PERMIT_AWARENESS_COPY = {
+  'R4A-B-01 – Issuance of Wildlife Farm Permit – Small Scale Farming': {
+    title: '🌿 Biodiversity Awareness – Wildlife Farm Permit (Small Scale)',
+    body: 'Wildlife farming, even on a small scale, requires a valid DENR permit. Unauthorized possession or breeding of wildlife may lead to confiscation, fines, and imprisonment under RA 9147.'
+  },
+  'R4A-B-02 – Issuance of Wildlife Farm Permit – Medium to Large Scale Farming': {
+    title: '🌿 Biodiversity Awareness – Wildlife Farm Permit (Medium to Large Scale)',
+    body: 'Medium to large-scale wildlife farming requires proper DENR authorization. Operating without a permit or beyond approved limits may result in confiscation, fines, and imprisonment under RA 9147.'
+  },
+  'R4A-B-03 – Issuance of Certificate of Wildlife Registration (CWR)': {
+    title: '🌿 Biodiversity Awareness – Certificate of Wildlife Registration (CWR)',
+    body: 'All captive wildlife must be properly registered with DENR. Possession of unregistered wildlife may lead to confiscation, fines, and imprisonment under RA 9147.'
+  },
+  'R4A-B-04 – Issuance of Local Transport Permit (Wildlife)': {
+    title: '🌿 Biodiversity Awareness – Local Transport Permit (Wildlife)',
+    body: 'Transporting wildlife requires a valid DENR Local Transport Permit. Unauthorized transport may result in seizure of wildlife, fines, and imprisonment under RA 9147.'
+  },
+  'R4A-B-05 – Issuance of Special Local Transport Permit (SLTP) (Wildlife)': {
+    title: '🌿 Biodiversity Awareness – Special Local Transport Permit (SLTP)',
+    body: 'Transporting wildlife under special or restricted conditions requires a Special Local Transport Permit. Violations may lead to confiscation, fines, and imprisonment under RA 9147.'
+  },
+  'R4A-B-06 – Issuance of Wildlife Import Clearance (Non-CITES)': {
+    title: '🌿 Biodiversity Awareness – Wildlife Import Clearance (Non-CITES)',
+    body: 'Importation of wildlife requires prior DENR clearance. Unauthorized importation may result in confiscation, fines, and imprisonment under RA 9147.'
+  },
+  'R4A-B-07 – Issuance of NIPAS Certification': {
+    title: '🌿 Biodiversity Awareness – NIPAS Certification',
+    body: 'Activities involving wildlife within protected areas require NIPAS Certification. Unauthorized activities may result in heavy fines, imprisonment, and closure of operations under applicable environmental laws.'
+  },
+  'RO-L-01 – Issuance of Certification of Land Classification Status': {
+    title: '🌱 Land Awareness – Certification of Land Classification Status (RO-L-01)',
+    body: 'Determining the classification of land requires official DENR certification. Using or claiming land without proper classification may result in denial of applications, penalties, and legal disputes.'
+  },
+  'RO-L-02 – Issuance of Survey Authority': {
+    title: '🌱 Land Awareness – Survey Authority (RO-L-02)',
+    body: 'Conducting land surveys requires a valid authority from DENR. Unauthorized surveying may lead to suspension of survey results, penalties, and invalidation of documents.'
+  },
+  'RO-L-03 – Application for Free Patent (Agricultural)': {
+    title: '🌱 Land Awareness – Free Patent (Agricultural) (RO-L-03)',
+    body: 'Acquisition of agricultural land through free patent requires compliance with DENR and legal requirements. Fraudulent or unauthorized claims may result in cancellation, fines, and legal action.'
+  },
+  'RO-L-04 – Application for Free Patent (Residential)': {
+    title: '🌱 Land Awareness – Free Patent (Residential) (RO-L-04)',
+    body: 'Residential land patents must be properly applied for and approved by DENR. Unauthorized occupation or falsified applications may lead to rejection, cancellation, and penalties under land laws.'
+  },
+  'RO-F-01 – Issuance of Private Tree Plantation Registration (PTPR)': {
+    title: '🌲 Forestry Awareness – Private Tree Plantation Registration (PTPR)',
+    body: 'Registration of private tree plantations is required under DENR regulations. Unregistered plantations may be subject to penalties and disqualification from harvesting privileges under PD 705.'
+  },
+  'RO-F-03a – Issuance of Certificate of Verification (COV) for transport of planted trees/non-timber products': {
+    title: '🌲 Forestry Awareness – Certificate of Verification (COV)',
+    body: 'Transport of planted trees and non-timber forest products requires a valid Certificate of Verification (COV). Unauthorized transport may lead to seizure, penalties, and confiscation of forest products.'
+  },
+  'RO-F-03b – Issuance of Certificate of Timber/Lumber Origin (CTO/CLO)': {
+    title: '🌲 Forestry Awareness – Certificate of Timber/Lumber Origin (CTO/CLO)',
+    body: 'Timber and lumber products must be supported by a valid Certificate of Timber/Lumber Origin. Possession or transport of undocumented forest products may result in confiscation, fines, and imprisonment.'
+  },
+  'RO-F-04 – Application for Chainsaw Registration': {
+    title: '🌲 Forestry Awareness – Chainsaw Registration',
+    body: 'All chainsaws used for legitimate purposes must be registered with DENR. Possession or use of an unregistered chainsaw may result in confiscation, fines, and penalties under the Chainsaw Act of 2002 (RA 9175).'
+  },
+  'RO-F-05 – Issuance of Special/Tree Cutting and/or Earth Balling Permit': {
+    title: '🌲 Forestry Awareness – Special/Tree Cutting and/or Earth Balling Permit',
+    body: 'Cutting, earth balling, or removal of trees requires prior DENR approval. Unauthorized tree cutting or earth balling may result in confiscation, fines, imprisonment, and restoration liabilities.'
+  },
+  'RO-F-06 – Issuance of Tree Cutting Permit for Public Safety': {
+    title: '🌲 Forestry Awareness – Tree Cutting Permit for Public Safety',
+    body: 'Tree cutting for public safety purposes requires DENR authorization and proper assessment. Unauthorized cutting may result in penalties and legal action under forestry regulations.'
+  },
+  'RO-F-07 – Issuance of Private Land Timber Permit (PLTP/SPLTP)': {
+    title: '🌲 Forestry Awareness – Private Land Timber Permit (PLTP/SPLTP)',
+    body: 'Harvesting and transport of timber from private lands require a valid DENR timber permit. Unauthorized cutting or transport may result in seizure, fines, and imprisonment.'
+  },
+  'R4A-F-08 – Issuance of Permit to Import Chainsaw': {
+    title: '🌲 Forestry Awareness – Permit to Import Chainsaw',
+    body: 'Importation of chainsaws requires a valid DENR permit. Unauthorized importation or possession of undocumented chainsaws may result in confiscation, fines, and legal penalties under RA 9175.'
+  }
 };
 
 // Dynamic step procedures - generated based on document requirements and type characteristics
@@ -5219,20 +5365,22 @@ function generateStepProcedure(documentType, permitType) {
   steps.push({
     step: stepNum++,
     title: 'Document Selection',
-    description: 'Select document type and category',
+    description: 'Select category type and permit type',
     icon: 'document'
   });
   
   // Step 2: Applicant/Owner Information (always required)
   steps.push({
     step: stepNum++,
-    title: documentType === 'Land Services' ? 'Property Owner Information' : 'Applicant Information',
-    description: documentType === 'Land Services' ? 'Provide property owner and contact details' : 'Provide personal and contact information',
+    title: documentType === 'Lands' ? 'Property Owner Information' : 'Applicant Information',
+    description: documentType === 'Lands' ? 'Provide property owner and contact details' : 'Provide personal and contact information',
     icon: 'user'
   });
   
-  // Step 3: Location/Property Details (for Land Services and location-based permits)
-  if (documentType === 'Land Services' || 
+  // Step 3: Location/Property Details (for Lands, Forestry, and location-based permits)
+  if (documentType === 'Lands' ||
+      documentType === 'Forestry' ||
+      documentType === 'Land Services' ||
       permitType.includes('CBFMA') ||
       permitType.includes('Farm') ||
       permitType.includes('Mining') ||
@@ -5240,8 +5388,8 @@ function generateStepProcedure(documentType, permitType) {
       permitType.includes('Tree Planting')) {
     steps.push({
       step: stepNum++,
-      title: documentType === 'Land Services' ? 'Property Location Details' : 'Location Details',
-      description: documentType === 'Land Services' ? 'Specify property location and boundaries' : 'Provide location and site details',
+      title: documentType === 'Lands' || documentType === 'Land Services' ? 'Property Location Details' : 'Location Details',
+      description: documentType === 'Lands' || documentType === 'Land Services' ? 'Specify property location and boundaries' : 'Provide location and site details',
       icon: 'location'
     });
   }
@@ -5283,7 +5431,7 @@ function generateStepProcedure(documentType, permitType) {
       description: 'Provide farm layout and facility information',
       icon: 'facility'
     });
-  } else if (documentType === 'Land Services') {
+  } else if (documentType === 'Lands' || documentType === 'Land Services') {
     steps.push({
       step: stepNum++,
       title: 'Survey Plan Information',
@@ -5333,7 +5481,7 @@ function generateStepProcedure(documentType, permitType) {
 
 // Default step procedure (used when no specific procedure is defined)
 const defaultStepProcedure = [
-  { step: 1, title: 'Document Selection', description: 'Select document type and category', icon: 'document' },
+  { step: 1, title: 'Document Selection', description: 'Select category type and permit type', icon: 'document' },
   { step: 2, title: 'Applicant Information', description: 'Provide personal and contact details', icon: 'user' },
   { step: 3, title: 'Location Details', description: 'Provide location and map pin', icon: 'location' },
   { step: 4, title: 'Application Details', description: 'Describe purpose and environmental impact', icon: 'document' },
@@ -5417,43 +5565,135 @@ const documentRequirements = {
   ]
 };
 
+Object.values(categoryTypePermitOptions)
+  .flat()
+  .forEach((label) => {
+    if (!documentRequirements[label]) {
+      documentRequirements[label] = [
+        'Duly accomplished application form',
+        'Valid government-issued ID',
+        'Supporting documents as required by DENR'
+      ];
+    }
+  });
+
+Object.values(categoryTypePermitOptions)
+  .flat()
+  .forEach((label) => {
+    if (!documentTypeDetails[label]) {
+      documentTypeDetails[label] = {
+        classification: "See DENR Regional Office / Citizen's Charter",
+        fees: 'Contact the office for applicable fees',
+        minimumProcessingTime: 'Processing time varies by application type'
+      };
+    }
+  });
+
 // Document type change handler
 const documentTypeSelect = document.getElementById('documentType');
 const permitTypeSelect = document.getElementById('permitType');
 const permitTypeInfo = document.getElementById('permitTypeInfo');
 const permitTypeDescription = document.getElementById('permitTypeDescription');
 const documentRequirementsList = document.getElementById('documentRequirementsList');
+const categoryAwarenessBanner = document.getElementById('categoryAwarenessBanner');
+const categoryAwarenessBannerBody = document.getElementById('categoryAwarenessBannerBody');
+const categoryAwarenessBannerDismiss = document.getElementById('categoryAwarenessBannerDismiss');
+
+function hideCategoryAwarenessBanner() {
+  if (categoryAwarenessBanner) {
+    categoryAwarenessBanner.style.display = 'none';
+  }
+}
+
+function updateStep1AwarenessBanner() {
+  if (!categoryAwarenessBanner || !categoryAwarenessBannerBody) return;
+  const docType = document.getElementById('documentType')?.value || '';
+  const permit = document.getElementById('permitType')?.value || '';
+
+  let copy = null;
+  if (permit && PERMIT_AWARENESS_COPY[permit]) {
+    copy = PERMIT_AWARENESS_COPY[permit];
+  } else if (
+    CATEGORY_TYPES.includes(docType) &&
+    CATEGORY_AWARENESS_COPY[docType] &&
+    (!permit || !PERMIT_AWARENESS_COPY[permit])
+  ) {
+    copy = CATEGORY_AWARENESS_COPY[docType];
+  }
+
+  if (copy) {
+    categoryAwarenessBannerBody.innerHTML = `<p><strong>${copy.title}</strong></p><p>${copy.body}</p>`;
+    categoryAwarenessBanner.style.display = 'block';
+  } else {
+    hideCategoryAwarenessBanner();
+  }
+}
+
+if (categoryAwarenessBannerDismiss) {
+  categoryAwarenessBannerDismiss.addEventListener('click', () => {
+    hideCategoryAwarenessBanner();
+  });
+}
+
+function resetPermitSelectForCategory(selectedType) {
+  const pts = document.getElementById('permitType');
+  if (!pts) return;
+  pts.innerHTML = '';
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  if (selectedType && documentTypeOptions[selectedType]) {
+    placeholder.textContent = 'Select permit type';
+    pts.appendChild(placeholder);
+    documentTypeOptions[selectedType].forEach((option) => {
+      const optElement = document.createElement('option');
+      optElement.value = option;
+      optElement.textContent = option;
+      pts.appendChild(optElement);
+    });
+    pts.disabled = false;
+  } else {
+    placeholder.textContent = 'Select category type first';
+    pts.appendChild(placeholder);
+    pts.disabled = true;
+  }
+  pts.value = '';
+}
+
+function initializeStep1DocumentControls() {
+  const catSelect = document.getElementById('documentType');
+  const cat = catSelect ? catSelect.value : '';
+  if (permitTypeInfo) {
+    permitTypeInfo.style.display = 'none';
+  }
+  resetPermitSelectForCategory(cat);
+  const reqList = document.getElementById('documentRequirementsList');
+  if (reqList) {
+    reqList.innerHTML = '';
+  }
+  updateStep1AwarenessBanner();
+}
 
 if (documentTypeSelect) {
   documentTypeSelect.addEventListener('change', (e) => {
     const selectedType = e.target.value;
 
-    // Save to localStorage for persistence across reload
     localStorage.setItem('selectedDocumentType', selectedType);
+    localStorage.removeItem('selectedPermitType');
 
-    // Clear document category options
-    permitTypeSelect.innerHTML = '<option value="">Select document type first</option>';
-    
-    if (selectedType && documentTypeOptions[selectedType]) {
-      // Populate document category options
-      documentTypeOptions[selectedType].forEach(option => {
-        const optElement = document.createElement('option');
-        optElement.value = option;
-        optElement.textContent = option;
-        permitTypeSelect.appendChild(optElement);
-      });
-      
-      // Show description
+    resetPermitSelectForCategory(selectedType);
+
+    if (selectedType && documentTypeDescriptions[selectedType] && permitTypeInfo && permitTypeDescription) {
       permitTypeInfo.style.display = 'block';
       permitTypeDescription.textContent = documentTypeDescriptions[selectedType];
-    } else {
+    } else if (permitTypeInfo) {
       permitTypeInfo.style.display = 'none';
     }
-    
-    // Clear document requirements
+
     if (documentRequirementsList) {
       documentRequirementsList.innerHTML = '';
     }
+
+    updateStep1AwarenessBanner();
   });
 }
 
@@ -5553,6 +5793,8 @@ if (permitTypeSelect) {
 
     // Save to localStorage for persistence across reload
     localStorage.setItem('selectedPermitType', selectedPermitType);
+
+    updateStep1AwarenessBanner();
     
     if (documentRequirementsList && selectedPermitType && documentRequirements[selectedPermitType]) {
       const requirements = documentRequirements[selectedPermitType];
@@ -7246,6 +7488,18 @@ window.navigateToSection = function(sectionId) {
     // Restore form data when navigating to sections with forms
     if (sectionId === 'newApplicationSection') {
       restoreFormData('newApplicationForm');
+      const documentTypeField = document.getElementById('documentType');
+      const permitTypeField = document.getElementById('permitType');
+      const savedPermitFromForm = permitTypeField ? permitTypeField.value : '';
+      if (documentTypeField && documentTypeField.value) {
+        documentTypeField.dispatchEvent(new Event('change'));
+        if (permitTypeField && savedPermitFromForm) {
+          permitTypeField.value = savedPermitFromForm;
+          permitTypeField.dispatchEvent(new Event('change'));
+        }
+      } else if (typeof initializeStep1DocumentControls === 'function') {
+        initializeStep1DocumentControls();
+      }
     }
     
     // Invalidate map size if navigating to new application section

@@ -492,23 +492,27 @@
                 <div class="form-step active" data-step="1">
                   <div class="step-card">
                     <h4 class="step-title">Document Information</h4>
-                    <p class="step-description">Select Document Type</p>
+                    <p class="step-description">Select category type and permit type</p>
 
                     <div class="form-group">
-                      <label for="documentType">Document Type *</label>
+                      <label for="documentType">Category Type *</label>
                       <select id="documentType">
-                        <option value="">Select document type</option>
-                        <option value="Permit">Permit</option>
-                        <option value="Certificate">Certificate</option>
-                        <option value="Certification">Certification</option>
-                        <option value="Clearance">Clearance</option>
+                        <option value="">Select category type</option>
+                        <option value="Biodiversity">Biodiversity</option>
+                        <option value="Lands">Lands</option>
+                        <option value="Forestry">Forestry</option>
                       </select>
                     </div>
 
+                    <div id="categoryAwarenessBanner" class="category-awareness-banner" style="display: none;" role="region" aria-live="polite" aria-label="Category awareness">
+                      <button type="button" class="category-awareness-banner__dismiss" id="categoryAwarenessBannerDismiss" aria-label="Dismiss awareness message">×</button>
+                      <div id="categoryAwarenessBannerBody" class="category-awareness-banner__body"></div>
+                    </div>
+
                     <div class="form-group">
-                      <label for="permitType">Document Category *</label>
-                      <select id="permitType">
-                        <option value="">Select document type first</option>
+                      <label for="permitType">Permit Type *</label>
+                      <select id="permitType" disabled>
+                        <option value="">Select category type first</option>
                       </select>
                     </div>
 
