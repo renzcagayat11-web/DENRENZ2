@@ -5866,13 +5866,21 @@ textarea:hover {
 }
 
 /*
- * Applied only during PDF capture: tighter vertical rhythm so the canvas is shorter.
- * The image is scaled to one A4 height — less empty vertical space ⇒ larger text on paper.
+ * Applied only during PDF capture. Produces a formal, print-ready snapshot
+ * tuned to fit the entire form on a single A4 page: fixed width, white
+ * background, tighter rhythm than the on-screen layout.
  */
 .denr-form--pdf-snapshot {
+  width: 794px;            /* A4 width @ 96dpi - keeps capture aspect identical across screens */
+  max-width: 794px;
+  margin: 0 auto;
+  background: #ffffff;
   padding: 10px 16px 12px;
   line-height: 1.38;
+  color: #111827;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
+  box-shadow: none;
 }
 
 .denr-form--pdf-snapshot .denr-cc-letterhead {

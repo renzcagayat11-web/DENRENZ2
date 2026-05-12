@@ -6340,4338 +6340,1444 @@ const DENR_FORM_TEMPLATES = {
   },
 
   // LAND FORMS
-  'R4A-L-01 – Issuance of Land Title Application': {
-    title: 'Land Title Application Form',
-    subtitle: 'Department of Environment and Natural Resources - Region IV-A',
+  'RO-L-01 – Issuance of Certification of Land Classification Status': {
+    title: 'Issuance of Certification of Land Classification Status',
+    subtitle: '',
     template: `
       <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">LAND TITLE APPLICATION FORM</div>
-          <div class="denr-form-subtitle">DENR Region IV-A CALABARZON</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">APPLICANT INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Full Name *</label>
-              <input type="text" class="denr-form-input" id="applicantName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address *</label>
-              <input type="text" class="denr-form-input" id="applicantAddress" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Number *</label>
-              <input type="tel" class="denr-form-input" id="applicantContact" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Email Address *</label>
-              <input type="email" class="denr-form-input" id="applicantEmail" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Civil Status *</label>
-              <select class="denr-form-input" id="civilStatus" required>
-                <option value="">Select civil status</option>
-                <option value="single">Single</option>
-                <option value="married">Married</option>
-                <option value="widowed">Widowed</option>
-                <option value="separated">Legally Separated</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Nationality *</label>
-              <input type="text" class="denr-form-input" id="nationality" required>
-            </div>
+        <div class="denr-cc-letterhead">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="denr-cc-lh-logo" width="72" height="72" />
+          <div class="denr-cc-lh-text">
+            <div>Republic of the Philippines</div>
+            <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
+            <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
+            <div>Brgy. Duhat, Sta. Cruz, Laguna</div>
+            <div class="denr-cc-lh-contact"><span class="denr-cc-lh-email">cenrostacruz@denr.gov.ph</span> | (049) 536 8903</div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">PROPERTY INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Lot Number *</label>
-              <input type="text" class="denr-form-input" id="lotNumber" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Block Number *</label>
-              <input type="text" class="denr-form-input" id="blockNumber" required>
-            </div>
+        <div class="denr-cc-banner">CHECKLIST OF REQUIREMENTS</div>
+
+        <div class="denr-cc-infobox">
+          <div class="denr-cc-charter-no">CITIZEN'S CHARTER NO. RO-L-01</div>
+          <div class="denr-cc-service-title">Issuance of Certification of Land Classification Status</div>
+          <p class="denr-cc-infobox-note">*This certification is being issued based from the land records/status and projection in the land classification map for alienability or disposability of the land being applied for. This Certification does not construe ownership and is for reference only.*</p>
+        </div>
+
+        <div class="denr-cc-applicant-block">
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Name of Applicant:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantName" />
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Survey Number *</label>
-              <input type="text" class="denr-form-input" id="surveyNumber" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Title Number (if any)</label>
-              <input type="text" class="denr-form-input" id="titleNumber">
-            </div>
+          <div class="denr-cc-field-row denr-cc-field-row-multiline">
+            <span class="denr-cc-field-label">Address:</span>
+            <textarea class="denr-cc-line-input denr-cc-line-textarea" id="applicantAddress" rows="2"></textarea>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Area (sq.m) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="propertyArea" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Location/Address of Property *</label>
-              <input type="text" class="denr-form-input" id="propertyLocation" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Municipality/City *</label>
-              <input type="text" class="denr-form-input" id="municipality" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Province *</label>
-              <input type="text" class="denr-form-input" id="province" required>
-            </div>
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Contact Details:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantContact" />
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">MODE OF ACQUISITION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Mode of Acquisition *</label>
-              <select class="denr-form-input" id="acquisitionMode" required>
-                <option value="">Select mode of acquisition</option>
-                <option value="sale">Sale/Deed of Sale</option>
-                <option value="donation">Donation</option>
-                <option value="inheritance">Inheritance/Succession</option>
-                <option value="adverse">Adverse Claim</option>
-                <option value="tax-sale">Tax Sale</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date of Acquisition *</label>
-              <input type="date" class="denr-form-input" id="acquisitionDate" required>
-            </div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">A. Requirements to be submitted upon filing of application</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Request Form (1 original, 1 duplicate copy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Any document showing the identity of the lot</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Sketch Plan with Complete Technical Description (1 original)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Others: ________________________________</label>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Transferor/Grantor *</label>
-              <input type="text" class="denr-form-input" id="transferorName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Document Number *</label>
-              <input type="text" class="denr-form-input" id="documentNumber" required>
-            </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">B. Type of Transaction</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Citizen</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Business <em>(Specify the Name of Company and Owner / Authorized Representative)</em></label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Government <em>(Specify the Name of the Agency and its Authorized Representative)</em></label>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Notary Public *</label>
-              <input type="text" class="denr-form-input" id="notaryPublic" required>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">C. Classification</div>
+          <div class="denr-cc-classification-line">✓ Highly Technical</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">D. Fees to be Paid</div>
+          <div class="denr-cc-fee-line">Certification Fee: ₱25.00</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">E. Processing Time</div>
+          <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> 4 working days, 3 hours, and 25 minutes</div>
+        </div>
+
+        <div class="denr-cc-received-row">
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Received by:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_l01_receivedBy" />
+          </div>
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Date Received:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_l01_dateReceived" />
+          </div>
+        </div>
+
+        <div class="denr-cc-stub-separator"></div>
+
+        <div class="denr-cc-receipt-official">
+          <img src="/assets/images/logo.png" alt="" class="denr-cc-receipt-logo" width="56" height="56" />
+          <div class="denr-cc-receipt-body">
+            <div class="denr-cc-receipt-heading">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="denr-cc-receipt-service">Name of Service: <strong>Issuance of Certification of Land Classification Status</strong></div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Name of Applicant:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_l01_ackApplicant" />
             </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Place of Notarization *</label>
-              <input type="text" class="denr-form-input" id="notaryPlace" required>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Date Received:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_l01_ackDateReceived" />
             </div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">TAX DECLARATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Tax Declaration Number *</label>
-              <input type="text" class="denr-form-input" id="taxDeclarationNumber" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Year Issued *</label>
-              <input type="number" class="denr-form-input" id="taxDeclarationYear" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Assessed Value *</label>
-              <input type="number" class="denr-form-input" id="assessedValue" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Real Property Tax Paid *</label>
-              <input type="text" class="denr-form-input" id="realPropertyTax" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">ENCUMBRANCES/LIENS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Any Encumbrances? *</label>
-              <select class="denr-form-input" id="hasEncumbrances" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">If Yes, specify:</label>
-              <textarea class="denr-form-textarea" id="encumbranceDetails"></textarea>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">ADJOINING OWNERS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">North *</label>
-              <input type="text" class="denr-form-input" id="northOwner" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">South *</label>
-              <input type="text" class="denr-form-input" id="southOwner" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">East *</label>
-              <input type="text" class="denr-form-input" id="eastOwner" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">West *</label>
-              <input type="text" class="denr-form-input" id="westOwner" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">UNDERTAKING</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking1" required>
-                I certify that all information provided is true and correct
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking2" required>
-                I certify that I am the lawful owner of the property
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking3" required>
-                I understand that false statements may result in criminal prosecution
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-signature">
-            <div class="denr-form-signature-label">Signature of Applicant</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Printed Name</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Date</div>
-            <div class="denr-form-signature-line"></div>
-          </div>
-        </div>
+        <p class="denr-cc-followup-note">*To follow-up your application, please present this stub or you may contact us at cenrostacruz@denr.gov.ph / (049) 536 – 8903*</p>
       </div>
     `
   },
 
-  'R4A-L-02 – Issuance of Land Title Transfer': {
-    title: 'Land Title Transfer Application Form',
-    subtitle: 'Department of Environment and Natural Resources - Region IV-A',
+  'RO-L-02 – Issuance of Survey Authority': {
+    title: 'Issuance of Survey Authority',
+    subtitle: '',
     template: `
       <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">LAND TITLE TRANSFER APPLICATION FORM</div>
-          <div class="denr-form-subtitle">DENR Region IV-A CALABARZON</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">TRANSFEROR INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Full Name *</label>
-              <input type="text" class="denr-form-input" id="transferorName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address *</label>
-              <input type="text" class="denr-form-input" id="transferorAddress" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Number *</label>
-              <input type="tel" class="denr-form-input" id="transferorContact" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Email Address *</label>
-              <input type="email" class="denr-form-input" id="transferorEmail" required>
-            </div>
+        <div class="denr-cc-letterhead">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="denr-cc-lh-logo" width="72" height="72" />
+          <div class="denr-cc-lh-text">
+            <div>Republic of the Philippines</div>
+            <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
+            <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
+            <div>Brgy. Duhat, Sta. Cruz, Laguna</div>
+            <div class="denr-cc-lh-contact"><span class="denr-cc-lh-email">cenrostacruz@denr.gov.ph</span> | (049) 536 8903</div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">TRANSFEREE INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Full Name *</label>
-              <input type="text" class="denr-form-input" id="transfereeName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address *</label>
-              <input type="text" class="denr-form-input" id="transfereeAddress" required>
-            </div>
+        <div class="denr-cc-banner">CHECKLIST OF REQUIREMENTS</div>
+
+        <div class="denr-cc-infobox">
+          <div class="denr-cc-charter-no">CITIZEN'S CHARTER NO. RO-L-02</div>
+          <div class="denr-cc-service-title">Issuance of Survey Authority</div>
+          <p class="denr-cc-infobox-note">*This document is an authority given to private Geodetic Engineers (GEs) for the survey of public lands for land titling.*</p>
+        </div>
+
+        <div class="denr-cc-applicant-block">
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Name of Applicant:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantName" />
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Number *</label>
-              <input type="tel" class="denr-form-input" id="transfereeContact" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Email Address *</label>
-              <input type="email" class="denr-form-input" id="transfereeEmail" required>
-            </div>
+          <div class="denr-cc-field-row denr-cc-field-row-multiline">
+            <span class="denr-cc-field-label">Address:</span>
+            <textarea class="denr-cc-line-input denr-cc-line-textarea" id="applicantAddress" rows="2"></textarea>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Civil Status *</label>
-              <select class="denr-form-input" id="transfereeCivilStatus" required>
-                <option value="">Select civil status</option>
-                <option value="single">Single</option>
-                <option value="married">Married</option>
-                <option value="widowed">Widowed</option>
-                <option value="separated">Legally Separated</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Nationality *</label>
-              <input type="text" class="denr-form-input" id="transfereeNationality" required>
-            </div>
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Contact Details:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantContact" />
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">PROPERTY INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Title Number *</label>
-              <input type="text" class="denr-form-input" id="titleNumber" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Lot Number *</label>
-              <input type="text" class="denr-form-input" id="lotNumber" required>
-            </div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">A. Requirements to be submitted upon filing of application</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Duly accomplished Letter-Request Form from the land owner requesting for survey authority and authorizing certain private GE to conduct the survey (1 original) <strong>OR</strong> Duly accomplished Letter-Request Form from the GE on behalf of his/her client (1 original)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Any proof of claim or acquisition of the property</label>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Block Number *</label>
-              <input type="text" class="denr-form-input" id="blockNumber" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Survey Number *</label>
-              <input type="text" class="denr-form-input" id="surveyNumber" required>
-            </div>
+          <div class="denr-form-checklist denr-form-nested">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Latest, Updated Tax declaration for the last year (1 certified copy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Deed of Sale (1 photocopy with accompanying Original Copy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Extra Judicial Settlement (1 original)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Waiver of Rights (1 original)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Other documents: ________________________________</label>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Area (sq.m) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="propertyArea" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Location/Address of Property *</label>
-              <input type="text" class="denr-form-input" id="propertyLocation" required>
-            </div>
+          <p class="denr-cc-infobox-note" style="margin:4px 0 8px 28px;">(Note: DENR may request for additional documents or combination of documents mentioned above depending on the situation of the application / request)</p>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Survey Authority form duly signed by the applicant and private Geodetic Engineer (1 original, 1 duplicate copy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Certification of Land Classification Status</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Scheme of subdivision from GE (1 photocopy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Certification from the Regional Trial Court concerned that there is no pending land registration case involving the parcel being applied for (1 original)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Certification from barangay that there is no record of claims and conflict (1 original, 1 duplicate copy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Copy of Approved Survey Plan with Technical Description (if with previously approved surveys) (1 blueprint copy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Certification of Lot Status (whether titled or not) and Status from LRA (if the municipality is under cadastral proceedings or if there is an old survey) (Private Survey) (1 original, 1 duplicate copy)</label>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Municipality/City *</label>
-              <input type="text" class="denr-form-input" id="municipality" required>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">B. Type of Transaction</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Citizen</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Business <em>(Specify the Name of Company and Owner / Authorized Representative)</em></label>
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">C. Classification</div>
+          <div class="denr-cc-classification-line">✓ Highly Technical</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">D. Fees to be Paid</div>
+          <div class="denr-cc-fee-line">&gt; ₱200.00 Field Inspection Deposit</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">E. Processing Time</div>
+          <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> 7 working days, 6 hours and 55 minutes</div>
+        </div>
+
+        <div class="denr-cc-received-row">
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Received by:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_l02_receivedBy" />
+          </div>
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Date Received:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_l02_dateReceived" />
+          </div>
+        </div>
+
+        <div class="denr-cc-stub-separator"></div>
+
+        <div class="denr-cc-receipt-official">
+          <img src="/assets/images/logo.png" alt="" class="denr-cc-receipt-logo" width="56" height="56" />
+          <div class="denr-cc-receipt-body">
+            <div class="denr-cc-receipt-heading">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="denr-cc-receipt-service">Name of Service: <strong>Issuance of Survey Authority</strong></div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Name of Applicant:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_l02_ackApplicant" />
             </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Province *</label>
-              <input type="text" class="denr-form-input" id="province" required>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Date Received:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_l02_ackDateReceived" />
             </div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">TRANSFER DOCUMENTS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Type of Transfer Document *</label>
-              <select class="denr-form-input" id="transferDocType" required>
-                <option value="">Select document type</option>
-                <option value="deed-sale">Deed of Sale</option>
-                <option value="deed-donation">Deed of Donation</option>
-                <option value="deed-exchange">Deed of Exchange</option>
-                <option value="extra-judicial">Extra-Judicial Settlement</option>
-                <option value="judicial-settlement">Judicial Settlement</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Document Number *</label>
-              <input type="text" class="denr-form-input" id="transferDocNumber" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date of Document *</label>
-              <input type="date" class="denr-form-input" id="transferDocDate" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Notary Public *</label>
-              <input type="text" class="denr-form-input" id="notaryPublic" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Place of Notarization *</label>
-              <input type="text" class="denr-form-input" id="notaryPlace" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Consideration Amount *</label>
-              <input type="number" class="denr-form-input" id="considerationAmount" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">TAX INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Tax Declaration Number *</label>
-              <input type="text" class="denr-form-input" id="taxDeclarationNumber" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Assessed Value *</label>
-              <input type="number" class="denr-form-input" id="assessedValue" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Capital Gains Tax Paid *</label>
-              <input type="text" class="denr-form-input" id="capitalGainsTax" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Documentary Stamp Tax Paid *</label>
-              <input type="text" class="denr-form-input" id="docStampTax" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Transfer Tax Paid *</label>
-              <input type="text" class="denr-form-input" id="transferTax" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">BIR Form Number *</label>
-              <input type="text" class="denr-form-input" id="birFormNumber" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">ENCUMBRANCES</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Existing Encumbrances? *</label>
-              <select class="denr-form-input" id="hasEncumbrances" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">If Yes, specify:</label>
-              <textarea class="denr-form-textarea" id="encumbranceDetails"></textarea>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">UNDERTAKING</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking1" required>
-                We certify that all information provided is true and correct
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking2" required>
-                We certify that the transfer is voluntary and with full consent
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking3" required>
-                We understand that false statements may result in criminal prosecution
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-signature">
-            <div class="denr-form-signature-label">Signature of Transferor</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Printed Name</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Date</div>
-            <div class="denr-form-signature-line"></div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-signature">
-            <div class="denr-form-signature-label">Signature of Transferee</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Printed Name</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Date</div>
-            <div class="denr-form-signature-line"></div>
-          </div>
-        </div>
+        <p class="denr-cc-followup-note">*To follow-up your application, please present this stub or you may contact us at cenrostacruz@denr.gov.ph / (049) 536 – 8903*</p>
       </div>
     `
   },
 
-  'R4A-L-03 – Issuance of Land Survey Application': {
-    title: 'Land Survey Application Form',
-    subtitle: 'Department of Environment and Natural Resources - Region IV-A',
+  'RO-L-03 – Application for Free Patent (Agricultural)': {
+    title: 'Application for Free Patent (Agricultural)',
+    subtitle: '',
     template: `
       <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">LAND SURVEY APPLICATION FORM</div>
-          <div class="denr-form-subtitle">DENR Region IV-A CALABARZON</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">APPLICANT INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Full Name *</label>
-              <input type="text" class="denr-form-input" id="applicantName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address *</label>
-              <input type="text" class="denr-form-input" id="applicantAddress" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Number *</label>
-              <input type="tel" class="denr-form-input" id="applicantContact" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Email Address *</label>
-              <input type="email" class="denr-form-input" id="applicantEmail" required>
-            </div>
+        <div class="denr-cc-letterhead">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="denr-cc-lh-logo" width="72" height="72" />
+          <div class="denr-cc-lh-text">
+            <div>Republic of the Philippines</div>
+            <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
+            <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
+            <div>Brgy. Duhat, Sta. Cruz, Laguna</div>
+            <div class="denr-cc-lh-contact"><span class="denr-cc-lh-email">cenrostacruz@denr.gov.ph</span> | (049) 536 8903</div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">TYPE OF SURVEY</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Survey Type *</label>
-              <select class="denr-form-input" id="surveyType" required>
-                <option value="">Select survey type</option>
-                <option value="cadastral">Cadastral Survey</option>
-                <option value="subdivision">Subdivision Survey</option>
-                <option value="consolidation">Consolidation Survey</option>
-                <option value="verification">Verification Survey</option>
-                <option value="relocation">Relocation Survey</option>
-                <option value="boundary">Boundary Survey</option>
-                <option value="topographic">Topographic Survey</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Purpose of Survey *</label>
-              <select class="denr-form-input" id="surveyPurpose" required>
-                <option value="">Select purpose</option>
-                <option value="title">Land Title Application</option>
-                <option value="transfer">Title Transfer</option>
-                <option value="subdivision">Property Subdivision</option>
-                <option value="boundary">Boundary Dispute</option>
-                <option value="verification">Verification of Area</option>
-                <option value="development">Land Development</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
+        <div class="denr-cc-banner">CHECKLIST OF REQUIREMENTS</div>
+
+        <div class="denr-cc-infobox">
+          <div class="denr-cc-charter-no">CITIZEN'S CHARTER NO. RO-L-03</div>
+          <div class="denr-cc-service-title">Application for Free Patent (Agricultural)</div>
+        </div>
+
+        <div class="denr-cc-applicant-block">
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Name of Applicant:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantName" />
+          </div>
+          <div class="denr-cc-field-row denr-cc-field-row-multiline">
+            <span class="denr-cc-field-label">Address:</span>
+            <textarea class="denr-cc-line-input denr-cc-line-textarea" id="applicantAddress" rows="2"></textarea>
+          </div>
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Contact Details:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantContact" />
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">PROPERTY INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Existing Title Number (if any)</label>
-              <input type="text" class="denr-form-input" id="existingTitleNumber">
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Lot Number *</label>
-              <input type="text" class="denr-form-input" id="lotNumber" required>
-            </div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">A. Requirements to be submitted upon filing of application</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Duly accomplished Free Patent Application and prescribed forms (1 original)</label>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Block Number *</label>
-              <input type="text" class="denr-form-input" id="blockNumber" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Survey Number (if any)</label>
-              <input type="text" class="denr-form-input" id="surveyNumber">
-            </div>
+          <div class="denr-form-checklist denr-form-nested">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Notarized Special Power of Attorney (SPA) (in case the application is filed by a representative or by the heirs of the original applicant)</label>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Current Area (sq.m) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="currentArea" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Location/Address of Property *</label>
-              <input type="text" class="denr-form-input" id="propertyLocation" required>
-            </div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Tax declaration in the name of the applicant. If the tax declaration is in the name of the applicant's predecessor-in-interest, any of the following documents shall be presented:</label>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Municipality/City *</label>
-              <input type="text" class="denr-form-input" id="municipality" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Province *</label>
-              <input type="text" class="denr-form-input" id="province" required>
-            </div>
+          <div class="denr-form-checklist denr-form-nested">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Deed of Sale</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Extra Judicial Settlement</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Waiver of Rights</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Deed of Donation or other form of monuments of ownership</label>
+          </div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Certification of status of land from LRA, if the municipality is under cadastral proceedings or if there is an old survey (Private and Original Survey) (1 photocopy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Documentary Stamp (to be attached in the application form)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Others: ________________________________</label>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">SURVEY DETAILS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Number of Lots to be Created *</label>
-              <input type="number" class="denr-form-input" id="numberOfLots" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Proposed Lot Areas (sq.m) *</label>
-              <textarea class="denr-form-textarea" id="proposedLotAreas" placeholder="List each lot area separated by comma" required></textarea>
-            </div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">B. Type of Transaction</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Citizen</label>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Access to Property *</label>
-              <select class="denr-form-input" id="propertyAccess" required>
-                <option value="">Select access type</option>
-                <option value="public-road">Public Road</option>
-                <option value="private-road">Private Road</option>
-                <option value="right-of-way">Right of Way</option>
-                <option value="easement">Easement</option>
-                <option value="no-access">No Access</option>
-              </select>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">C. Classification</div>
+          <div class="denr-cc-classification-line">✓ Highly Technical (Multi-Stage Processing)</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">D. Fees to be Paid</div>
+          <div class="denr-cc-fee-line">Application Fee: ₱150.00</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">E. Processing Time</div>
+          <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> 130 calendar days (120 Calendar days for processing + 10 calendar days Review / Approval / Disapproval and Transmittal)</div>
+        </div>
+
+        <div class="denr-cc-received-row">
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Received by:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_l03_receivedBy" />
+          </div>
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Date Received:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_l03_dateReceived" />
+          </div>
+        </div>
+
+        <div class="denr-cc-stub-separator"></div>
+
+        <div class="denr-cc-receipt-official">
+          <img src="/assets/images/logo.png" alt="" class="denr-cc-receipt-logo" width="56" height="56" />
+          <div class="denr-cc-receipt-body">
+            <div class="denr-cc-receipt-heading">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="denr-cc-receipt-service">Name of Service: <strong>Issuance of Agricultural Free Patent</strong></div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Name of Applicant:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_l03_ackApplicant" />
             </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Road Description *</label>
-              <input type="text" class="denr-form-input" id="roadDescription" required>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Date Received:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_l03_ackDateReceived" />
             </div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">OWNERSHIP INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Proof of Ownership *</label>
-              <select class="denr-form-input" id="ownershipProof" required>
-                <option value="">Select proof type</option>
-                <option value="title">Transfer Certificate of Title</option>
-                <option value="tax-declaration">Tax Declaration</option>
-                <option value="deed">Deed of Sale/Donation</option>
-                <option value="inheritance">Extra-Judicial Settlement</option>
-                <option value="court-order">Court Order</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Document Number *</label>
-              <input type="text" class="denr-form-input" id="documentNumber" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date Issued *</label>
-              <input type="date" class="denr-form-input" id="documentDate" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Issuing Office *</label>
-              <input type="text" class="denr-form-input" id="issuingOffice" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">ADJOINING PROPERTIES</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">North *</label>
-              <input type="text" class="denr-form-input" id="northOwner" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">South *</label>
-              <input type="text" class="denr-form-input" id="southOwner" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">East *</label>
-              <input type="text" class="denr-form-input" id="eastOwner" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">West *</label>
-              <input type="text" class="denr-form-input" id="westOwner" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">SPECIAL INSTRUCTIONS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Special Requirements/Instructions</label>
-              <textarea class="denr-form-textarea" id="specialInstructions" placeholder="Any special requirements or instructions for the survey"></textarea>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">UNDERTAKING</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking1" required>
-                I certify that all information provided is true and correct
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking2" required>
-                I certify that I am the lawful owner of the property
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking3" required>
-                I authorize the survey team to enter the property for survey purposes
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-signature">
-            <div class="denr-form-signature-label">Signature of Applicant</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Printed Name</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Date</div>
-            <div class="denr-form-signature-line"></div>
-          </div>
-        </div>
+        <p class="denr-cc-followup-note">*To follow-up your application, please present this stub or you may contact us at cenrostacruz@denr.gov.ph / (049) 536 – 8903*</p>
       </div>
     `
   },
 
-  'R4A-L-04 – Issuance of Land Use Conversion Application': {
-    title: 'Land Use Conversion Application Form',
-    subtitle: 'Department of Environment and Natural Resources - Region IV-A',
+  'RO-L-04 – Application for Free Patent (Residential)': {
+    title: 'Application for Free Patent (Residential)',
+    subtitle: '',
     template: `
       <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">LAND USE CONVERSION APPLICATION FORM</div>
-          <div class="denr-form-subtitle">DENR Region IV-A CALABARZON</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">APPLICANT INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant/Company *</label>
-              <input type="text" class="denr-form-input" id="applicantName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address *</label>
-              <input type="text" class="denr-form-input" id="applicantAddress" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Number *</label>
-              <input type="tel" class="denr-form-input" id="applicantContact" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Email Address *</label>
-              <input type="email" class="denr-form-input" id="applicantEmail" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Business Registration (if applicable)</label>
-              <input type="text" class="denr-form-input" id="businessRegistration">
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Representative Name *</label>
-              <input type="text" class="denr-form-input" id="representativeName" required>
-            </div>
+        <div class="denr-cc-letterhead">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="denr-cc-lh-logo" width="72" height="72" />
+          <div class="denr-cc-lh-text">
+            <div>Republic of the Philippines</div>
+            <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
+            <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
+            <div>Brgy. Duhat, Sta. Cruz, Laguna</div>
+            <div class="denr-cc-lh-contact"><span class="denr-cc-lh-email">cenrostacruz@denr.gov.ph</span> | (049) 536 8903</div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">PROPERTY INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Title Number *</label>
-              <input type="text" class="denr-form-input" id="titleNumber" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Lot Number *</label>
-              <input type="text" class="denr-form-input" id="lotNumber" required>
-            </div>
+        <div class="denr-cc-banner">CHECKLIST OF REQUIREMENTS</div>
+
+        <div class="denr-cc-infobox">
+          <div class="denr-cc-charter-no">CITIZEN'S CHARTER NO. RO-L-04</div>
+          <div class="denr-cc-service-title">Application for Free Patent (Residential)</div>
+        </div>
+
+        <div class="denr-cc-applicant-block">
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Name of Applicant:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantName" />
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Block Number *</label>
-              <input type="text" class="denr-form-input" id="blockNumber" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Survey Number *</label>
-              <input type="text" class="denr-form-input" id="surveyNumber" required>
-            </div>
+          <div class="denr-cc-field-row denr-cc-field-row-multiline">
+            <span class="denr-cc-field-label">Address:</span>
+            <textarea class="denr-cc-line-input denr-cc-line-textarea" id="applicantAddress" rows="2"></textarea>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Total Area (hectares) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="totalArea" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Location/Address of Property *</label>
-              <input type="text" class="denr-form-input" id="propertyLocation" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Municipality/City *</label>
-              <input type="text" class="denr-form-input" id="municipality" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Province *</label>
-              <input type="text" class="denr-form-input" id="province" required>
-            </div>
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Contact Details:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantContact" />
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">CURRENT LAND USE</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Current Land Use Classification *</label>
-              <select class="denr-form-input" id="currentLandUse" required>
-                <option value="">Select current use</option>
-                <option value="agricultural">Agricultural</option>
-                <option value="forest">Forest Land</option>
-                <option value="residential">Residential</option>
-                <option value="commercial">Commercial</option>
-                <option value="industrial">Industrial</option>
-                <option value="institutional">Institutional</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Years Under Current Use *</label>
-              <input type="number" class="denr-form-input" id="yearsCurrentUse" required>
-            </div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">A. Requirements to be submitted upon filing of application</div>
+          <div class="denr-form-subheading">Basic:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Duly accomplished Free Patent Application and prescribed forms (1 original)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Any of the following document showing identity of land and claims of ownership:</label>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Current Use Description *</label>
-              <textarea class="denr-form-textarea" id="currentUseDescription" required></textarea>
+          <div class="denr-form-checklist denr-form-nested">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Tax Declaration, if applicable (1 certified copy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Deed of Sale / Deed of Donation / Deed of Transfer (1 photocopy, present original copy) *if applicable</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Extra Judicial Settlement (1 photocopy) *if applicable</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Waiver of Rights, Barangay Certification (1 photocopy) *if applicable</label>
+          </div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Affidavit of at least two (2) disinterested person residing in the area</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Certification from the Municipal Circuit/Regional Trial Court (MCTC/RTC) concerned that there is no pending land registration case involving the parcel being applied for (1 original, 1 photocopy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Approved Survey Plan with Technical Description/Form V37 (if covered with isolated survey) (1 certified copy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Certification of status of land from LRA, if the municipality is under cadastral proceedings or if there is an old survey (Private and Original Survey) (1 photocopy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Certification that the land applied for is alienable and disposable (1 original, 1 photocopy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Documentary Stamp (4 pieces) (2-Affidavits, 1-Application Form, 1-Notice of Posting)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Certification from LGU that the area applied for is zoned as Residential (1 original), or approved CLUP, if applicable (1 photocopy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Latest photograph of land and house (preferably geo-tagged)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Others: ________________________________</label>
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">B. Type of Transaction</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Citizen</label>
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">C. Classification</div>
+          <div class="denr-cc-classification-line">✓ Highly Technical (Multi-Stage Processing)</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">D. Fees to be Paid</div>
+          <div class="denr-cc-fee-line">Application Fee: ₱50.00</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">E. Processing Time</div>
+          <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> 130 calendar days (120 calendar days for processing + 10 working days for Review / Approval / Disapproval and Transmittal to ROD)</div>
+        </div>
+
+        <div class="denr-cc-received-row">
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Received by:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_l04_receivedBy" />
+          </div>
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Date Received:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_l04_dateReceived" />
+          </div>
+        </div>
+
+        <div class="denr-cc-stub-separator"></div>
+
+        <div class="denr-cc-receipt-official">
+          <img src="/assets/images/logo.png" alt="" class="denr-cc-receipt-logo" width="56" height="56" />
+          <div class="denr-cc-receipt-body">
+            <div class="denr-cc-receipt-heading">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="denr-cc-receipt-service">Name of Service: <strong>Issuance of Residential Free Patent</strong></div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Name of Applicant:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_l04_ackApplicant" />
+            </div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Date Received:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_l04_ackDateReceived" />
             </div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">PROPOSED LAND USE</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Proposed Land Use Classification *</label>
-              <select class="denr-form-input" id="proposedLandUse" required>
-                <option value="">Select proposed use</option>
-                <option value="residential">Residential</option>
-                <option value="commercial">Commercial</option>
-                <option value="industrial">Industrial</option>
-                <option value="institutional">Institutional</option>
-                <option value="agricultural">Agricultural</option>
-                <option value="tourism">Tourism</option>
-                <option value="mixed-use">Mixed Use</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Project Type *</label>
-              <select class="denr-form-input" id="projectType" required>
-                <option value="">Select project type</option>
-                <option value="subdivision">Subdivision</option>
-                <option value="condominium">Condominium</option>
-                <option value="commercial-complex">Commercial Complex</option>
-                <option value="factory">Factory/Plant</option>
-                <option value="school">School/University</option>
-                <option value="hospital">Hospital</option>
-                <option value="resort">Resort/Hotel</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Proposed Use Description *</label>
-              <textarea class="denr-form-textarea" id="proposedUseDescription" rows="4" required></textarea>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">PROJECT DETAILS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Project Name *</label>
-              <input type="text" class="denr-form-input" id="projectName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Total Project Cost *</label>
-              <input type="number" class="denr-form-input" id="projectCost" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Construction Period *</label>
-              <input type="text" class="denr-form-input" id="constructionPeriod" placeholder="e.g., 24 months" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Expected Completion Date *</label>
-              <input type="date" class="denr-form-input" id="completionDate" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Number of Units/Buildings *</label>
-              <input type="number" class="denr-form-input" id="numberOfUnits" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Employment Generation *</label>
-              <input type="number" class="denr-form-input" id="employmentGeneration" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">ENVIRONMENTAL COMPLIANCE</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">ECC Required? *</label>
-              <select class="denr-form-input" id="eccRequired" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">ECC Number (if applicable)</label>
-              <input type="text" class="denr-form-input" id="eccNumber">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Environmental Impact Assessment *</label>
-              <textarea class="denr-form-textarea" id="environmentalImpact" rows="3" required></textarea>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">ZONING COMPLIANCE</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Zoning Classification *</label>
-              <input type="text" class="denr-form-input" id="zoningClassification" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Zoning Permit Number *</label>
-              <input type="text" class="denr-form-input" id="zoningPermitNumber" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date Issued *</label>
-              <input type="date" class="denr-form-input" id="zoningDate" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Issuing LGU *</label>
-              <input type="text" class="denr-form-input" id="issuingLGU" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">COMMUNITY IMPACT</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Community Consultation Conducted? *</label>
-              <select class="denr-form-input" id="communityConsultation" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date of Consultation *</label>
-              <input type="date" class="denr-form-input" id="consultationDate">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Community Impact Assessment *</label>
-              <textarea class="denr-form-textarea" id="communityImpact" rows="3" required></textarea>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">UNDERTAKING</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking1" required>
-                I certify that all information provided is true and correct
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking2" required>
-                I undertake to comply with all environmental and zoning requirements
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking3" required>
-                I understand that violation may result in permit cancellation and penalties
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-signature">
-            <div class="denr-form-signature-label">Signature of Applicant/Representative</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Printed Name</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Date</div>
-            <div class="denr-form-signature-line"></div>
-          </div>
-        </div>
+        <p class="denr-cc-followup-note">*To follow-up your application, please present this stub or you may contact us at cenrostacruz@denr.gov.ph / (049) 536 – 8903*</p>
       </div>
     `
   },
 
   // FORESTRY FORMS
-  'R4A-F-01 – Issuance of Tree Cutting Permit': {
-    title: 'Tree Cutting Permit Application Form',
-    subtitle: 'Department of Environment and Natural Resources - Region IV-A',
+  'RO-F-01 – Issuance of Private Tree Plantation Registration (PTPR)': {
+    title: 'Issuance of Private Tree Plantation Registration (PTPR)',
+    subtitle: '',
     template: `
       <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">TREE CUTTING PERMIT APPLICATION FORM</div>
-          <div class="denr-form-subtitle">DENR Region IV-A CALABARZON</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">APPLICANT INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant *</label>
-              <input type="text" class="denr-form-input" id="applicantName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address *</label>
-              <input type="text" class="denr-form-input" id="applicantAddress" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Number *</label>
-              <input type="tel" class="denr-form-input" id="applicantContact" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Email Address *</label>
-              <input type="email" class="denr-form-input" id="applicantEmail" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">PROPERTY INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Property Ownership *</label>
-              <select class="denr-form-input" id="propertyOwnership" required>
-                <option value="">Select ownership type</option>
-                <option value="private">Private Land</option>
-                <option value="public">Public Land</option>
-                <option value="government">Government Property</option>
-                <option value="leased">Leased Property</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Proof of Ownership *</label>
-              <select class="denr-form-input" id="ownershipProof" required>
-                <option value="">Select proof type</option>
-                <option value="title">Land Title</option>
-                <option value="tax-declaration">Tax Declaration</option>
-                <option value="lease">Lease Agreement</option>
-                <option value="permit">Special Permit</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Document Number *</label>
-              <input type="text" class="denr-form-input" id="documentNumber" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Location of Property *</label>
-              <input type="text" class="denr-form-input" id="propertyLocation" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Municipality/City *</label>
-              <input type="text" class="denr-form-input" id="municipality" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Province *</label>
-              <input type="text" class="denr-form-input" id="province" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">TREE CUTTING DETAILS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Purpose of Tree Cutting *</label>
-              <select class="denr-form-input" id="cuttingPurpose" required>
-                <option value="">Select purpose</option>
-                <option value="construction">Construction</option>
-                <option value="agriculture">Agricultural Development</option>
-                <option value="infrastructure">Infrastructure Project</option>
-                <option value="safety">Safety Reasons</option>
-                <option value="disease">Disease Control</option>
-                <option value="commercial">Commercial Harvesting</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Project Name/Description *</label>
-              <input type="text" class="denr-form-input" id="projectDescription" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Number of Trees to be Cut *</label>
-              <input type="number" class="denr-form-input" id="numberOfTrees" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Estimated Volume (cubic meters) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="estimatedVolume" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">TREE SPECIES INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Species Name(s) *</label>
-              <textarea class="denr-form-textarea" id="treeSpecies" placeholder="List all tree species with common and scientific names" required></textarea>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Tree Diameter (cm) *</label>
-              <input type="text" class="denr-form-input" id="treeDiameter" placeholder="e.g., 30-50 cm, 60-80 cm" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Tree Height (meters) *</label>
-              <input type="text" class="denr-form-input" id="treeHeight" placeholder="e.g., 15-20 m, 25-30 m" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Age of Trees (years) *</label>
-              <input type="text" class="denr-form-input" id="treeAge" placeholder="e.g., 20-30 years" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Condition of Trees *</label>
-              <select class="denr-form-input" id="treeCondition" required>
-                <option value="">Select condition</option>
-                <option value="healthy">Healthy</option>
-                <option value="diseased">Diseased</option>
-                <option value="damaged">Damaged</option>
-                <option value="dead">Dead</option>
-                <option value="mixed">Mixed</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">CUTTING METHOD AND TIMING</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Cutting Method *</label>
-              <select class="denr-form-input" id="cuttingMethod" required>
-                <option value="">Select method</option>
-                <option value="manual">Manual Cutting</option>
-                <option value="mechanical">Mechanical Cutting</option>
-                <option value="chemical">Chemical Treatment</option>
-                <option value="combination">Combination Methods</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Proposed Cutting Date *</label>
-              <input type="date" class="denr-form-input" id="cuttingDate" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Duration of Cutting Activity *</label>
-              <input type="text" class="denr-form-input" id="cuttingDuration" placeholder="e.g., 3 days, 1 week" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Cutting Equipment to be Used *</label>
-              <input type="text" class="denr-form-input" id="cuttingEquipment" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">ENVIRONMENTAL MITIGATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Replacement/Replanting Plan *</label>
-              <select class="denr-form-input" id="replantingPlan" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes, will replant</option>
-                <option value="no">No replanting required</option>
-                <option value="mitigation">Other mitigation measures</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Number of Trees to Replace *</label>
-              <input type="number" class="denr-form-input" id="replacementTrees" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Replanting Location *</label>
-              <input type="text" class="denr-form-input" id="replantingLocation">
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Replanting Schedule *</label>
-              <input type="text" class="denr-form-input" id="replantingSchedule">
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">PERMITS AND CLEARANCES</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Building Permit Number *</label>
-              <input type="text" class="denr-form-input" id="buildingPermitNumber" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date Issued *</label>
-              <input type="date" class="denr-form-input" id="permitDate" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">LGU Endorsement *</label>
-              <select class="denr-form-input" id="lguEndorsement" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-                <option value="pending">Pending</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Endorsement Number</label>
-              <input type="text" class="denr-form-input" id="endorsementNumber">
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">UNDERTAKING</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking1" required>
-                I certify that all information provided is true and correct
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking2" required>
-                I undertake to comply with all tree cutting regulations and mitigation measures
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking3" required>
-                I understand that violation may result in permit cancellation and penalties
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-signature">
-            <div class="denr-form-signature-label">Signature of Applicant</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Printed Name</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Date</div>
-            <div class="denr-form-signature-line"></div>
-          </div>
-        </div>
-      </div>
-    `
-  },
-
-  'R4A-F-02 – Issuance of Chainsaw Permit': {
-    title: 'Chainsaw Permit Application Form',
-    subtitle: 'Department of Environment and Natural Resources - Region IV-A',
-    template: `
-      <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">CHAINSAW PERMIT APPLICATION FORM</div>
-          <div class="denr-form-subtitle">DENR Region IV-A CALABARZON</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">APPLICANT INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant *</label>
-              <input type="text" class="denr-form-input" id="applicantName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address *</label>
-              <input type="text" class="denr-form-input" id="applicantAddress" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Number *</label>
-              <input type="tel" class="denr-form-input" id="applicantContact" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Email Address *</label>
-              <input type="email" class="denr-form-input" id="applicantEmail" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Age *</label>
-              <input type="number" class="denr-form-input" id="applicantAge" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Civil Status *</label>
-              <select class="denr-form-input" id="civilStatus" required>
-                <option value="">Select status</option>
-                <option value="single">Single</option>
-                <option value="married">Married</option>
-                <option value="widowed">Widowed</option>
-                <option value="separated">Separated</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">CHAINSAW DETAILS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Chainsaw Brand *</label>
-              <input type="text" class="denr-form-input" id="chainsawBrand" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Model *</label>
-              <input type="text" class="denr-form-input" id="chainsawModel" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Serial Number *</label>
-              <input type="text" class="denr-form-input" id="serialNumber" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Engine Capacity (cc) *</label>
-              <input type="number" class="denr-form-input" id="engineCapacity" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date Purchased *</label>
-              <input type="date" class="denr-form-input" id="purchaseDate" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Purchase Location *</label>
-              <input type="text" class="denr-form-input" id="purchaseLocation" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">PURPOSE OF CHAINSAW USE</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Primary Purpose *</label>
-              <select class="denr-form-input" id="primaryPurpose" required>
-                <option value="">Select purpose</option>
-                <option value="personal">Personal Use</option>
-                <option value="commercial">Commercial Use</option>
-                <option value="agricultural">Agricultural Development</option>
-                <option value="construction">Construction</option>
-                <option value="tree-planting">Tree Planting Maintenance</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Specific Activity Description *</label>
-              <input type="text" class="denr-form-input" id="specificActivity" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Location of Use *</label>
-              <input type="text" class="denr-form-input" id="useLocation" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Frequency of Use *</label>
-              <select class="denr-form-input" id="frequencyUse" required>
-                <option value="">Select frequency</option>
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-                <option value="occasional">Occasional</option>
-                <option value="seasonal">Seasonal</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">TRAINING AND EXPERIENCE</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Formal Training Received? *</label>
-              <select class="denr-form-input" id="formalTraining" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Training Institution</label>
-              <input type="text" class="denr-form-input" id="trainingInstitution">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Years of Experience *</label>
-              <input type="number" class="denr-form-input" id="yearsExperience" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Previous Chainsaw Models Used</label>
-              <input type="text" class="denr-form-input" id="previousModels">
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">SAFETY EQUIPMENT</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Personal Protective Equipment Available *</label>
-              <div class="denr-form-checkbox-group">
-                <label class="denr-form-label">
-                  <input type="checkbox" class="denr-form-checkbox" id="safetyHelmet" required>
-                  Safety Helmet
-                </label>
-                <label class="denr-form-label">
-                  <input type="checkbox" class="denr-form-checkbox" id="safetyGoggles" required>
-                  Safety Goggles
-                </label>
-                <label class="denr-form-label">
-                  <input type="checkbox" class="denr-form-checkbox" id="safetyGloves" required>
-                  Safety Gloves
-                </label>
-                <label class="denr-form-label">
-                  <input type="checkbox" class="denr-form-checkbox" id="safetyBoots" required>
-                  Safety Boots
-                </label>
-                <label class="denr-form-label">
-                  <input type="checkbox" class="denr-form-checkbox" id="protectiveChaps" required>
-                  Protective Chaps
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">LEGAL REQUIREMENTS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Valid ID Type *</label>
-              <select class="denr-form-input" id="idType" required>
-                <option value="">Select ID type</option>
-                <option value="passport">Passport</option>
-                <option value="drivers-license">Driver's License</option>
-                <option value="national-id">National ID</option>
-                <option value="postal-id">Postal ID</option>
-                <option value="voters-id">Voter's ID</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">ID Number *</label>
-              <input type="text" class="denr-form-input" id="idNumber" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Barangay Clearance *</label>
-              <select class="denr-form-input" id="barangayClearance" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-                <option value="pending">Pending</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Clearance Number</label>
-              <input type="text" class="denr-form-input" id="clearanceNumber">
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">UNDERTAKING</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking1" required>
-                I certify that I am the lawful owner of the chainsaw
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking2" required>
-                I will use the chainsaw only for the declared purpose and location
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking3" required>
-                I will comply with all safety regulations and environmental laws
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking4" required>
-                I understand that violation may result in permit cancellation and penalties
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-signature">
-            <div class="denr-form-signature-label">Signature of Applicant</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Printed Name</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Date</div>
-            <div class="denr-form-signature-line"></div>
-          </div>
-        </div>
-      </div>
-    `
-  },
-
-  'R4A-F-03 – Issuance of Wood Products Transport Permit': {
-    title: 'Wood Products Transport Permit Application Form',
-    subtitle: 'Department of Environment and Natural Resources - Region IV-A',
-    template: `
-      <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">WOOD PRODUCTS TRANSPORT PERMIT APPLICATION FORM</div>
-          <div class="denr-form-subtitle">DENR Region IV-A CALABARZON</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">APPLICANT INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant/Company *</label>
-              <input type="text" class="denr-form-input" id="applicantName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address *</label>
-              <input type="text" class="denr-form-input" id="applicantAddress" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Number *</label>
-              <input type="tel" class="denr-form-input" id="applicantContact" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Email Address *</label>
-              <input type="email" class="denr-form-input" id="applicantEmail" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Business Permit Number *</label>
-              <input type="text" class="denr-form-input" id="businessPermitNumber" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">DTI Registration Number</label>
-              <input type="text" class="denr-form-input" id="dtiRegistration">
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">TRANSPORT DETAILS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Origin of Wood Products *</label>
-              <input type="text" class="denr-form-input" id="originLocation" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Destination *</label>
-              <input type="text" class="denr-form-input" id="destination" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date of Transport *</label>
-              <input type="date" class="denr-form-input" id="transportDate" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Purpose of Transport *</label>
-              <select class="denr-form-input" id="transportPurpose" required>
-                <option value="">Select purpose</option>
-                <option value="commercial-sale">Commercial Sale</option>
-                <option value="processing">Wood Processing</option>
-                <option value="construction">Construction</option>
-                <option value="export">Export</option>
-                <option value="personal-use">Personal Use</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">VEHICLE INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Vehicle Type *</label>
-              <select class="denr-form-input" id="vehicleType" required>
-                <option value="">Select vehicle type</option>
-                <option value="truck">Truck</option>
-                <option value="van">Van</option>
-                <option value="pickup">Pickup Truck</option>
-                <option value="trailer">Trailer</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Plate Number *</label>
-              <input type="text" class="denr-form-input" id="plateNumber" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Driver's Name *</label>
-              <input type="text" class="denr-form-input" id="driverName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Driver's License Number *</label>
-              <input type="text" class="denr-form-input" id="driverLicense" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Vehicle Owner *</label>
-              <input type="text" class="denr-form-input" id="vehicleOwner" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Vehicle Capacity (tons) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="vehicleCapacity" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">WOOD PRODUCTS DETAILS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Type of Wood Products *</label>
-              <select class="denr-form-input" id="woodType" required>
-                <option value="">Select wood type</option>
-                <option value="lumber">Lumber</option>
-                <option value="logs">Logs</option>
-                <option value="plywood">Plywood</option>
-                <option value="veneer">Veneer</option>
-                <option value="charcoal">Charcoal</option>
-                <option value="firewood">Firewood</option>
-                <option value="furniture">Furniture</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Wood Species *</label>
-              <input type="text" class="denr-form-input" id="woodSpecies" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Quantity *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="quantity" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Unit of Measure *</label>
-              <select class="denr-form-input" id="unitMeasure" required>
-                <option value="">Select unit</option>
-                <option value="cubic-meters">Cubic Meters</option>
-                <option value="board-feet">Board Feet</option>
-                <option value="pieces">Pieces</option>
-                <option value="kilograms">Kilograms</option>
-                <option value="tons">Tons</option>
-              </select>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Estimated Value (PHP) *</label>
-              <input type="number" class="denr-form-input" id="estimatedValue" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Dimensions (if applicable)</label>
-              <input type="text" class="denr-form-input" id="dimensions" placeholder="e.g., Length x Width x Height">
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">SOURCE DOCUMENTATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Source of Wood Products *</label>
-              <select class="denr-form-input" id="woodSource" required>
-                <option value="">Select source</option>
-                <option value="private-land">Private Land</option>
-                <option value="tree-plantation">Tree Plantation</option>
-                <option value="imported">Imported</option>
-                <option value="government-permit">Government Permit</option>
-                <option value="certified-sustainable">Certified Sustainable</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Permit/Document Number *</label>
-              <input type="text" class="denr-form-input" id="sourceDocumentNumber" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Issuing Agency *</label>
-              <input type="text" class="denr-form-input" id="issuingAgency" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date Issued *</label>
-              <input type="date" class="denr-form-input" id="documentDate" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">ADDITIONAL INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Route Description *</label>
-              <textarea class="denr-form-textarea" id="routeDescription" placeholder="Describe the transport route including major roads and checkpoints" required></textarea>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Special Handling Requirements</label>
-              <textarea class="denr-form-textarea" id="specialHandling" placeholder="Any special handling or storage requirements for the wood products"></textarea>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">UNDERTAKING</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking1" required>
-                I certify that all wood products are legally sourced and documented
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking2" required>
-                I will transport the wood products only to the declared destination
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking3" required>
-                I will present this permit and supporting documents upon inspection
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking4" required>
-                I understand that violation may result in permit cancellation and legal action
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-signature">
-            <div class="denr-form-signature-label">Signature of Applicant/Authorized Representative</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Printed Name</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Date</div>
-            <div class="denr-form-signature-line"></div>
-          </div>
-        </div>
-      </div>
-    `
-  },
-
-  'R4A-F-04 – Issuance of Private Tree Plantation Development Permit': {
-    title: 'Private Tree Plantation Development Permit Application Form',
-    subtitle: 'Department of Environment and Natural Resources - Region IV-A',
-    template: `
-      <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">PRIVATE TREE PLANTATION DEVELOPMENT PERMIT APPLICATION FORM</div>
-          <div class="denr-form-subtitle">DENR Region IV-A CALABARZON</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">APPLICANT INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant/Company *</label>
-              <input type="text" class="denr-form-input" id="applicantName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address *</label>
-              <input type="text" class="denr-form-input" id="applicantAddress" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Number *</label>
-              <input type="tel" class="denr-form-input" id="applicantContact" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Email Address *</label>
-              <input type="email" class="denr-form-input" id="applicantEmail" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Business Registration (if applicable)</label>
-              <input type="text" class="denr-form-input" id="businessRegistration">
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">TIN Number</label>
-              <input type="text" class="denr-form-input" id="tinNumber">
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">PLANTATION SITE INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Site Location *</label>
-              <input type="text" class="denr-form-input" id="siteLocation" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Municipality/City *</label>
-              <input type="text" class="denr-form-input" id="municipality" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Province *</label>
-              <input type="text" class="denr-form-input" id="province" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Barangay *</label>
-              <input type="text" class="denr-form-input" id="barangay" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Total Area (hectares) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="totalArea" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Plantable Area (hectares) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="plantableArea" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Land Ownership *</label>
-              <select class="denr-form-input" id="landOwnership" required>
-                <option value="">Select ownership</option>
-                <option value="owned">Owned</option>
-                <option value="leased">Leased</option>
-                <option value="rented">Rented</option>
-                <option value="government">Government</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Proof of Ownership *</label>
-              <select class="denr-form-input" id="ownershipProof" required>
-                <option value="">Select proof</option>
-                <option value="title">Land Title</option>
-                <option value="tax-declaration">Tax Declaration</option>
-                <option value="lease-agreement">Lease Agreement</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">PLANTATION DETAILS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Type of Plantation *</label>
-              <select class="denr-form-input" id="plantationType" required>
-                <option value="">Select type</option>
-                <option value="commercial">Commercial</option>
-                <option value="industrial">Industrial</option>
-                <option value="agroforestry">Agroforestry</option>
-                <option value="reforestation">Reforestation</option>
-                <option value="mixed">Mixed Species</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Primary Species to be Planted *</label>
-              <input type="text" class="denr-form-input" id="primarySpecies" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Target Number of Trees *</label>
-              <input type="number" class="denr-form-input" id="targetTrees" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Planting Density (trees/hectare) *</label>
-              <input type="number" class="denr-form-input" id="plantingDensity" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Expected Rotation Period (years) *</label>
-              <input type="number" class="denr-form-input" id="rotationPeriod" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Intended Products *</label>
-              <input type="text" class="denr-form-input" id="intendedProducts" placeholder="e.g., timber, pulp, charcoal">
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">PROJECT TIMELINE</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Proposed Start Date *</label>
-              <input type="date" class="denr-form-input" id="startDate" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Expected Completion Date *</label>
-              <input type="date" class="denr-form-input" id="completionDate" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Project Duration (years) *</label>
-              <input type="number" class="denr-form-input" id="projectDuration" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Project Phase *</label>
-              <select class="denr-form-input" id="projectPhase" required>
-                <option value="">Select phase</option>
-                <option value="planning">Planning Phase</option>
-                <option value="site-preparation">Site Preparation</option>
-                <option value="planting">Planting Phase</option>
-                <option value="maintenance">Maintenance Phase</option>
-                <option value="harvesting">Harvesting Phase</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">TECHNICAL SPECIFICATIONS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Soil Type *</label>
-              <input type="text" class="denr-form-input" id="soilType" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Climate Zone *</label>
-              <input type="text" class="denr-form-input" id="climateZone" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Water Source *</label>
-              <select class="denr-form-input" id="waterSource" required>
-                <option value="">Select water source</option>
-                <option value="rainfall">Rainfall Only</option>
-                <option value="irrigation">Irrigation System</option>
-                <option value="groundwater">Groundwater</option>
-                <option value="surface-water">Surface Water</option>
-                <option value="mixed">Mixed Sources</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Irrigation Method</label>
-              <input type="text" class="denr-form-input" id="irrigationMethod">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Site Preparation Method *</label>
-              <select class="denr-form-input" id="sitePreparation" required>
-                <option value="">Select method</option>
-                <option value="manual">Manual Clearing</option>
-                <option value="mechanical">Mechanical Clearing</option>
-                <option value="controlled-burning">Controlled Burning</option>
-                <option value="minimum-tillage">Minimum Tillage</option>
-                <option value="no-till">No-Till Method</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Planting Method *</label>
-              <select class="denr-form-input" id="plantingMethod" required>
-                <option value="">Select method</option>
-                <option value="direct-seeding">Direct Seeding</option>
-                <option value="seedlings">Seedlings</option>
-                <option value="cuttings">Cuttings</option>
-                <option value="mixed">Mixed Methods</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">FINANCIAL INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Total Project Cost (PHP) *</label>
-              <input type="number" class="denr-form-input" id="totalCost" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Source of Funding *</label>
-              <select class="denr-form-input" id="fundingSource" required>
-                <option value="">Select funding source</option>
-                <option value="own-capital">Own Capital</option>
-                <option value="bank-loan">Bank Loan</option>
-                <option value="government-grant">Government Grant</option>
-                <option value="private-investor">Private Investor</option>
-                <option value="mixed">Mixed Sources</option>
-              </select>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Expected ROI (%)</label>
-              <input type="number" step="0.01" class="denr-form-input" id="expectedROI">
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Break-even Period (years)</label>
-              <input type="number" class="denr-form-input" id="breakEvenPeriod">
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">ENVIRONMENTAL COMPLIANCE</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Environmental Impact Assessment Required? *</label>
-              <select class="denr-form-input" id="eiaRequired" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">ECC Number (if applicable)</label>
-              <input type="text" class="denr-form-input" id="eccNumber">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Biodiversity Conservation Plan *</label>
-              <select class="denr-form-input" id="biodiversityPlan" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes, have plan</option>
-                <option value="no">Not required</option>
-                <option value="pending">Pending development</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Soil Conservation Measures *</label>
-              <select class="denr-form-input" id="soilConservation" required>
-                <option value="">Select option</option>
-                <option value="contour-farming">Contour Farming</option>
-                <option value="terracing">Terracing</option>
-                <option value="cover-crops">Cover Crops</option>
-                <option value="mulching">Mulching</option>
-                <option value="other">Other Methods</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">UNDERTAKING</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking1" required>
-                I certify that all information provided is true and correct
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking2" required>
-                I will comply with all environmental and forestry regulations
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking3" required>
-                I will implement proper forest management and conservation practices
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking4" required>
-                I understand that violation may result in permit cancellation and penalties
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-signature">
-            <div class="denr-form-signature-label">Signature of Applicant/Authorized Representative</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Printed Name</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Date</div>
-            <div class="denr-form-signature-line"></div>
-          </div>
-        </div>
-      </div>
-    `
-  },
-
-  'R4A-F-05 – Issuance of Seedling Production Permit': {
-    title: 'Seedling Production Permit Application Form',
-    subtitle: 'Department of Environment and Natural Resources - Region IV-A',
-    template: `
-      <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">SEEDLING PRODUCTION PERMIT APPLICATION FORM</div>
-          <div class="denr-form-subtitle">DENR Region IV-A CALABARZON</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">APPLICANT INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant/Company *</label>
-              <input type="text" class="denr-form-input" id="applicantName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address *</label>
-              <input type="text" class="denr-form-input" id="applicantAddress" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Number *</label>
-              <input type="tel" class="denr-form-input" id="applicantContact" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Email Address *</label>
-              <input type="email" class="denr-form-input" id="applicantEmail" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Business Permit Number *</label>
-              <input type="text" class="denr-form-input" id="businessPermitNumber" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">DTI/SEC Registration Number</label>
-              <input type="text" class="denr-form-input" id="registrationNumber">
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">NURSERY INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Nursery Name *</label>
-              <input type="text" class="denr-form-input" id="nurseryName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Nursery Location *</label>
-              <input type="text" class="denr-form-input" id="nurseryLocation" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Municipality/City *</label>
-              <input type="text" class="denr-form-input" id="municipality" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Province *</label>
-              <input type="text" class="denr-form-input" id="province" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Total Nursery Area (sq.m) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="nurseryArea" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Production Area (sq.m) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="productionArea" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Land Ownership *</label>
-              <select class="denr-form-input" id="landOwnership" required>
-                <option value="">Select ownership</option>
-                <option value="owned">Owned</option>
-                <option value="leased">Leased</option>
-                <option value="rented">Rented</option>
-                <option value="government">Government</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Years in Operation *</label>
-              <input type="number" class="denr-form-input" id="yearsOperation" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">SEEDLING PRODUCTION DETAILS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Type of Seedlings *</label>
-              <select class="denr-form-input" id="seedlingType" required>
-                <option value="">Select type</option>
-                <option value="forest-trees">Forest Trees</option>
-                <option value="fruit-trees">Fruit Trees</option>
-                <option value="ornamental">Ornamental Plants</option>
-                <option value="bamboo">Bamboo</option>
-                <option value="mangrove">Mangrove</option>
-                <option value="mixed">Mixed Species</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Primary Species *</label>
-              <input type="text" class="denr-form-input" id="primarySpecies" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Annual Production Capacity *</label>
-              <input type="number" class="denr-form-input" id="productionCapacity" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Current Production Level *</label>
-              <input type="number" class="denr-form-input" id="currentProduction" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Source of Seeds/Planting Materials *</label>
-              <select class="denr-form-input" id="seedSource" required>
-                <option value="">Select source</option>
-                <option value="own-collection">Own Collection</option>
-                <option value="denr-supplied">DENR Supplied</option>
-                <option value="private-supplier">Private Supplier</option>
-                <option value="imported">Imported</option>
-                <option value="mixed">Mixed Sources</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Seed Source Certification</label>
-              <input type="text" class="denr-form-input" id="seedCertification">
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">FACILITIES AND EQUIPMENT</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Greenhouse Available? *</label>
-              <select class="denr-form-input" id="greenhouseAvailable" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Greenhouse Area (sq.m)</label>
-              <input type="number" step="0.01" class="denr-form-input" id="greenhouseArea">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Irrigation System *</label>
-              <select class="denr-form-input" id="irrigationSystem" required>
-                <option value="">Select system</option>
-                <option value="manual">Manual</option>
-                <option value="sprinkler">Sprinkler</option>
-                <option value="drip">Drip Irrigation</option>
-                <option value="overhead">Overhead</option>
-                <option value="mixed">Mixed Systems</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Water Source *</label>
-              <select class="denr-form-input" id="waterSource" required>
-                <option value="">Select source</option>
-                <option value="municipal">Municipal Supply</option>
-                <option value="well">Well</option>
-                <option value="rainwater">Rainwater Collection</option>
-                <option value="river">River/Spring</option>
-                <option value="mixed">Mixed Sources</option>
-              </select>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Equipment Available *</label>
-              <div class="denr-form-checkbox-group">
-                <label class="denr-form-label">
-                  <input type="checkbox" class="denr-form-checkbox" id="equipmentShovel">
-                  Shovel/Spade
-                </label>
-                <label class="denr-form-label">
-                  <input type="checkbox" class="denr-form-checkbox" id="equipmentWheelbarrow">
-                  Wheelbarrow
-                </label>
-                <label class="denr-form-label">
-                  <input type="checkbox" class="denr-form-checkbox" id="equipmentPruning">
-                  Pruning Tools
-                </label>
-                <label class="denr-form-label">
-                  <input type="checkbox" class="denr-form-checkbox" id="equipmentSprayer">
-                  Sprayer
-                </label>
-                <label class="denr-form-label">
-                  <input type="checkbox" class="denr-form-checkbox" id="equipmentMachinery">
-                  Machinery/Tractor
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">TECHNICAL PERSONNEL</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Number of Technical Staff *</label>
-              <input type="number" class="denr-form-input" id="technicalStaff" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Number of Laborers *</label>
-              <input type="number" class="denr-form-input" id="laborers" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Qualified Forester/Technician? *</label>
-              <select class="denr-form-input" id="qualifiedTechnician" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Technician Name (if applicable)</label>
-              <input type="text" class="denr-form-input" id="technicianName">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">License/Registration Number</label>
-              <input type="text" class="denr-form-input" id="technicianLicense">
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Years of Experience</label>
-              <input type="number" class="denr-form-input" id="technicianExperience">
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">QUALITY CONTROL</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Quality Control System? *</label>
-              <select class="denr-form-input" id="qualityControl" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes, have system</option>
-                <option value="no">No system</option>
-                <option value="developing">Developing system</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Seedling Quality Standards *</label>
-              <select class="denr-form-input" id="qualityStandards" required>
-                <option value="">Select standard</option>
-                <option value="denr">DENR Standards</option>
-                <option value="international">International Standards</option>
-                <option value="custom">Custom Standards</option>
-                <option value="mixed">Mixed Standards</option>
-              </select>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Record Keeping System *</label>
-              <select class="denr-form-input" id="recordKeeping" required>
-                <option value="">Select system</option>
-                <option value="manual">Manual Records</option>
-                <option value="computerized">Computerized System</option>
-                <option value="both">Both Systems</option>
-                <option value="none">No System</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Certification Obtained</label>
-              <input type="text" class="denr-form-input" id="certificationObtained" placeholder="e.g., ISO, DENR Accreditation">
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">MARKET INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Primary Market *</label>
-              <select class="denr-form-input" id="primaryMarket" required>
-                <option value="">Select market</option>
-                <option value="government">Government Agencies</option>
-                <option value="private">Private Companies</option>
-                <option value="individuals">Individual Buyers</option>
-                <option value="ngos">NGOs/Foundations</option>
-                <option value="export">Export Market</option>
-                <option value="mixed">Mixed Markets</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Distribution Method *</label>
-              <select class="denr-form-input" id="distributionMethod" required>
-                <option value="">Select method</option>
-                <option value="walk-in">Walk-in Customers</option>
-                <option value="delivery">Delivery Service</option>
-                <option value="contract">Contract Supply</option>
-                <option value="online">Online Sales</option>
-                <option value="mixed">Mixed Methods</option>
-              </select>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Expected Annual Revenue (PHP) *</label>
-              <input type="number" class="denr-form-input" id="annualRevenue" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Major Clients (if any)</label>
-              <input type="text" class="denr-form-input" id="majorClients">
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">UNDERTAKING</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking1" required>
-                I certify that all information provided is true and correct
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking2" required>
-                I will comply with all seedling production standards and regulations
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking3" required>
-                I will maintain proper records and allow regular inspections
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking4" required>
-                I understand that violation may result in permit cancellation and penalties
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-signature">
-            <div class="denr-form-signature-label">Signature of Applicant/Authorized Representative</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Printed Name</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Date</div>
-            <div class="denr-form-signature-line"></div>
-          </div>
-        </div>
-      </div>
-    `
-  },
-
-  'R4A-F-06 – Issuance of Wildlife Farming Permit': {
-    title: 'Wildlife Farming Permit Application Form',
-    subtitle: 'Department of Environment and Natural Resources - Region IV-A',
-    template: `
-      <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">WILDLIFE FARMING PERMIT APPLICATION FORM</div>
-          <div class="denr-form-subtitle">DENR Region IV-A CALABARZON</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">APPLICANT INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant/Company *</label>
-              <input type="text" class="denr-form-input" id="applicantName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address *</label>
-              <input type="text" class="denr-form-input" id="applicantAddress" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Number *</label>
-              <input type="tel" class="denr-form-input" id="applicantContact" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Email Address *</label>
-              <input type="email" class="denr-form-input" id="applicantEmail" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Business Permit Number *</label>
-              <input type="text" class="denr-form-input" id="businessPermitNumber" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">DTI/SEC Registration Number</label>
-              <input type="text" class="denr-form-input" id="registrationNumber">
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">FARM LOCATION INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Farm Name *</label>
-              <input type="text" class="denr-form-input" id="farmName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Farm Location *</label>
-              <input type="text" class="denr-form-input" id="farmLocation" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Municipality/City *</label>
-              <input type="text" class="denr-form-input" id="municipality" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Province *</label>
-              <input type="text" class="denr-form-input" id="province" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Total Farm Area (hectares) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="farmArea" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Actual Farming Area (hectares) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="farmingArea" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Land Ownership *</label>
-              <select class="denr-form-input" id="landOwnership" required>
-                <option value="">Select ownership</option>
-                <option value="owned">Owned</option>
-                <option value="leased">Leased</option>
-                <option value="rented">Rented</option>
-                <option value="government">Government</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Proof of Ownership *</label>
-              <select class="denr-form-input" id="ownershipProof" required>
-                <option value="">Select proof</option>
-                <option value="title">Land Title</option>
-                <option value="tax-declaration">Tax Declaration</option>
-                <option value="lease-agreement">Lease Agreement</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">WILDLIFE SPECIES INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Type of Wildlife *</label>
-              <select class="denr-form-input" id="wildlifeType" required>
-                <option value="">Select type</option>
-                <option value="birds">Birds</option>
-                <option value="mammals">Mammals</option>
-                <option value="reptiles">Reptiles</option>
-                <option value="amphibians">Amphibians</option>
-                <option value="insects">Insects</option>
-                <option value="mixed">Mixed Species</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Primary Species *</label>
-              <input type="text" class="denr-form-input" id="primarySpecies" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Scientific Names *</label>
-              <textarea class="denr-form-textarea" id="scientificNames" placeholder="List scientific names of all species" required></textarea>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Current Population *</label>
-              <input type="number" class="denr-form-input" id="currentPopulation" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Target Population *</label>
-              <input type="number" class="denr-form-input" id="targetPopulation" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Source of Stock *</label>
-              <select class="denr-form-input" id="stockSource" required>
-                <option value="">Select source</option>
-                <option value="breeding">Captive Breeding</option>
-                <option value="wild-caught">Wild Caught (with permit)</option>
-                <option value="purchased">Purchased from licensed farm</option>
-                <option value="government">Government Supplied</option>
-                <option value="mixed">Mixed Sources</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Source Permit Number</label>
-              <input type="text" class="denr-form-input" id="sourcePermitNumber">
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">FARMING FACILITIES</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Housing/Enclosure Type *</label>
-              <select class="denr-form-input" id="housingType" required>
-                <option value="">Select type</option>
-                <option value="cages">Cages</option>
-                <option value="aviary">Aviary</option>
-                <option value="pen">Pens</option>
-                <option value="pond">Ponds</option>
-                <option value="natural">Natural Habitat</option>
-                <option value="mixed">Mixed Systems</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Number of Enclosures *</label>
-              <input type="number" class="denr-form-input" id="enclosureCount" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Total Enclosure Area (sq.m) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="enclosureArea" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Ventilation System *</label>
-              <select class="denr-form-input" id="ventilationSystem" required>
-                <option value="">Select system</option>
-                <option value="natural">Natural</option>
-                <option value="mechanical">Mechanical</option>
-                <option value="mixed">Mixed</option>
-              </select>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Water Supply System *</label>
-              <select class="denr-form-input" id="waterSystem" required>
-                <option value="">Select system</option>
-                <option value="municipal">Municipal Supply</option>
-                <option value="well">Well</option>
-                <option value="rainwater">Rainwater Collection</option>
-                <option value="river">River/Spring</option>
-                <option value="mixed">Mixed Sources</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Waste Management System *</label>
-              <select class="denr-form-input" id="wasteManagement" required>
-                <option value="">Select system</option>
-                <option value="septic">Septic Tank</option>
-                <option value="composting">Composting</option>
-                <option value="biological">Biological Treatment</option>
-                <option value="other">Other Method</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">FEEDING AND NUTRITION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Primary Feed Type *</label>
-              <select class="denr-form-input" id="feedType" required>
-                <option value="">Select feed type</option>
-                <option value="commercial">Commercial Feed</option>
-                <option value="natural">Natural Food</option>
-                <option value="mixed">Mixed Diet</option>
-                <option value="supplemented">Supplemented Natural</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Feed Supplier *</label>
-              <input type="text" class="denr-form-input" id="feedSupplier" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Daily Feed Requirement (kg) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="dailyFeedRequirement" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Feed Storage Capacity (kg) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="feedStorageCapacity" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Nutritional Supplements Used</label>
-              <input type="text" class="denr-form-input" id="nutritionalSupplements">
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Feeding Schedule *</label>
-              <input type="text" class="denr-form-input" id="feedingSchedule" placeholder="e.g., twice daily, morning only" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">HEALTH MANAGEMENT</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Veterinary Services Available? *</label>
-              <select class="denr-form-input" id="veterinaryServices" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Veterinarian Name</label>
-              <input type="text" class="denr-form-input" id="veterinarianName">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Health Monitoring System *</label>
-              <select class="denr-form-input" id="healthMonitoring" required>
-                <option value="">Select system</option>
-                <option value="daily">Daily Monitoring</option>
-                <option value="weekly">Weekly Monitoring</option>
-                <option value="monthly">Monthly Monitoring</option>
-                <option value="as-needed">As Needed</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Disease Prevention Program *</label>
-              <select class="denr-form-input" id="diseasePrevention" required>
-                <option value="">Select option</option>
-                <option value="vaccination">Vaccination Program</option>
-                <option value="quarantine">Quarantine Protocol</option>
-                <option value="both">Both Programs</option>
-                <option value="other">Other Method</option>
-              </select>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Record Keeping System *</label>
-              <select class="denr-form-input" id="recordKeeping" required>
-                <option value="">Select system</option>
-                <option value="manual">Manual Records</option>
-                <option value="computerized">Computerized System</option>
-                <option value="both">Both Systems</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Emergency Response Plan *</label>
-              <select class="denr-form-input" id="emergencyResponse" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes, have plan</option>
-                <option value="no">No plan</option>
-                <option value="developing">Developing plan</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">BUSINESS INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Purpose of Farming *</label>
-              <select class="denr-form-input" id="farmingPurpose" required>
-                <option value="">Select purpose</option>
-                <option value="commercial">Commercial Sale</option>
-                <option value="conservation">Conservation</option>
-                <option value="research">Research</option>
-                <option value="education">Education</option>
-                <option value="mixed">Mixed Purposes</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Products/Services *</label>
-              <input type="text" class="denr-form-input" id="productsServices" placeholder="e.g., live animals, meat, eggs, tourism">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Target Market *</label>
-              <select class="denr-form-input" id="targetMarket" required>
-                <option value="">Select market</option>
-                <option value="local">Local Market</option>
-                <option value="national">National Market</option>
-                <option value="export">Export Market</option>
-                <option value="mixed">Mixed Markets</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Expected Annual Revenue (PHP) *</label>
-              <input type="number" class="denr-form-input" id="annualRevenue" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">UNDERTAKING</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking1" required>
-                I certify that all information provided is true and correct
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking2" required>
-                I will comply with all wildlife welfare standards and regulations
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking3" required>
-                I will maintain proper records and allow regular inspections
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking4" required>
-                I understand that violation may result in permit cancellation and penalties
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-signature">
-            <div class="denr-form-signature-label">Signature of Applicant/Authorized Representative</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Printed Name</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Date</div>
-            <div class="denr-form-signature-line"></div>
-          </div>
-        </div>
-      </div>
-    `
-  },
-
-  'R4A-F-07 – Issuance of Special Use Agreement in Protected Areas': {
-    title: 'Special Use Agreement in Protected Areas Application Form',
-    subtitle: 'Department of Environment and Natural Resources - Region IV-A',
-    template: `
-      <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">SPECIAL USE AGREEMENT IN PROTECTED AREAS APPLICATION FORM</div>
-          <div class="denr-form-subtitle">DENR Region IV-A CALABARZON</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">APPLICANT INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant/Company *</label>
-              <input type="text" class="denr-form-input" id="applicantName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address *</label>
-              <input type="text" class="denr-form-input" id="applicantAddress" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Number *</label>
-              <input type="tel" class="denr-form-input" id="applicantContact" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Email Address *</label>
-              <input type="email" class="denr-form-input" id="applicantEmail" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Business Registration Number *</label>
-              <input type="text" class="denr-form-input" id="businessRegistration" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">TIN Number</label>
-              <input type="text" class="denr-form-input" id="tinNumber">
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">PROTECTED AREA INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Protected Area Name *</label>
-              <input type="text" class="denr-form-input" id="protectedAreaName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Protected Area Category *</label>
-              <select class="denr-form-input" id="protectedAreaCategory" required>
-                <option value="">Select category</option>
-                <option value="national-park">National Park</option>
-                <option value="natural-park">Natural Park</option>
-                <option value="wildlife-sanctuary">Wildlife Sanctuary</option>
-                <option value="protected-landscape">Protected Landscape/Seascape</option>
-                <option value="resource-reserve">Resource Reserve</option>
-                <option value="natural-monument">Natural Monument</option>
-              </select>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Location/Municipality *</label>
-              <input type="text" class="denr-form-input" id="location" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Province *</label>
-              <input type="text" class="denr-form-input" id="province" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Area to be Used (hectares) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="areaToBeUsed" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Total Protected Area (hectares) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="totalProtectedArea" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">PROPOSED ACTIVITY/PROJECT</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Type of Activity *</label>
-              <select class="denr-form-input" id="activityType" required>
-                <option value="">Select activity type</option>
-                <option value="tourism">Tourism Facilities</option>
-                <option value="research">Research Station</option>
-                <option value="education">Education Center</option>
-                <option value="infrastructure">Infrastructure</option>
-                <option value="recreation">Recreation Facilities</option>
-                <option value="resource-extraction">Resource Extraction</option>
-                <option value="cultural">Cultural Activities</option>
-                <option value="other">Other Activities</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Project Name *</label>
-              <input type="text" class="denr-form-input" id="projectName" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Project Description *</label>
-              <textarea class="denr-form-textarea" id="projectDescription" placeholder="Detailed description of the proposed activity" required></textarea>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Project Duration *</label>
-              <input type="text" class="denr-form-input" id="projectDuration" placeholder="e.g., 5 years, renewable" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Expected Start Date *</label>
-              <input type="date" class="denr-form-input" id="startDate" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">TECHNICAL SPECIFICATIONS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Total Project Cost (PHP) *</label>
-              <input type="number" class="denr-form-input" id="totalProjectCost" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Source of Funding *</label>
-              <select class="denr-form-input" id="fundingSource" required>
-                <option value="">Select funding source</option>
-                <option value="own-capital">Own Capital</option>
-                <option value="bank-loan">Bank Loan</option>
-                <option value="government-grant">Government Grant</option>
-                <option value="private-investor">Private Investor</option>
-                <option value="mixed">Mixed Sources</option>
-              </select>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Number of Employees *</label>
-              <input type="number" class="denr-form-input" id="numberOfEmployees" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Local Employment Percentage *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="localEmploymentPercentage" placeholder="%" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Infrastructure/Facilities to be Built *</label>
-              <textarea class="denr-form-textarea" id="infrastructureFacilities" placeholder="List all structures and facilities" required></textarea>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">ENVIRONMENTAL CONSIDERATIONS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Environmental Impact Assessment Required? *</label>
-              <select class="denr-form-input" id="eiaRequired" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">ECC Number (if applicable)</label>
-              <input type="text" class="denr-form-input" id="eccNumber">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Potential Environmental Impacts *</label>
-              <textarea class="denr-form-textarea" id="environmentalImpacts" placeholder="Describe potential impacts on flora, fauna, water, soil, etc." required></textarea>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Mitigation Measures *</label>
-              <textarea class="denr-form-textarea" id="mitigationMeasures" placeholder="Describe measures to minimize environmental impacts" required></textarea>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Waste Management Plan *</label>
-              <select class="denr-form-input" id="wasteManagementPlan" required>
-                <option value="">Select option</option>
-                <option value="comprehensive">Comprehensive Plan</option>
-                <option value="basic">Basic Plan</option>
-                <option value="none">No Plan</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Water Conservation Measures *</label>
-              <select class="denr-form-input" id="waterConservation" required>
-                <option value="">Select option</option>
-                <option value="rainwater-harvesting">Rainwater Harvesting</option>
-                <option value="recycling">Water Recycling</option>
-                <option value="efficiency">Efficiency Measures</option>
-                <option value="none">No Measures</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">SOCIAL AND ECONOMIC BENEFITS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Expected Local Employment *</label>
-              <input type="number" class="denr-form-input" id="localEmployment" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Expected Annual Revenue (PHP) *</label>
-              <input type="number" class="denr-form-input" id="annualRevenue" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Community Development Programs *</label>
-              <textarea class="denr-form-textarea" id="communityPrograms" placeholder="Describe programs for local community benefit"></textarea>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Skills Training/Livelihood Programs *</label>
-              <select class="denr-form-input" id="livelihoodPrograms" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes, have programs</option>
-                <option value="planned">Planned programs</option>
-                <option value="none">No programs</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Community Share/Benefits *</label>
-              <input type="text" class="denr-form-input" id="communityBenefits" placeholder="e.g., percentage of revenue, in-kind contributions">
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">LEGAL AND COMPLIANCE</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Previous Permits Obtained? *</label>
-              <select class="denr-form-input" id="previousPermits" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Permit Numbers (if applicable)</label>
-              <input type="text" class="denr-form-input" id="permitNumbers">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Legal Issues/Complaints? *</label>
-              <select class="denr-form-input" id="legalIssues" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Details of Legal Issues</label>
-              <input type="text" class="denr-form-input" id="legalIssuesDetails">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Insurance Coverage *</label>
-              <select class="denr-form-input" id="insuranceCoverage" required>
-                <option value="">Select option</option>
-                <option value="comprehensive">Comprehensive</option>
-                <option value="basic">Basic</option>
-                <option value="none">None</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Policy Number</label>
-              <input type="text" class="denr-form-input" id="policyNumber">
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">UNDERTAKING</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking1" required>
-                I certify that all information provided is true and correct
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking2" required>
-                I will comply with all protected area management regulations
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking3" required>
-                I will implement all environmental mitigation measures
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking4" required>
-                I understand that violation may result in agreement cancellation and penalties
-              </label>
-            </div>
+        <div class="denr-cc-letterhead">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="denr-cc-lh-logo" width="72" height="72" />
+          <div class="denr-cc-lh-text">
+            <div>Republic of the Philippines</div>
+            <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
+            <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
+            <div>Brgy. Duhat, Sta. Cruz, Laguna</div>
+            <div class="denr-cc-lh-contact"><span class="denr-cc-lh-email">cenrostacruz@denr.gov.ph</span> | (049) 536 8903</div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-signature">
-            <div class="denr-form-signature-label">Signature of Applicant/Authorized Representative</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Printed Name</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Date</div>
-            <div class="denr-form-signature-line"></div>
-          </div>
-        </div>
-      </div>
-    `
-  },
+        <div class="denr-cc-banner">CHECKLIST OF REQUIREMENTS</div>
 
-  'R4A-F-08 – Issuance of Forest Products Processing Permit': {
-    title: 'Forest Products Processing Permit Application Form',
-    subtitle: 'Department of Environment and Natural Resources - Region IV-A',
-    template: `
-      <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">FOREST PRODUCTS PROCESSING PERMIT APPLICATION FORM</div>
-          <div class="denr-form-subtitle">DENR Region IV-A CALABARZON</div>
+        <div class="denr-cc-infobox">
+          <div class="denr-cc-charter-no">CITIZEN'S CHARTER NO. RO-F-01</div>
+          <div class="denr-cc-service-title">Issuance of Private Tree Plantation Registration (PTPR)</div>
+          <p class="denr-cc-infobox-note">*This Certificate shows the ownership of plantations or planted trees within private, titled lands or tax declared alienable and disposable lands. The issuance of PTPR requires inventory and ocular inspection in the area. Tree inventory for permits (e.g. TCP or PLTP) is a process conducted separately from the inspection for PTPR per existing DENR policies, rules and regulations.*</p>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">APPLICANT INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant/Company *</label>
-              <input type="text" class="denr-form-input" id="applicantName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address *</label>
-              <input type="text" class="denr-form-input" id="applicantAddress" required>
-            </div>
+        <div class="denr-cc-applicant-block">
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Name of Applicant:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantName" />
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Number *</label>
-              <input type="tel" class="denr-form-input" id="applicantContact" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Email Address *</label>
-              <input type="email" class="denr-form-input" id="applicantEmail" required>
-            </div>
+          <div class="denr-cc-field-row denr-cc-field-row-multiline">
+            <span class="denr-cc-field-label">Address:</span>
+            <textarea class="denr-cc-line-input denr-cc-line-textarea" id="applicantAddress" rows="2"></textarea>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Business Permit Number *</label>
-              <input type="text" class="denr-form-input" id="businessPermitNumber" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">DTI/SEC Registration Number</label>
-              <input type="text" class="denr-form-input" id="registrationNumber">
-            </div>
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Contact Details:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantContact" />
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">PROCESSING FACILITY INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Facility Name *</label>
-              <input type="text" class="denr-form-input" id="facilityName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Facility Location *</label>
-              <input type="text" class="denr-form-input" id="facilityLocation" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Municipality/City *</label>
-              <input type="text" class="denr-form-input" id="municipality" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Province *</label>
-              <input type="text" class="denr-form-input" id="province" required>
-            </div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">A. Requirements to be submitted upon filing of application</div>
+          <div class="denr-form-subheading">Basic:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Letter of Application (1 original, 1 photocopy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> OCT, TCT, Judicial Title, CLOA, Tax Declared Alienable and Disposable Lands (1 certified true copy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Data on the number of seedlings planted, species and area planted</label>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Total Facility Area (sq.m) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="facilityArea" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Processing Area (sq.m) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="processingArea" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Land Ownership *</label>
-              <select class="denr-form-input" id="landOwnership" required>
-                <option value="">Select ownership</option>
-                <option value="owned">Owned</option>
-                <option value="leased">Leased</option>
-                <option value="rented">Rented</option>
-                <option value="government">Government</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Years in Operation *</label>
-              <input type="number" class="denr-form-input" id="yearsOperation" required>
-            </div>
+          <div class="denr-form-subheading">Additional Requirement, if the applicant is a representative:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Special Power of Attorney (SPA) (1 original)</label>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">PROCESSING ACTIVITIES</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Primary Processing Type *</label>
-              <select class="denr-form-input" id="processingType" required>
-                <option value="">Select processing type</option>
-                <option value="sawmilling">Sawmilling</option>
-                <option value="veneer">Veneer Production</option>
-                <option value="plywood">Plywood Manufacturing</option>
-                <option value="furniture">Furniture Making</option>
-                <option value="charcoal">Charcoal Production</option>
-                <option value="wood-treatment">Wood Treatment</option>
-                <option value="other">Other Processing</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Secondary Processing Activities</label>
-              <input type="text" class="denr-form-input" id="secondaryActivities">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Forest Products to be Processed *</label>
-              <select class="denr-form-input" id="forestProducts" required>
-                <option value="">Select products</option>
-                <option value="logs">Logs</option>
-                <option value="lumber">Lumber</option>
-                <option value="bamboo">Bamboo</option>
-                <option value="rattan">Rattan</option>
-                <option value="resin">Resin/Turpentine</option>
-                <option value="mixed">Mixed Products</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Annual Processing Capacity *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="processingCapacity" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Current Production Level *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="currentProduction" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Unit of Measurement *</label>
-              <select class="denr-form-input" id="unitMeasurement" required>
-                <option value="">Select unit</option>
-                <option value="cubic-meters">Cubic Meters</option>
-                <option value="board-feet">Board Feet</option>
-                <option value="tons">Tons</option>
-                <option value="pieces">Pieces</option>
-              </select>
-            </div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">B. Type of Transaction</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Citizen</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Business <em>(Specify the Name of Company and Owner / Authorized Representative)</em></label>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">EQUIPMENT AND MACHINERY</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Major Equipment Available *</label>
-              <div class="denr-form-checkbox-group">
-                <label class="denr-form-label">
-                  <input type="checkbox" class="denr-form-checkbox" id="equipmentSawmill">
-                  Sawmill
-                </label>
-                <label class="denr-form-label">
-                  <input type="checkbox" class="denr-form-checkbox" id="equipmentPlaner">
-                  Planer
-                </label>
-                <label class="denr-form-label">
-                  <input type="checkbox" class="denr-form-checkbox" id="equipmentJointer">
-                  Jointer
-                </label>
-                <label class="denr-form-label">
-                  <input type="checkbox" class="denr-form-checkbox" id="equipmentRouter">
-                  Router
-                </label>
-                <label class="denr-form-label">
-                  <input type="checkbox" class="denr-form-checkbox" id="equipmentLathe">
-                  Lathe
-                </label>
-                <label class="denr-form-label">
-                  <input type="checkbox" class="denr-form-checkbox" id="equipmentSander">
-                  Sander
-                </label>
-                <label class="denr-form-label">
-                  <input type="checkbox" class="denr-form-checkbox" id="equipmentKiln">
-                  Kiln Dryer
-                </label>
-                <label class="denr-form-label">
-                  <input type="checkbox" class="denr-form-checkbox" id="equipmentGenerator">
-                  Generator
-                </label>
-              </div>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Power Source *</label>
-              <select class="denr-form-input" id="powerSource" required>
-                <option value="">Select power source</option>
-                <option value="electricity">Electricity</option>
-                <option value="generator">Generator</option>
-                <option value="mixed">Mixed Sources</option>
-                <option value="manual">Manual</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Total Power Requirement (kW) *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="powerRequirement" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Equipment Maintenance Program *</label>
-              <select class="denr-form-input" id="maintenanceProgram" required>
-                <option value="">Select option</option>
-                <option value="regular">Regular Maintenance</option>
-                <option value="preventive">Preventive Maintenance</option>
-                <option value="as-needed">As Needed</option>
-                <option value="none">No Program</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Safety Equipment Available *</label>
-              <select class="denr-form-input" id="safetyEquipment" required>
-                <option value="">Select option</option>
-                <option value="complete">Complete Set</option>
-                <option value="partial">Partial Set</option>
-                <option value="minimal">Minimal</option>
-                <option value="none">None</option>
-              </select>
-            </div>
-          </div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">C. Classification</div>
+          <div class="denr-cc-classification-line">✓ Highly Technical</div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">RAW MATERIAL SOURCES</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Primary Source of Raw Materials *</label>
-              <select class="denr-form-input" id="rawMaterialSource" required>
-                <option value="">Select source</option>
-                <option value="private-plantation">Private Plantation</option>
-                <option value="government-permit">Government Permit</option>
-                <option value="supplier">Licensed Supplier</option>
-                <option value="imported">Imported</option>
-                <option value="mixed">Mixed Sources</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Supplier Information</label>
-              <input type="text" class="denr-form-input" id="supplierInformation">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Supply Contract Duration *</label>
-              <input type="text" class="denr-form-input" id="contractDuration" placeholder="e.g., 1 year, renewable">
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Quality Control System *</label>
-              <select class="denr-form-input" id="qualityControl" required>
-                <option value="">Select system</option>
-                <option value="incoming-inspection">Incoming Inspection</option>
-                <option value="process-control">Process Control</option>
-                <option value="final-inspection">Final Inspection</option>
-                <option value="comprehensive">Comprehensive System</option>
-                <option value="none">No System</option>
-              </select>
-            </div>
-          </div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">D. Fees to be Paid</div>
+          <div class="denr-cc-fee-line">✓ None</div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">ENVIRONMENTAL COMPLIANCE</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Waste Management System *</label>
-              <select class="denr-form-input" id="wasteManagement" required>
-                <option value="">Select system</option>
-                <option value="segregated">Segregated Waste</option>
-                <option value="recycling">Recycling Program</option>
-                <option value="composting">Composting</option>
-                <option value="disposal">Proper Disposal</option>
-                <option value="none">No System</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Air Pollution Control *</label>
-              <select class="denr-form-input" id="airPollutionControl" required>
-                <option value="">Select control</option>
-                <option value="dust-collector">Dust Collector</option>
-                <option value="ventilation">Ventilation System</option>
-                <option value="filters">Air Filters</option>
-                <option value="none">No Control</option>
-              </select>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Water Treatment System *</label>
-              <select class="denr-form-input" id="waterTreatment" required>
-                <option value="">Select system</option>
-                <option value="treatment-plant">Treatment Plant</option>
-                <option value="septic">Septic Tank</option>
-                <option value="recycling">Water Recycling</option>
-                <option value="none">No System</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Environmental Permit Required? *</label>
-              <select class="denr-form-input" id="environmentalPermit" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-                <option value="pending">Pending</option>
-              </select>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Permit Number (if applicable)</label>
-              <input type="text" class="denr-form-input" id="environmentalPermitNumber">
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Noise Control Measures *</label>
-              <select class="denr-form-input" id="noiseControl" required>
-                <option value="">Select measures</option>
-                <option value="enclosure">Equipment Enclosure</option>
-                <option value="barriers">Sound Barriers</option>
-                <option value="schedule">Time Scheduling</option>
-                <option value="none">No Measures</option>
-              </select>
-            </div>
-          </div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">E. Processing Time</div>
+          <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> 16 working days, 3 hours, 50 minutes</div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">PERSONNEL AND SAFETY</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Number of Technical Staff *</label>
-              <input type="number" class="denr-form-input" id="technicalStaff" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Number of Production Workers *</label>
-              <input type="number" class="denr-form-input" id="productionWorkers" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Safety Training Program *</label>
-              <select class="denr-form-input" id="safetyTraining" required>
-                <option value="">Select option</option>
-                <option value="regular">Regular Training</option>
-                <option value="initial">Initial Training Only</option>
-                <option value="as-needed">As Needed</option>
-                <option value="none">No Training</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">First Aid Facilities Available? *</label>
-              <select class="denr-form-input" id="firstAid" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </div>
+        <div class="denr-cc-received-row">
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Received by:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_f01_receivedBy" />
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Fire Safety Equipment *</label>
-              <select class="denr-form-input" id="fireSafety" required>
-                <option value="">Select option</option>
-                <option value="complete">Complete Set</option>
-                <option value="partial">Partial Set</option>
-                <option value="minimal">Minimal</option>
-                <option value="none">None</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Emergency Response Plan *</label>
-              <select class="denr-form-input" id="emergencyResponse" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes, have plan</option>
-                <option value="developing">Developing plan</option>
-                <option value="no">No plan</option>
-              </select>
-            </div>
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Date Received:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_f01_dateReceived" />
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">BUSINESS INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Primary Market *</label>
-              <select class="denr-form-input" id="primaryMarket" required>
-                <option value="">Select market</option>
-                <option value="local">Local Market</option>
-                <option value="national">National Market</option>
-                <option value="export">Export Market</option>
-                <option value="contract">Contract Supply</option>
-                <option value="mixed">Mixed Markets</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Major Products *</label>
-              <input type="text" class="denr-form-input" id="majorProducts" placeholder="e.g., lumber, furniture, plywood">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Expected Annual Revenue (PHP) *</label>
-              <input type="number" class="denr-form-input" id="annualRevenue" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Major Customers (if any)</label>
-              <input type="text" class="denr-form-input" id="majorCustomers">
-            </div>
-          </div>
-        </div>
+        <div class="denr-cc-stub-separator"></div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">UNDERTAKING</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking1" required>
-                I certify that all information provided is true and correct
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking2" required>
-                I will comply with all forest products processing regulations
-              </label>
+        <div class="denr-cc-receipt-official">
+          <img src="/assets/images/logo.png" alt="" class="denr-cc-receipt-logo" width="56" height="56" />
+          <div class="denr-cc-receipt-body">
+            <div class="denr-cc-receipt-heading">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="denr-cc-receipt-service">Name of Service: <strong>Issuance of Private Tree Plantation Registration (PTPR)</strong></div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Name of Applicant:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_f01_ackApplicant" />
             </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking3" required>
-                I will maintain proper records and allow regular inspections
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking4" required>
-                I understand that violation may result in permit cancellation and penalties
-              </label>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Date Received:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_f01_ackDateReceived" />
             </div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-signature">
-            <div class="denr-form-signature-label">Signature of Applicant/Authorized Representative</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Printed Name</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Date</div>
-            <div class="denr-form-signature-line"></div>
-          </div>
-        </div>
+        <p class="denr-cc-followup-note">*To follow-up your application, please present this stub or you may contact us at cenrostacruz@denr.gov.ph / (049) 536 – 8903*</p>
       </div>
     `
   },
 
   'RO-F-03a – Issuance of Certificate of Verification (COV) for transport of planted trees/non-timber products': {
-    title: 'Certificate of Verification Application Form',
-    subtitle: 'Department of Environment and Natural Resources - Region IV-A',
+    title: 'Issuance of Certificate of Verification (COV)',
+    subtitle: '',
     template: `
       <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">CERTIFICATE OF VERIFICATION APPLICATION FORM</div>
-          <div class="denr-form-subtitle">DENR Region IV-A CALABARZON</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">APPLICANT INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant/Company *</label>
-              <input type="text" class="denr-form-input" id="applicantName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address *</label>
-              <input type="text" class="denr-form-input" id="applicantAddress" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Number *</label>
-              <input type="tel" class="denr-form-input" id="applicantContact" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Email Address *</label>
-              <input type="email" class="denr-form-input" id="applicantEmail" required>
-            </div>
+        <div class="denr-cc-letterhead">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="denr-cc-lh-logo" width="72" height="72" />
+          <div class="denr-cc-lh-text">
+            <div>Republic of the Philippines</div>
+            <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
+            <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
+            <div>Brgy. Duhat, Sta. Cruz, Laguna</div>
+            <div class="denr-cc-lh-contact"><span class="denr-cc-lh-email">cenrostacruz@denr.gov.ph</span> | (049) 536 8903</div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">PRODUCT INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Type of Products *</label>
-              <select class="denr-form-input" id="productType" required>
-                <option value="">Select product type</option>
-                <option value="planted-trees">Planted Trees</option>
-                <option value="non-timber">Non-Timber Forest Products</option>
-                <option value="mixed">Mixed Products</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Product Description *</label>
-              <input type="text" class="denr-form-input" id="productDescription" placeholder="e.g., Gmelina, Mahogany, Bamboo, Rattan" required>
-            </div>
+        <div class="denr-cc-banner">CHECKLIST OF REQUIREMENTS</div>
+
+        <div class="denr-cc-infobox">
+          <div class="denr-cc-charter-no">CITIZEN'S CHARTER NO. RO-F-03a</div>
+          <div class="denr-cc-service-title">Issuance of Certificate of Verification (COV) for the transport of planted trees within private land, non-timber forest products except Rattan and Bamboo</div>
+          <p class="denr-cc-infobox-note">*COV is a document to be presented when transporting planted trees within private lands not registered under the Private Tree Plantation Registration and/or non-premium trees, non-timber forest products (except rattan and bamboo).*</p>
+        </div>
+
+        <div class="denr-cc-applicant-block">
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Name of Applicant:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantName" />
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Quantity *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="quantity" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Unit of Measurement *</label>
-              <select class="denr-form-input" id="unitMeasurement" required>
-                <option value="">Select unit</option>
-                <option value="cubic-meters">Cubic Meters</option>
-                <option value="board-feet">Board Feet</option>
-                <option value="tons">Tons</option>
-                <option value="pieces">Pieces</option>
-                <option value="kilograms">Kilograms</option>
-              </select>
-            </div>
+          <div class="denr-cc-field-row denr-cc-field-row-multiline">
+            <span class="denr-cc-field-label">Address:</span>
+            <textarea class="denr-cc-line-input denr-cc-line-textarea" id="applicantAddress" rows="2"></textarea>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Source of Products *</label>
-              <select class="denr-form-input" id="productSource" required>
-                <option value="">Select source</option>
-                <option value="private-plantation">Private Plantation</option>
-                <option value="government-plantation">Government Plantation</option>
-                <option value="community-tree-plantation">Community Tree Plantation</option>
-                <option value="natural-forest">Natural Forest (with permit)</option>
-                <option value="mixed">Mixed Sources</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Origin Location *</label>
-              <input type="text" class="denr-form-input" id="originLocation" placeholder="Municipality, Province" required>
-            </div>
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Contact Details:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantContact" />
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">TRANSPORTATION DETAILS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Destination *</label>
-              <input type="text" class="denr-form-input" id="destination" placeholder="Complete address" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Purpose of Transport *</label>
-              <select class="denr-form-input" id="transportPurpose" required>
-                <option value="">Select purpose</option>
-                <option value="sale">For Sale</option>
-                <option value="processing">For Processing</option>
-                <option value="construction">For Construction</option>
-                <option value="export">For Export</option>
-                <option value="transfer">For Transfer</option>
-                <option value="other">Other Purpose</option>
-              </select>
-            </div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">A. Requirements to be submitted upon filing of application</div>
+          <div class="denr-form-subheading">Basic:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Request letter indicating the following: (1 original, 1 photocopy)</label>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Mode of Transportation *</label>
-              <select class="denr-form-input" id="transportMode" required>
-                <option value="">Select mode</option>
-                <option value="truck">Truck</option>
-                <option value="van">Van</option>
-                <option value="trailer">Trailer</option>
-                <option value="boat">Boat</option>
-                <option value="mixed">Mixed Transportation</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Vehicle Details *</label>
-              <input type="text" class="denr-form-input" id="vehicleDetails" placeholder="Make, model, plate number" required>
-            </div>
+          <div class="denr-form-checklist denr-form-nested">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Type of forest product</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Species</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Estimated volume/quantity</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Type of conveyance and plate number</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Name and address of the consignee/destination</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Date of transport</label>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Transport Date *</label>
-              <input type="date" class="denr-form-input" id="transportDate" required>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Certification that the forest products are harvested within the area of the owner (for non-timber) (1 original)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Approved Tree Cutting Permit for timber (1 photocopy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> OR/CR of conveyance and Driver's License (1 photocopy)</label>
+          </div>
+          <div class="denr-form-subheading">Additional requirement, if the owner of the forest product is not the owner of the conveyance:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Certificate of Transport Agreement (1 original)</label>
+          </div>
+          <div class="denr-form-subheading">Additional requirement, if applicant is not the land owner:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Special Power of Attorney (SPA) (1 original)</label>
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">B. Type of Transaction</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Citizen</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Business <em>(Specify the Name of Company and Owner / Authorized Representative)</em></label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Government <em>(Specify the Name of the Agency and its Authorized Representative)</em></label>
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">C. Classification</div>
+          <div class="denr-cc-classification-line">✓ Complex</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">D. Fees to be Paid</div>
+          <div class="denr-cc-fee-line">✓ ₱446.00+ <em>(Certification Fee: ₱50.00/ truck load; Oath Fee: ₱36.00 per application; Inspection Fee: ₱360.00) Fees and charges are based on DAO 2004-16</em></div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">E. Processing Time</div>
+          <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> 5 working days, 5 hours, and 45 minutes</div>
+        </div>
+
+        <div class="denr-cc-received-row">
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Received by:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_f03a_receivedBy" />
+          </div>
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Date Received:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_f03a_dateReceived" />
+          </div>
+        </div>
+
+        <div class="denr-cc-stub-separator"></div>
+
+        <div class="denr-cc-receipt-official">
+          <img src="/assets/images/logo.png" alt="" class="denr-cc-receipt-logo" width="56" height="56" />
+          <div class="denr-cc-receipt-body">
+            <div class="denr-cc-receipt-heading">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="denr-cc-receipt-service">Name of Service: <strong>Issuance of Certificate of Verification (COV) for the transport of planted trees within private land, non-timber forest products except Rattan and Bamboo</strong></div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Name of Applicant:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_f03a_ackApplicant" />
             </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Valid Until *</label>
-              <input type="date" class="denr-form-input" id="validUntil" required>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Date Received:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_f03a_ackDateReceived" />
             </div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">SUPPORTING DOCUMENTS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Proof of Ownership/Source *</label>
-              <select class="denr-form-input" id="ownershipProof" required>
-                <option value="">Select proof</option>
-                <option value="tree-plantation-certificate">Tree Plantation Certificate</option>
-                <option value="community-certificate">Community Certificate</option>
-                <option value="purchase-receipt">Purchase Receipt</option>
-                <option value="harvest-permit">Harvest Permit</option>
-                <option value="other">Other Documents</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Document Number</label>
-              <input type="text" class="denr-form-input" id="documentNumber">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Barangay Clearance *</label>
-              <select class="denr-form-input" id="barangayClearance" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes, attached</option>
-                <option value="no">No, not required</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Local Government Permit *</label>
-              <select class="denr-form-input" id="lgPermit" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes, attached</option>
-                <option value="no">No, not required</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">UNDERTAKING</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking1" required>
-                I certify that all information provided is true and correct
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking2" required>
-                I certify that the products are legally sourced and obtained
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking3" required>
-                I understand that this certificate is valid only for the specified transport
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking4" required>
-                I understand that false information may result in legal action
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-signature">
-            <div class="denr-form-signature-label">Signature of Applicant/Authorized Representative</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Printed Name</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Date</div>
-            <div class="denr-form-signature-line"></div>
-          </div>
-        </div>
+        <p class="denr-cc-followup-note">*To follow-up your application, please present this stub or you may contact us at cenrostacruz@denr.gov.ph / (049) 536 – 8903*</p>
       </div>
     `
   },
 
   'RO-F-03b – Issuance of Certificate of Timber/Lumber Origin (CTO/CLO)': {
-    title: 'Certificate of Timber/Lumber Origin Application Form',
-    subtitle: 'Department of Environment and Natural Resources - Region IV-A',
+    title: 'Issuance of Certificate of Timber/Lumber Origin (CTO/CLO)',
+    subtitle: '',
     template: `
       <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">CERTIFICATE OF TIMBER/LUMBER ORIGIN APPLICATION FORM</div>
-          <div class="denr-form-subtitle">DENR Region IV-A CALABARZON</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">APPLICANT INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant/Company *</label>
-              <input type="text" class="denr-form-input" id="applicantName" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address *</label>
-              <input type="text" class="denr-form-input" id="applicantAddress" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Number *</label>
-              <input type="tel" class="denr-form-input" id="applicantContact" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Email Address *</label>
-              <input type="email" class="denr-form-input" id="applicantEmail" required>
-            </div>
+        <div class="denr-cc-letterhead">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="denr-cc-lh-logo" width="72" height="72" />
+          <div class="denr-cc-lh-text">
+            <div>Republic of the Philippines</div>
+            <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
+            <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
+            <div>Brgy. Duhat, Sta. Cruz, Laguna</div>
+            <div class="denr-cc-lh-contact"><span class="denr-cc-lh-email">cenrostacruz@denr.gov.ph</span> | (049) 536 8903</div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">TIMBER/LUMBER INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Type of Wood Products *</label>
-              <select class="denr-form-input" id="woodType" required>
-                <option value="">Select type</option>
-                <option value="timber">Timber</option>
-                <option value="lumber">Lumber</option>
-                <option value="logs">Logs</option>
-                <option value="veneer">Veneer</option>
-                <option value="plywood">Plywood</option>
-                <option value="mixed">Mixed Products</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Wood Species *</label>
-              <input type="text" class="denr-form-input" id="woodSpecies" placeholder="e.g., Narra, Mahogany, Gmelina, Acacia" required>
-            </div>
+        <div class="denr-cc-banner">CHECKLIST OF REQUIREMENTS</div>
+
+        <div class="denr-cc-infobox">
+          <div class="denr-cc-charter-no">CITIZEN'S CHARTER NO. RO-F-03b</div>
+          <div class="denr-cc-service-title">Issuance of Certificate of Timber/Lumber Origin (CTO/CLO) for Processed Logs/Lumber</div>
+          <p class="denr-cc-infobox-note">*CTO/CLO is a document to secure/present when transporting processed logs or lumber from WPP to another WPP or desired destination*</p>
+        </div>
+
+        <div class="denr-cc-applicant-block">
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Name of Applicant:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantName" />
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Volume/Quantity *</label>
-              <input type="number" step="0.01" class="denr-form-input" id="volume" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Unit of Measurement *</label>
-              <select class="denr-form-input" id="unitMeasurement" required>
-                <option value="">Select unit</option>
-                <option value="cubic-meters">Cubic Meters</option>
-                <option value="board-feet">Board Feet</option>
-                <option value="pieces">Pieces</option>
-                <option value="linear-meters">Linear Meters</option>
-              </select>
-            </div>
+          <div class="denr-cc-field-row denr-cc-field-row-multiline">
+            <span class="denr-cc-field-label">Address:</span>
+            <textarea class="denr-cc-line-input denr-cc-line-textarea" id="applicantAddress" rows="2"></textarea>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Grade/Quality *</label>
-              <select class="denr-form-input" id="grade" required>
-                <option value="">Select grade</option>
-                <option value="premium">Premium</option>
-                <option value="first">First</option>
-                <option value="second">Second</option>
-                <option value="third">Third</option>
-                <option value="utility">Utility</option>
-                <option value="mixed">Mixed Grades</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Processing Status *</label>
-              <select class="denr-form-input" id="processingStatus" required>
-                <option value="">Select status</option>
-                <option value="raw">Raw/Unprocessed</option>
-                <option value="semi-processed">Semi-processed</option>
-                <option value="finished">Finished</option>
-                <option value="mixed">Mixed Status</option>
-              </select>
-            </div>
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Contact Details:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantContact" />
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">SOURCE/ORIGIN INFORMATION</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Source of Timber/Lumber *</label>
-              <select class="denr-form-input" id="source" required>
-                <option value="">Select source</option>
-                <option value="private-land">Private Land</option>
-                <option value="public-land">Public Land (with permit)</option>
-                <option value="tree-plantation">Tree Plantation</option>
-                <option value="community-tree-plantation">Community Tree Plantation</option>
-                <option value="imported">Imported</option>
-                <option value="mixed">Mixed Sources</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Source Location *</label>
-              <input type="text" class="denr-form-input" id="sourceLocation" placeholder="Municipality, Province" required>
-            </div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">A. Requirements to be submitted upon filing of application</div>
+          <div class="denr-form-subheading">Basic:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Request letter indicating the following: (1 original, 1 photocopy)</label>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Source Permit Number</label>
-              <input type="text" class="denr-form-input" id="sourcePermitNumber">
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date of Harvest/Cutting *</label>
-              <input type="date" class="denr-form-input" id="harvestDate" required>
-            </div>
+          <div class="denr-form-checklist denr-form-nested">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Species, Dimension (Lumber), Number of pieces/poles and volume</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Name and Place of loading/Lumber Origin</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Type of conveyance and plate number</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Date of transport</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Name and address of the consignee/destination</label>
           </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Land Ownership Document *</label>
-              <select class="denr-form-input" id="ownershipDocument" required>
-                <option value="">Select document</option>
-                <option value="land-title">Land Title</option>
-                <option value="tax-declaration">Tax Declaration</option>
-                <option value="lease-agreement">Lease Agreement</option>
-                <option value="tree-plantation-permit">Tree Plantation Permit</option>
-                <option value="other">Other Document</option>
-              </select>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Source of Forest Product (Permit/Agreement/Imported Product)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Approved WPP Permit or Certificate of Registration as Lumber/Timber Dealer (1 photocopy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Approved Log/Lumber Supply Contract or Invoice Receipt (1 photocopy)</label>
+          </div>
+          <div class="denr-form-subheading">Additional requirement, if applicant is not the WPP owner:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Special Power of Attorney (SPA) (1 original)</label>
+          </div>
+          <div class="denr-form-subheading">Additional requirement, if the owner of the forest product is not the owner of the conveyance:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Certificate of Transport Agreement (1 original, 1 photocopy)</label>
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">B. Type of Transaction</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Citizen</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Business <em>(Specify the Name of Company and Owner / Authorized Representative)</em></label>
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">C. Classification</div>
+          <div class="denr-cc-classification-line">✓ Complex</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">D. Fees to be Paid</div>
+          <div class="denr-cc-fee-line">✓ ₱446.00+ <em>(Certification Fee: ₱50.00/ truck load; Oath Fee: ₱36.00 per application; Scaling Fee: ₱360.00) Fees and charges are based on DAO 2004-16</em></div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">E. Processing Time</div>
+          <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> 5 working days, 5 hours, 45 minutes</div>
+        </div>
+
+        <div class="denr-cc-received-row">
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Received by:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_f03b_receivedBy" />
+          </div>
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Date Received:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_f03b_dateReceived" />
+          </div>
+        </div>
+
+        <div class="denr-cc-stub-separator"></div>
+
+        <div class="denr-cc-receipt-official">
+          <img src="/assets/images/logo.png" alt="" class="denr-cc-receipt-logo" width="56" height="56" />
+          <div class="denr-cc-receipt-body">
+            <div class="denr-cc-receipt-heading">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="denr-cc-receipt-service">Name of Service: <strong>Issuance of Certificate of Timber/Lumber Origin (CTO/CLO) for Processed Logs/Lumber</strong></div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Name of Applicant:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_f03b_ackApplicant" />
             </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Document Number</label>
-              <input type="text" class="denr-form-input" id="documentNumber">
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Date Received:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_f03b_ackDateReceived" />
             </div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">TRANSPORTATION DETAILS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Destination *</label>
-              <input type="text" class="denr-form-input" id="destination" placeholder="Complete address" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Purpose of Transport *</label>
-              <select class="denr-form-input" id="transportPurpose" required>
-                <option value="">Select purpose</option>
-                <option value="sale">For Sale</option>
-                <option value="processing">For Processing</option>
-                <option value="construction">For Construction</option>
-                <option value="export">For Export</option>
-                <option value="transfer">For Transfer</option>
-                <option value="storage">For Storage</option>
-              </select>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Mode of Transportation *</label>
-              <select class="denr-form-input" id="transportMode" required>
-                <option value="">Select mode</option>
-                <option value="truck">Truck</option>
-                <option value="trailer">Trailer</option>
-                <option value="van">Van</option>
-                <option value="boat">Boat</option>
-                <option value="mixed">Mixed Transportation</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Vehicle Details *</label>
-              <input type="text" class="denr-form-input" id="vehicleDetails" placeholder="Make, model, plate number" required>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Transport Date *</label>
-              <input type="date" class="denr-form-input" id="transportDate" required>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Valid Until *</label>
-              <input type="date" class="denr-form-input" id="validUntil" required>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">SUPPORTING DOCUMENTS</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Proof of Legal Source *</label>
-              <select class="denr-form-input" id="legalSourceProof" required>
-                <option value="">Select proof</option>
-                <option value="harvest-permit">Harvest Permit</option>
-                <option value="tree-plantation-certificate">Tree Plantation Certificate</option>
-                <option value="purchase-receipt">Purchase Receipt</option>
-                <option value="import-permit">Import Permit</option>
-                <option value="other">Other Documents</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Document Number</label>
-              <input type="text" class="denr-form-input" id="proofDocumentNumber">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Barangay Clearance *</label>
-              <select class="denr-form-input" id="barangayClearance" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes, attached</option>
-                <option value="no">No, not required</option>
-              </select>
-            </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Local Government Permit *</label>
-              <select class="denr-form-input" id="lgPermit" required>
-                <option value="">Select option</option>
-                <option value="yes">Yes, attached</option>
-                <option value="no">No, not required</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">UNDERTAKING</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking1" required>
-                I certify that all information provided is true and correct
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking2" required>
-                I certify that the timber/lumber is legally sourced and obtained
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking3" required>
-                I understand that this certificate is valid only for the specified transport
-              </label>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">
-                <input type="checkbox" class="denr-form-checkbox" id="undertaking4" required>
-                I understand that false information may result in legal action
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-signature">
-            <div class="denr-form-signature-label">Signature of Applicant/Authorized Representative</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Printed Name</div>
-            <div class="denr-form-signature-line"></div>
-            <div class="denr-form-signature-label">Date</div>
-            <div class="denr-form-signature-line"></div>
-          </div>
-        </div>
+        <p class="denr-cc-followup-note">*To follow-up your application, please present this stub or you may contact us at cenrostacruz@denr.gov.ph / (049) 536 – 8903*</p>
       </div>
     `
-  }
+  },
+
+  'RO-F-04 – Application for Chainsaw Registration': {
+    title: 'Application for Chainsaw Registration',
+    subtitle: '',
+    template: `
+      <div class="denr-form">
+        <div class="denr-cc-letterhead">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="denr-cc-lh-logo" width="72" height="72" />
+          <div class="denr-cc-lh-text">
+            <div>Republic of the Philippines</div>
+            <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
+            <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
+            <div>Brgy. Duhat, Sta. Cruz, Laguna</div>
+            <div class="denr-cc-lh-contact"><span class="denr-cc-lh-email">cenrostacruz@denr.gov.ph</span> | (049) 536 8903</div>
+          </div>
+        </div>
+
+        <div class="denr-cc-banner">CHECKLIST OF REQUIREMENTS</div>
+
+        <div class="denr-cc-infobox">
+          <div class="denr-cc-charter-no">CITIZEN'S CHARTER NO. RO-F-04</div>
+          <div class="denr-cc-service-title">Application for Chainsaw Registration</div>
+          <p class="denr-cc-infobox-note">*This Registration serves as a legal proof of ownership, use and possession of chainsaw in the Philippines. The DENR shall issue different permits or certifications for the purchase or import, manufacture, selling, re-selling, disposal, distribution, transfer of ownership, lease, rental or lending of chainsaws.*</p>
+        </div>
+
+        <div class="denr-cc-applicant-block">
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Name of Applicant:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantName" />
+          </div>
+          <div class="denr-cc-field-row denr-cc-field-row-multiline">
+            <span class="denr-cc-field-label">Address:</span>
+            <textarea class="denr-cc-line-input denr-cc-line-textarea" id="applicantAddress" rows="2"></textarea>
+          </div>
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Contact Details:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantContact" />
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">A. Requirements to be submitted upon filing of application</div>
+          <div class="denr-form-subheading">Basic:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Duly Accomplished Application Form</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Official Receipt of Chainsaw Purchase (1 certified copy and 1 original for verification) or Affidavit of Ownership in case the original copy is lost.</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> SPA if the applicant is not the owner of the chainsaw</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Detailed Specification of Chainsaw (brand, model, engine capacity, serial number)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Notarized Deed of Absolute Sale, if transfer of ownership (1 original)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Chainsaw to be registered</label>
+          </div>
+          <div class="denr-form-subheading">Additional if Tenurial Instrument Holder:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Certified True Copy of Forest Tenure Agreement</label>
+          </div>
+          <div class="denr-form-subheading">Additional if Business Owner:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Business Permit (1 photocopy)</label>
+          </div>
+          <div class="denr-form-subheading">Additional if Registered as Private Tree Plantation Owner:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Certificate of Registration</label>
+          </div>
+          <div class="denr-form-subheading">Additional if the applicant shows satisfactory proof that the possession and/or use of a chainsaw is for a legal purpose:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Business Permit from LGU or affidavit that the chainsaw is needed in applicants/profession/work and will be used for legal purpose (1 photocopy)</label>
+          </div>
+          <div class="denr-form-subheading">Additional if licensed Wood Processor:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Wood processing plant permit (1 photocopy)</label>
+          </div>
+          <div class="denr-form-subheading">Additional if government, and GOCC:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Certification from the Head of Office or his/her authorized representative that chainsaws are possessed by the office and use for legal purposes (specify)</label>
+          </div>
+          <div class="denr-form-subheading">Additional if it is for renewal of registration:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Latest Certificate of Chainsaw Registration (1 photocopy)</label>
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">B. Type of Transaction</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Citizen</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Business <em>(Specify the Name of Company and Owner / Authorized Representative)</em></label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Government <em>(Specify the Name of the Agency and its Authorized Representative)</em></label>
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">C. Classification</div>
+          <div class="denr-cc-classification-line">✓ Simple</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">D. Fees to be Paid</div>
+          <div class="denr-cc-fee-line">✓ Registration Fee: ₱500.00</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">E. Processing Time</div>
+          <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> 2 working days, 4 hours and 30 minutes</div>
+        </div>
+
+        <div class="denr-cc-received-row">
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Received by:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_f04_receivedBy" />
+          </div>
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Date Received:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_f04_dateReceived" />
+          </div>
+        </div>
+
+        <div class="denr-cc-stub-separator"></div>
+
+        <div class="denr-cc-receipt-official">
+          <img src="/assets/images/logo.png" alt="" class="denr-cc-receipt-logo" width="56" height="56" />
+          <div class="denr-cc-receipt-body">
+            <div class="denr-cc-receipt-heading">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="denr-cc-receipt-service">Name of Service: <strong>Application for Chainsaw Registration</strong></div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Name of Applicant:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_f04_ackApplicant" />
+            </div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Date Received:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_f04_ackDateReceived" />
+            </div>
+          </div>
+        </div>
+
+        <p class="denr-cc-followup-note">*To follow-up your application, please present this stub or you may contact us at cenrostacruz@denr.gov.ph / (049) 536 – 8903*</p>
+      </div>
+    `
+  },
+
+  'RO-F-05 – Issuance of Special/Tree Cutting and/or Earth Balling Permit': {
+    title: 'Issuance of Special/Tree Cutting and/or Earth Balling Permit',
+    subtitle: '',
+    template: `
+      <div class="denr-form">
+        <div class="denr-cc-letterhead">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="denr-cc-lh-logo" width="72" height="72" />
+          <div class="denr-cc-lh-text">
+            <div>Republic of the Philippines</div>
+            <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
+            <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
+            <div>Brgy. Duhat, Sta. Cruz, Laguna</div>
+            <div class="denr-cc-lh-contact"><span class="denr-cc-lh-email">cenrostacruz@denr.gov.ph</span> | (049) 536 8903</div>
+          </div>
+        </div>
+
+        <div class="denr-cc-banner">CHECKLIST OF REQUIREMENTS</div>
+
+        <div class="denr-cc-infobox">
+          <div class="denr-cc-charter-no">CITIZEN'S CHARTER NO. RO-F-05</div>
+          <div class="denr-cc-service-title">Issuance of Special/Tree Cutting and/or Earth Balling Permit for Trees affected by projects of National Government Agencies (DPWH, DOTR, DEPED, DA, DOH, CHED, DOE, and NIA)</div>
+          <p class="denr-cc-infobox-note">*This Permit serves as proof of authorization for the removal/cutting and/or relocation of trees affected by projects of the National Government Agencies (DPWH, DOTr, DepEd, DA, DOH, CHED, DOE and NIA).*</p>
+        </div>
+
+        <div class="denr-cc-applicant-block">
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Name of Applicant:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantName" />
+          </div>
+          <div class="denr-cc-field-row denr-cc-field-row-multiline">
+            <span class="denr-cc-field-label">Address:</span>
+            <textarea class="denr-cc-line-input denr-cc-line-textarea" id="applicantAddress" rows="2"></textarea>
+          </div>
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Contact Details:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantContact" />
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">A. Requirements to be submitted upon filing of application</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Letter of Application (1 original)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> LGU Endorsement/Certification of No Objection (1 original)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Approved Site Development Plan/Infrastructure Plan with tree charting indicating the geotagged location of individual trees affected by the project, to be numbered sequentially, as basis of validation by the DENR during actual cutting operations (1 Certified true Copy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Environmental Compliance Certificate (ECC)/Certificate of Non-Coverage (CNC), whichever is applicable (1 certified true copy)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> NCIP Clearance (FPIC/CP/CNO, whichever is applicable)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Waiver/Consent of owner/s, if titled property, if applicable (1 original)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> PAMB Clearance/Resolution, if within Protected Area (1 original)</label>
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">B. Type of Transaction</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Government <em>(Specify the Name of the Agency and its Authorized Representative)</em></label>
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">C. Classification</div>
+          <div class="denr-cc-classification-line">✓ Simple</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">D. Fees to be Paid</div>
+          <div class="denr-cc-fee-line">✓ ₱86.00 <em>(Certification Fee: ₱50.00; Oath Fee: ₱36.00 per application)</em></div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">E. Processing Time</div>
+          <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> 2 working days, 7 hours, 50 minutes</div>
+        </div>
+
+        <div class="denr-cc-received-row">
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Received by:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_f05_receivedBy" />
+          </div>
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Date Received:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_f05_dateReceived" />
+          </div>
+        </div>
+
+        <div class="denr-cc-stub-separator"></div>
+
+        <div class="denr-cc-receipt-official">
+          <img src="/assets/images/logo.png" alt="" class="denr-cc-receipt-logo" width="56" height="56" />
+          <div class="denr-cc-receipt-body">
+            <div class="denr-cc-receipt-heading">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="denr-cc-receipt-service">Name of Service: <strong>Issuance of Special/Tree Cutting and/or Earth Balling Permit for Trees affected by projects of National Government Agencies (DPWH, DOTR, DEPED, DA, DOH, CHED, DOE, and NIA)</strong></div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Name of Applicant:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_f05_ackApplicant" />
+            </div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Date Received:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_f05_ackDateReceived" />
+            </div>
+          </div>
+        </div>
+
+        <p class="denr-cc-followup-note">*To follow-up your application, please present this stub or you may contact us at cenrostacruz@denr.gov.ph / (049) 536 – 8903*</p>
+      </div>
+    `
+  },
+
+  'RO-F-06 – Issuance of Tree Cutting Permit for Public Safety': {
+    title: 'Issuance of Tree Cutting Permit for Public Safety',
+    subtitle: '',
+    template: `
+      <div class="denr-form">
+        <div class="denr-cc-letterhead">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="denr-cc-lh-logo" width="72" height="72" />
+          <div class="denr-cc-lh-text">
+            <div>Republic of the Philippines</div>
+            <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
+            <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
+            <div>Brgy. Duhat, Sta. Cruz, Laguna</div>
+            <div class="denr-cc-lh-contact"><span class="denr-cc-lh-email">cenrostacruz@denr.gov.ph</span> | (049) 536 8903</div>
+          </div>
+        </div>
+
+        <div class="denr-cc-banner">CHECKLIST OF REQUIREMENTS</div>
+
+        <div class="denr-cc-infobox">
+          <div class="denr-cc-charter-no">CITIZEN'S CHARTER NO. RO-F-06</div>
+          <div class="denr-cc-service-title">Issuance of Tree Cutting Permit for planted trees and naturally growing trees found within public places (Plaza, Public Parks, School Premises or Political Subdivisions) for purposes of public safety</div>
+          <p class="denr-cc-infobox-note">*This Permit serves as proof of authorization for the removal/cutting of trees in public places (Plaza, Public Parks, School Premises or Political Subdivisions for purposes of public safety).*</p>
+        </div>
+
+        <div class="denr-cc-applicant-block">
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Name of Applicant:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantName" />
+          </div>
+          <div class="denr-cc-field-row denr-cc-field-row-multiline">
+            <span class="denr-cc-field-label">Address:</span>
+            <textarea class="denr-cc-line-input denr-cc-line-textarea" id="applicantAddress" rows="2"></textarea>
+          </div>
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Contact Details:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantContact" />
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">A. Requirements to be submitted upon filing of application</div>
+          <div class="denr-form-subheading">Basic:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Application Letter (1 original)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> LGU Endorsement/Certification of No Objection/Resolution (1 original)</label>
+          </div>
+          <div class="denr-form-subheading">Additional if within Subdivisions:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Homeowners Resolution (1 original / 1 certified true copy)</label>
+          </div>
+          <div class="denr-form-subheading">Additional if School/Organization:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> PTA Resolution or Resolution from any organize group of No Objection and Reason for Cutting (1 original)</label>
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">B. Type of Transaction</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Citizen</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Business <em>(Specify the Name of Company and Owner / Authorized Representative)</em></label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Government <em>(Specify the Name of the Agency and its Authorized Representative)</em></label>
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">C. Classification</div>
+          <div class="denr-cc-classification-line">✓ Highly Technical</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">D. Fees to be Paid</div>
+          <div class="denr-cc-fee-line">✓ Certification Fee: ₱50.00; Oath Fee: ₱36.00 per application; Inventory Fee: ₱1,200.00 (for 1ha. and above)</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">E. Processing Time</div>
+          <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> 16 days and 6 hours</div>
+        </div>
+
+        <div class="denr-cc-received-row">
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Received by:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_f06_receivedBy" />
+          </div>
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Date Received:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_f06_dateReceived" />
+          </div>
+        </div>
+
+        <div class="denr-cc-stub-separator"></div>
+
+        <div class="denr-cc-receipt-official">
+          <img src="/assets/images/logo.png" alt="" class="denr-cc-receipt-logo" width="56" height="56" />
+          <div class="denr-cc-receipt-body">
+            <div class="denr-cc-receipt-heading">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="denr-cc-receipt-service">Name of Service: <strong>Issuance of Tree Cutting Permit for planted trees and naturally growing trees found within public places (Plaza, Public Parks, School Premises or Political Subdivisions) for purposes of public safety</strong></div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Name of Applicant:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_f06_ackApplicant" />
+            </div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Date Received:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_f06_ackDateReceived" />
+            </div>
+          </div>
+        </div>
+
+        <p class="denr-cc-followup-note">*To follow-up your application, please present this stub or you may contact us at cenrostacruz@denr.gov.ph / (049) 536 – 8903*</p>
+      </div>
+    `
+  },
+
+  'RO-F-07 – Issuance of Private Land Timber Permit (PLTP/SPLTP)': {
+    title: 'Issuance of Private Land Timber Permit (PLTP/SPLTP)',
+    subtitle: '',
+    template: `
+      <div class="denr-form">
+        <div class="denr-cc-letterhead">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="denr-cc-lh-logo" width="72" height="72" />
+          <div class="denr-cc-lh-text">
+            <div>Republic of the Philippines</div>
+            <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
+            <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
+            <div>Brgy. Duhat, Sta. Cruz, Laguna</div>
+            <div class="denr-cc-lh-contact"><span class="denr-cc-lh-email">cenrostacruz@denr.gov.ph</span> | (049) 536 8903</div>
+          </div>
+        </div>
+
+        <div class="denr-cc-banner">CHECKLIST OF REQUIREMENTS</div>
+
+        <div class="denr-cc-infobox">
+          <div class="denr-cc-charter-no">CITIZEN'S CHARTER NO. RO-F-07</div>
+          <div class="denr-cc-service-title">Issuance of Private Land Timber Permit (PLTP) for Non-Premium Species, or Special PLTP (SPLTP) for Premium Naturally-Grown Trees within private/ titled lands</div>
+          <p class="denr-cc-infobox-note">*PLTP or SPLTP serves as the official authority to cut, gather and utilize naturally grown trees within private or titled lands. This shall not cover the trimming, pruning, cutting and removal of trees within power line corridors which no longer requires to secure prior clearance or permit from, but with due notice to, the DENR Field Offices, pursuant to RA No. 11361, S. 2019. Further, the transport of logs derived therefrom shall require a transport permit consistent with existing rules and regulations.*</p>
+        </div>
+
+        <div class="denr-cc-applicant-block">
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Name of Applicant:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantName" />
+          </div>
+          <div class="denr-cc-field-row denr-cc-field-row-multiline">
+            <span class="denr-cc-field-label">Address:</span>
+            <textarea class="denr-cc-line-input denr-cc-line-textarea" id="applicantAddress" rows="2"></textarea>
+          </div>
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Contact Details:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantContact" />
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">A. Requirements to be submitted upon filing of application</div>
+          <div class="denr-form-subheading">Basic:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Application Letter (1 original)</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Endorsement/Certification from concerned LGU interposing no objection to the cutting of trees under the following conditions (1 original):</label>
+          </div>
+          <div class="denr-form-checklist denr-form-nested">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> If the trees to be cut falls within one barangay, an endorsement from the Barangay Captain shall be secured</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> If the trees to be cut falls within more than one barangay, endorsement shall be secured either from the Municipal/City Mayor or all the Barangay Captains concerned</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> If the trees to be cut fall within more than one municipality/city, endorsement shall be secured either from the Provincial Governor or all the Municipal/City Mayors concerned</label>
+          </div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Authenticated copy of Land Title/CLOA issued by LRA or Registry of Deeds, whichever is applicable</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Environmental Compliance Certificate (ECC)/Certificate of Non-Coverage (CNC), whichever is applicable. (1 certified copy)</label>
+          </div>
+          <div class="denr-form-subheading">Additional, if application covers ten (10) hectares or larger:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Utilization Plan with at least 50% of the area covered with forest trees (1 original)</label>
+          </div>
+          <div class="denr-form-subheading">Additional, if covered by CLOA:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Endorsement by local agrarian reform officer interposing No Objection (1 original)</label>
+          </div>
+          <div class="denr-form-subheading">Additional, if School/Organization:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> PTA Resolution or Resolution from any organized group of No Objection and Reason for Cutting for (1 original)</label>
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">B. Type of Transaction</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Citizen</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Business <em>(Specify the Name of Company and Owner / Authorized Representative)</em></label>
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">C. Classification</div>
+          <div class="denr-cc-classification-line">✓ Highly Technical (multi-stage processing)</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">D. Fees to be Paid</div>
+          <div class="denr-cc-fee-line">✓ Certification Fee: ₱50.00; Oath Fee: ₱36.00 per application; Inventory Fee: ₱1,200.00 (for 1ha. and above)</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">E. Processing Time</div>
+          <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> Implementing PENRO: 27D, 1H and 20M; TOTAL: 36D, 50M</div>
+        </div>
+
+        <div class="denr-cc-received-row">
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Received by:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_f07_receivedBy" />
+          </div>
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Date Received:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_f07_dateReceived" />
+          </div>
+        </div>
+
+        <div class="denr-cc-stub-separator"></div>
+
+        <div class="denr-cc-receipt-official">
+          <img src="/assets/images/logo.png" alt="" class="denr-cc-receipt-logo" width="56" height="56" />
+          <div class="denr-cc-receipt-body">
+            <div class="denr-cc-receipt-heading">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="denr-cc-receipt-service">Name of Service: <strong>Issuance of Private Land Timber Permit (PLTP) For Non-Premium Species, or Special PLTP (SPLTP) For Premium Naturally-Grown Trees Within Private/ Titled Lands</strong></div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Name of Applicant:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_f07_ackApplicant" />
+            </div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Date Received:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_f07_ackDateReceived" />
+            </div>
+          </div>
+        </div>
+
+        <p class="denr-cc-followup-note">*To follow-up your application, please present this stub or you may contact us at cenrostacruz@denr.gov.ph / (049) 536 – 8903*</p>
+      </div>
+    `
+  },
+
+  'R4A-F-08 – Issuance of Permit to Import Chainsaw': {
+    title: 'Issuance of Permit to Import Chainsaw',
+    subtitle: '',
+    template: `
+      <div class="denr-form">
+        <div class="denr-cc-letterhead">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="denr-cc-lh-logo" width="72" height="72" />
+          <div class="denr-cc-lh-text">
+            <div>Republic of the Philippines</div>
+            <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
+            <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
+            <div>Brgy. Duhat, Sta. Cruz, Laguna</div>
+            <div class="denr-cc-lh-contact"><span class="denr-cc-lh-email">cenrostacruz@denr.gov.ph</span> | (049) 536 8903</div>
+          </div>
+        </div>
+
+        <div class="denr-cc-banner">CHECKLIST OF REQUIREMENTS</div>
+
+        <div class="denr-cc-infobox">
+          <div class="denr-cc-charter-no">CITIZEN'S CHARTER NO. R4A-F-08</div>
+          <div class="denr-cc-service-title">Issuance of Permit to Import Chainsaw</div>
+          <p class="denr-cc-infobox-note">*The permit is necessary in order to regulate the import, ownership, possession, and/or use of chainsaws to prevent them from being used in illegal logging or unauthorized clearing of forests.*</p>
+        </div>
+
+        <div class="denr-cc-applicant-block">
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Name of Applicant:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantName" />
+          </div>
+          <div class="denr-cc-field-row denr-cc-field-row-multiline">
+            <span class="denr-cc-field-label">Address:</span>
+            <textarea class="denr-cc-line-input denr-cc-line-textarea" id="applicantAddress" rows="2"></textarea>
+          </div>
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Contact Details:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantContact" />
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">A. Requirements to be submitted upon filing of application</div>
+          <div class="denr-form-subheading">Basic:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Duly accomplished Application Form</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Payment of Permit Fee</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Copy of Purchase Order</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Endorsement of the concerned PENR Officer</label>
+          </div>
+          <div class="denr-form-subheading">Additional if individual:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Affidavit that he/she will use the chainsaw for legal purpose</label>
+          </div>
+          <div class="denr-form-subheading">Additional if business / private corporation:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Certificate of Registration of Business Name from DTI or SEC</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Business License / Mayor's Permit</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Authorization / Secretary's Certificate (if applies)</label>
+          </div>
+          <div class="denr-form-subheading">Additional if within Subdivisions:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Homeowner's Resolution (1 original / 1 certified true copy)</label>
+          </div>
+          <div class="denr-form-subheading">Additional if School/Organization:</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> PTA Resolution or Resolution from any organize group of No Objection and Reason for Cutting (1 original)</label>
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">B. Type of Transaction</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Citizen</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Business <em>(Specify the Name of Company and Owner / Authorized Representative)</em></label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Government <em>(Specify the Name of the Agency and its Authorized Representative)</em></label>
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">C. Classification</div>
+          <div class="denr-cc-classification-line">✓ Highly Technical</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">D. Fees to be Paid</div>
+          <div class="denr-cc-fee-line">✓ Certification Fee: ₱50.00; Oath Fee: ₱36.00 per application; Inventory Fee: ₱1,200.00 (for 1ha. and above)</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">E. Processing Time</div>
+          <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> 16 days and 8 hours</div>
+        </div>
+
+        <div class="denr-cc-received-row">
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Received by:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_f08_receivedBy" />
+          </div>
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Date Received:</span>
+            <input type="text" class="denr-cc-received-input" id="ro_f08_dateReceived" />
+          </div>
+        </div>
+
+        <div class="denr-cc-stub-separator"></div>
+
+        <div class="denr-cc-receipt-official">
+          <img src="/assets/images/logo.png" alt="" class="denr-cc-receipt-logo" width="56" height="56" />
+          <div class="denr-cc-receipt-body">
+            <div class="denr-cc-receipt-heading">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="denr-cc-receipt-service">Name of Service: <strong>Issuance of Permit to Import Chainsaw</strong></div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Name of Applicant:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_f08_ackApplicant" />
+            </div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Date Received:</span>
+              <input type="text" class="denr-cc-receipt-input" id="ro_f08_ackDateReceived" />
+            </div>
+          </div>
+        </div>
+
+        <p class="denr-cc-followup-note">*To follow-up your application, please present this stub or you may contact us at cenrostacruz@denr.gov.ph / (049) 536 – 8903*</p>
+      </div>
+    `
+  },
 };
 
 // Dynamic step procedures - generated based on document requirements and type characteristics
@@ -11181,11 +8287,18 @@ async function generateFormPDF() {
       }
 
       const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-      addDenrFormCanvasToPdf(doc, canvas);
+      // Document title used in the formal page footer
+      const docTitle = (formTitle?.textContent || permitType || 'DENR Application Form').trim();
+      doc.setProperties({
+        title: docTitle,
+        subject: 'DENR Citizen\u2019s Charter Checklist of Requirements',
+        creator: 'DENR CENRO Sta. Cruz - Online Application System'
+      });
+      addDenrFormCanvasToPdf(doc, canvas, { documentTitle: docTitle });
       doc.save(filename);
       showFormDownloadAwareness();
       showAlert(
-        'PDF downloaded — clearer text on paper (compact layout during capture, 5 mm margins, high-resolution snapshot). For the blank Word checklist, use “Official checklist (Word)”.',
+        'PDF downloaded \u2014 fits on a single A4 page with formal margins and footer. For the blank Word checklist, use \u201cOfficial checklist (Word)\u201d.',
         'success'
       );
       return;
@@ -11232,32 +8345,58 @@ async function generateFormPDF() {
 }
 
 /**
- * Places the full form snapshot on a single A4 page: centered, proportional scale,
- * narrow margins so the form appears larger on paper (matches on-screen sizing).
+ * Renders the captured DENR form onto a single formal A4 page.
+ * - 10 mm side / 10 mm top margins; 12 mm reserved at bottom for the footer.
+ * - The form is scaled proportionally to the largest size that fully fits the
+ *   printable area (width OR height bound), then centered horizontally.
+ * - A thin footer with the document name and generated date appears at the
+ *   bottom of the page for a formal, print-ready look.
  */
-function addDenrFormCanvasToPdf(pdf, canvas) {
-  const imgData = canvas.toDataURL('image/png');
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-  const marginMm = 5;
-  const maxW = pageWidth - 2 * marginMm;
-  const maxH = pageHeight - 2 * marginMm;
+function addDenrFormCanvasToPdf(pdf, canvas, options = {}) {
+  const {
+    documentTitle = 'DENR Application Form',
+    generatedAt = new Date(),
+  } = options;
+
+  const pageWidth = pdf.internal.pageSize.getWidth();   // 210 mm
+  const pageHeight = pdf.internal.pageSize.getHeight(); // 297 mm
+  const marginX = 10;
+  const marginTop = 10;
+  const footerReserved = 12; // bottom space reserved for the footer
+  const printableW = pageWidth - 2 * marginX;
+  const printableH = pageHeight - marginTop - footerReserved;
 
   const cw = canvas.width;
   const ch = canvas.height;
-  const canvasAspect = cw / ch;
+  const aspect = cw / ch;
 
-  let drawW = maxW;
-  let drawH = drawW / canvasAspect;
-  if (drawH > maxH) {
-    drawH = maxH;
-    drawW = drawH * canvasAspect;
+  // Fit-to-page: pick the larger drawing size that still fits both bounds.
+  let drawW = printableW;
+  let drawH = drawW / aspect;
+  if (drawH > printableH) {
+    drawH = printableH;
+    drawW = drawH * aspect;
   }
 
-  const x = marginMm + (maxW - drawW) / 2;
-  const y = marginMm + (maxH - drawH) / 2;
+  const x = marginX + (printableW - drawW) / 2;
+  const y = marginTop;
 
-  pdf.addImage(imgData, 'PNG', x, y, drawW, drawH);
+  pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, drawW, drawH);
+
+  // Formal footer: thin separator + document title + date
+  const dateStr = generatedAt.toLocaleDateString('en-PH', {
+    year: 'numeric', month: 'long', day: 'numeric'
+  });
+  const footerY = pageHeight - 6;
+  pdf.setDrawColor(180, 180, 180);
+  pdf.setLineWidth(0.2);
+  pdf.line(marginX, footerY - 4, pageWidth - marginX, footerY - 4);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(8);
+  pdf.setTextColor(110, 110, 110);
+  pdf.text(documentTitle, marginX, footerY);
+  pdf.text(`Generated ${dateStr}`, pageWidth - marginX, footerY, { align: 'right' });
+  pdf.setTextColor(0, 0, 0);
 }
 
 function downloadOfficialChecklistDocx() {
