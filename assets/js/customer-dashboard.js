@@ -4024,7 +4024,7 @@ function displayExistingDocuments(documents) {
   const permitType = document.getElementById('permitType')?.value;
   console.log('Current permit type:', permitType);
   
-  const requirements = documentRequirements[permitType] || [];
+  const requirements = PERMIT_REQUIREMENTS[permitType] || [];
   console.log('Requirements for permit type:', requirements);
   
   // Try to match documents to requirements by index first, then by name
@@ -4188,6 +4188,7 @@ if (createAppBtn) {
       clearFormData('newApplicationForm');
       hideCategoryAwarenessBanner();
       hidePermitAwarenessBanner();
+      hideRequirementsSection();
       window.editingAppId = null;
       window.existingDocuments = [];
       const submitBtn = document.getElementById('submitStep5') || document.querySelector('#newApplicationForm button[type="submit"]');
@@ -4376,7 +4377,7 @@ function updateRequirementsList5(documentType, permitType) {
   const requirementsList5 = document.getElementById('requirementsList5');
   if (!requirementsList5) return;
   
-  const requirements = documentRequirements[permitType] || [];
+  const requirements = PERMIT_REQUIREMENTS[permitType] || [];
   
   if (requirements.length === 0) {
     requirementsList5.innerHTML = '<li style="padding: 8px 0; color: #374151;">No specific requirements</li>';
@@ -4437,7 +4438,7 @@ document.getElementById('submitStep5')?.addEventListener('click', async (e) => {
   // OPTIMIZED: Fast document validation
   const documentType = document.getElementById('documentType')?.value || '';
   const permitType = document.getElementById('permitType')?.value || '';
-  const requirements = documentRequirements[permitType] || [];
+  const requirements = PERMIT_REQUIREMENTS[permitType] || [];
   
   // Quick parallel document check
   const documentChecks = requirements.map(async (requirement, index) => {
@@ -4845,7 +4846,7 @@ function validateStep(step) {
     return { isValid };
   }
 
-  const requirements = documentRequirements[permitType] || [];
+  const requirements = PERMIT_REQUIREMENTS[permitType] || [];
   console.log('Document upload validation - requirements:', requirements.length);
 
   // Check if all required documents are uploaded
@@ -4900,7 +4901,7 @@ function validateStep(step) {
 
   // Final step: Review & Submit
   if (title.includes('review') && step === stepProcedure.length) {
-    const requirements = documentRequirements[permitType] || [];
+    const requirements = PERMIT_REQUIREMENTS[permitType] || [];
     
     // Ensure all documents are uploaded before review
     let allUploaded = true;
@@ -5278,6 +5279,174 @@ const CATEGORY_AWARENESS_COPY = {
   }
 };
 
+/** Permit requirements data (keys must match option values in categoryTypePermitOptions). */
+const PERMIT_REQUIREMENTS = {
+  'R4A-B-01 – Issuance of Wildlife Farm Permit – Small Scale Farming': [
+    'Duly accomplished application form',
+    'Two (2) recent 2x2 ID pictures',
+    'Valid government-issued ID',
+    'DTI/SEC/CDA Registration (if business/entity)',
+    'Proof of scientific expertise / veterinarian certification',
+    'Financial plan or proof of financial capability',
+    'Proposed facility design/layout',
+    'List of wildlife species to be farmed',
+    'Proof of legal source of wildlife stocks'
+  ],
+  'R4A-B-02 – Issuance of Wildlife Farm Permit – Medium to Large Scale Farming': [
+    'Duly accomplished application form',
+    'Business registration documents (SEC/DTI/CDA)',
+    'Feasibility study or business plan',
+    'Environmental management plan',
+    'Proof of technical/scientific expertise',
+    'Veterinary health certification',
+    'Site development/facility plan',
+    'Proof of financial capability',
+    'Proof of legal source of wildlife'
+  ],
+  'R4A-B-03 – Issuance of Certificate of Wildlife Registration (CWR)': [
+    'Accomplished application form',
+    'Valid ID of owner/applicant',
+    'Photos of wildlife species',
+    'Proof of legal acquisition/source',
+    'Inventory list of wildlife',
+    'Supporting permits/documents (if applicable)'
+  ],
+  'R4A-B-04 – Issuance of Local Transport Permit (Wildlife)': [
+    'Application/request letter',
+    'Copy of Wildlife Farm Permit or CWR',
+    'Inventory of wildlife for transport',
+    'Veterinary/health certificate',
+    'Transport details (origin, destination, route)',
+    'Proof of legal source'
+  ],
+  'R4A-B-05 – Issuance of Special Local Transport Permit (SLTP) (Wildlife)': [
+    'Duly accomplished application form',
+    'Justification/request for special transport',
+    'Copy of existing wildlife permits',
+    'Veterinary clearance/certificate',
+    'Transport schedule and route',
+    'Proof of legal possession/source'
+  ],
+  'R4A-B-06 – Issuance of Wildlife Import Clearance (Non-CITES)': [
+    'Letter request/application',
+    'Importation details/specifications',
+    'Proof of legal source/export permit',
+    'Veterinary/Quarantine Certificate',
+    'Packing list and invoice',
+    'Import permits from concerned agencies',
+    'Valid identification/business registration'
+  ],
+  'R4A-B-07 – Issuance of NIPAS Certification': [
+    'Letter request/application',
+    'Project description/proposal',
+    'Vicinity map/location plan',
+    'Proof of land/project ownership or authority',
+    'Environmental compliance documents',
+    'Endorsement from concerned LGU/barangay (if applicable)'
+  ],
+  'RO-L-01 – Issuance of Certification of Land Classification Status': [
+    'Duly accomplished application form/request letter',
+    'Valid government-issued ID',
+    'Tax Declaration or proof of land claim/ownership',
+    'Lot/Survey Plan or Sketch Plan',
+    'Vicinity Map',
+    'Official Receipt of payment of fees',
+    'Authorization letter/Special Power of Attorney (if representative)'
+  ],
+  'RO-L-02 – Issuance of Survey Authority': [
+    'Letter request/application',
+    'Proof of land claim, rights, or authority',
+    'Approved sketch plan/vicinity map',
+    'Valid ID of applicant',
+    'Endorsement/clearance (if applicable)',
+    'Technical description of property',
+    'Payment of applicable fees'
+  ],
+  'RO-L-03 – Application for Free Patent (Agricultural)': [
+    'Duly accomplished Free Patent application form',
+    'Alienable and Disposable (A&D) land certification',
+    'Tax Declaration',
+    'Certification from DENR/CENRO',
+    'Affidavit of continuous occupation/cultivation',
+    'Barangay Certification',
+    'Valid government-issued ID',
+    'Approved survey plan or cadastral map',
+    'Latest real property tax receipt (if applicable)'
+  ],
+  'RO-L-04 – Application for Free Patent (Residential)': [
+    'Accomplished application form',
+    'Certification that land is alienable and disposable',
+    'Tax Declaration',
+    'Barangay Certification of actual occupancy',
+    'Valid government-issued ID',
+    'Approved survey/cadastral plan',
+    'Affidavit of ownership/occupancy',
+    'Latest tax payment receipt (if applicable)'
+  ],
+  'RO-F-01 – Issuance of Private Tree Plantation Registration (PTPR)': [
+    'Duly accomplished application form',
+    'Proof of land ownership (TCT, Tax Declaration, CLOA, etc.)',
+    'Sketch map/location map',
+    'List or inventory of planted trees',
+    'Valid ID'
+  ],
+  'RO-F-03a – Issuance of Certificate of Verification (COV) for transport of planted trees/non-timber products': [
+    'Application form',
+    'PTPR/CTPO or proof of legal source',
+    'Inventory of forest/non-timber products',
+    'Delivery receipt or sales invoice',
+    'Valid ID'
+  ],
+  'RO-F-03b – Issuance of Certificate of Timber/Lumber Origin (CTO/CLO)': [
+    'Application form',
+    'Proof of legal source of timber/lumber',
+    'Sales invoice/delivery receipt',
+    'Lumber inventory report',
+    'Valid ID'
+  ],
+  'RO-F-04 – Application for Chainsaw Registration': [
+    'Official Receipt of chainsaw purchase',
+    'Stencil Serial Number of chainsaw',
+    'Duly accomplished application form',
+    'Detailed specification of chainsaw',
+    'SPA if representative only',
+    'Notarized Deed of Sale (if transferred ownership)',
+    'Actual chainsaw for inspection'
+  ],
+  'RO-F-05 – Issuance of Special/Tree Cutting and/or Earth Balling Permit': [
+    'Letter request/application',
+    'Proof of land/project ownership',
+    'Vicinity or sketch map',
+    'Tree inventory',
+    'Photographs of trees',
+    'Barangay certification/clearance',
+    'Valid ID'
+  ],
+  'RO-F-06 – Issuance of Tree Cutting Permit for Public Safety': [
+    'Request letter',
+    'Certification that tree is hazardous',
+    'Photos of affected tree',
+    'Barangay certification',
+    'Sketch map/location map',
+    'Valid ID'
+  ],
+  'RO-F-07 – Issuance of Private Land Timber Permit (PLTP/SPLTP)': [
+    'Duly accomplished application form',
+    'Proof of land ownership',
+    'Tree inventory report',
+    'Sketch/vicinity map',
+    'Barangay certification',
+    'Valid ID'
+  ],
+  'R4A-F-08 – Issuance of Permit to Import Chainsaw': [
+    'Application form',
+    'Importation documents/proforma invoice',
+    'DTI/SEC registration',
+    'Valid ID',
+    'Justification for importation/use'
+  ]
+};
+
 /** Per–permit-type awareness (keys must match option values in categoryTypePermitOptions). */
 const PERMIT_AWARENESS_COPY = {
   'R4A-B-01 – Issuance of Wildlife Farm Permit – Small Scale Farming': {
@@ -5360,7 +5529,7 @@ const PERMIT_AWARENESS_COPY = {
 
 // Dynamic step procedures - generated based on document requirements and type characteristics
 function generateStepProcedure(documentType, permitType) {
-  const requirements = documentRequirements[permitType] || [];
+  const requirements = PERMIT_REQUIREMENTS[permitType] || [];
   const steps = [];
   let stepNum = 1;
   
@@ -5491,94 +5660,6 @@ const defaultStepProcedure = [
   { step: 5, title: 'Documents & Review', description: 'Upload documents and submit application', icon: 'upload' }
 ];
 
-// Document requirements based on permit type
-const documentRequirements = {
-  'Community-Based Forest Management Agreement (CBFMA)': [
-    'Letter of Intent',
-    'SEC/DOLE/CDA Registration (for organization)',
-    'List of officers/members',
-    'Barangay clearance',
-    'Project proposal / management plan'
-  ],
-  'Permit to Import Chainsaw': [
-    'Application form',
-    'Valid ID',
-    'Business permit (if company)',
-    'Justification for import',
-    'Invoice / details of chainsaw'
-  ],
-  'Permit to Purchase Chainsaw': [
-    'Application form',
-    'Valid ID',
-    'Barangay clearance',
-    'Reason for purchase',
-    'Proof of legal use (e.g., farming, business)'
-  ],
-  'Local Transport Permit (Wildlife)': [
-    'Application form',
-    'Proof of legal ownership of wildlife',
-    'Transport details (origin → destination)',
-    'Veterinary/health certificate (if applicable)'
-  ],
-  'Wildlife Farm Permit - Medium to Large Scale Farming': [
-    'Application form',
-    'Farm layout / plan',
-    'Proof of land ownership or lease',
-    'Environmental compliance (ECC if required)',
-    'Technical description of operation'
-  ],
-  'Wildlife Farm Permit - Small Scale Farming': [
-    'Application form',
-    'Farm layout / plan',
-    'Proof of land ownership or lease',
-    'Environmental compliance (ECC if required)',
-    'Technical description of operation'
-  ],
-  'Certificate of Registration as Lumber Dealer': [
-    'Application form',
-    'Valid ID',
-    'Business permit',
-    'Tax identification number',
-    'Proof of business address'
-  ],
-  'Certificate of Registration as Importer of Lumber and Wood Materials': [
-    'Application form',
-    'Valid ID',
-    'Business permit',
-    'Import license',
-    'Tax identification number'
-  ],
-  'Certificate of Wildlife Registration (CWR)': [
-    'Application form',
-    'Valid ID',
-    'Proof of ownership',
-    'Facility inspection report'
-  ],
-  'Certification for the Transport of Non-Timber Forest Product Except Rattan': [
-    'Application form',
-    'Proof of legal origin',
-    'Transport permit',
-    'Harvest permit'
-  ],
-  'Special Local Transport Permit (SLTP) (Wildlife)': [
-    'Application form',
-    'Proof of legal ownership',
-    'Transport permit',
-    'Veterinary certificate'
-  ]
-};
-
-Object.values(categoryTypePermitOptions)
-  .flat()
-  .forEach((label) => {
-    if (!documentRequirements[label]) {
-      documentRequirements[label] = [
-        'Duly accomplished application form',
-        'Valid government-issued ID',
-        'Supporting documents as required by DENR'
-      ];
-    }
-  });
 
 Object.values(categoryTypePermitOptions)
   .flat()
@@ -5597,7 +5678,6 @@ const documentTypeSelect = document.getElementById('documentType');
 const permitTypeSelect = document.getElementById('permitType');
 const permitTypeInfo = document.getElementById('permitTypeInfo');
 const permitTypeDescription = document.getElementById('permitTypeDescription');
-const documentRequirementsList = document.getElementById('documentRequirementsList');
 const categoryAwarenessBanner = document.getElementById('categoryAwarenessBanner');
 const categoryAwarenessBannerBody = document.getElementById('categoryAwarenessBannerBody');
 const categoryAwarenessBannerDismiss = document.getElementById('categoryAwarenessBannerDismiss');
@@ -5605,6 +5685,9 @@ const categoryAwarenessBannerDismiss = document.getElementById('categoryAwarenes
 const permitAwarenessBanner = document.getElementById('permitAwarenessBanner');
 const permitAwarenessBannerBody = document.getElementById('permitAwarenessBannerBody');
 const permitAwarenessBannerDismiss = document.getElementById('permitAwarenessBannerDismiss');
+
+const requirementsSection = document.getElementById('requirementsSection');
+const requirementsList = document.getElementById('requirementsList');
 
 function hideCategoryAwarenessBanner() {
   if (categoryAwarenessBanner) {
@@ -5615,6 +5698,31 @@ function hideCategoryAwarenessBanner() {
 function hidePermitAwarenessBanner() {
   if (permitAwarenessBanner) {
     permitAwarenessBanner.style.display = 'none';
+  }
+}
+
+function hideRequirementsSection() {
+  if (requirementsSection) {
+    requirementsSection.style.display = 'none';
+  }
+}
+
+function updateRequirementsSection() {
+  if (!requirementsSection || !requirementsList) return;
+  const permit = document.getElementById('permitType')?.value || '';
+
+  const requirements = PERMIT_REQUIREMENTS[permit];
+
+  if (requirements && requirements.length > 0) {
+    requirementsList.innerHTML = requirements.map((req, index) => `
+      <div class="requirement-item">
+        <div class="requirement-number">${index + 1}</div>
+        <div class="requirement-text">${req}</div>
+      </div>
+    `).join('');
+    requirementsSection.style.display = 'block';
+  } else {
+    hideRequirementsSection();
   }
 }
 
@@ -5649,6 +5757,7 @@ function updatePermitAwarenessBanner() {
 function updateStep1AwarenessBanner() {
   updateCategoryAwarenessBanner();
   updatePermitAwarenessBanner();
+  updateRequirementsSection();
 }
 
 if (categoryAwarenessBannerDismiss) {
@@ -5716,10 +5825,6 @@ function initializeStep1DocumentControls() {
     permitTypeInfo.style.display = 'none';
   }
   resetPermitSelectForCategory(cat);
-  const reqList = document.getElementById('documentRequirementsList');
-  if (reqList) {
-    reqList.innerHTML = '';
-  }
   updateStep1AwarenessBanner();
 }
 
@@ -5737,10 +5842,6 @@ if (documentTypeSelect) {
       permitTypeDescription.textContent = documentTypeDescriptions[selectedType];
     } else if (permitTypeInfo) {
       permitTypeInfo.style.display = 'none';
-    }
-
-    if (documentRequirementsList) {
-      documentRequirementsList.innerHTML = '';
     }
 
     updateStep1AwarenessBanner();
@@ -5846,22 +5947,6 @@ if (permitTypeSelect) {
 
     updateStep1AwarenessBanner();
     
-    if (documentRequirementsList && selectedPermitType && documentRequirements[selectedPermitType]) {
-      const requirements = documentRequirements[selectedPermitType];
-      documentRequirementsList.innerHTML = `
-        <h5 style="color: #046307; font-weight: 600; margin-bottom: 12px;">Required Documents:</h5>
-        <ul style="list-style: none; padding: 0; margin: 0;">
-          ${requirements.map(req => `
-            <li style="padding: 8px 12px; margin-bottom: 8px; background: #f5f8f5; border-left: 3px solid #046307; border-radius: 4px; font-size: 14px; color: #333;">
-              ✓ ${req}
-            </li>
-          `).join('')}
-        </ul>
-      `;
-    } else if (documentRequirementsList) {
-      documentRequirementsList.innerHTML = '';
-    }
-    
     // Update step indicators and form steps based on document type and category
     if (selectedDocumentType && selectedPermitType) {
       updateStepIndicators(selectedDocumentType, selectedPermitType);
@@ -5873,7 +5958,7 @@ if (permitTypeSelect) {
 
 // Function to dynamically generate document upload fields based on required documents
 function updateDocumentUploadFields(documentType, permitType) {
-  const requirements = documentRequirements[permitType] || [];
+  const requirements = PERMIT_REQUIREMENTS[permitType] || [];
   const uploadContainer = document.getElementById('dynamicDocumentUploads');
   const requirementsList4 = document.getElementById('requirementsList4');
 
@@ -6000,7 +6085,7 @@ function updateDocumentUploadFields(documentType, permitType) {
       console.log('Displaying existing documents after creating upload fields...');
       
       // First, let's check if all upload areas exist
-      const requirements = documentRequirements[permitType] || [];
+      const requirements = PERMIT_REQUIREMENTS[permitType] || [];
       console.log('Checking upload areas for', requirements.length, 'requirements');
       
       requirements.forEach((req, index) => {
@@ -6687,7 +6772,7 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
   }
   
   // Collect files for background upload
-  const requirements = documentRequirements[permitType] || [];
+  const requirements = PERMIT_REQUIREMENTS[permitType] || [];
   const filesToUpload = [];
   
   // Initialize IndexedDB
@@ -6843,6 +6928,7 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
     clearFormData('newApplicationForm');
     hideCategoryAwarenessBanner();
     hidePermitAwarenessBanner();
+    hideRequirementsSection();
     resetFormSteps();
     
     // Clear editing state
