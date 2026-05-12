@@ -5307,8 +5307,8 @@ textarea:hover {
 }
 
 .form-content-area {
-  padding: 24px;
-  max-height: 600px;
+  padding: 28px 32px;
+  max-height: min(78vh, 880px);
   overflow-y: auto;
 }
 
@@ -5402,7 +5402,8 @@ textarea:hover {
 /* DENR Form Specific Styles */
 .denr-form {
   font-family: 'Arial', sans-serif;
-  line-height: 1.4;
+  line-height: 1.5;
+  font-size: 14px;
 }
 
 .denr-form-header {
@@ -5413,24 +5414,24 @@ textarea:hover {
 }
 
 .denr-form-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
   color: #1e40af;
   margin: 0 0 8px 0;
 }
 
 .denr-form-subtitle {
-  font-size: 14px;
+  font-size: 15px;
   color: #374151;
   margin: 0;
 }
 
 .denr-form-section {
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .denr-form-section-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: bold;
   color: #1f2937;
   margin-bottom: 12px;
@@ -5440,8 +5441,8 @@ textarea:hover {
 
 .denr-form-row {
   display: flex;
-  gap: 16px;
-  margin-bottom: 12px;
+  gap: 18px;
+  margin-bottom: 14px;
   align-items: flex-start;
 }
 
@@ -5451,18 +5452,18 @@ textarea:hover {
 
 .denr-form-label {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   color: #374151;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   font-weight: 500;
 }
 
 .denr-form-input {
   width: 100%;
-  padding: 6px 8px;
+  padding: 10px 12px;
   border: 1px solid #d1d5db;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 14px;
   background: white;
 }
 
@@ -5474,17 +5475,21 @@ textarea:hover {
 
 .denr-form-textarea {
   width: 100%;
-  padding: 6px 8px;
+  padding: 10px 12px;
   border: 1px solid #d1d5db;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 14px;
   background: white;
   resize: vertical;
-  min-height: 60px;
+  min-height: 72px;
 }
 
 .denr-form-checkbox {
-  margin-right: 8px;
+  margin-right: 10px;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  flex-shrink: 0;
 }
 
 .denr-form-signature {
@@ -5509,42 +5514,42 @@ textarea:hover {
 }
 
 .denr-form-subheading {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: #374151;
-  margin: 12px 0 8px;
+  margin: 14px 0 10px;
 }
 
 .denr-form-checklist {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .denr-form-checklabel {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  font-size: 12px;
+  gap: 10px;
+  font-size: 13px;
   color: #374151;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 .denr-form-checklabel .denr-form-checkbox {
-  margin-top: 2px;
+  margin-top: 3px;
   flex-shrink: 0;
 }
 
 .denr-form-radio-stack {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .denr-form-static {
-  font-size: 12px;
+  font-size: 13px;
   color: #374151;
-  line-height: 1.5;
+  line-height: 1.55;
   margin-bottom: 8px;
 }
 
@@ -5579,6 +5584,446 @@ textarea:hover {
   padding-left: 16px;
   margin-bottom: 8px;
   border-left: 2px solid #e5e7eb;
+}
+
+/* Official Citizen's Charter checklist layout (matches DENR printed/PDF format) */
+.denr-checklist-official {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px 22px 28px;
+  background: #fff;
+  color: #111827;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  border: 1px solid #e5e7eb;
+  box-sizing: border-box;
+}
+
+.denr-cc-letterhead {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.denr-cc-logo {
+  flex-shrink: 0;
+  object-fit: contain;
+  width: 84px;
+  height: auto;
+}
+
+.denr-cc-letterhead-text {
+  flex: 1;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.denr-cc-lh-strong {
+  font-weight: 700;
+}
+
+.denr-cc-lh-contact {
+  margin-top: 4px;
+}
+
+.denr-cc-lh-email {
+  color: #2563eb;
+}
+
+.denr-cc-banner {
+  background: #1e3a8a;
+  color: #fff;
+  text-align: center;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  padding: 12px 10px;
+  margin-bottom: 0;
+}
+
+.denr-cc-infobox {
+  background: #e8f4fc;
+  border: 1px solid #bfdbfe;
+  padding: 16px 18px 14px;
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.denr-cc-charter-no,
+.denr-cc-service-title,
+.denr-cc-service-sub {
+  color: #1e40af;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.denr-cc-service-title {
+  margin-top: 10px;
+}
+
+.denr-cc-service-sub {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.denr-cc-infobox-note {
+  margin: 12px 0 0;
+  font-size: 11px;
+  font-style: italic;
+  color: #4b5563;
+}
+
+.denr-cc-applicant-block {
+  margin-bottom: 20px;
+}
+
+.denr-cc-field-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  background: #f3f8fc;
+  border-radius: 4px;
+}
+
+.denr-cc-field-row-multiline {
+  align-items: flex-start;
+}
+
+.denr-cc-field-label {
+  flex-shrink: 0;
+  font-weight: 600;
+  min-width: 132px;
+  font-size: 13px;
+}
+
+.denr-cc-line-input {
+  flex: 1;
+  border: none;
+  border-bottom: 1px solid #374151;
+  background: transparent;
+  font-size: 13px;
+  padding: 6px 4px;
+  font-family: inherit;
+}
+
+.denr-cc-line-textarea {
+  min-height: 44px;
+  resize: vertical;
+  border-bottom: 1px solid #374151;
+}
+
+.denr-cc-section .denr-form-section-title {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.denr-cc-section-title-main {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 12px;
+  color: #111827;
+}
+
+.denr-checklist-official .denr-form-checklabel {
+  font-size: 13px;
+  gap: 10px;
+  line-height: 1.5;
+}
+
+.denr-checklist-official .denr-form-checkbox {
+  width: 17px;
+  height: 17px;
+  min-width: 17px;
+  margin-top: 2px;
+}
+
+.denr-cc-section .denr-form-subheading {
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+.denr-cc-classification-line {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.denr-cc-fee-line {
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.denr-cc-processing-line {
+  font-size: 13px;
+}
+
+.denr-cc-bullet {
+  margin-right: 8px;
+}
+
+.denr-cc-received-row {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 28px;
+  margin-top: 18px;
+  margin-bottom: 10px;
+}
+
+.denr-cc-received-item {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 220px;
+}
+
+.denr-cc-received-label {
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.denr-cc-received-input {
+  border: none;
+  border-bottom: 1px solid #374151;
+  background: transparent;
+  font-size: 13px;
+  padding: 6px 4px;
+  font-family: inherit;
+}
+
+.denr-cc-stub-separator {
+  border-top: 1px solid #9ca3af;
+  margin: 18px 0 14px;
+}
+
+.denr-cc-receipt-official {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+}
+
+.denr-cc-receipt-logo {
+  flex-shrink: 0;
+  object-fit: contain;
+  width: 64px;
+  height: auto;
+}
+
+.denr-cc-receipt-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.denr-cc-receipt-heading {
+  font-size: 17px;
+  font-weight: 800;
+  color: #c2410c;
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
+}
+
+.denr-cc-receipt-service,
+.denr-cc-receipt-service-sub {
+  font-size: 13px;
+  color: #1e40af;
+  margin-bottom: 8px;
+}
+
+.denr-cc-receipt-field {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.denr-cc-receipt-label {
+  flex-shrink: 0;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.denr-cc-receipt-input {
+  flex: 1;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font-size: 13px;
+  padding: 8px 10px;
+  font-family: inherit;
+}
+
+.denr-cc-followup-note {
+  margin-top: 16px;
+  font-size: 10px;
+  font-style: italic;
+  color: #6b7280;
+  text-align: center;
+}
+
+/*
+ * Applied only during PDF capture: tighter vertical rhythm so the canvas is shorter.
+ * The image is scaled to one A4 height — less empty vertical space ⇒ larger text on paper.
+ */
+.denr-checklist-official.denr-form--pdf-snapshot {
+  padding: 10px 16px 12px;
+  line-height: 1.38;
+  -webkit-font-smoothing: antialiased;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-letterhead {
+  margin-bottom: 6px;
+  gap: 8px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-logo {
+  width: 68px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-letterhead-text {
+  font-size: 11px;
+  line-height: 1.32;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-banner {
+  padding: 7px 8px;
+  font-size: 13px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-infobox {
+  padding: 8px 12px 8px;
+  margin-bottom: 10px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-charter-no,
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-service-title {
+  font-size: 13px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-service-sub {
+  margin-top: 2px;
+  font-size: 12px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-service-title {
+  margin-top: 6px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-infobox-note {
+  margin: 6px 0 0;
+  font-size: 10px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-applicant-block {
+  margin-bottom: 10px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-field-row {
+  margin-bottom: 6px;
+  padding: 4px 6px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-field-label,
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-line-input {
+  font-size: 13px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-line-input {
+  padding: 3px 2px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-line-textarea {
+  min-height: 32px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-section-title-main {
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-form-checklabel {
+  font-size: 13px;
+  gap: 8px;
+  line-height: 1.35;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-form-checkbox {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  margin-top: 1px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-section .denr-form-subheading {
+  margin-top: 5px;
+  font-size: 13px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-classification-line,
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-fee-line,
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-processing-line {
+  font-size: 13px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-fee-line {
+  margin-bottom: 5px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-received-row {
+  margin-top: 10px;
+  margin-bottom: 6px;
+  gap: 18px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-stub-separator {
+  margin: 10px 0 8px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-receipt-official {
+  gap: 10px;
+  padding: 8px 10px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-receipt-logo {
+  width: 52px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-receipt-heading {
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-receipt-service,
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-receipt-service-sub {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-receipt-field {
+  margin-top: 6px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-receipt-label,
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-receipt-input {
+  font-size: 13px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-receipt-input {
+  padding: 5px 7px;
+}
+
+.denr-checklist-official.denr-form--pdf-snapshot .denr-cc-followup-note {
+  margin-top: 8px;
+  font-size: 9px;
+}
+
+.denr-form.denr-form--pdf-snapshot:not(.denr-checklist-official) {
+  font-size: 14px;
+  line-height: 1.35;
 }
 
 /* Info Grid for Document Information */

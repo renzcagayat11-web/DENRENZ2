@@ -5560,38 +5560,47 @@ const DENR_FORM_TEMPLATES = {
     title: 'Issuance of Wildlife Farm Permit – Small Scale Farming',
     subtitle: '(Project Cost is P1.5Million and Below)',
     template: `
-      <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">Issuance of Wildlife Farm Permit – Small Scale Farming</div>
-          <div class="denr-form-subtitle">(Project Cost is P1.5Million and Below)</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant</label>
-              <input type="text" class="denr-form-input" id="applicantName">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address</label>
-              <textarea class="denr-form-textarea" id="applicantAddress" rows="2"></textarea>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Details</label>
-              <input type="text" class="denr-form-input" id="applicantContact">
-            </div>
+      <div class="denr-form denr-checklist-official">
+        <div class="denr-cc-letterhead">
+          <img src="/assets/images/logo.png" alt="DENR" class="denr-cc-logo" width="76" height="76" />
+          <div class="denr-cc-letterhead-text">
+            <div>Republic of the Philippines</div>
+            <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
+            <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
+            <div>Brgy. Duhat, Sta. Cruz, Laguna</div>
+            <div class="denr-cc-lh-contact"><span class="denr-cc-lh-email">cenrostacruz@denr.gov.ph</span> | (049) 536 8903</div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section A - Requirements</div>
+        <div class="denr-cc-banner">CHECKLIST OF REQUIREMENTS</div>
+
+        <div class="denr-cc-infobox">
+          <div class="denr-cc-charter-no">CITIZEN'S CHARTER NO. R4A-B-01</div>
+          <div class="denr-cc-service-title">Issuance of Wildlife Farm Permit – Small Scale Farming</div>
+          <div class="denr-cc-service-sub">(Project Cost is P1.5Million and Below)</div>
+          <p class="denr-cc-infobox-note">*This permit issue to develop, operate and maintain a wildlife breeding farm for conservation, trade, and/or scientific purposes.*</p>
+        </div>
+
+        <div class="denr-cc-applicant-block">
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Name of Applicant:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantName" />
+          </div>
+          <div class="denr-cc-field-row denr-cc-field-row-multiline">
+            <span class="denr-cc-field-label">Address:</span>
+            <textarea class="denr-cc-line-input denr-cc-line-textarea" id="applicantAddress" rows="2"></textarea>
+          </div>
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Contact Details:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantContact" />
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">Section A: Requirements to be submitted upon filing of application</div>
           <div class="denr-form-subheading">Basic:</div>
           <div class="denr-form-checklist">
-            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Duly accomplished application form with two recent 2"x2" photos of applicant</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Duly accomplished application form with two recent 2&quot; x 2&quot; photos of applicant</label>
             <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Copy of Certificate of Registration</label>
             <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Proof of scientific expertise (list and qualifications of manpower)</label>
             <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Financial capability to go into breeding/ Income Tax Return</label>
@@ -5606,61 +5615,62 @@ const DENR_FORM_TEMPLATES = {
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section B - Type of Transaction</div>
-          <div class="denr-form-radio-stack">
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b01_transaction" value="g2c"> Government to Citizen</label>
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b01_transaction" value="g2b"> Government to Business (Specify the Name of Company and Owner / Authorized Representative)</label>
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b01_transaction" value="g2g"> Government to Government (Specify the Name of the Agency and its Authorized Representative)</label>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">Section B: Type of Transaction</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Citizen</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Business <em>(Specify the Name of Company and Owner / Authorized Representative)</em></label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Government <em>(Specify the Name of the Agency and its Authorized Representative)</em></label>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section C - Classification</div>
-          <div class="denr-form-static">✓ Highly Technical (Multi-Stage)</div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">Section C: Classification</div>
+          <div class="denr-cc-classification-line">✓ Highly Technical (Multi-Stage)</div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section D - Fees to be Paid</div>
-          <div class="denr-form-static">Implementing PENRO (IP): ₱100.00 (Inspection Fee)</div>
-          <div class="denr-form-static">Regional Office: ₱3,100.00 (Application Fee: ₱500.00; Permit Fee: ₱2,500.00)</div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">Section D: Fees to be Paid</div>
+          <div class="denr-cc-fee-line">Implementing PENRO (IP): ₱100.00 (Inspection Fee)</div>
+          <div class="denr-cc-fee-line">Regional Office: ₱3,100.00 (Application Fee: ₱500.00; Permit Fee: ₱2,500.00)</div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section E - Processing Time</div>
-          <div class="denr-form-static">IP: 6 working days, 5 hours / Total TAT: 38 working days, 18 hours</div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">Section E: Processing Time</div>
+          <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> IP: 6 working days, 5 hours / Total TAT: 38 working days, 18 hours</div>
         </div>
 
-        <div class="denr-form-section denr-form-received-block">
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Received by:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b01_receivedBy">
+        <div class="denr-cc-received-row">
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Received by:</span>
+            <input type="text" class="denr-cc-received-input" id="r4a_b01_receivedBy" />
+          </div>
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Date Received:</span>
+            <input type="text" class="denr-cc-received-input" id="r4a_b01_dateReceived" />
+          </div>
+        </div>
+
+        <div class="denr-cc-stub-separator"></div>
+
+        <div class="denr-cc-receipt-official">
+          <img src="/assets/images/logo.png" alt="" class="denr-cc-receipt-logo" width="56" height="56" />
+          <div class="denr-cc-receipt-body">
+            <div class="denr-cc-receipt-heading">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="denr-cc-receipt-service">Name of Service: <strong>Issuance of Wildlife Farm Permit – Small Scale Farming</strong></div>
+            <div class="denr-cc-receipt-service-sub"><strong>(Project Cost is P1.5Million and Below)</strong></div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Name of Applicant:</span>
+              <input type="text" class="denr-cc-receipt-input" id="r4a_b01_ackApplicant" />
             </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date Received:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b01_dateReceived">
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Date Received:</span>
+              <input type="text" class="denr-cc-receipt-input" id="r4a_b01_ackDateReceived" />
             </div>
           </div>
         </div>
 
-        <div class="denr-form-section denr-form-receipt">
-          <div class="denr-form-receipt-title">Acknowledgement Receipt</div>
-          <div class="denr-form-static">Name of Service: Issuance of Wildlife Farm Permit – Small Scale Farming</div>
-          <div class="denr-form-static">(Project Cost is P1.5Million and Below)</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b01_ackApplicant">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date Received:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b01_ackDateReceived">
-            </div>
-          </div>
-        </div>
+        <p class="denr-cc-followup-note">*To follow-up your application, please present this stub or you may contact us at cenrostacruz@denr.gov.ph / (049) 536 – 8903*</p>
       </div>
     `
   },
@@ -10910,6 +10920,11 @@ function loadCustomForm(permitType, formTemplate) {
   
   // Load form content
   formContentArea.innerHTML = formTemplate.template;
+
+  const titleSection = document.querySelector('#customFormContainer .form-title-section');
+  if (titleSection) {
+    titleSection.style.display = formContentArea.querySelector('.denr-checklist-official') ? 'none' : '';
+  }
   
   // Auto-populate form fields from Step 1 data
   autoPopulateFormFields();
@@ -11029,40 +11044,13 @@ function clearCustomForm() {
   }
 }
 
-function addDenrFormCanvasToPdf(pdf, canvas) {
-  const imgData = canvas.toDataURL('image/jpeg', 0.92);
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-  const imgWidth = pageWidth;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
-  let heightLeft = imgHeight;
-  let position = 0;
-
-  pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-  heightLeft -= pageHeight;
-
-  while (heightLeft > 0) {
-    position = heightLeft - imgHeight;
-    pdf.addPage();
-    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-  }
-}
-
-function downloadOfficialChecklistDocx() {
-  const docType = document.getElementById('documentType')?.value || '';
-  const fileName = CHECKLIST_DOCX_FILES[docType];
-  if (!fileName) {
-    showAlert('Select Lands, Forestry, or Biodiversity in Step 1 to download the matching official checklist (Word).', 'warning');
-    return;
-  }
-  const link = document.createElement('a');
-  link.href = `/assets/form/${encodeURIComponent(fileName)}`;
-  link.download = fileName;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  showAlert(`Downloaded ${fileName} — same layout as the Citizens Charter checklist.`, 'success');
+/** Active DENR form in Step 2 (official checklist shell or generic denr-form). */
+function getDenrFilledFormRoot() {
+  if (!formContentArea) return null;
+  return (
+    formContentArea.querySelector('.denr-checklist-official') ||
+    formContentArea.querySelector('.denr-form')
+  );
 }
 
 async function generateFormPDF() {
@@ -11071,48 +11059,98 @@ async function generateFormPDF() {
     return;
   }
 
+  const denrForm = getDenrFilledFormRoot();
+  if (!denrForm) {
+    showAlert('No form to export.', 'warning');
+    return;
+  }
+
   const permitType = document.getElementById('permitType')?.value || 'application';
   const filename = `${permitType.replace(/[^a-zA-Z0-9]/g, '_')}_form_${Date.now()}.pdf`;
 
   try {
     const { jsPDF } = window.jspdf;
-    const denrForm = formContentArea?.querySelector('.denr-form');
 
-    if (denrForm && typeof html2canvas === 'function') {
-      const canvas = await html2canvas(denrForm, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-      });
+    if (typeof html2canvas === 'function') {
+      const imgs = denrForm.querySelectorAll('img');
+      await Promise.all(
+        Array.from(imgs).map(
+          (img) =>
+            img.complete
+              ? Promise.resolve()
+              : new Promise((resolve) => {
+                  img.onload = resolve;
+                  img.onerror = resolve;
+                })
+        )
+      );
+
+      denrForm.classList.add('denr-form--pdf-snapshot');
+      if (document.fonts?.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (_) {
+          /* ignore */
+        }
+      }
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+      let canvas;
+      try {
+        canvas = await html2canvas(denrForm, {
+          scale: 4,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          scrollX: 0,
+          scrollY: 0,
+          imageTimeout: 15000
+        });
+      } catch (e) {
+        console.warn('html2canvas at scale 4 failed, retrying at 3:', e);
+        canvas = await html2canvas(denrForm, {
+          scale: 3,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff',
+          scrollX: 0,
+          scrollY: 0,
+          imageTimeout: 15000
+        });
+      } finally {
+        denrForm.classList.remove('denr-form--pdf-snapshot');
+      }
 
       const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
       addDenrFormCanvasToPdf(doc, canvas);
       doc.save(filename);
       showFormDownloadAwareness();
-      showAlert('PDF downloaded (matches your on-screen form layout). For the exact Word checklist, use “Official checklist (Word)”.', 'success');
+      showAlert(
+        'PDF downloaded — clearer text on paper (compact layout during capture, 5 mm margins, high-resolution snapshot). For the blank Word checklist, use “Official checklist (Word)”.',
+        'success'
+      );
       return;
     }
 
     const doc = new jsPDF();
     const title = formTitle.textContent || 'DENR Application Form';
-    doc.setFontSize(18);
-    doc.text(title, 105, 20, { align: 'center' });
-    doc.setFontSize(12);
+    doc.setFontSize(20);
+    doc.text(title, 105, 22, { align: 'center' });
+    doc.setFontSize(14);
     const subtitle = formSubtitle.textContent || '';
-    if (subtitle) doc.text(subtitle, 105, 30, { align: 'center' });
-    doc.setFontSize(10);
-    doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 45);
+    if (subtitle) doc.text(subtitle, 105, 32, { align: 'center' });
+    doc.setFontSize(11);
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 48);
 
     const formData = extractFormData();
-    let yPosition = 60;
-    doc.setFontSize(11);
+    let yPosition = 62;
+    doc.setFontSize(12);
     Object.entries(formData).forEach(([key, value]) => {
       if (yPosition > 270) {
         doc.addPage();
         yPosition = 20;
       }
-      const fieldName = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+      const fieldName = key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
       doc.text(`${fieldName}:`, 20, yPosition);
       doc.text(String(value || ''), 60, yPosition);
       yPosition += 10;
@@ -11132,6 +11170,51 @@ async function generateFormPDF() {
     console.error('Error generating PDF:', error);
     showAlert('Error generating PDF. Please try again.', 'error');
   }
+}
+
+/**
+ * Places the full form snapshot on a single A4 page: centered, proportional scale,
+ * narrow margins so the form appears larger on paper (matches on-screen sizing).
+ */
+function addDenrFormCanvasToPdf(pdf, canvas) {
+  const imgData = canvas.toDataURL('image/png');
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const marginMm = 5;
+  const maxW = pageWidth - 2 * marginMm;
+  const maxH = pageHeight - 2 * marginMm;
+
+  const cw = canvas.width;
+  const ch = canvas.height;
+  const canvasAspect = cw / ch;
+
+  let drawW = maxW;
+  let drawH = drawW / canvasAspect;
+  if (drawH > maxH) {
+    drawH = maxH;
+    drawW = drawH * canvasAspect;
+  }
+
+  const x = marginMm + (maxW - drawW) / 2;
+  const y = marginMm + (maxH - drawH) / 2;
+
+  pdf.addImage(imgData, 'PNG', x, y, drawW, drawH);
+}
+
+function downloadOfficialChecklistDocx() {
+  const docType = document.getElementById('documentType')?.value || '';
+  const fileName = CHECKLIST_DOCX_FILES[docType];
+  if (!fileName) {
+    showAlert('Select Lands, Forestry, or Biodiversity in Step 1 to download the matching official checklist (Word).', 'warning');
+    return;
+  }
+  const link = document.createElement('a');
+  link.href = `/assets/form/${encodeURIComponent(fileName)}`;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showAlert(`Downloaded ${fileName} — same layout as the Citizens Charter checklist.`, 'success');
 }
 
 function extractFormData() {
