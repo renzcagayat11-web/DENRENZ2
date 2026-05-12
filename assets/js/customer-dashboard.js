@@ -5667,25 +5667,47 @@ function resetPermitSelectForCategory(selectedType) {
   const pts = document.getElementById('permitType');
   if (!pts) return;
   pts.innerHTML = '';
-  const placeholder = document.createElement('option');
-  placeholder.value = '';
+  
   if (selectedType && documentTypeOptions[selectedType]) {
+    // Add disabled placeholder option
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.disabled = true;
+    placeholder.selected = true;
     placeholder.textContent = 'Select permit type';
     pts.appendChild(placeholder);
+    
+    // Add actual options
     documentTypeOptions[selectedType].forEach((option) => {
-      const optElement = document.createElement('option');
-      optElement.value = option;
-      optElement.textContent = option;
-      pts.appendChild(optElement);
+      const opt = document.createElement('option');
+      opt.value = option;
+      opt.textContent = option;
+      pts.appendChild(opt);
     });
     pts.disabled = false;
   } else {
+    // Add disabled placeholder option for no category state
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.disabled = true;
+    placeholder.selected = true;
     placeholder.textContent = 'Select category type first';
     pts.appendChild(placeholder);
     pts.disabled = true;
   }
-  pts.value = '';
+  
+  // Reset permit info
+  if (permitTypeInfo) {
+    permitTypeInfo.style.display = 'none';
+  }
 }
+
+const catSelect = document.getElementById('documentType');
+const cat = catSelect ? catSelect.value : '';
+if (permitTypeInfo) {
+  permitTypeInfo.style.display = 'none';
+}
+resetPermitSelectForCategory(cat);
 
 function initializeStep1DocumentControls() {
   const catSelect = document.getElementById('documentType');
