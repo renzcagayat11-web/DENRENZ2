@@ -5508,6 +5508,79 @@ textarea:hover {
   margin-bottom: 4px;
 }
 
+.denr-form-subheading {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  margin: 12px 0 8px;
+}
+
+.denr-form-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.denr-form-checklabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.45;
+}
+
+.denr-form-checklabel .denr-form-checkbox {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.denr-form-radio-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.denr-form-static {
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.denr-form-received-block .denr-form-inline-blank {
+  border: none;
+  border-bottom: 1px solid #374151;
+  border-radius: 0;
+  background: transparent;
+}
+
+.denr-form-receipt {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 16px;
+  background: #fafafa;
+  margin-top: 8px;
+}
+
+.denr-form-receipt-title {
+  font-weight: bold;
+  font-size: 13px;
+  margin-bottom: 12px;
+  color: #1f2937;
+}
+
+.denr-form-nested-intro {
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.denr-form-nested {
+  padding-left: 16px;
+  margin-bottom: 8px;
+  border-left: 2px solid #e5e7eb;
+}
+
 /* Info Grid for Document Information */
 .info-grid {
   display: grid;

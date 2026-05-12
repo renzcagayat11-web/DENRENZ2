@@ -9,8 +9,9 @@
     <link rel="stylesheet" href="/assets/css/customer-dashboard.css" />
     <link rel="stylesheet" href="/assets/css/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- jsPDF for PDF generation -->
+    <!-- jsPDF + html2canvas: PDF matches on-screen DENR form layout -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <!-- RBAC Auth Guard - Prevents Unauthorized Access -->
     <script type="module">
       import { initAuthGuard, protectRoute } from '/assets/js/auth-guard.js';
@@ -568,6 +569,7 @@
                       </div>
                       <div class="form-actions-header">
                         <button type="button" class="btn-secondary btn-sm" id="clearFormBtn">Clear Form</button>
+                        <button type="button" class="btn-secondary btn-sm" id="downloadChecklistDocxBtn" title="Same file as Application Form page">Official checklist (Word)</button>
                         <button type="button" class="btn-primary btn-sm" id="downloadPdfBtn">Download PDF</button>
                       </div>
                     </div>
