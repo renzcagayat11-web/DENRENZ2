@@ -5560,10 +5560,10 @@ const DENR_FORM_TEMPLATES = {
     title: 'Issuance of Wildlife Farm Permit – Small Scale Farming',
     subtitle: '(Project Cost is P1.5Million and Below)',
     template: `
-      <div class="denr-form denr-checklist-official">
+      <div class="denr-form">
         <div class="denr-cc-letterhead">
-          <img src="/assets/images/logo.png" alt="DENR" class="denr-cc-logo" width="76" height="76" />
-          <div class="denr-cc-letterhead-text">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="denr-cc-lh-logo" width="72" height="72" />
+          <div class="denr-cc-lh-text">
             <div>Republic of the Philippines</div>
             <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
             <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
@@ -5597,7 +5597,7 @@ const DENR_FORM_TEMPLATES = {
         </div>
 
         <div class="denr-form-section denr-cc-section">
-          <div class="denr-cc-section-title-main">Section A: Requirements to be submitted upon filing of application</div>
+          <div class="denr-cc-section-title-main">A. Requirements to be submitted upon filing of application</div>
           <div class="denr-form-subheading">Basic:</div>
           <div class="denr-form-checklist">
             <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Duly accomplished application form with two recent 2&quot; x 2&quot; photos of applicant</label>
@@ -5616,7 +5616,7 @@ const DENR_FORM_TEMPLATES = {
         </div>
 
         <div class="denr-form-section denr-cc-section">
-          <div class="denr-cc-section-title-main">Section B: Type of Transaction</div>
+          <div class="denr-cc-section-title-main">B. Type of Transaction</div>
           <div class="denr-form-checklist">
             <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Citizen</label>
             <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Business <em>(Specify the Name of Company and Owner / Authorized Representative)</em></label>
@@ -5625,18 +5625,18 @@ const DENR_FORM_TEMPLATES = {
         </div>
 
         <div class="denr-form-section denr-cc-section">
-          <div class="denr-cc-section-title-main">Section C: Classification</div>
+          <div class="denr-cc-section-title-main">C. Classification</div>
           <div class="denr-cc-classification-line">✓ Highly Technical (Multi-Stage)</div>
         </div>
 
         <div class="denr-form-section denr-cc-section">
-          <div class="denr-cc-section-title-main">Section D: Fees to be Paid</div>
+          <div class="denr-cc-section-title-main">D. Fees to be Paid</div>
           <div class="denr-cc-fee-line">Implementing PENRO (IP): ₱100.00 (Inspection Fee)</div>
           <div class="denr-cc-fee-line">Regional Office: ₱3,100.00 (Application Fee: ₱500.00; Permit Fee: ₱2,500.00)</div>
         </div>
 
         <div class="denr-form-section denr-cc-section">
-          <div class="denr-cc-section-title-main">Section E: Processing Time</div>
+          <div class="denr-cc-section-title-main">E. Processing Time</div>
           <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> IP: 6 working days, 5 hours / Total TAT: 38 working days, 18 hours</div>
         </div>
 
@@ -5680,37 +5680,46 @@ const DENR_FORM_TEMPLATES = {
     subtitle: '(with capital P1.5Million and Above)',
     template: `
       <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">Issuance of Wildlife Farm Permit – Medium to Large Scale Farming</div>
-          <div class="denr-form-subtitle">(with capital P1.5Million and Above)</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant</label>
-              <input type="text" class="denr-form-input" id="applicantName">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address</label>
-              <textarea class="denr-form-textarea" id="applicantAddress" rows="2"></textarea>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Details</label>
-              <input type="text" class="denr-form-input" id="applicantContact">
-            </div>
+        <div class="denr-cc-letterhead">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="denr-cc-lh-logo" width="72" height="72" />
+          <div class="denr-cc-lh-text">
+            <div>Republic of the Philippines</div>
+            <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
+            <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
+            <div>Brgy. Duhat, Sta. Cruz, Laguna</div>
+            <div class="denr-cc-lh-contact"><span class="denr-cc-lh-email">cenrostacruz@denr.gov.ph</span> | (049) 536 8903</div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section A - Requirements</div>
+        <div class="denr-cc-banner">CHECKLIST OF REQUIREMENTS</div>
+
+        <div class="denr-cc-infobox">
+          <div class="denr-cc-charter-no">CITIZEN'S CHARTER NO. R4A-B-02</div>
+          <div class="denr-cc-service-title">Issuance of Wildlife Farm Permit – Medium to Large Scale Farming</div>
+          <div class="denr-cc-service-sub">(with capital P1.5Million and Above)</div>
+          <p class="denr-cc-infobox-note">*This permit issue to develop, operate and maintain a wildlife breeding farm for conservation, trade, and/or scientific purposes.*</p>
+        </div>
+
+        <div class="denr-cc-applicant-block">
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Name of Applicant:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantName" />
+          </div>
+          <div class="denr-cc-field-row denr-cc-field-row-multiline">
+            <span class="denr-cc-field-label">Address:</span>
+            <textarea class="denr-cc-line-input denr-cc-line-textarea" id="applicantAddress" rows="2"></textarea>
+          </div>
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Contact Details:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantContact" />
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">A. Requirements to be submitted upon filing of application</div>
           <div class="denr-form-subheading">Basic:</div>
           <div class="denr-form-checklist">
-            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Duly accomplished application form with two recent 2"x2" photo of applicant</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Duly accomplished application form with two recent 2&quot; x 2&quot; photo of applicant</label>
             <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Management and Breeding Plan</label>
             <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Proof of scientific expertise (list and qualifications of manpower)</label>
             <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> In case of indigenous threatened species, letter of commitment to simultaneously undertake conservation breeding and propose measures on rehabilitation and/or protection of habitat, where appropriate, as may be determined by the RWMC</label>
@@ -5727,158 +5736,170 @@ const DENR_FORM_TEMPLATES = {
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section B - Type of Transaction</div>
-          <div class="denr-form-radio-stack">
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b02_transaction" value="g2c"> Government to Citizen</label>
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b02_transaction" value="g2b"> Government to Business (Specify the Name of Company and Owner / Authorized Representative)</label>
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b02_transaction" value="g2g"> Government to Government (Specify the Name of the Agency and its Authorized Representative)</label>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">B. Type of Transaction</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Citizen</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Business <em>(Specify the Name of Company and Owner / Authorized Representative)</em></label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Government <em>(Specify the Name of the Agency and its Authorized Representative)</em></label>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section C - Classification</div>
-          <div class="denr-form-static">✓ Highly Technical (Multi-Stage)</div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">C. Classification</div>
+          <div class="denr-cc-classification-line">✓ Highly Technical (Multi-Stage)</div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section D - Fees to be Paid</div>
-          <div class="denr-form-static">Implementing PENRO (IP): ₱100.00</div>
-          <div class="denr-form-static">Regional Office: ₱5,500.00 (Application Fee: ₱500.00; Permit Fee: ₱5,000.00)</div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">D. Fees to be Paid</div>
+          <div class="denr-cc-fee-line">Implementing PENRO (IP): ₱100.00 (Inspection Fee)</div>
+          <div class="denr-cc-fee-line">Regional Office: ₱5,500.00 (Application Fee: ₱500.00; Permit Fee: ₱5,000.00)</div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section E - Processing Time</div>
-          <div class="denr-form-static">IP: 6 working days and 5 hours / Total TAT: 38 working days, 18 hours</div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">E. Processing Time</div>
+          <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> IP: 6 working days and 5 hours / Total TAT: 38 working days, 18 hours</div>
         </div>
 
-        <div class="denr-form-section denr-form-received-block">
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Received by:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b02_receivedBy">
+        <div class="denr-cc-received-row">
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Received by:</span>
+            <input type="text" class="denr-cc-received-input" id="r4a_b02_receivedBy" />
+          </div>
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Date Received:</span>
+            <input type="text" class="denr-cc-received-input" id="r4a_b02_dateReceived" />
+          </div>
+        </div>
+
+        <div class="denr-cc-stub-separator"></div>
+
+        <div class="denr-cc-receipt-official">
+          <img src="/assets/images/logo.png" alt="" class="denr-cc-receipt-logo" width="56" height="56" />
+          <div class="denr-cc-receipt-body">
+            <div class="denr-cc-receipt-heading">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="denr-cc-receipt-service">Name of Service: <strong>Issuance of Wildlife Farm Permit – Medium to Large Scale Farming</strong></div>
+            <div class="denr-cc-receipt-service-sub"><strong>(with capital P1.5Million and Above)</strong></div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Name of Applicant:</span>
+              <input type="text" class="denr-cc-receipt-input" id="r4a_b02_ackApplicant" />
             </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date Received:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b02_dateReceived">
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Date Received:</span>
+              <input type="text" class="denr-cc-receipt-input" id="r4a_b02_ackDateReceived" />
             </div>
           </div>
         </div>
 
-        <div class="denr-form-section denr-form-receipt">
-          <div class="denr-form-receipt-title">Acknowledgement Receipt</div>
-          <div class="denr-form-static">Name of Service: Issuance of Wildlife Farm Permit – Medium to Large Scale Farming</div>
-          <div class="denr-form-static">(with capital P1.5Million and Above)</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b02_ackApplicant">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date Received:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b02_ackDateReceived">
-            </div>
-          </div>
-        </div>
+        <p class="denr-cc-followup-note">*To follow-up your application, please present this stub or you may contact us at cenrostacruz@denr.gov.ph / (049) 536 – 8903*</p>
       </div>
     `
   },
 
   'R4A-B-03 – Issuance of Certificate of Wildlife Registration (CWR)': {
-    title: 'Issuance of Certificate of Wildlife Registration',
+    title: 'Issuance of Certificate of Wildlife Registration (CWR)',
     subtitle: '',
     template: `
       <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">Issuance of Certificate of Wildlife Registration</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant</label>
-              <input type="text" class="denr-form-input" id="applicantName">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address</label>
-              <textarea class="denr-form-textarea" id="applicantAddress" rows="2"></textarea>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Details</label>
-              <input type="text" class="denr-form-input" id="applicantContact">
-            </div>
+        <div class="denr-cc-letterhead">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="denr-cc-lh-logo" width="72" height="72" />
+          <div class="denr-cc-lh-text">
+            <div>Republic of the Philippines</div>
+            <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
+            <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
+            <div>Brgy. Duhat, Sta. Cruz, Laguna</div>
+            <div class="denr-cc-lh-contact"><span class="denr-cc-lh-email">cenrostacruz@denr.gov.ph</span> | (049) 536 8903</div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section A - Requirements</div>
+        <div class="denr-cc-banner">CHECKLIST OF REQUIREMENTS</div>
+
+        <div class="denr-cc-infobox">
+          <div class="denr-cc-charter-no">CITIZEN'S CHARTER NO. R4A-B-03</div>
+          <div class="denr-cc-service-title">Issuance of Certificate of Wildlife Registration (CWR)</div>
+          <p class="denr-cc-infobox-note">*This service is for the registration of wildlife in captivity to ensure legal possession and proper documentation.*</p>
+        </div>
+
+        <div class="denr-cc-applicant-block">
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Name of Applicant:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantName" />
+          </div>
+          <div class="denr-cc-field-row denr-cc-field-row-multiline">
+            <span class="denr-cc-field-label">Address:</span>
+            <textarea class="denr-cc-line-input denr-cc-line-textarea" id="applicantAddress" rows="2"></textarea>
+          </div>
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Contact Details:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantContact" />
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">A. Requirements to be submitted upon filing of application</div>
           <div class="denr-form-checklist">
-            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Duly accomplished application form with two recent 2"x2" photos of applicant</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Duly accomplished application form with two recent 2&quot; x 2&quot; photos of applicant</label>
             <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Documentary Stamp (to be affixed on CWR)</label>
             <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Proof of acquisition (Sales Invoice, Acquisition Receipt or Deed of Donation, LTP, Inventory of Source of wildlife)</label>
             <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> If corporation (Secretary's Certificate, SEC Registration)</label>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section B - Type of Transaction</div>
-          <div class="denr-form-radio-stack">
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b03_transaction" value="g2c"> Government to Citizen</label>
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b03_transaction" value="g2b"> Government to Business (Specify the Name of Company and Owner / Authorized Representative)</label>
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b03_transaction" value="g2g"> Government to Government (Specify the Name of the Agency and its Authorized Representative)</label>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">B. Type of Transaction</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Citizen</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Business <em>(Specify the Name of Company and Owner / Authorized Representative)</em></label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Government <em>(Specify the Name of the Agency and its Authorized Representative)</em></label>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section C - Classification</div>
-          <div class="denr-form-static">✓ Highly Technical (Multi-Stage Processing)</div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">C. Classification</div>
+          <div class="denr-cc-classification-line">✓ Highly Technical (Multi-Stage Processing)</div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section D - Fees to be Paid</div>
-          <div class="denr-form-static">Implementing PENRO: Inspection Fee: ₱100.00; Permit Fee: *1-50 heads - ₱50 / *51-100 heads - ₱500 / *101-200 heads - ₱750 / *201 heads and above - ₱1,000</div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">D. Fees to be Paid</div>
+          <div class="denr-cc-fee-line">Implementing PENRO: Inspection Fee: ₱100.00</div>
+          <div class="denr-cc-fee-line">Permit Fee: *1-50 heads – ₱50 / *51-100 heads – ₱500 / *101-200 heads – ₱750 / *201 heads and above – ₱1,000</div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section E - Processing Time</div>
-          <div class="denr-form-static">IP: 7 working days and 7 hours / Total TAT: 16 working days, 11 hours and 20 minutes</div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">E. Processing Time</div>
+          <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> IP: 7 working days and 7 hours / Total TAT: 16 working days, 11 hours and 20 minutes</div>
         </div>
 
-        <div class="denr-form-section denr-form-received-block">
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Received by:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b03_receivedBy">
+        <div class="denr-cc-received-row">
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Received by:</span>
+            <input type="text" class="denr-cc-received-input" id="r4a_b03_receivedBy" />
+          </div>
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Date Received:</span>
+            <input type="text" class="denr-cc-received-input" id="r4a_b03_dateReceived" />
+          </div>
+        </div>
+
+        <div class="denr-cc-stub-separator"></div>
+
+        <div class="denr-cc-receipt-official">
+          <img src="/assets/images/logo.png" alt="" class="denr-cc-receipt-logo" width="56" height="56" />
+          <div class="denr-cc-receipt-body">
+            <div class="denr-cc-receipt-heading">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="denr-cc-receipt-service">Name of Service: <strong>Issuance of Certificate of Wildlife Registration (CWR)</strong></div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Name of Applicant:</span>
+              <input type="text" class="denr-cc-receipt-input" id="r4a_b03_ackApplicant" />
             </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date Received:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b03_dateReceived">
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Date Received:</span>
+              <input type="text" class="denr-cc-receipt-input" id="r4a_b03_ackDateReceived" />
             </div>
           </div>
         </div>
 
-        <div class="denr-form-section denr-form-receipt">
-          <div class="denr-form-receipt-title">Acknowledgement Receipt</div>
-          <div class="denr-form-static">Name of Service: Issuance of Certificate of Wildlife Registration</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b03_ackApplicant">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date Received:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b03_ackDateReceived">
-            </div>
-          </div>
-        </div>
+        <p class="denr-cc-followup-note">*To follow-up your application, please present this stub or you may contact us at cenrostacruz@denr.gov.ph / (049) 536 – 8903*</p>
       </div>
     `
   },
@@ -5888,33 +5909,42 @@ const DENR_FORM_TEMPLATES = {
     subtitle: '',
     template: `
       <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">Issuance of Local Transport Permit (Wildlife)</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant</label>
-              <input type="text" class="denr-form-input" id="applicantName">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address</label>
-              <textarea class="denr-form-textarea" id="applicantAddress" rows="2"></textarea>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Details</label>
-              <input type="text" class="denr-form-input" id="applicantContact">
-            </div>
+        <div class="denr-cc-letterhead">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="denr-cc-lh-logo" width="72" height="72" />
+          <div class="denr-cc-lh-text">
+            <div>Republic of the Philippines</div>
+            <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
+            <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
+            <div>Brgy. Duhat, Sta. Cruz, Laguna</div>
+            <div class="denr-cc-lh-contact"><span class="denr-cc-lh-email">cenrostacruz@denr.gov.ph</span> | (049) 536 8903</div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section A - Requirements</div>
+        <div class="denr-cc-banner">CHECKLIST OF REQUIREMENTS</div>
+
+        <div class="denr-cc-infobox">
+          <div class="denr-cc-charter-no">CITIZEN'S CHARTER NO. R4A-B-04</div>
+          <div class="denr-cc-service-title">Issuance of Local Transport Permit (Wildlife)</div>
+          <p class="denr-cc-infobox-note">*This permit is required for the transport of wildlife within the country to ensure legal movement and proper documentation.*</p>
+        </div>
+
+        <div class="denr-cc-applicant-block">
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Name of Applicant:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantName" />
+          </div>
+          <div class="denr-cc-field-row denr-cc-field-row-multiline">
+            <span class="denr-cc-field-label">Address:</span>
+            <textarea class="denr-cc-line-input denr-cc-line-textarea" id="applicantAddress" rows="2"></textarea>
+          </div>
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Contact Details:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantContact" />
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">A. Requirements to be submitted upon filing of application</div>
           <div class="denr-form-checklist">
             <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Duly accomplished application form</label>
             <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Documents supporting the legal possession or acquisition of wildlife</label>
@@ -5922,59 +5952,60 @@ const DENR_FORM_TEMPLATES = {
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section B - Type of Transaction</div>
-          <div class="denr-form-radio-stack">
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b04_transaction" value="g2c"> Government to Citizen</label>
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b04_transaction" value="g2b"> Government to Business (Specify the Name of Company and Owner / Authorized Representative)</label>
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b04_transaction" value="g2g"> Government to Government (Specify the Name of the Agency and its Authorized Representative)</label>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">B. Type of Transaction</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Citizen</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Business <em>(Specify the Name of Company and Owner / Authorized Representative)</em></label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Government <em>(Specify the Name of the Agency and its Authorized Representative)</em></label>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section C - Classification</div>
-          <div class="denr-form-static">✓ Simple to Complex</div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">C. Classification</div>
+          <div class="denr-cc-classification-line">✓ Simple to Complex</div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section D - Fees to be Paid</div>
-          <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Permit Fee: ₱100.00</label>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">D. Fees to be Paid</div>
+          <div class="denr-cc-fee-line">Permit Fee: ₱100.00</div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section E - Processing Time</div>
-          <div class="denr-form-static">✓ 4 working days, 8 hours, 15 minutes</div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">E. Processing Time</div>
+          <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> 4 working days, 8 hours, 15 minutes</div>
         </div>
 
-        <div class="denr-form-section denr-form-received-block">
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Received by:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b04_receivedBy">
+        <div class="denr-cc-received-row">
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Received by:</span>
+            <input type="text" class="denr-cc-received-input" id="r4a_b04_receivedBy" />
+          </div>
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Date Received:</span>
+            <input type="text" class="denr-cc-received-input" id="r4a_b04_dateReceived" />
+          </div>
+        </div>
+
+        <div class="denr-cc-stub-separator"></div>
+
+        <div class="denr-cc-receipt-official">
+          <img src="/assets/images/logo.png" alt="" class="denr-cc-receipt-logo" width="56" height="56" />
+          <div class="denr-cc-receipt-body">
+            <div class="denr-cc-receipt-heading">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="denr-cc-receipt-service">Name of Service: <strong>Issuance of Local Transport Permit (Wildlife)</strong></div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Name of Applicant:</span>
+              <input type="text" class="denr-cc-receipt-input" id="r4a_b04_ackApplicant" />
             </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date Received:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b04_dateReceived">
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Date Received:</span>
+              <input type="text" class="denr-cc-receipt-input" id="r4a_b04_ackDateReceived" />
             </div>
           </div>
         </div>
 
-        <div class="denr-form-section denr-form-receipt">
-          <div class="denr-form-receipt-title">Acknowledgement Receipt</div>
-          <div class="denr-form-static">Name of Service: Issuance of Local Transport Permit (Wildlife)</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b04_ackApplicant">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date Received:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b04_ackDateReceived">
-            </div>
-          </div>
-        </div>
+        <p class="denr-cc-followup-note">*To follow-up your application, please present this stub or you may contact us at cenrostacruz@denr.gov.ph / (049) 536 – 8903*</p>
       </div>
     `
   },
@@ -5984,33 +6015,42 @@ const DENR_FORM_TEMPLATES = {
     subtitle: '',
     template: `
       <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">Issuance of Special Local Transport Permit (SLTP) (Wildlife)</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant</label>
-              <input type="text" class="denr-form-input" id="applicantName">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address</label>
-              <textarea class="denr-form-textarea" id="applicantAddress" rows="2"></textarea>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Details</label>
-              <input type="text" class="denr-form-input" id="applicantContact">
-            </div>
+        <div class="denr-cc-letterhead">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="denr-cc-lh-logo" width="72" height="72" />
+          <div class="denr-cc-lh-text">
+            <div>Republic of the Philippines</div>
+            <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
+            <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
+            <div>Brgy. Duhat, Sta. Cruz, Laguna</div>
+            <div class="denr-cc-lh-contact"><span class="denr-cc-lh-email">cenrostacruz@denr.gov.ph</span> | (049) 536 8903</div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section A - Requirements</div>
+        <div class="denr-cc-banner">CHECKLIST OF REQUIREMENTS</div>
+
+        <div class="denr-cc-infobox">
+          <div class="denr-cc-charter-no">CITIZEN'S CHARTER NO. R4A-B-05</div>
+          <div class="denr-cc-service-title">Issuance of Special Local Transport Permit (SLTP) (Wildlife)</div>
+          <p class="denr-cc-infobox-note">*This permit is required for special transport of wildlife for shows, exhibitions, or educational events.*</p>
+        </div>
+
+        <div class="denr-cc-applicant-block">
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Name of Applicant:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantName" />
+          </div>
+          <div class="denr-cc-field-row denr-cc-field-row-multiline">
+            <span class="denr-cc-field-label">Address:</span>
+            <textarea class="denr-cc-line-input denr-cc-line-textarea" id="applicantAddress" rows="2"></textarea>
+          </div>
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Contact Details:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantContact" />
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">A. Requirements to be submitted upon filing of application</div>
           <div class="denr-form-checklist">
             <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Duly accomplished application form</label>
             <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Certified true copy of the WSUP and other documents supporting the legal possession/acquisition of the wildlife species/specimen for WSUP</label>
@@ -6018,63 +6058,62 @@ const DENR_FORM_TEMPLATES = {
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section B - Type of Transaction</div>
-          <div class="denr-form-radio-stack">
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b05_transaction" value="g2c"> Government to Citizen</label>
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b05_transaction" value="g2b"> Government to Business (Specify the Name of Company and Owner / Authorized Representative)</label>
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b05_transaction" value="g2g"> Government to Government (Specify the Name of the Agency and its Authorized Representative)</label>
-          </div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section C - Classification</div>
-          <div class="denr-form-static">✓ Simple to Complex</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section D - Fees to be Paid</div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">B. Type of Transaction</div>
           <div class="denr-form-checklist">
-            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Application and Processing Fee: ₱300.00</label>
-            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Inspection Fee: ₱500.00</label>
-            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Permit Fee: 1 week or less - ₱200 / 2 weeks - ₱250 / 3 weeks - ₱300 / 1 month - ₱500 / 2 months - ₱750 / 3 months - ₱1,000</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Citizen</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Business <em>(Specify the Name of Company and Owner / Authorized Representative)</em></label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Government <em>(Specify the Name of the Agency and its Authorized Representative)</em></label>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section E - Processing Time</div>
-          <div class="denr-form-static">✓ 4 working days, 8 hours, 15 minutes</div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">C. Classification</div>
+          <div class="denr-cc-classification-line">✓ Simple to Complex</div>
         </div>
 
-        <div class="denr-form-section denr-form-received-block">
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Received by:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b05_receivedBy">
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">D. Fees to be Paid</div>
+          <div class="denr-cc-fee-line">Application and Processing Fee: ₱300.00</div>
+          <div class="denr-cc-fee-line">Inspection Fee: ₱500.00</div>
+          <div class="denr-cc-fee-line">Permit Fee: 1 week or less – ₱200 / 2 weeks – ₱250 / 3 weeks – ₱300 / 1 month – ₱500 / 2 months – ₱750 / 3 months – ₱1,000</div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">E. Processing Time</div>
+          <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> 4 working days, 8 hours, 15 minutes</div>
+        </div>
+
+        <div class="denr-cc-received-row">
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Received by:</span>
+            <input type="text" class="denr-cc-received-input" id="r4a_b05_receivedBy" />
+          </div>
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Date Received:</span>
+            <input type="text" class="denr-cc-received-input" id="r4a_b05_dateReceived" />
+          </div>
+        </div>
+
+        <div class="denr-cc-stub-separator"></div>
+
+        <div class="denr-cc-receipt-official">
+          <img src="/assets/images/logo.png" alt="" class="denr-cc-receipt-logo" width="56" height="56" />
+          <div class="denr-cc-receipt-body">
+            <div class="denr-cc-receipt-heading">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="denr-cc-receipt-service">Name of Service: <strong>Issuance of Special Local Transport Permit (SLTP) (Wildlife)</strong></div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Name of Applicant:</span>
+              <input type="text" class="denr-cc-receipt-input" id="r4a_b05_ackApplicant" />
             </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date Received:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b05_dateReceived">
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Date Received:</span>
+              <input type="text" class="denr-cc-receipt-input" id="r4a_b05_ackDateReceived" />
             </div>
           </div>
         </div>
 
-        <div class="denr-form-section denr-form-receipt">
-          <div class="denr-form-receipt-title">Acknowledgement Receipt</div>
-          <div class="denr-form-static">Name of Service: Issuance of Special Local Transport Permit (SLTP) (Wildlife)</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b05_ackApplicant">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date Received:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b05_ackDateReceived">
-            </div>
-          </div>
-        </div>
+        <p class="denr-cc-followup-note">*To follow-up your application, please present this stub or you may contact us at cenrostacruz@denr.gov.ph / (049) 536 – 8903*</p>
       </div>
     `
   },
@@ -6084,94 +6123,104 @@ const DENR_FORM_TEMPLATES = {
     subtitle: '',
     template: `
       <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">Issuance of Wildlife Import Clearance (Non-CITES)</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant</label>
-              <input type="text" class="denr-form-input" id="applicantName">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address</label>
-              <textarea class="denr-form-textarea" id="applicantAddress" rows="2"></textarea>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Details</label>
-              <input type="text" class="denr-form-input" id="applicantContact">
-            </div>
+        <div class="denr-cc-letterhead">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="denr-cc-lh-logo" width="72" height="72" />
+          <div class="denr-cc-lh-text">
+            <div>Republic of the Philippines</div>
+            <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
+            <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
+            <div>Brgy. Duhat, Sta. Cruz, Laguna</div>
+            <div class="denr-cc-lh-contact"><span class="denr-cc-lh-email">cenrostacruz@denr.gov.ph</span> | (049) 536 8903</div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section A - Requirements</div>
+        <div class="denr-cc-banner">CHECKLIST OF REQUIREMENTS</div>
+
+        <div class="denr-cc-infobox">
+          <div class="denr-cc-charter-no">CITIZEN'S CHARTER NO. R4A-B-06</div>
+          <div class="denr-cc-service-title">Issuance of Wildlife Import Clearance (Non-CITES)</div>
+          <p class="denr-cc-infobox-note">*This clearance is required for the importation of non-CITES listed wildlife into the Philippines.*</p>
+        </div>
+
+        <div class="denr-cc-applicant-block">
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Name of Applicant:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantName" />
+          </div>
+          <div class="denr-cc-field-row denr-cc-field-row-multiline">
+            <span class="denr-cc-field-label">Address:</span>
+            <textarea class="denr-cc-line-input denr-cc-line-textarea" id="applicantAddress" rows="2"></textarea>
+          </div>
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Contact Details:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantContact" />
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">A. Requirements to be submitted upon filing of application</div>
           <div class="denr-form-checklist">
-            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Duly accomplished application form with two (2) recent 2x2 photos of applicant</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Duly accomplished application form with two (2) recent 2&quot; x 2&quot; photos of applicant</label>
             <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Export permit/Certification of Origin from exporting country</label>
-            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> For live specimens, veterinary/ phytosanitary certificate issued by the authorized government agency of the country of origin</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> For live specimens, veterinary/phytosanitary certificate issued by the authorized government agency of the country of origin</label>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section B - Type of Transaction</div>
-          <div class="denr-form-radio-stack">
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b06_transaction" value="g2c"> Government to Citizen</label>
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b06_transaction" value="g2b"> Government to Business (Specify the Name of Company and Owner / Authorized Representative)</label>
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b06_transaction" value="g2g"> Government to Government (Specify the Name of the Agency and its Authorized Representative)</label>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">B. Type of Transaction</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Citizen</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Business <em>(Specify the Name of Company and Owner / Authorized Representative)</em></label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Government <em>(Specify the Name of the Agency and its Authorized Representative)</em></label>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section C - Classification</div>
-          <div class="denr-form-static">✓ Highly Technical</div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">C. Classification</div>
+          <div class="denr-cc-classification-line">✓ Highly Technical</div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section D - Fees to be Paid</div>
-          <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> PENRO: Inspection Fee: ₱100.00</label>
-          <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Regional Office: Permit Fee: ₱350</label>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">D. Fees to be Paid</div>
+          <div class="denr-cc-fee-line">PENRO: Inspection Fee: ₱100.00</div>
+          <div class="denr-cc-fee-line">Regional Office: Permit Fee: ₱350.00</div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section E - Processing Time</div>
-          <div class="denr-form-static">IP: 7 working days, 5 hours, 30 minutes / Total TAT: 13 working days, 10 hours</div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">E. Processing Time</div>
+          <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> IP: 7 working days, 5 hours, 30 minutes / Total TAT: 13 working days, 10 hours</div>
         </div>
 
-        <div class="denr-form-section denr-form-received-block">
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Received by:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b06_receivedBy">
+        <div class="denr-cc-received-row">
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Received by:</span>
+            <input type="text" class="denr-cc-received-input" id="r4a_b06_receivedBy" />
+          </div>
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Date Received:</span>
+            <input type="text" class="denr-cc-received-input" id="r4a_b06_dateReceived" />
+          </div>
+        </div>
+
+        <div class="denr-cc-stub-separator"></div>
+
+        <div class="denr-cc-receipt-official">
+          <img src="/assets/images/logo.png" alt="" class="denr-cc-receipt-logo" width="56" height="56" />
+          <div class="denr-cc-receipt-body">
+            <div class="denr-cc-receipt-heading">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="denr-cc-receipt-service">Name of Service: <strong>Issuance of Wildlife Import Clearance (Non-CITES)</strong></div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Name of Applicant:</span>
+              <input type="text" class="denr-cc-receipt-input" id="r4a_b06_ackApplicant" />
             </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date Received:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b06_dateReceived">
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Date Received:</span>
+              <input type="text" class="denr-cc-receipt-input" id="r4a_b06_ackDateReceived" />
             </div>
           </div>
         </div>
 
-        <div class="denr-form-section denr-form-receipt">
-          <div class="denr-form-receipt-title">Acknowledgement Receipt</div>
-          <div class="denr-form-static">Name of Service: Issuance of Wildlife Import Clearance (Non-CITES)</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b06_ackApplicant">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date Received:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b06_ackDateReceived">
-            </div>
-          </div>
-        </div>
+        <p class="denr-cc-followup-note">*To follow-up your application, please present this stub or you may contact us at cenrostacruz@denr.gov.ph / (049) 536 – 8903*</p>
       </div>
     `
   },
@@ -6181,33 +6230,42 @@ const DENR_FORM_TEMPLATES = {
     subtitle: '',
     template: `
       <div class="denr-form">
-        <div class="denr-form-header">
-          <div class="denr-form-title">Issuance of NIPAS Certification</div>
-        </div>
-
-        <div class="denr-form-section">
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant</label>
-              <input type="text" class="denr-form-input" id="applicantName">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Address</label>
-              <textarea class="denr-form-textarea" id="applicantAddress" rows="2"></textarea>
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Contact Details</label>
-              <input type="text" class="denr-form-input" id="applicantContact">
-            </div>
+        <div class="denr-cc-letterhead">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="denr-cc-lh-logo" width="72" height="72" />
+          <div class="denr-cc-lh-text">
+            <div>Republic of the Philippines</div>
+            <div class="denr-cc-lh-strong">Department of Environment and Natural Resources</div>
+            <div>Community Environment and Natural Resources Office (CENRO) – STA. CRUZ</div>
+            <div>Brgy. Duhat, Sta. Cruz, Laguna</div>
+            <div class="denr-cc-lh-contact"><span class="denr-cc-lh-email">cenrostacruz@denr.gov.ph</span> | (049) 536 8903</div>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section A - Requirements</div>
+        <div class="denr-cc-banner">CHECKLIST OF REQUIREMENTS</div>
+
+        <div class="denr-cc-infobox">
+          <div class="denr-cc-charter-no">CITIZEN'S CHARTER NO. R4A-B-07</div>
+          <div class="denr-cc-service-title">Issuance of NIPAS Certification</div>
+          <p class="denr-cc-infobox-note">*This certification is issued to determine if a land area falls within or outside the National Integrated Protected Areas System (NIPAS).*</p>
+        </div>
+
+        <div class="denr-cc-applicant-block">
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Name of Applicant:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantName" />
+          </div>
+          <div class="denr-cc-field-row denr-cc-field-row-multiline">
+            <span class="denr-cc-field-label">Address:</span>
+            <textarea class="denr-cc-line-input denr-cc-line-textarea" id="applicantAddress" rows="2"></textarea>
+          </div>
+          <div class="denr-cc-field-row">
+            <span class="denr-cc-field-label">Contact Details:</span>
+            <input type="text" class="denr-cc-line-input" id="applicantContact" />
+          </div>
+        </div>
+
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">A. Requirements to be submitted upon filing of application</div>
           <div class="denr-form-checklist">
             <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Letter request of the applicant (with contact no.)</label>
             <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Inspection Report of the Field Office</label>
@@ -6223,59 +6281,60 @@ const DENR_FORM_TEMPLATES = {
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section B - Type of Transaction</div>
-          <div class="denr-form-radio-stack">
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b07_transaction" value="g2c"> Government to Citizen</label>
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b07_transaction" value="g2b"> Government to Business (Specify the Name of Company and Owner / Authorized Representative)</label>
-            <label class="denr-form-checklabel"><input type="radio" name="r4a_b07_transaction" value="g2g"> Government to Government (Specify the Name of the Agency and its Authorized Representative)</label>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">B. Type of Transaction</div>
+          <div class="denr-form-checklist">
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Citizen</label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Business <em>(Specify the Name of Company and Owner / Authorized Representative)</em></label>
+            <label class="denr-form-checklabel"><input type="checkbox" class="denr-form-checkbox"> Government to Government <em>(Specify the Name of the Agency and its Authorized Representative)</em></label>
           </div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section C - Classification</div>
-          <div class="denr-form-static">✓ Highly Technical</div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">C. Classification</div>
+          <div class="denr-cc-classification-line">✓ Highly Technical</div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section D - Fees to be Paid</div>
-          <div class="denr-form-static">Regional Office: Certification Fee: ₱50/lot</div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">D. Fees to be Paid</div>
+          <div class="denr-cc-fee-line">Regional Office: Certification Fee: ₱50/lot</div>
         </div>
 
-        <div class="denr-form-section">
-          <div class="denr-form-section-title">Section E - Processing Time</div>
-          <div class="denr-form-static">IP: 13 working days / Total TAT: 16 working days</div>
+        <div class="denr-form-section denr-cc-section">
+          <div class="denr-cc-section-title-main">E. Processing Time</div>
+          <div class="denr-cc-processing-line"><span class="denr-cc-bullet">•</span> IP: 13 working days / Total TAT: 16 working days</div>
         </div>
 
-        <div class="denr-form-section denr-form-received-block">
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Received by:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b07_receivedBy">
+        <div class="denr-cc-received-row">
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Received by:</span>
+            <input type="text" class="denr-cc-received-input" id="r4a_b07_receivedBy" />
+          </div>
+          <div class="denr-cc-received-item">
+            <span class="denr-cc-received-label">Date Received:</span>
+            <input type="text" class="denr-cc-received-input" id="r4a_b07_dateReceived" />
+          </div>
+        </div>
+
+        <div class="denr-cc-stub-separator"></div>
+
+        <div class="denr-cc-receipt-official">
+          <img src="/assets/images/logo.png" alt="" class="denr-cc-receipt-logo" width="56" height="56" />
+          <div class="denr-cc-receipt-body">
+            <div class="denr-cc-receipt-heading">ACKNOWLEDGEMENT RECEIPT</div>
+            <div class="denr-cc-receipt-service">Name of Service: <strong>Issuance of NIPAS Certification</strong></div>
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Name of Applicant:</span>
+              <input type="text" class="denr-cc-receipt-input" id="r4a_b07_ackApplicant" />
             </div>
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date Received:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b07_dateReceived">
+            <div class="denr-cc-receipt-field">
+              <span class="denr-cc-receipt-label">Date Received:</span>
+              <input type="text" class="denr-cc-receipt-input" id="r4a_b07_ackDateReceived" />
             </div>
           </div>
         </div>
 
-        <div class="denr-form-section denr-form-receipt">
-          <div class="denr-form-receipt-title">Acknowledgement Receipt</div>
-          <div class="denr-form-static">Name of Service: Issuance of NIPAS Certification</div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Name of Applicant:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b07_ackApplicant">
-            </div>
-          </div>
-          <div class="denr-form-row">
-            <div class="denr-form-field">
-              <label class="denr-form-label">Date Received:</label>
-              <input type="text" class="denr-form-input denr-form-inline-blank" id="r4a_b07_ackDateReceived">
-            </div>
-          </div>
-        </div>
+        <p class="denr-cc-followup-note">*To follow-up your application, please present this stub or you may contact us at cenrostacruz@denr.gov.ph / (049) 536 – 8903*</p>
       </div>
     `
   },
