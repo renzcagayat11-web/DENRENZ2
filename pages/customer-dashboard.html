@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="/assets/css/customer-dashboard.css" />
     <link rel="stylesheet" href="/assets/css/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- RBAC Auth Guard - Prevents Unauthorized Access -->
     <script type="module">
       import { initAuthGuard, protectRoute } from '/assets/js/auth-guard.js';
@@ -542,99 +544,73 @@
                   </div>
                 </div>
 
-                <!-- Step 2: Applicant Information -->
+                <!-- Step 2: DENR Application Forms -->
                 <div class="form-step" data-step="2" style="display: none;">
                 <div class="step-card">
-                  <h4 class="step-title">Applicant Information</h4>
-                  <p class="step-description">Provide personal and contact details</p>
+                  <h4 class="step-title">DENR Application Forms</h4>
+                  <p class="step-description">Fill out the required DENR application form for your permit type</p>
                   
-                  <!-- Applicant Type Selection -->
-                  <div class="form-group">
-                    <label>Applicant Type *</label>
-                    <div class="applicant-type-selector">
-                      <label class="radio-option">
-                        <input type="radio" name="applicantType" value="personal" id="personalType" checked>
-                        <span class="radio-label">Personal Application</span>
-                      </label>
-                      <label class="radio-option">
-                        <input type="radio" name="applicantType" value="company" id="companyType">
-                        <span class="radio-label">Company Application</span>
-                      </label>
+                  <!-- Form Selection Notice -->
+                  <div id="formSelectionNotice" class="form-selection-notice">
+                    <div class="notice-icon">📝</div>
+                    <div class="notice-content">
+                      <h5>Please Complete Step 1 First</h5>
+                      <p>Select your document type and permit type in Step 1 to load the appropriate application form.</p>
                     </div>
                   </div>
 
-                  <!-- Personal Information Fields -->
-                  <div id="personalFields" class="applicant-fields">
-                    <div class="form-row">
-                      <div class="form-group">
-                        <label for="firstName">First Name *</label>
-                        <input type="text" id="firstName" placeholder="Enter your first name" maxlength="50" />
+                  <!-- Custom Form Container -->
+                  <div id="customFormContainer" class="custom-form-container" style="display: none;">
+                    <div class="form-header">
+                      <div class="form-title-section">
+                        <h5 id="formTitle">Application Form</h5>
+                        <p id="formSubtitle">DENR Official Form</p>
                       </div>
-                      <div class="form-group">
-                        <label for="lastName">Last Name *</label>
-                        <input type="text" id="lastName" placeholder="Enter your last name" maxlength="50" />
-                      </div>
-                    </div>
-                    
-                    <div class="form-row">
-                      <div class="form-group">
-                        <label for="middleName">Middle Name</label>
-                        <input type="text" id="middleName" placeholder="Enter your middle name (optional)" maxlength="50" />
-                      </div>
-                      <div class="form-group">
-                        <label for="suffix">Suffix</label>
-                        <select id="suffix">
-                          <option value="" disabled selected>Select suffix (optional)</option>
-                          <option value="Jr">Jr</option>
-                          <option value="Sr">Sr</option>
-                          <option value="I">I</option>
-                          <option value="II">II</option>
-                          <option value="III">III</option>
-                          <option value="IV">IV</option>
-                          <option value="V">V</option>
-                        </select>
+                      <div class="form-actions-header">
+                        <button type="button" class="btn-secondary btn-sm" id="clearFormBtn">Clear Form</button>
+                        <button type="button" class="btn-primary btn-sm" id="downloadPdfBtn">Download PDF</button>
                       </div>
                     </div>
                     
-                    <div class="form-row">
-                      <div class="form-group">
-                        <label for="applicantMobileIndividual">Mobile Number *</label>
-                        <input type="tel" id="applicantMobileIndividual" placeholder="Enter mobile number" pattern="[0-9]{11,13}" maxlength="13" />
-                        <small>09 prefix = 11 digits | 63 prefix = 13 digits</small>
+                    <!-- Form Content Area -->
+                    <div id="formContentArea" class="form-content-area">
+                      <!-- Dynamic form content will be loaded here -->
+                    </div>
+
+                    <!-- Form Footer -->
+                    <div class="form-footer">
+                      <div id="formValidationMessage" class="validation-message" style="display: none;">
+                        <div class="validation-icon">⚠️</div>
+                        <div class="validation-text">Please complete all required fields before proceeding.</div>
                       </div>
-                      <div class="form-group">
-                        <label>&nbsp;</label>
-                        <small>&nbsp;</small>
+                      
+                      <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="prevStep2">Previous</button>
+                        <button type="button" class="btn-primary" id="nextStep2">Next</button>
+                        <button type="button" class="btn-cancel" id="cancelNewAppForm2">Cancel</button>
                       </div>
                     </div>
                   </div>
 
-                  <!-- Company Information Fields -->
-                  <div id="companyFields" class="applicant-fields" style="display: none;">
-                    <div class="form-row">
-                      <div class="form-group">
-                        <label for="companyName">Company Name *</label>
-                        <input type="text" id="companyName" placeholder="Enter company name" maxlength="100" />
+                  <!-- Form Download Awareness -->
+                  <div id="formDownloadAwareness" class="form-download-awareness" style="display: none;">
+                    <div class="awareness-header">
+                      <div class="awareness-icon">📄</div>
+                      <div class="awareness-content">
+                        <h5>Form Download Required</h5>
+                        <p>Please download your completed form. You will need to upload this signed form in the document upload step.</p>
                       </div>
-                      <div class="form-group">
-                        <label for="representativeName">Authorized Representative Name *</label>
-                        <input type="text" id="representativeName" placeholder="Enter authorized representative name" maxlength="100" />
-                      </div>
+                      <button type="button" class="awareness-dismiss" id="dismissAwareness">×</button>
                     </div>
-                    
-                    <div class="form-row">
-                      <div class="form-group">
-                        <label for="applicantMobileCompany">Mobile Number *</label>
-                        <input type="tel" id="applicantMobileCompany" placeholder="Enter mobile number" pattern="[0-9]{11,13}" maxlength="13" />
-                        <small>09 prefix = 11 digits | 63 prefix = 13 digits</small>
-                      </div>
+                    <div class="awareness-actions">
+                      <button type="button" class="btn-primary" id="downloadFormBtn">
+                        <span class="btn-icon">⬇️</span>
+                        Download Completed Form
+                      </button>
+                      <button type="button" class="btn-secondary" id="proceedWithoutDownloadBtn">
+                        Proceed Without Download
+                      </button>
                     </div>
-                  </div>
-
-                  <div class="form-actions">
-                    <button type="button" class="btn-secondary" id="prevStep2">Previous</button>
-                    <button type="button" class="btn-primary" id="nextStep2">Next</button>
-                    <button type="button" class="btn-cancel" id="cancelNewAppForm2">Cancel</button>
                   </div>
                 </div>
               </div>
