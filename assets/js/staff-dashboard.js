@@ -1172,6 +1172,10 @@ async function updateApplicationStatus(appId, newStatus, rejectionReason = null,
       // Don't increment resubmit count here - increment when customer submits resubmission
     }
 
+    // Persist to Firestore (this was missing — caused status changes to silently
+    // revert when the real-time onSnapshot listener refreshed local state).
+    await updateDoc(appRef, updateData);
+
     // Update local data
     const appIndex = allApplications.findIndex(app => app.id === appId);
     if (appIndex !== -1) {
