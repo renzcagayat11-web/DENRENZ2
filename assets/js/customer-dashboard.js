@@ -4178,13 +4178,16 @@ if (createAppBtn) {
   const btn = document.getElementById(id);
   if (btn) {
     btn.addEventListener('click', async () => {
-      // Clear any pending files from IndexedDB for this app
-      if (window.editingAppId) {
-        await clearEditFilesForApp(window.editingAppId);
+      if (btn.id === 'cancelNewAppForm') {
+        // Clear form and go back to dashboard
+        const confirmed = confirm('Are you sure you want to cancel this application? All entered data will be lost.');
+        if (!confirmed) return;
       }
       
       document.getElementById('newApplicationForm').reset();
       clearFormData('newApplicationForm');
+      hideCategoryAwarenessBanner();
+      hidePermitAwarenessBanner();
       window.editingAppId = null;
       window.existingDocuments = [];
       const submitBtn = document.getElementById('submitStep5') || document.querySelector('#newApplicationForm button[type="submit"]');
@@ -5278,31 +5281,31 @@ const CATEGORY_AWARENESS_COPY = {
 /** Per–permit-type awareness (keys must match option values in categoryTypePermitOptions). */
 const PERMIT_AWARENESS_COPY = {
   'R4A-B-01 – Issuance of Wildlife Farm Permit – Small Scale Farming': {
-    title: '🌿 Biodiversity Awareness – Wildlife Farm Permit (Small Scale)',
+    title: '🌿 Wildlife Farm Permit (Small Scale)',
     body: 'Wildlife farming, even on a small scale, requires a valid DENR permit. Unauthorized possession or breeding of wildlife may lead to confiscation, fines, and imprisonment under RA 9147.'
   },
   'R4A-B-02 – Issuance of Wildlife Farm Permit – Medium to Large Scale Farming': {
-    title: '🌿 Biodiversity Awareness – Wildlife Farm Permit (Medium to Large Scale)',
+    title: '🌿 Wildlife Farm Permit (Medium to Large Scale)',
     body: 'Medium to large-scale wildlife farming requires proper DENR authorization. Operating without a permit or beyond approved limits may result in confiscation, fines, and imprisonment under RA 9147.'
   },
   'R4A-B-03 – Issuance of Certificate of Wildlife Registration (CWR)': {
-    title: '🌿 Biodiversity Awareness – Certificate of Wildlife Registration (CWR)',
+    title: '🌿 Certificate of Wildlife Registration (CWR)',
     body: 'All captive wildlife must be properly registered with DENR. Possession of unregistered wildlife may lead to confiscation, fines, and imprisonment under RA 9147.'
   },
   'R4A-B-04 – Issuance of Local Transport Permit (Wildlife)': {
-    title: '🌿 Biodiversity Awareness – Local Transport Permit (Wildlife)',
+    title: '🌿 Local Transport Permit (Wildlife)',
     body: 'Transporting wildlife requires a valid DENR Local Transport Permit. Unauthorized transport may result in seizure of wildlife, fines, and imprisonment under RA 9147.'
   },
   'R4A-B-05 – Issuance of Special Local Transport Permit (SLTP) (Wildlife)': {
-    title: '🌿 Biodiversity Awareness – Special Local Transport Permit (SLTP)',
+    title: '🌿 Special Local Transport Permit (SLTP)',
     body: 'Transporting wildlife under special or restricted conditions requires a Special Local Transport Permit. Violations may lead to confiscation, fines, and imprisonment under RA 9147.'
   },
   'R4A-B-06 – Issuance of Wildlife Import Clearance (Non-CITES)': {
-    title: '🌿 Biodiversity Awareness – Wildlife Import Clearance (Non-CITES)',
+    title: '🌿 Wildlife Import Clearance (Non-CITES)',
     body: 'Importation of wildlife requires prior DENR clearance. Unauthorized importation may result in confiscation, fines, and imprisonment under RA 9147.'
   },
   'R4A-B-07 – Issuance of NIPAS Certification': {
-    title: '🌿 Biodiversity Awareness – NIPAS Certification',
+    title: '🌿 NIPAS Certification',
     body: 'Activities involving wildlife within protected areas require NIPAS Certification. Unauthorized activities may result in heavy fines, imprisonment, and closure of operations under applicable environmental laws.'
   },
   'RO-L-01 – Issuance of Certification of Land Classification Status': {
@@ -5599,27 +5602,27 @@ const categoryAwarenessBanner = document.getElementById('categoryAwarenessBanner
 const categoryAwarenessBannerBody = document.getElementById('categoryAwarenessBannerBody');
 const categoryAwarenessBannerDismiss = document.getElementById('categoryAwarenessBannerDismiss');
 
+const permitAwarenessBanner = document.getElementById('permitAwarenessBanner');
+const permitAwarenessBannerBody = document.getElementById('permitAwarenessBannerBody');
+const permitAwarenessBannerDismiss = document.getElementById('permitAwarenessBannerDismiss');
+
 function hideCategoryAwarenessBanner() {
   if (categoryAwarenessBanner) {
     categoryAwarenessBanner.style.display = 'none';
   }
 }
 
-function updateStep1AwarenessBanner() {
+function hidePermitAwarenessBanner() {
+  if (permitAwarenessBanner) {
+    permitAwarenessBanner.style.display = 'none';
+  }
+}
+
+function updateCategoryAwarenessBanner() {
   if (!categoryAwarenessBanner || !categoryAwarenessBannerBody) return;
   const docType = document.getElementById('documentType')?.value || '';
-  const permit = document.getElementById('permitType')?.value || '';
 
-  let copy = null;
-  if (permit && PERMIT_AWARENESS_COPY[permit]) {
-    copy = PERMIT_AWARENESS_COPY[permit];
-  } else if (
-    CATEGORY_TYPES.includes(docType) &&
-    CATEGORY_AWARENESS_COPY[docType] &&
-    (!permit || !PERMIT_AWARENESS_COPY[permit])
-  ) {
-    copy = CATEGORY_AWARENESS_COPY[docType];
-  }
+  const copy = CATEGORY_AWARENESS_COPY[docType];
 
   if (copy) {
     categoryAwarenessBannerBody.innerHTML = `<p><strong>${copy.title}</strong></p><p>${copy.body}</p>`;
@@ -5629,9 +5632,34 @@ function updateStep1AwarenessBanner() {
   }
 }
 
+function updatePermitAwarenessBanner() {
+  if (!permitAwarenessBanner || !permitAwarenessBannerBody) return;
+  const permit = document.getElementById('permitType')?.value || '';
+
+  const copy = PERMIT_AWARENESS_COPY[permit];
+
+  if (copy) {
+    permitAwarenessBannerBody.innerHTML = `<p><strong>${copy.title}</strong></p><p>${copy.body}</p>`;
+    permitAwarenessBanner.style.display = 'block';
+  } else {
+    hidePermitAwarenessBanner();
+  }
+}
+
+function updateStep1AwarenessBanner() {
+  updateCategoryAwarenessBanner();
+  updatePermitAwarenessBanner();
+}
+
 if (categoryAwarenessBannerDismiss) {
   categoryAwarenessBannerDismiss.addEventListener('click', () => {
     hideCategoryAwarenessBanner();
+  });
+}
+
+if (permitAwarenessBannerDismiss) {
+  permitAwarenessBannerDismiss.addEventListener('click', () => {
+    hidePermitAwarenessBanner();
   });
 }
 
@@ -6791,6 +6819,8 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
     navigateToSection('myApplicationsSection');
     document.getElementById('newApplicationForm').reset();
     clearFormData('newApplicationForm');
+    hideCategoryAwarenessBanner();
+    hidePermitAwarenessBanner();
     resetFormSteps();
     
     // Clear editing state

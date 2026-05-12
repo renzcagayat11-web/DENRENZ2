@@ -5068,13 +5068,13 @@ textarea:hover {
   position: relative;
   margin: 0 0 20px;
   padding: 14px 40px 14px 16px;
-  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
-  border: 1px solid #86efac;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
   border-radius: 10px;
   color: #14532d;
   font-size: 14px;
   line-height: 1.55;
-  box-shadow: 0 1px 3px rgba(4, 99, 7, 0.08);
+  box-shadow: 0 1px 3px rgba(21, 128, 61, 0.08);
 }
 
 .category-awareness-banner__body p {
@@ -5111,6 +5111,57 @@ textarea:hover {
 
 .category-awareness-banner__dismiss:hover {
   background: #fff;
+  color: #14532d;
+}
+
+/* Permit awareness (Document Information step) */
+.permit-awareness-banner {
+  position: relative;
+  margin: 0 0 20px;
+  padding: 14px 40px 14px 16px;
+  background: #f0fdf4;
+  color: #14532d;
+  border-radius: 8px;
+  border-left: 4px solid #bbf7d0;
+  box-shadow: 0 1px 3px rgba(20, 83, 45, 0.08);
+}
+
+.permit-awareness-banner__body p {
+  margin: 0 0 8px;
+}
+
+.permit-awareness-banner__body p:last-child {
+  margin-bottom: 0;
+}
+
+.permit-awareness-banner__body strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 15px;
+  color: #14532d;
+}
+
+.permit-awareness-banner__dismiss {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.permit-awareness-banner__dismiss:hover {
+  background: rgba(255, 255, 255, 0.2);
   color: #14532d;
 }
 
