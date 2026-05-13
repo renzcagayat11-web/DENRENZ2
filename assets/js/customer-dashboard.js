@@ -2797,7 +2797,30 @@ document.getElementById('editAvatarBtn')?.addEventListener('click', () => {
 });
 document.getElementById('profilePicture')?.addEventListener('change', handleProfilePictureUpload);
 document.getElementById('cancelProfileBtn')?.addEventListener('click', () => {
-  // Disable edit mode and reload original data
+  // Clear all field errors first
+  clearFieldError('profileFirstName');
+  clearFieldError('profileSurname');
+  clearFieldError('profileMiddleName');
+  clearFieldError('profileMobile');
+  clearFieldError('profileDistrict');
+  clearFieldError('profileMunicipal');
+  clearFieldError('profileBarangay');
+  clearFieldError('profileStreetAddress');
+  
+  // Restore original data
+  if (currentUserData) {
+    document.getElementById('profileFirstName').value = currentUserData.firstName || '';
+    document.getElementById('profileSurname').value = currentUserData.surname || '';
+    document.getElementById('profileMiddleName').value = currentUserData.middleName || '';
+    document.getElementById('profileSuffix').value = currentUserData.suffix || '';
+    document.getElementById('profileMobile').value = currentUserData.mobile || '';
+    document.getElementById('profileDistrict').value = currentUserData.district || '';
+    document.getElementById('profileMunicipal').value = currentUserData.municipal || '';
+    document.getElementById('profileBarangay').value = currentUserData.barangay || '';
+    document.getElementById('profileStreetAddress').value = currentUserData.streetAddress || '';
+  }
+  
+  // Disable edit mode
   enableProfileEditMode(false);
 });
 
