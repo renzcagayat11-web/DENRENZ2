@@ -8586,7 +8586,14 @@ function restoreDenrFormData(permitType) {
     const formData = JSON.parse(savedData);
     
     Object.keys(formData).forEach(key => {
-      const input = formContentArea.querySelector(`#${key}, [name="${key}"]`);
+      // Skip empty keys
+      if (!key || key.trim() === '') return;
+      
+      // Try to find input by ID first, then by name
+      let input = formContentArea.querySelector(`#${CSS.escape(key)}`);
+      if (!input) {
+        input = formContentArea.querySelector(`[name="${CSS.escape(key)}"]`);
+      }
       if (!input) return;
       
       if (input.type === 'checkbox') {
@@ -9492,19 +9499,34 @@ function handleFileSelect(index, file) {
     };
     
     try {
-      // Save to sessionStorage only (localStorage has 5-10MB limit)
-      // Don't save large file data to localStorage to prevent quota exceeded error
-      if (fileData.data && fileData.data.length > 1000000) { // If larger than ~1MB
-        console.log(`File ${file.name} too large for storage (${(fileData.data.length / 1024 / 1024).toFixed(2)} MB), keeping in memory only`);
+      // Save to sessionStorage (and localStorage backup for smaller files)
+      const fileSizeMB = fileData.base64.length / 1024 / 1024;
+      
+      if (fileSizeMB > 4) { // If larger than 4MB
+        console.log(`File ${file.name} too large for storage (${fileSizeMB.toFixed(2)} MB), keeping in memory only`);
         // Store only metadata, not the full data
         const metadataOnly = {
-          ...fileData,
-          data: null, // Don't store large data
+          name: fileData.name,
+          size: fileData.size,
+          type: fileData.type,
+          lastModified: fileData.lastModified,
+          timestamp: fileData.timestamp,
           storedInMemory: true
         };
         sessionStorage.setItem(`docUpload_${index}`, JSON.stringify(metadataOnly));
       } else {
+        // Save to sessionStorage
         sessionStorage.setItem(`docUpload_${index}`, JSON.stringify(fileData));
+        
+        // Also save to localStorage as backup (for smaller files only)
+        if (fileSizeMB < 2) {
+          try {
+            localStorage.setItem(`docUpload_${index}_backup`, JSON.stringify(fileData));
+            console.log(`File ${file.name} also saved to localStorage backup`);
+          } catch (localError) {
+            console.warn('localStorage backup failed:', localError);
+          }
+        }
       }
       console.log(`File ${file.name} saved to sessionStorage as docUpload_${index}`);
       
@@ -11168,25 +11190,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Restore saved section and form data on page load (for refresh/reload behavior)
 window.addEventListener('load', function() {
-  // Clear existing upload backups from localStorage on page load to free up space
-  try {
-    for (let i = 0; i < sessionStorage.length; i++) {
-      const key = sessionStorage.key(i);
-      if (key && key.startsWith('docUpload_')) {
-        sessionStorage.removeItem(key);
-      }
-    }
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith('docUpload_')) {
-        localStorage.removeItem(key);
-      }
-    }
-    console.log('Cleared old document uploads from storage');
-  } catch (e) {
-    console.log('Error clearing old uploads:', e);
-  }
-  
   // Hash to section mapping for URL-based navigation
   const hashSectionMap = {
     'dashboard': 'dashboardSection',
