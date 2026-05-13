@@ -334,7 +334,7 @@ function showValidationToast(message, type = 'error') {
       </div>
       <div class="validation-modal-content">
         <h3 class="validation-modal-title">${title}</h3>
-        <p class="validation-modal-message">${message}</p>
+        <div class="validation-modal-message">${message}</div>
       </div>
       <div class="validation-modal-actions">
         <button class="validation-modal-btn validation-modal-btn-primary" onclick="this.closest('.validation-modal-overlay').remove()">
@@ -4480,33 +4480,9 @@ document.getElementById('nextStep1')?.addEventListener('click', () => {
 
 // Step 2: DENR Application Forms
 document.getElementById('nextStep2')?.addEventListener('click', () => {
-  // Check if custom form is loaded and validate
-  const permitType = document.getElementById('permitType')?.value || '';
-  const formTemplate = DENR_FORM_TEMPLATES[permitType];
-  
-  if (formTemplate && customFormContainer && customFormContainer.style.display !== 'none') {
-    // Validate the custom form
-    if (!validateForm()) {
-      showValidationToast('Please complete all required fields in the DENR application form.');
-      // Scroll to validation message
-      const validationMsg = document.getElementById('formValidationMessage');
-      if (validationMsg && validationMsg.style.display !== 'none') {
-        validationMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      return;
-    }
-    
-    // Check if form has been downloaded
-    if (formDownloadAwareness && formDownloadAwareness.style.display !== 'none') {
-      showValidationToast('Please download the completed form before proceeding to the next step.', 'error');
-      formDownloadAwareness.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // Add pulse animation to awareness box
-      formDownloadAwareness.style.animation = 'fieldErrorShake 0.4s ease-in-out';
-      setTimeout(() => {
-        formDownloadAwareness.style.animation = '';
-      }, 400);
-      return;
-    }
+  // Auto-hide download awareness if still showing
+  if (formDownloadAwareness && formDownloadAwareness.style.display !== 'none') {
+    formDownloadAwareness.style.display = 'none';
   }
   
   goToStep(3);
@@ -4862,6 +4838,7 @@ function initializeDefaultSteps() {
 function validateStep(step) {
   console.log('======== Validating step:', step, '========');
   let isValid = true;
+  let missingFields = [];
 
   const documentType = document.getElementById('documentType')?.value || '';
   const permitType = document.getElementById('permitType')?.value || '';
@@ -4874,7 +4851,7 @@ function validateStep(step) {
 
   if (!currentStepInfo) {
     console.log('Step info not found, allowing navigation');
-    return { isValid: true };
+    return { isValid: true, missingFields: [] };
   }
 
   const title = currentStepInfo.title.toLowerCase();
@@ -4892,9 +4869,11 @@ function validateStep(step) {
     
     if (!docType) {
       showFieldError('documentType', 'Category type is required to proceed.');
+      missingFields.push('Category Type');
       isValid = false;
     } else if (!docCategory) {
       showFieldError('permitType', 'Permit type is required to proceed.');
+      missingFields.push('Permit Type');
       isValid = false;
     }
     
@@ -4930,31 +4909,39 @@ function validateStep(step) {
       // Name validation with character limits and format
       if (!firstName) {
         showFieldError('firstName', 'First name is required.');
+        missingFields.push('First Name');
         isValid = false;
       } else if (!/^[a-zA-Z\s\-\.']+$/.test(firstName)) {
         showFieldError('firstName', 'Only letters, spaces, hyphens, periods, and apostrophes allowed.');
+        missingFields.push('First Name (invalid format)');
         isValid = false;
       } else if (firstName.length < 2 || firstName.length > 50) {
         showFieldError('firstName', 'Must be between 2 and 50 characters.');
+        missingFields.push('First Name (invalid length)');
         isValid = false;
       }
       
       if (!lastName) {
         showFieldError('lastName', 'Last name is required.');
+        missingFields.push('Last Name');
         isValid = false;
       } else if (!/^[a-zA-Z\s\-\.']+$/.test(lastName)) {
         showFieldError('lastName', 'Only letters, spaces, hyphens, periods, and apostrophes allowed.');
+        missingFields.push('Last Name (invalid format)');
         isValid = false;
       } else if (lastName.length < 2 || lastName.length > 50) {
         showFieldError('lastName', 'Must be between 2 and 50 characters.');
+        missingFields.push('Last Name (invalid length)');
         isValid = false;
       }
       
       if (middleName && !/^[a-zA-Z\s\-\.']+$/.test(middleName)) {
         showFieldError('middleName', 'Only letters, spaces, hyphens, periods, and apostrophes allowed.');
+        missingFields.push('Middle Name (invalid format)');
         isValid = false;
       } else if (middleName && (middleName.length < 2 || middleName.length > 50)) {
         showFieldError('middleName', 'Must be between 2 and 50 characters.');
+        missingFields.push('Middle Name (invalid length)');
         isValid = false;
       }
     } else {
@@ -5060,8 +5047,7 @@ function validateStep(step) {
   // Step: Document Upload validation
   // Validate uploads only if we're on step 5 (Document Upload & Review step)
   if (step < 5) {
-    console.log('Step', step, 'is not upload step, skipping upload validation');
-    return { isValid };
+    return { isValid, missingFields };
   }
 
   const requirements = PERMIT_REQUIREMENTS[permitType] || [];
@@ -5138,7 +5124,7 @@ function validateStep(step) {
     }
   }
 
-  return { isValid };
+  return { isValid, missingFields };
 }
 
 // Go to specific step
@@ -5150,12 +5136,16 @@ function goToStep(step) {
   // Clear field errors when navigating
   clearAllFieldErrors('.form-step.active');
 
-  // If moving forward, validate current step first
-  if (step > currentStep) {
-    const { isValid } = validateStep(currentStep);
+  // If moving forward, validate current step first (skip Step 2 validation)
+  if (step > currentStep && currentStep !== 2) {
+    const { isValid, missingFields } = validateStep(currentStep);
     if (!isValid) {
-      // Show validation toast notification
-      showValidationToast('Please complete all required fields before proceeding to the next step.');
+      // Show detailed validation modal with missing fields
+      if (missingFields && missingFields.length > 0) {
+        showStepValidationModal(missingFields);
+      } else {
+        showValidationToast('Please complete all required fields before proceeding to the next step.');
+      }
       // Show field-level errors and scroll to first error
       scrollToFirstError();
       return;
@@ -8297,11 +8287,17 @@ function loadCustomForm(permitType, formTemplate) {
   // Auto-populate form fields from Step 1 data
   autoPopulateFormFields();
   
+  // Restore saved form data if exists
+  restoreDenrFormData(permitType);
+  
   // Add input validation and limits
   setupInputValidation();
   
   // Add event listeners for form validation
   setupFormValidation();
+  
+  // Add auto-save on input changes
+  setupFormAutoSave(permitType);
 }
 
 function autoPopulateFormFields() {
@@ -8512,46 +8508,119 @@ function removeMobileError(input) {
 
 function setupFormValidation() {
   const requiredFields = formContentArea.querySelectorAll('[required]');
-  const checkboxes = formContentArea.querySelectorAll('input[type="checkbox"][required]');
   
   requiredFields.forEach(field => {
     field.addEventListener('input', validateForm);
     field.addEventListener('change', validateForm);
   });
+}
+
+// Auto-save form data to localStorage
+function setupFormAutoSave(permitType) {
+  if (!formContentArea) return;
   
-  checkboxes.forEach(checkbox => {
-    checkbox.addEventListener('change', validateForm);
+  const inputs = formContentArea.querySelectorAll('input, textarea, select');
+  
+  inputs.forEach(input => {
+    input.addEventListener('input', () => saveDenrFormData(permitType));
+    input.addEventListener('change', () => saveDenrFormData(permitType));
   });
+}
+
+// Save DENR form data to localStorage
+function saveDenrFormData(permitType) {
+  if (!formContentArea || !permitType) return;
+  
+  const formData = {};
+  const inputs = formContentArea.querySelectorAll('input, textarea, select');
+  
+  inputs.forEach(input => {
+    if (input.type === 'checkbox') {
+      formData[input.id || input.name] = input.checked;
+    } else if (input.type === 'radio') {
+      if (input.checked) {
+        formData[input.name] = input.value;
+      }
+    } else {
+      formData[input.id || input.name] = input.value;
+    }
+  });
+  
+  const storageKey = `denrFormData_${permitType}`;
+  localStorage.setItem(storageKey, JSON.stringify(formData));
+}
+
+// Restore DENR form data from localStorage
+function restoreDenrFormData(permitType) {
+  if (!formContentArea || !permitType) return;
+  
+  const storageKey = `denrFormData_${permitType}`;
+  const savedData = localStorage.getItem(storageKey);
+  
+  if (!savedData) return;
+  
+  try {
+    const formData = JSON.parse(savedData);
+    
+    Object.keys(formData).forEach(key => {
+      const input = formContentArea.querySelector(`#${key}, [name="${key}"]`);
+      if (!input) return;
+      
+      if (input.type === 'checkbox') {
+        input.checked = formData[key];
+      } else if (input.type === 'radio') {
+        if (input.value === formData[key]) {
+          input.checked = true;
+        }
+      } else {
+        input.value = formData[key];
+      }
+    });
+  } catch (error) {
+    console.error('Error restoring form data:', error);
+  }
+}
+
+// Clear saved DENR form data
+function clearDenrFormData(permitType) {
+  if (!permitType) return;
+  const storageKey = `denrFormData_${permitType}`;
+  localStorage.removeItem(storageKey);
 }
 
 function validateForm() {
   if (!formContentArea) return true;
   
-  const requiredFields = formContentArea.querySelectorAll('[required]');
-  const requiredCheckboxes = formContentArea.querySelectorAll('input[type="checkbox"][required]');
+  const requiredFields = formContentArea.querySelectorAll('input[required]:not([type="checkbox"]), textarea[required], select[required]');
   
   let isValid = true;
-  let emptyFieldCount = 0;
-  let uncheckedBoxCount = 0;
+  let emptyFields = [];
   
-  // Check text/select/textarea fields
+  // Check text/select/textarea fields only (checkboxes are optional checklists)
   requiredFields.forEach(field => {
     if (!field.value.trim()) {
       isValid = false;
-      emptyFieldCount++;
+      
+      // Get field label or placeholder
+      let fieldLabel = '';
+      const label = formContentArea.querySelector(`label[for="${field.id}"]`);
+      if (label) {
+        fieldLabel = label.textContent.trim().replace(':', '');
+      } else if (field.placeholder) {
+        fieldLabel = field.placeholder;
+      } else if (field.name) {
+        fieldLabel = field.name.replace(/([A-Z])/g, ' $1').trim();
+      } else {
+        fieldLabel = 'Unnamed field';
+      }
+      
+      emptyFields.push(fieldLabel);
+      
       // Add visual feedback
       field.style.borderColor = '#fca5a5';
       field.addEventListener('input', function() {
         this.style.borderColor = '';
       }, { once: true });
-    }
-  });
-  
-  // Check required checkboxes
-  requiredCheckboxes.forEach(checkbox => {
-    if (!checkbox.checked) {
-      isValid = false;
-      uncheckedBoxCount++;
     }
   });
   
@@ -8561,14 +8630,7 @@ function validateForm() {
     if (!isValid) {
       const validationText = validationMessage.querySelector('.validation-text');
       if (validationText) {
-        let message = 'Please complete all required fields before proceeding.';
-        if (emptyFieldCount > 0 && uncheckedBoxCount > 0) {
-          message = `Please fill ${emptyFieldCount} required field${emptyFieldCount > 1 ? 's' : ''} and check ${uncheckedBoxCount} required checkbox${uncheckedBoxCount > 1 ? 'es' : ''}.`;
-        } else if (emptyFieldCount > 0) {
-          message = `Please fill ${emptyFieldCount} required field${emptyFieldCount > 1 ? 's' : ''}.`;
-        } else if (uncheckedBoxCount > 0) {
-          message = `Please check ${uncheckedBoxCount} required checkbox${uncheckedBoxCount > 1 ? 'es' : ''}.`;
-        }
+        let message = `Please fill ${emptyFields.length} required field${emptyFields.length > 1 ? 's' : ''}.`;
         validationText.textContent = message;
       }
       validationMessage.style.display = 'flex';
@@ -8579,6 +8641,80 @@ function validateForm() {
   }
   
   return isValid;
+}
+
+// Validate form and return detailed results
+function validateFormWithDetails() {
+  if (!formContentArea) return { isValid: true, emptyFields: [] };
+  
+  const requiredFields = formContentArea.querySelectorAll('input[required]:not([type="checkbox"]), textarea[required], select[required]');
+  
+  let isValid = true;
+  let emptyFields = [];
+  
+  // Check text/select/textarea fields only (checkboxes are optional checklists)
+  requiredFields.forEach(field => {
+    if (!field.value.trim()) {
+      isValid = false;
+      
+      // Get field label or placeholder
+      let fieldLabel = '';
+      const label = formContentArea.querySelector(`label[for="${field.id}"]`);
+      if (label) {
+        fieldLabel = label.textContent.trim().replace(':', '');
+      } else if (field.placeholder) {
+        fieldLabel = field.placeholder;
+      } else if (field.name) {
+        fieldLabel = field.name.replace(/([A-Z])/g, ' $1').trim();
+      } else {
+        fieldLabel = 'Unnamed field';
+      }
+      
+      emptyFields.push(fieldLabel);
+      
+      // Add visual feedback
+      field.style.borderColor = '#fca5a5';
+      field.addEventListener('input', function() {
+        this.style.borderColor = '';
+      }, { once: true });
+    }
+  });
+  
+  return { isValid, emptyFields };
+}
+
+// Show detailed validation modal for DENR form
+function showDenrFormValidationModal(validationResult) {
+  const { emptyFields } = validationResult;
+  
+  let message = '<div style="text-align: left; max-height: 300px; overflow-y: auto;">';
+  
+  if (emptyFields.length > 0) {
+    message += '<p style="margin: 0 0 12px 0; font-weight: 600; color: #dc2626;">Missing Required Fields:</p>';
+    message += '<ul style="margin: 0; padding-left: 20px; color: #374151;">';
+    emptyFields.forEach(field => {
+      message += `<li style="margin-bottom: 6px;">${field}</li>`;
+    });
+    message += '</ul>';
+  }
+  
+  message += '</div>';
+  
+  showValidationToast(message, 'error');
+}
+
+// Show detailed validation modal for step navigation
+function showStepValidationModal(missingFields) {
+  let message = '<div style="text-align: left; max-height: 300px; overflow-y: auto;">';
+  message += '<p style="margin: 0 0 12px 0; font-weight: 600; color: #dc2626;">Missing Required Fields:</p>';
+  message += '<ul style="margin: 0; padding-left: 20px; color: #374151;">';
+  missingFields.forEach(field => {
+    message += `<li style="margin-bottom: 6px;">${field}</li>`;
+  });
+  message += '</ul>';
+  message += '</div>';
+  
+  showValidationToast(message, 'error');
 }
 
 function clearCustomForm() {
@@ -8592,6 +8728,12 @@ function clearCustomForm() {
       input.value = '';
     }
   });
+  
+  // Clear saved form data from localStorage
+  const permitType = document.getElementById('permitType')?.value || '';
+  if (permitType) {
+    clearDenrFormData(permitType);
+  }
   
   // Re-auto-populate basic fields
   autoPopulateFormFields();
@@ -8861,7 +9003,12 @@ if (permitAwarenessBannerDismiss) {
 
 // Custom Form Event Listeners
 if (clearFormBtn) {
-  clearFormBtn.addEventListener('click', clearCustomForm);
+  clearFormBtn?.addEventListener('click', () => {
+  if (confirm('Are you sure you want to clear all form data? This action cannot be undone.')) {
+    clearCustomForm();
+    showAlert('Form data cleared successfully.', 'success');
+  }
+});
 }
 
 if (downloadPdfBtn) {
