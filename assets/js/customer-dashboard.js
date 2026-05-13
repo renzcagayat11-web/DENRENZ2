@@ -9353,23 +9353,25 @@ function updateDocumentUploadFields(documentType, permitType) {
     uploadGroup.style.marginBottom = '0';
     uploadGroup.innerHTML = `
       <label for="docUpload_${index}" style="display: block; margin-bottom: 6px; font-weight: 600; color: #1f2937; font-size: 13px;">${req} *</label>
-      <div id="dropzone_${index}" style="border: 4px solid #10b981; border-radius: 12px; padding: 30px 20px; text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background: #ffffff; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
-        <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 15px; transition: all 0.3s ease;">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="17 8 12 3 7 8"></polyline>
-          <line x1="12" y1="3" x2="12" y2="15"></line>
-        </svg>
-        <p style="color: #1f2937; font-size: 15px; margin: 0 0 6px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Drop your document here</p>
-        <p style="color: #6b7280; font-size: 13px; margin: 0; font-weight: 500;">or click to select file</p>
+      <div id="dropzone_${index}" style="position: relative; border: 4px solid #10b981; border-radius: 12px; padding: 30px 20px; text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background: #ffffff; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); height: 220px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <div id="dropzone_${index}_content" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 15px; transition: all 0.3s ease;">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <p style="color: #1f2937; font-size: 15px; margin: 0 0 6px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Drop your document here</p>
+          <p style="color: #6b7280; font-size: 13px; margin: 0; font-weight: 500;">or click to select file</p>
+        </div>
         <input type="file" id="docUpload_${index}" name="${safeName}" accept=".pdf,.jpg,.jpeg,.png" style="display: none;" />
-        <div id="docUpload_${index}_preview" style="margin-top: 12px; display: none;">
+        <div id="docUpload_${index}_preview" style="position: absolute; bottom: 12px; left: 12px; right: 12px; display: none;">
           <div style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #f0fdf4; padding: 8px 14px; border-radius: 8px; border: 1px solid #bbf7d0; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
               <polyline points="22 4 12 14.01 9 11.01"></polyline>
             </svg>
-            <span id="docUpload_${index}_filename" style="color: #16a34a; font-size: 12px; font-weight: 600;"></span>
-            <button type="button" onclick="removeFile(event, ${index})" style="background: #fee2e2; border: none; cursor: pointer; padding: 4px; color: #dc2626; border-radius: 4px; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;">
+            <span id="docUpload_${index}_filename" style="color: #16a34a; font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px;"></span>
+            <button type="button" onclick="removeFile(event, ${index})" style="background: #fee2e2; border: none; cursor: pointer; padding: 4px; color: #dc2626; border-radius: 4px; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -11241,90 +11243,133 @@ window.addEventListener('load', function() {
         permitTypeSelect.dispatchEvent(new Event('change'));
       }
 
-      // Restore uploaded files status and actual files
+      // Restore uploaded files after permit type is set
       setTimeout(() => {
-        const requirements = PERMIT_REQUIREMENTS[savedPermitType] || [];
-        requirements.forEach((req, index) => {
-          // Try to restore from sessionStorage first, then localStorage backup
-          const preview = document.getElementById(`docUpload_${index}_preview`);
-          const filenameSpan = document.getElementById(`docUpload_${index}_filename`);
-          const fileInput = document.getElementById(`docUpload_${index}`);
-          const dropzone = document.getElementById(`dropzone_${index}`);
-
-          // Try sessionStorage first
-          const sessionStorageData = sessionStorage.getItem(`docUpload_${index}`);
-          if (sessionStorageData) {
-            try {
-              const fileData = JSON.parse(sessionStorageData);
-              if (fileData.base64) {
-                // File found in sessionStorage - restore it
-                const fileDataForRestore = {
-                  name: fileData.name,
-                  size: fileData.size,
-                  type: fileData.type,
-                  data: fileData.base64
-                };
-                restoreFileFromFileData(fileDataForRestore, preview, filenameSpan, fileInput, dropzone, 'sessionStorage');
-                console.log(`File ${fileData.name} restored from sessionStorage`);
-                return; // Success, exit early
-              }
-            } catch (error) {
-              console.error('Error restoring from sessionStorage:', error);
-            }
-          }
-
-          // Try localStorage backup
-          const localStorageData = localStorage.getItem(`docUpload_${index}_backup`);
-          if (localStorageData) {
-            try {
-              const fileData = JSON.parse(localStorageData);
-              if (fileData.base64) {
-                // File found in localStorage - restore it
-                const fileDataForRestore = {
-                  name: fileData.name,
-                  size: fileData.size,
-                  type: fileData.type,
-                  data: fileData.base64
-                };
-                restoreFileFromFileData(fileDataForRestore, preview, filenameSpan, fileInput, dropzone, 'localStorage backup');
-                console.log(`File ${fileData.name} restored from localStorage backup`);
-                return; // Success, exit early
-              }
-            } catch (error) {
-              console.error('Error restoring from localStorage backup:', error);
-            }
-          }
-
-          // Try old localStorage format
-          const oldLocalStorageData = localStorage.getItem(`docUpload_${index}`);
-          if (oldLocalStorageData) {
-            try {
-              const fileData = JSON.parse(oldLocalStorageData);
-              if (fileData.base64) {
-                // File found in old localStorage - restore it
-                const fileDataForRestore = {
-                  name: fileData.name,
-                  size: fileData.size,
-                  type: fileData.type,
-                  data: fileData.base64
-                };
-                restoreFileFromFileData(fileDataForRestore, preview, filenameSpan, fileInput, dropzone, 'localStorage');
-                console.log(`File ${fileData.name} restored from old localStorage`);
-                return; // Success, exit early
-              } else {
-                // Old format - only metadata
-                showFileRemovedMessage(fileData.name, preview, filenameSpan, dropzone);
-              }
-            } catch (error) {
-              console.error('Error restoring from old localStorage:', error);
-            }
-          }
-
-          // No file found in any storage
-          console.log(`No file found for docUpload_${index} in any storage`);
-          showFileErrorMessage(preview, filenameSpan, dropzone);
-        });
-      }, 200);
+        restoreUploadedDocuments(savedPermitType);
+      }, 300);
     }, 100);
   }
+  
+  // Also try to restore files even if no saved permit type (in case user is on step 5)
+  setTimeout(() => {
+    const permitTypeSelect = document.getElementById('permitType');
+    const currentPermitType = permitTypeSelect?.value;
+    console.log('=== RESTORE CHECK ===');
+    console.log('Permit type select element:', permitTypeSelect);
+    console.log('Saved permit type:', savedPermitType);
+    console.log('Current permit type:', currentPermitType);
+    console.log('Current section:', localStorage.getItem('currentSection'));
+    
+    if (currentPermitType) {
+      console.log('Calling restoreUploadedDocuments with:', currentPermitType);
+      restoreUploadedDocuments(currentPermitType);
+    } else if (savedPermitType) {
+      console.log('No current permit type, but have saved permit type. Calling restore with:', savedPermitType);
+      restoreUploadedDocuments(savedPermitType);
+    } else {
+      console.log('No permit type found at all, skipping restore');
+    }
+  }, 1000);
 });
+
+// Separate function to restore uploaded documents
+function restoreUploadedDocuments(permitType) {
+  if (!permitType) {
+    console.log('restoreUploadedDocuments called with empty permitType');
+    return;
+  }
+  
+  const requirements = PERMIT_REQUIREMENTS[permitType] || [];
+  console.log(`Attempting to restore ${requirements.length} documents for ${permitType}`);
+  
+  // Log what's in storage
+  console.log('Storage contents:');
+  for (let i = 0; i < 20; i++) {
+    const sessionData = sessionStorage.getItem(`docUpload_${i}`);
+    const localData = localStorage.getItem(`docUpload_${i}_backup`);
+    if (sessionData || localData) {
+      console.log(`  docUpload_${i}: sessionStorage=${!!sessionData}, localStorage=${!!localData}`);
+    }
+  }
+  
+  requirements.forEach((req, index) => {
+    // Try to restore from sessionStorage first, then localStorage backup
+    const preview = document.getElementById(`docUpload_${index}_preview`);
+    const filenameSpan = document.getElementById(`docUpload_${index}_filename`);
+    const fileInput = document.getElementById(`docUpload_${index}`);
+    const dropzone = document.getElementById(`dropzone_${index}`);
+
+    // Try sessionStorage first
+    const sessionStorageData = sessionStorage.getItem(`docUpload_${index}`);
+    if (sessionStorageData) {
+      try {
+        const fileData = JSON.parse(sessionStorageData);
+        if (fileData.base64) {
+          // File found in sessionStorage - restore it
+          const fileDataForRestore = {
+            name: fileData.name,
+            size: fileData.size,
+            type: fileData.type,
+            data: fileData.base64
+          };
+          restoreFileFromFileData(fileDataForRestore, preview, filenameSpan, fileInput, dropzone, 'sessionStorage');
+          console.log(`File ${fileData.name} restored from sessionStorage`);
+          return; // Success, exit early
+        }
+      } catch (error) {
+        console.error('Error restoring from sessionStorage:', error);
+      }
+    }
+
+    // Try localStorage backup
+    const localStorageData = localStorage.getItem(`docUpload_${index}_backup`);
+    if (localStorageData) {
+      try {
+        const fileData = JSON.parse(localStorageData);
+        if (fileData.base64) {
+          // File found in localStorage - restore it
+          const fileDataForRestore = {
+            name: fileData.name,
+            size: fileData.size,
+            type: fileData.type,
+            data: fileData.base64
+          };
+          restoreFileFromFileData(fileDataForRestore, preview, filenameSpan, fileInput, dropzone, 'localStorage backup');
+          console.log(`File ${fileData.name} restored from localStorage backup`);
+          return; // Success, exit early
+        }
+      } catch (error) {
+        console.error('Error restoring from localStorage backup:', error);
+      }
+    }
+
+    // Try old localStorage format
+    const oldLocalStorageData = localStorage.getItem(`docUpload_${index}`);
+    if (oldLocalStorageData) {
+      try {
+        const fileData = JSON.parse(oldLocalStorageData);
+        if (fileData.base64) {
+          // File found in old localStorage - restore it
+          const fileDataForRestore = {
+            name: fileData.name,
+            size: fileData.size,
+            type: fileData.type,
+            data: fileData.base64
+          };
+          restoreFileFromFileData(fileDataForRestore, preview, filenameSpan, fileInput, dropzone, 'localStorage');
+          console.log(`File ${fileData.name} restored from old localStorage`);
+          return; // Success, exit early
+        } else {
+          // Old format - only metadata
+          showFileRemovedMessage(fileData.name, preview, filenameSpan, dropzone);
+        }
+      } catch (error) {
+        console.error('Error restoring from old localStorage:', error);
+      }
+    }
+
+    // No file found in any storage
+    console.log(`No file found for docUpload_${index} in any storage`);
+    showFileErrorMessage(preview, filenameSpan, dropzone);
+  });
+}
