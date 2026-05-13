@@ -1499,29 +1499,36 @@ body* {
 /* Field Validation System */
 .field-error {
   border-color: #dc2626 !important;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2) !important;
-  background-color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15) !important;
+  background-color: #fef2f2 !important;
+  transition: all 0.3s ease;
 }
 
 .field-error-message {
-  color: #dc2626;
+  color: #991b1b;
   font-size: 13px;
   font-weight: 500;
-  margin-top: 6px;
-  padding: 8px 12px;
-  background: #ffffff;
-  border: 1px solid #dc2626;
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid #fca5a5;
+  border-left: 3px solid #dc2626;
   border-radius: 8px;
   animation: fieldErrorSlideIn 0.3s ease-out;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
 }
 
-.field-error-message::before {
-  content: '';
-  font-size: 14px;
+.field-error-message svg {
   flex-shrink: 0;
+  color: #dc2626;
+}
+
+.field-error-message span {
+  flex: 1;
+  line-height: 1.4;
 }
 
 @keyframes fieldErrorSlideIn {
@@ -1532,6 +1539,29 @@ body* {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fieldErrorFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes fieldErrorShake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-8px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(8px);
   }
 }
 
@@ -1550,6 +1580,21 @@ body* {
 .form-group textarea.field-error:focus {
   border-color: #dc2626;
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+  background-color: #ffffff !important;
+}
+
+/* Success state for valid fields */
+.form-group input:valid:not(:placeholder-shown),
+.form-group select:valid:not([value=""]),
+.form-group textarea:valid:not(:placeholder-shown) {
+  border-color: #d1d5db;
+}
+
+.form-group input:valid:focus:not(:placeholder-shown),
+.form-group select:valid:focus:not([value=""]),
+.form-group textarea:valid:focus:not(:placeholder-shown) {
+  border-color: #046307;
+  box-shadow: 0 0 0 3px rgba(4, 99, 7, 0.1);
 }
 
 /* Page Loader Overlay */
@@ -5464,34 +5509,48 @@ textarea:hover {
 .validation-message {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  color: #dc2626;
+  gap: 14px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid #fca5a5;
+  border-left: 4px solid #dc2626;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  color: #991b1b;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.12);
 }
 
 .validation-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: rgba(220, 38, 38, 0.10);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(220, 38, 38, 0.15);
   color: #dc2626;
   flex-shrink: 0;
 }
 
 .validation-icon svg {
   display: block;
+  animation: validationIconPulse 2s ease-in-out infinite;
+}
+
+@keyframes validationIconPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 .validation-text {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  line-height: 1.5;
+  flex: 1;
 }
 
 .form-download-awareness {
@@ -5499,7 +5558,206 @@ textarea:hover {
   padding: 20px;
   background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
   border: 1px solid #fbbf24;
+  border-left: 4px solid #f59e0b;
   border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+  transition: all 0.3s ease;
+}
+
+.form-download-awareness:hover {
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Professional Centered Validation Modal */
+.validation-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  padding: 20px;
+}
+
+.validation-modal-overlay.validation-modal-show {
+  opacity: 1;
+}
+
+.validation-modal-overlay.validation-modal-show .validation-modal {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.validation-modal {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 440px;
+  width: 100%;
+  padding: 32px;
+  text-align: center;
+  transform: scale(0.9);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.validation-modal-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: modalIconBounce 0.6s ease-out;
+}
+
+@keyframes modalIconBounce {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.validation-modal-icon-error {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #dc2626;
+}
+
+.validation-modal-icon-success {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #10b981;
+}
+
+.validation-modal-icon-logout {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #f59e0b;
+}
+
+.validation-modal-icon svg {
+  display: block;
+}
+
+.validation-modal-content {
+  margin-bottom: 28px;
+}
+
+.validation-modal-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 12px 0;
+}
+
+.validation-modal-message {
+  font-size: 15px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.validation-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.validation-modal-btn {
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.validation-modal-btn-primary {
+  background: linear-gradient(135deg, #046307 0%, #0b5f2c 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(4, 99, 7, 0.3);
+}
+
+.validation-modal-btn-primary:hover {
+  background: linear-gradient(135deg, #0b5f2c 0%, #046307 100%);
+  box-shadow: 0 6px 16px rgba(4, 99, 7, 0.4);
+  transform: translateY(-2px);
+}
+
+.validation-modal-btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(4, 99, 7, 0.3);
+}
+
+.validation-modal-btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.validation-modal-btn-secondary:hover {
+  background: #e5e7eb;
+}
+
+.validation-modal-btn-danger {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.validation-modal-btn-danger:hover {
+  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+  box-shadow: 0 6px 16px rgba(220, 38, 38, 0.4);
+  transform: translateY(-2px);
+}
+
+.validation-modal-btn-danger:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+}
+
+/* Responsive modal for mobile */
+@media (max-width: 640px) {
+  .validation-modal {
+    padding: 24px;
+    max-width: 100%;
+  }
+  
+  .validation-modal-icon {
+    width: 64px;
+    height: 64px;
+  }
+  
+  .validation-modal-icon svg {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .validation-modal-title {
+    font-size: 20px;
+  }
+  
+  .validation-modal-message {
+    font-size: 14px;
+  }
+  
+  .validation-modal-btn {
+    padding: 10px 24px;
+    font-size: 14px;
+  }
 }
 
 .awareness-header {

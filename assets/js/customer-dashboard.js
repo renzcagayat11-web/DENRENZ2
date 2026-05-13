@@ -212,35 +212,59 @@ function showFieldError(fieldId, message) {
   // Remove existing error
   clearFieldError(fieldId);
   
-  // Add error styling
+  // Add error styling with animation
   field.classList.add('field-error');
   
-  // Create error message element
+  // Create error message element with icon
   const errorElement = document.createElement('div');
   errorElement.className = 'field-error-message';
-  errorElement.textContent = message;
+  
+  // Add error icon SVG
+  const iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  iconSvg.setAttribute('width', '16');
+  iconSvg.setAttribute('height', '16');
+  iconSvg.setAttribute('viewBox', '0 0 24 24');
+  iconSvg.setAttribute('fill', 'none');
+  iconSvg.setAttribute('stroke', 'currentColor');
+  iconSvg.setAttribute('stroke-width', '2');
+  iconSvg.setAttribute('stroke-linecap', 'round');
+  iconSvg.setAttribute('stroke-linejoin', 'round');
+  iconSvg.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+  
+  const textSpan = document.createElement('span');
+  textSpan.textContent = message;
+  
+  errorElement.appendChild(iconSvg);
+  errorElement.appendChild(textSpan);
   
   // Insert error message after field
   field.parentNode.insertBefore(errorElement, field.nextSibling);
   
-  // Focus on the field
-  field.focus();
+  // Add shake animation to field
+  field.style.animation = 'fieldErrorShake 0.4s ease-in-out';
+  setTimeout(() => {
+    field.style.animation = '';
+  }, 400);
   
   // Auto-remove error after user starts typing
   field.addEventListener('input', () => clearFieldError(fieldId), { once: true });
+  field.addEventListener('change', () => clearFieldError(fieldId), { once: true });
 }
 
 function clearFieldError(fieldId) {
   const field = document.getElementById(fieldId);
   if (!field) return;
   
-  // Remove error styling
+  // Remove error styling with fade out
   field.classList.remove('field-error');
   
-  // Remove error message
+  // Remove error message with animation
   const errorElement = field.parentNode.querySelector('.field-error-message');
   if (errorElement) {
-    errorElement.remove();
+    errorElement.style.animation = 'fieldErrorFadeOut 0.2s ease-out';
+    setTimeout(() => {
+      errorElement.remove();
+    }, 200);
   }
 }
 
@@ -251,12 +275,105 @@ function clearAllFieldErrors(containerSelector = '.form-step.active') {
   // Remove all error styles
   container.querySelectorAll('.field-error').forEach(field => {
     field.classList.remove('field-error');
+    field.style.animation = '';
   });
   
-  // Remove all error messages
+  // Remove all error messages with animation
   container.querySelectorAll('.field-error-message').forEach(msg => {
-    msg.remove();
+    msg.style.animation = 'fieldErrorFadeOut 0.2s ease-out';
+    setTimeout(() => {
+      msg.remove();
+    }, 200);
   });
+}
+
+// Scroll to first error field smoothly
+function scrollToFirstError() {
+  const firstError = document.querySelector('.field-error');
+  if (firstError) {
+    firstError.scrollIntoView({ 
+      behavior: 'smooth', 
+      block: 'center',
+      inline: 'nearest'
+    });
+    // Focus after scroll completes
+    setTimeout(() => {
+      firstError.focus();
+    }, 500);
+  }
+}
+
+// Show validation modal (centered, professional)
+function showValidationToast(message, type = 'error') {
+  // Remove existing modal if any
+  const existingModal = document.querySelector('.validation-modal-overlay');
+  if (existingModal) {
+    existingModal.remove();
+  }
+  
+  // Create modal overlay
+  const overlay = document.createElement('div');
+  overlay.className = 'validation-modal-overlay';
+  
+  // Icon and colors based on type
+  let iconSvg, iconClass, title;
+  if (type === 'error' || type === 'warning') {
+    iconSvg = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+    iconClass = 'validation-modal-icon-error';
+    title = type === 'error' ? 'Validation Error' : 'Warning';
+  } else {
+    iconSvg = '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+    iconClass = 'validation-modal-icon-success';
+    title = 'Success';
+  }
+  
+  overlay.innerHTML = `
+    <div class="validation-modal">
+      <div class="validation-modal-icon ${iconClass}">
+        ${iconSvg}
+      </div>
+      <div class="validation-modal-content">
+        <h3 class="validation-modal-title">${title}</h3>
+        <p class="validation-modal-message">${message}</p>
+      </div>
+      <div class="validation-modal-actions">
+        <button class="validation-modal-btn validation-modal-btn-primary" onclick="this.closest('.validation-modal-overlay').remove()">
+          OK
+        </button>
+      </div>
+    </div>
+  `;
+  
+  // Add to body
+  document.body.appendChild(overlay);
+  
+  // Trigger animation
+  setTimeout(() => {
+    overlay.classList.add('validation-modal-show');
+  }, 10);
+  
+  // Close on overlay click
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      closeValidationModal(overlay);
+    }
+  });
+  
+  // Close on ESC key
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      closeValidationModal(overlay);
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
+}
+
+function closeValidationModal(overlay) {
+  overlay.classList.remove('validation-modal-show');
+  setTimeout(() => {
+    overlay.remove();
+  }, 300);
 }
 
 // Barangay Data for District 4 Laguna Municipalities
@@ -3335,14 +3452,21 @@ function showLogoutModal() {
   if (logoutModal) {
     logoutModal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
+    // Trigger animation
+    setTimeout(() => {
+      logoutModal.classList.add('validation-modal-show');
+    }, 10);
   }
 }
 
 // Hide logout modal function
 function hideLogoutModal() {
   if (logoutModal) {
-    logoutModal.style.display = 'none';
-    document.body.style.overflow = '';
+    logoutModal.classList.remove('validation-modal-show');
+    setTimeout(() => {
+      logoutModal.style.display = 'none';
+      document.body.style.overflow = '';
+    }, 300);
   }
 }
 
@@ -4363,13 +4487,24 @@ document.getElementById('nextStep2')?.addEventListener('click', () => {
   if (formTemplate && customFormContainer && customFormContainer.style.display !== 'none') {
     // Validate the custom form
     if (!validateForm()) {
-      showAlert('Please complete all required fields before proceeding to the next step.', 'warning');
+      showValidationToast('Please complete all required fields in the DENR application form.');
+      // Scroll to validation message
+      const validationMsg = document.getElementById('formValidationMessage');
+      if (validationMsg && validationMsg.style.display !== 'none') {
+        validationMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return;
     }
     
     // Check if form has been downloaded
     if (formDownloadAwareness && formDownloadAwareness.style.display !== 'none') {
-      showAlert('Please download the completed form before proceeding.', 'warning');
+      showValidationToast('Please download the completed form before proceeding to the next step.', 'error');
+      formDownloadAwareness.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Add pulse animation to awareness box
+      formDownloadAwareness.style.animation = 'fieldErrorShake 0.4s ease-in-out';
+      setTimeout(() => {
+        formDownloadAwareness.style.animation = '';
+      }, 400);
       return;
     }
   }
@@ -4756,11 +4891,15 @@ function validateStep(step) {
     clearFieldError('permitType');
     
     if (!docType) {
-      showFieldError('documentType', 'Please select a category type.');
+      showFieldError('documentType', 'Category type is required to proceed.');
       isValid = false;
     } else if (!docCategory) {
-      showFieldError('permitType', 'Please select a permit type.');
+      showFieldError('permitType', 'Permit type is required to proceed.');
       isValid = false;
+    }
+    
+    if (!isValid) {
+      scrollToFirstError();
     }
   }
 
@@ -4790,32 +4929,32 @@ function validateStep(step) {
       
       // Name validation with character limits and format
       if (!firstName) {
-        showFieldError('firstName', 'Please enter your first name.');
+        showFieldError('firstName', 'First name is required.');
         isValid = false;
       } else if (!/^[a-zA-Z\s\-\.']+$/.test(firstName)) {
-        showFieldError('firstName', 'First name can only contain letters, spaces, hyphens, periods, and apostrophes.');
+        showFieldError('firstName', 'Only letters, spaces, hyphens, periods, and apostrophes allowed.');
         isValid = false;
       } else if (firstName.length < 2 || firstName.length > 50) {
-        showFieldError('firstName', 'First name must be between 2 and 50 characters.');
+        showFieldError('firstName', 'Must be between 2 and 50 characters.');
         isValid = false;
       }
       
       if (!lastName) {
-        showFieldError('lastName', 'Please enter your last name.');
+        showFieldError('lastName', 'Last name is required.');
         isValid = false;
       } else if (!/^[a-zA-Z\s\-\.']+$/.test(lastName)) {
-        showFieldError('lastName', 'Last name can only contain letters, spaces, hyphens, periods, and apostrophes.');
+        showFieldError('lastName', 'Only letters, spaces, hyphens, periods, and apostrophes allowed.');
         isValid = false;
       } else if (lastName.length < 2 || lastName.length > 50) {
-        showFieldError('lastName', 'Last name must be between 2 and 50 characters.');
+        showFieldError('lastName', 'Must be between 2 and 50 characters.');
         isValid = false;
       }
       
       if (middleName && !/^[a-zA-Z\s\-\.']+$/.test(middleName)) {
-        showFieldError('middleName', 'Middle name can only contain letters, spaces, hyphens, periods, and apostrophes.');
+        showFieldError('middleName', 'Only letters, spaces, hyphens, periods, and apostrophes allowed.');
         isValid = false;
       } else if (middleName && (middleName.length < 2 || middleName.length > 50)) {
-        showFieldError('middleName', 'Middle name must be between 2 and 50 characters.');
+        showFieldError('middleName', 'Must be between 2 and 50 characters.');
         isValid = false;
       }
     } else {
@@ -4827,10 +4966,10 @@ function validateStep(step) {
       clearFieldError('representativeName');
       
       if (!companyName) {
-        showFieldError('companyName', 'Please enter company name.');
+        showFieldError('companyName', 'Company name is required.');
         isValid = false;
       } else if (!representativeName) {
-        showFieldError('representativeName', 'Please enter authorized representative name.');
+        showFieldError('representativeName', 'Authorized representative name is required.');
         isValid = false;
       }
     }
@@ -4838,23 +4977,27 @@ function validateStep(step) {
     // Mobile validation (common for both types)
     const mobileFieldId = applicantType === 'personal' ? 'applicantMobileIndividual' : 'applicantMobileCompany';
     if (!applicantMobile) {
-      showFieldError(mobileFieldId, 'Please enter a mobile number.');
+      showFieldError(mobileFieldId, 'Mobile number is required.');
       isValid = false;
     } else if (applicantMobile.startsWith('09')) {
       // 09 prefix must be exactly 11 digits
       if (applicantMobile.length !== 11) {
-        showFieldError(mobileFieldId, 'Mobile number starting with 09 must be 11 digits only.');
+        showFieldError(mobileFieldId, 'Must be exactly 11 digits (e.g., 09123456789).');
         isValid = false;
       }
     } else if (applicantMobile.startsWith('63')) {
       // 63 prefix must be exactly 13 digits
       if (applicantMobile.length !== 13) {
-        showFieldError(mobileFieldId, 'Mobile number starting with 63 must be 13 digits only.');
+        showFieldError(mobileFieldId, 'Must be exactly 13 digits (e.g., 639123456789).');
         isValid = false;
       }
     } else {
-      showFieldError(mobileFieldId, 'Mobile number must start with 09 or 63.');
+      showFieldError(mobileFieldId, 'Must start with 09 or 63.');
       isValid = false;
+    }
+    
+    if (!isValid) {
+      scrollToFirstError();
     }
   }
 
@@ -4874,26 +5017,30 @@ function validateStep(step) {
     clearFieldError('streetAddress');
     
     if (!district) {
-      showFieldError('district', 'Please select a district.');
+      showFieldError('district', 'District is required.');
       isValid = false;
     }
     
     if (!municipal) {
-      showFieldError('municipal', 'Please select a municipal.');
+      showFieldError('municipal', 'Municipality is required.');
       isValid = false;
     }
     
     if (!barangay) {
-      showFieldError('barangay', 'Please select a barangay.');
+      showFieldError('barangay', 'Barangay is required.');
       isValid = false;
     }
     
     if (!streetAddress || streetAddress.length < 5) {
-      showFieldError('streetAddress', 'Please enter your street address (at least 5 characters).');
+      showFieldError('streetAddress', 'Street address is required (minimum 5 characters).');
       isValid = false;
       console.log('Street address validation failed - empty or too short');
     } else {
       console.log('Location validation passed');
+    }
+    
+    if (!isValid) {
+      scrollToFirstError();
     }
   }
 
@@ -5007,7 +5154,10 @@ function goToStep(step) {
   if (step > currentStep) {
     const { isValid } = validateStep(currentStep);
     if (!isValid) {
-      // Show field-level errors only, no modal
+      // Show validation toast notification
+      showValidationToast('Please complete all required fields before proceeding to the next step.');
+      // Show field-level errors and scroll to first error
+      scrollToFirstError();
       return;
     }
   }
@@ -8147,6 +8297,9 @@ function loadCustomForm(permitType, formTemplate) {
   // Auto-populate form fields from Step 1 data
   autoPopulateFormFields();
   
+  // Add input validation and limits
+  setupInputValidation();
+  
   // Add event listeners for form validation
   setupFormValidation();
 }
@@ -8190,6 +8343,173 @@ function autoPopulateFormFields() {
   });
 }
 
+function setupInputValidation() {
+  if (!formContentArea) return;
+  
+  // Get all input fields
+  const textInputs = formContentArea.querySelectorAll('input[type="text"], input:not([type]), textarea');
+  const numberInputs = formContentArea.querySelectorAll('input[type="number"]');
+  const mobileInputs = formContentArea.querySelectorAll('#applicantContact, #ownerContact, #contactNumber, input[name*="mobile"], input[name*="contact"], input[placeholder*="mobile" i], input[placeholder*="contact" i]');
+  
+  // Text input validation - max 100 characters
+  textInputs.forEach(input => {
+    // Skip mobile/contact fields as they have special validation
+    if (input.id && (input.id.toLowerCase().includes('contact') || input.id.toLowerCase().includes('mobile'))) {
+      return;
+    }
+    if (input.placeholder && (input.placeholder.toLowerCase().includes('contact') || input.placeholder.toLowerCase().includes('mobile'))) {
+      return;
+    }
+    
+    // Set maxlength if not already set
+    if (!input.hasAttribute('maxlength')) {
+      if (input.tagName.toLowerCase() === 'textarea') {
+        input.setAttribute('maxlength', '500');
+      } else {
+        input.setAttribute('maxlength', '100');
+      }
+    }
+    
+    // Add character counter for long fields
+    if (input.tagName.toLowerCase() === 'textarea') {
+      addCharacterCounter(input);
+    }
+  });
+  
+  // Number input validation - only allow numbers
+  numberInputs.forEach(input => {
+    input.addEventListener('input', (e) => {
+      // Remove non-numeric characters
+      e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    });
+    
+    input.addEventListener('keypress', (e) => {
+      // Only allow numbers
+      if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+        e.preventDefault();
+      }
+    });
+  });
+  
+  // Mobile number validation - 11 digits only, must start with 09
+  mobileInputs.forEach(input => {
+    // Set type to tel for better mobile keyboard
+    input.setAttribute('type', 'tel');
+    input.setAttribute('maxlength', '11');
+    input.setAttribute('pattern', '09[0-9]{9}');
+    input.setAttribute('placeholder', '09XXXXXXXXX');
+    
+    input.addEventListener('input', (e) => {
+      // Remove non-numeric characters
+      let value = e.target.value.replace(/[^0-9]/g, '');
+      
+      // Auto-add "09" if user starts typing
+      if (value.length > 0 && !value.startsWith('09')) {
+        // If first digit is 0, add 9
+        if (value.startsWith('0') && value.length === 1) {
+          value = '09';
+        }
+        // If first digit is 9, prepend 0
+        else if (value.startsWith('9')) {
+          value = '0' + value;
+        }
+        // Otherwise, prepend 09
+        else {
+          value = '09' + value;
+        }
+      }
+      
+      // Limit to 11 digits
+      if (value.length > 11) {
+        value = value.slice(0, 11);
+      }
+      
+      e.target.value = value;
+      
+      // Visual feedback
+      if (value.length > 0 && value.length < 11) {
+        e.target.style.borderColor = '#fbbf24';
+      } else if (value.length === 11 && value.startsWith('09')) {
+        e.target.style.borderColor = '#10b981';
+      } else if (value.length > 0 && !value.startsWith('09')) {
+        e.target.style.borderColor = '#dc2626';
+      } else {
+        e.target.style.borderColor = '';
+      }
+    });
+    
+    input.addEventListener('keypress', (e) => {
+      // Only allow numbers
+      if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+        e.preventDefault();
+      }
+    });
+    
+    input.addEventListener('blur', (e) => {
+      const value = e.target.value;
+      if (value.length > 0 && (value.length !== 11 || !value.startsWith('09'))) {
+        // Show error
+        e.target.style.borderColor = '#dc2626';
+        showMobileError(e.target, 'Must start with 09');
+      } else {
+        e.target.style.borderColor = '';
+        removeMobileError(e.target);
+      }
+    });
+  });
+}
+
+function addCharacterCounter(textarea) {
+  const maxLength = textarea.getAttribute('maxlength') || 500;
+  const counter = document.createElement('div');
+  counter.className = 'character-counter';
+  counter.style.cssText = 'font-size: 12px; color: #6b7280; text-align: right; margin-top: 4px;';
+  
+  const updateCounter = () => {
+    const remaining = maxLength - textarea.value.length;
+    counter.textContent = `${textarea.value.length}/${maxLength} characters`;
+    
+    if (remaining < 50) {
+      counter.style.color = '#dc2626';
+    } else if (remaining < 100) {
+      counter.style.color = '#f59e0b';
+    } else {
+      counter.style.color = '#6b7280';
+    }
+  };
+  
+  textarea.addEventListener('input', updateCounter);
+  textarea.parentNode.insertBefore(counter, textarea.nextSibling);
+  updateCounter();
+}
+
+function showMobileError(input, customMessage = null) {
+  removeMobileError(input);
+  
+  const message = customMessage || 'Mobile number must be exactly 11 digits and start with 09';
+  
+  const errorMsg = document.createElement('div');
+  errorMsg.className = 'mobile-error-message';
+  errorMsg.style.cssText = 'color: #dc2626; font-size: 12px; margin-top: 4px; display: flex; align-items: center; gap: 6px;';
+  errorMsg.innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <span>${message}</span>
+  `;
+  
+  input.parentNode.insertBefore(errorMsg, input.nextSibling);
+}
+
+function removeMobileError(input) {
+  const errorMsg = input.parentNode.querySelector('.mobile-error-message');
+  if (errorMsg) {
+    errorMsg.remove();
+  }
+}
+
 function setupFormValidation() {
   const requiredFields = formContentArea.querySelectorAll('[required]');
   const checkboxes = formContentArea.querySelectorAll('input[type="checkbox"][required]');
@@ -8211,30 +8531,51 @@ function validateForm() {
   const requiredCheckboxes = formContentArea.querySelectorAll('input[type="checkbox"][required]');
   
   let isValid = true;
+  let emptyFieldCount = 0;
+  let uncheckedBoxCount = 0;
   
   // Check text/select/textarea fields
   requiredFields.forEach(field => {
     if (!field.value.trim()) {
       isValid = false;
+      emptyFieldCount++;
+      // Add visual feedback
+      field.style.borderColor = '#fca5a5';
+      field.addEventListener('input', function() {
+        this.style.borderColor = '';
+      }, { once: true });
     }
   });
   
   // Check required checkboxes
-  let allCheckboxesChecked = true;
   requiredCheckboxes.forEach(checkbox => {
     if (!checkbox.checked) {
-      allCheckboxesChecked = false;
+      isValid = false;
+      uncheckedBoxCount++;
     }
   });
   
-  if (!allCheckboxesChecked) {
-    isValid = false;
-  }
-  
-  // Show/hide validation message
+  // Show/hide validation message with detailed feedback
   const validationMessage = document.getElementById('formValidationMessage');
   if (validationMessage) {
-    validationMessage.style.display = isValid ? 'none' : 'flex';
+    if (!isValid) {
+      const validationText = validationMessage.querySelector('.validation-text');
+      if (validationText) {
+        let message = 'Please complete all required fields before proceeding.';
+        if (emptyFieldCount > 0 && uncheckedBoxCount > 0) {
+          message = `Please fill ${emptyFieldCount} required field${emptyFieldCount > 1 ? 's' : ''} and check ${uncheckedBoxCount} required checkbox${uncheckedBoxCount > 1 ? 'es' : ''}.`;
+        } else if (emptyFieldCount > 0) {
+          message = `Please fill ${emptyFieldCount} required field${emptyFieldCount > 1 ? 's' : ''}.`;
+        } else if (uncheckedBoxCount > 0) {
+          message = `Please check ${uncheckedBoxCount} required checkbox${uncheckedBoxCount > 1 ? 'es' : ''}.`;
+        }
+        validationText.textContent = message;
+      }
+      validationMessage.style.display = 'flex';
+      validationMessage.style.animation = 'fieldErrorSlideIn 0.3s ease-out';
+    } else {
+      validationMessage.style.display = 'none';
+    }
   }
   
   return isValid;
