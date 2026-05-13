@@ -8717,6 +8717,77 @@ function showStepValidationModal(missingFields) {
   showValidationToast(message, 'error');
 }
 
+// Show application submission success modal
+function showApplicationSuccessModal(action, applicationId) {
+  const actionText = action === 'updated' ? 'Updated' : 'Submitted';
+  const actionTextLower = action === 'updated' ? 'updated' : 'submitted';
+  
+  const message = `
+    <div style="text-align: center; padding: 10px 0;">
+      <h3 style="margin: 0 0 12px 0; font-size: 18px; font-weight: 600; color: #059669;">
+        Application ${actionText} Successfully!
+      </h3>
+      <p style="margin: 0 0 12px 0; color: #6b7280; font-size: 14px;">
+        Your application has been ${actionTextLower} and is now pending review.
+      </p>
+      <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 12px; margin: 0 0 12px 0;">
+        <p style="margin: 0 0 4px 0; color: #6b7280; font-size: 12px; font-weight: 500;">Application ID</p>
+        <p style="margin: 0; color: #059669; font-size: 16px; font-weight: 700; font-family: monospace;">${applicationId}</p>
+      </div>
+      <p style="margin: 0; color: #6b7280; font-size: 13px;">
+        You will be notified once your application is reviewed.
+      </p>
+    </div>
+  `;
+  
+  showValidationToast(message, 'success');
+  
+  // Auto-close after 4 seconds
+  setTimeout(() => {
+    const overlay = document.querySelector('.validation-modal-overlay');
+    if (overlay) {
+      overlay.remove();
+    }
+  }, 4000);
+}
+
+// Show success toast notification (no OK button, auto-disappear)
+function showSuccessToast(message) {
+  // Remove existing toast if any
+  const existingToast = document.querySelector('.success-toast');
+  if (existingToast) {
+    existingToast.remove();
+  }
+  
+  // Create toast
+  const toast = document.createElement('div');
+  toast.className = 'success-toast';
+  toast.innerHTML = `
+    <div class="success-toast-content">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      <span>${message}</span>
+    </div>
+  `;
+  
+  document.body.appendChild(toast);
+  
+  // Trigger animation
+  setTimeout(() => {
+    toast.classList.add('show');
+  }, 10);
+  
+  // Auto-remove after 3 seconds
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, 3000);
+}
+
 function clearCustomForm() {
   if (!formContentArea) return;
   
@@ -10179,17 +10250,21 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
       appRef = await addDoc(collection(db, 'applications'), applicationData);
     }
     
-    // INSTANT: Show success and redirect
+    // INSTANT: Show success modal and redirect
     if (isEditing) {
-      showAlert('Application updated successfully! Status is now pending for review. New documents are being uploaded in background...', 'success');
+      showApplicationSuccessModal('updated', applicationId);
       // Immediately refresh applications to show updated status
       setTimeout(() => {
         fetchUserApplications();
       }, 1000);
     } else {
-      showAlert('Application submitted successfully! Uploading documents in background...', 'success');
+      showApplicationSuccessModal('submitted', applicationId);
     }
-    navigateToSection('myApplicationsSection');
+    
+    // Delay navigation to show modal
+    setTimeout(() => {
+      navigateToSection('myApplicationsSection');
+    }, 2000);
     document.getElementById('newApplicationForm').reset();
     clearFormData('newApplicationForm');
     hideCategoryAwarenessBanner();
@@ -10665,60 +10740,77 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
     
     let hasErrors = false;
     
+    // First name validation
     if (!firstName || firstName.trim() === '') {
-      console.log('First name validation failed:', firstName);
-      showFieldError('profileFirstName', 'Please enter your first name.');
+      showFieldError('profileFirstName', 'First name is required.');
+      hasErrors = true;
+    } else if (!/^[a-zA-Z\s\-\.']+$/.test(firstName)) {
+      showFieldError('profileFirstName', 'Only letters, spaces, hyphens, periods, and apostrophes allowed.');
+      hasErrors = true;
+    } else if (firstName.length < 2 || firstName.length > 50) {
+      showFieldError('profileFirstName', 'Must be between 2 and 50 characters.');
       hasErrors = true;
     }
     
+    // Surname validation
     if (!surname || surname.trim() === '') {
-      console.log('Surname validation failed:', surname);
-      showFieldError('profileSurname', 'Please enter your surname.');
+      showFieldError('profileSurname', 'Surname is required.');
+      hasErrors = true;
+    } else if (!/^[a-zA-Z\s\-\.']+$/.test(surname)) {
+      showFieldError('profileSurname', 'Only letters, spaces, hyphens, periods, and apostrophes allowed.');
+      hasErrors = true;
+    } else if (surname.length < 2 || surname.length > 50) {
+      showFieldError('profileSurname', 'Must be between 2 and 50 characters.');
       hasErrors = true;
     }
     
-    if (!middleName || middleName.trim() === '') {
-      console.log('Middle name validation failed:', middleName);
-      showFieldError('profileMiddleName', 'Please enter your middle name.');
-      hasErrors = true;
+    // Middle name validation (optional but must be valid if provided)
+    if (middleName && middleName.trim() !== '') {
+      if (!/^[a-zA-Z\s\-\.']+$/.test(middleName)) {
+        showFieldError('profileMiddleName', 'Only letters, spaces, hyphens, periods, and apostrophes allowed.');
+        hasErrors = true;
+      } else if (middleName.length < 2 || middleName.length > 50) {
+        showFieldError('profileMiddleName', 'Must be between 2 and 50 characters.');
+        hasErrors = true;
+      }
     }
     
+    // Mobile number validation
     if (!mobile || mobile.trim() === '') {
-      showFieldError('profileMobile', 'Please enter a mobile number.');
+      showFieldError('profileMobile', 'Mobile number is required.');
       hasErrors = true;
-    } else if (mobile.startsWith('09')) {
-      if (mobile.length !== 11) {
-        showFieldError('profileMobile', 'Mobile number starting with 09 must be 11 digits only.');
-        hasErrors = true;
-      }
-    } else if (mobile.startsWith('63')) {
-      if (mobile.length !== 13) {
-        showFieldError('profileMobile', 'Mobile number starting with 63 must be 13 digits only.');
-        hasErrors = true;
-      }
-    } else {
-      showFieldError('profileMobile', 'Mobile number must start with 09 or 63.');
+    } else if (!mobile.startsWith('09')) {
+      showFieldError('profileMobile', 'Mobile number must start with 09.');
+      hasErrors = true;
+    } else if (mobile.length !== 11) {
+      showFieldError('profileMobile', 'Mobile number must be exactly 11 digits (09XXXXXXXXX).');
+      hasErrors = true;
+    } else if (!/^09\d{9}$/.test(mobile)) {
+      showFieldError('profileMobile', 'Mobile number must contain only numbers.');
       hasErrors = true;
     }
     
     // Address validation
-    if (!district) {
-      showFieldError('profileDistrict', 'Please select a district.');
+    if (!district || district === '') {
+      showFieldError('profileDistrict', 'District is required.');
       hasErrors = true;
     }
     
-    if (!municipal) {
-      showFieldError('profileMunicipal', 'Please select a municipal.');
+    if (!municipal || municipal === '') {
+      showFieldError('profileMunicipal', 'Municipality is required.');
       hasErrors = true;
     }
     
-    if (!barangay) {
-      showFieldError('profileBarangay', 'Please select a barangay.');
+    if (!barangay || barangay === '') {
+      showFieldError('profileBarangay', 'Barangay is required.');
       hasErrors = true;
     }
     
-    if (!streetAddress) {
-      showFieldError('profileStreetAddress', 'Please enter your street address.');
+    if (!streetAddress || streetAddress.trim() === '') {
+      showFieldError('profileStreetAddress', 'Street address is required.');
+      hasErrors = true;
+    } else if (streetAddress.length < 5 || streetAddress.length > 200) {
+      showFieldError('profileStreetAddress', 'Street address must be between 5 and 200 characters.');
       hasErrors = true;
     }
     
@@ -10816,7 +10908,7 @@ async function saveProfileData(updateData) {
     console.log('Local data updated:', currentUserData);
     
     updateUserInfo(auth.currentUser, currentUserData);
-    showAlert('[SUCCESS] Profile updated successfully!', 'success');
+    showSuccessToast('Profile updated successfully!');
     
     // Return to view mode after successful update
     enableProfileEditMode(false);

@@ -5692,6 +5692,39 @@ textarea:hover {
   display: block;
 }
 
+/* Success Toast Notification */
+.success-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(5, 150, 105, 0.3);
+  z-index: 10000;
+  opacity: 0;
+  transform: translateX(400px);
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.success-toast.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.success-toast-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.success-toast-content svg {
+  flex-shrink: 0;
+}
+
 .validation-modal-content {
   margin-bottom: 28px;
 }
