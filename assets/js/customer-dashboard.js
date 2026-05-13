@@ -3497,50 +3497,37 @@ function clearFilters() {
 }
 
 function displayApplicationsWithFilter(applications) {
-  const tbody = document.getElementById('applicationsTable');
-  
-  if (!tbody) return;
-  
-  tbody.innerHTML = '';
-  
-  if (applications.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 32px; color: #666;">No applications found matching your filters.</td></tr>';
-    return;
-  }
-  
-  applications.forEach(app => {
-    const row = document.createElement('tr');
-    const statusClass = getStatusClass(app.status);
-    const dateFormatted = formatDate(app.createdAt);
-
-    const isPending = app.status === 'pending';
-    const needsResubmit = app.status === 'needs revision' || app.status === 'needs resubmit';
-    const canEdit = needsResubmit;  // Only allow edit when staff requests resubmit
-    const canDelete = app.status === 'pending' || app.status === 'under review' || app.status === 'rejected' || needsResubmit;
-
-    row.innerHTML = `
-      <td>${app.applicationId || app.id}</td>
-      <td>${app.permitType || 'N/A'}</td>
-      <td>${dateFormatted}</td>
-      <td>
-        <span class="status-badge ${statusClass}">${app.status || 'PENDING'}</span>
-      </td>
-      <td>
-        <div class="table-actions">
-          <button class="action-btn btn-view" onclick="viewApplication('${app.id}')">View</button>
-          ${canEdit ? `
-          <button class="action-btn btn-edit" onclick="editApplication('${app.id}')">Resubmit</button>
-          ` : ''}
-          ${canDelete ? `
-          <button class="action-btn btn-delete" onclick="deleteApplication('${app.id}')">🗑️</button>
-          ` : ''}
-        </div>
-      </td>
-    `;
-
-    tbody.appendChild(row);
-  });
+  applicationsCurrentPage = 1; // reset to first page whenever filters change
+  renderApplicationsTable(applications, 'No applications found matching your filters.');
 }
+
+// Wire up pagination click handlers (delegated, runs once on DOM ready)
+document.addEventListener('DOMContentLoaded', () => {
+  const prevBtn = document.getElementById('applicationsPaginationPrev');
+  const nextBtn = document.getElementById('applicationsPaginationNext');
+  const pages = document.getElementById('applicationsPaginationPages');
+
+  const goToPage = (page) => {
+    if (!applicationsActiveDataset) return;
+    const total = applicationsActiveDataset.length;
+    const totalPages = Math.max(1, Math.ceil(total / APPLICATIONS_PAGE_SIZE));
+    const target = Math.min(Math.max(1, page), totalPages);
+    if (target === applicationsCurrentPage) return;
+    applicationsCurrentPage = target;
+    renderApplicationsTable(applicationsActiveDataset, 'No applications found matching your filters.');
+    // Scroll the table into view so the user sees the new page
+    document.querySelector('.table-container-applications')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  prevBtn?.addEventListener('click', () => goToPage(applicationsCurrentPage - 1));
+  nextBtn?.addEventListener('click', () => goToPage(applicationsCurrentPage + 1));
+  pages?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.apps-pagination__page');
+    if (!btn) return;
+    const page = parseInt(btn.dataset.page, 10);
+    if (!Number.isNaN(page)) goToPage(page);
+  });
+});
 
 // Update statistics
 function updateStats() {

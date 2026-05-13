@@ -5572,6 +5572,111 @@ textarea:hover {
   display: block;
 }
 
+/* Applications table pagination */
+.apps-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 14px 18px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.apps-pagination[hidden] {
+  display: none !important;
+}
+
+.apps-pagination__info {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.apps-pagination__controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.apps-pagination__btn,
+.apps-pagination__page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 12px;
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.apps-pagination__btn:hover:not(:disabled),
+.apps-pagination__page:hover:not(.is-active) {
+  background: #f0fdf4;
+  color: #0b5f2c;
+  border-color: #bbf7d0;
+}
+
+.apps-pagination__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.apps-pagination__page.is-active {
+  background: #0b5f2c;
+  color: #ffffff;
+  border-color: #0b5f2c;
+  box-shadow: 0 2px 6px rgba(11, 95, 44, 0.25);
+}
+
+.apps-pagination__pages {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.apps-pagination__ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  color: #94a3b8;
+  font-weight: 600;
+  user-select: none;
+}
+
+.apps-pagination__btn svg,
+.apps-pagination__page svg {
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .apps-pagination {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .apps-pagination__controls {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .apps-pagination__btn span:not([class]) {
+    display: none; /* hide "Previous"/"Next" labels on small screens, keep arrows */
+  }
+}
+
 /* Back-to-dashboard row inside the New Application section */
 .new-app-back-row {
   padding: 16px 48px 0;
