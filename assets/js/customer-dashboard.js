@@ -3763,73 +3763,126 @@ async function viewApplication(appId) {
   console.log('Details element:', detailsDiv);
   
   detailsDiv.innerHTML = `
-    <div class="detail-row">
-      <div class="detail-label">Application ID:</div>
-      <div class="detail-value">${app.applicationId || app.id}</div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-label">Permit Type:</div>
-      <div class="detail-value">${app.permitType || 'N/A'}</div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-label">Applicant Name:</div>
-      <div class="detail-value">${app.applicantName || 'N/A'}</div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-label">Address:</div>
-      <div class="detail-value">${app.applicantAddress || 'N/A'}</div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-label">Mobile Number:</div>
-      <div class="detail-value">${app.applicantMobile || 'N/A'}</div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-label">Date Submitted:</div>
-      <div class="detail-value">${formatDate(app.createdAt)}</div>
-    </div>
-    <div class="detail-row">
-      <div class="detail-label">Current Status:</div>
-      <div class="detail-value">
-        <span class="status-badge ${getStatusClass(app.status)}">${app.status}</span>
+    <!-- Application Header Card -->
+    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 24px; border-radius: 12px; margin-bottom: 24px; color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+      <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
+        <div>
+          <div style="font-size: 13px; opacity: 0.9; margin-bottom: 4px;">Application ID</div>
+          <div style="font-size: 24px; font-weight: 700; letter-spacing: 0.5px;">${app.applicationId || app.id}</div>
+        </div>
+        <span class="status-badge ${getStatusClass(app.status)}" style="font-size: 14px; padding: 8px 16px;">${app.status}</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; font-size: 14px;">
+        <div>
+          <div style="opacity: 0.9; margin-bottom: 4px;">📋 Permit Type</div>
+          <div style="font-weight: 600;">${app.permitType || 'N/A'}</div>
+        </div>
+        <div>
+          <div style="opacity: 0.9; margin-bottom: 4px;">📅 Submitted</div>
+          <div style="font-weight: 600;">${formatDate(app.createdAt)}</div>
+        </div>
       </div>
     </div>
+
+    <!-- Applicant Information Section -->
+    <div style="margin-bottom: 24px;">
+      <h4 style="font-size: 16px; font-weight: 700; color: #1f2937; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">
+        👤 Applicant Information
+      </h4>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+        <div style="background: #f9fafb; padding: 16px; border-radius: 8px; border-left: 3px solid #10b981;">
+          <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">Full Name</div>
+          <div style="font-weight: 600; color: #1f2937;">${app.applicantName || 'N/A'}</div>
+        </div>
+        <div style="background: #f9fafb; padding: 16px; border-radius: 8px; border-left: 3px solid #10b981;">
+          <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">Mobile Number</div>
+          <div style="font-weight: 600; color: #1f2937;">${app.applicantMobile || 'N/A'}</div>
+        </div>
+        <div style="background: #f9fafb; padding: 16px; border-radius: 8px; border-left: 3px solid #10b981; grid-column: 1 / -1;">
+          <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">Address</div>
+          <div style="font-weight: 600; color: #1f2937;">${app.applicantAddress || 'N/A'}</div>
+        </div>
+      </div>
+    </div>
+
     ${app.applicationDetails ? `
-    <div class="detail-row">
-      <div class="detail-label">Application Details:</div>
-      <div class="detail-value">${app.applicationDetails}</div>
-    </div>
-    ` : ''}
-    ${app.rejectionReason ? `
-    <div class="detail-row">
-      <div class="detail-label">Rejection Reason:</div>
-      <div class="detail-value" style="color: #ef4444;">${app.rejectionReason}</div>
-    </div>
-    ` : ''}
-    ${app.revisionComments ? `
-    <div class="detail-row">
-      <div class="detail-label">📝 Revision Required:</div>
-      <div class="detail-value" style="color: #f59e0b; background: #fffbeb; padding: 12px; border-radius: 6px; border-left: 4px solid #f59e0b;">
-        <strong>Please revise the following:</strong><br>
-        ${app.revisionComments}
+    <!-- Application Details Section -->
+    <div style="margin-bottom: 24px;">
+      <h4 style="font-size: 16px; font-weight: 700; color: #1f2937; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">
+        📝 Application Details
+      </h4>
+      <div style="background: #f9fafb; padding: 16px; border-radius: 8px; border-left: 3px solid #3b82f6;">
+        <div style="color: #374151; line-height: 1.6;">${app.applicationDetails}</div>
       </div>
     </div>
     ` : ''}
-    ${app.reviewedBy ? `
-    <div class="detail-row">
-      <div class="detail-label">Reviewed By:</div>
-      <div class="detail-value">${app.reviewedBy}</div>
+
+    ${app.revisionComments ? `
+    <!-- Revision Required Section -->
+    <div style="margin-bottom: 24px;">
+      <div style="background: #fffbeb; padding: 20px; border-radius: 12px; border-left: 4px solid #f59e0b; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.1);">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <div style="font-size: 28px;">⚠️</div>
+          <div>
+            <div style="font-size: 18px; font-weight: 700; color: #92400e;">Revision Required</div>
+            <div style="font-size: 13px; color: #b45309;">Please address the following comments</div>
+          </div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 8px; color: #78350f; line-height: 1.6;">
+          ${app.revisionComments}
+        </div>
+      </div>
     </div>
     ` : ''}
-    ${app.reviewedAt ? `
-    <div class="detail-row">
-      <div class="detail-label">Review Date:</div>
-      <div class="detail-value">${formatDate(app.reviewedAt)}</div>
+
+    ${app.rejectionReason ? `
+    <!-- Rejection Reason Section -->
+    <div style="margin-bottom: 24px;">
+      <div style="background: #fef2f2; padding: 20px; border-radius: 12px; border-left: 4px solid #ef4444; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1);">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <div style="font-size: 28px;">❌</div>
+          <div>
+            <div style="font-size: 18px; font-weight: 700; color: #991b1b;">Application Rejected</div>
+            <div style="font-size: 13px; color: #dc2626;">Reason for rejection</div>
+          </div>
+        </div>
+        <div style="background: white; padding: 16px; border-radius: 8px; color: #7f1d1d; line-height: 1.6;">
+          ${app.rejectionReason}
+        </div>
+      </div>
     </div>
     ` : ''}
+
+    ${app.reviewedBy || app.reviewedAt ? `
+    <!-- Review Information Section -->
+    <div style="margin-bottom: 24px;">
+      <h4 style="font-size: 16px; font-weight: 700; color: #1f2937; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">
+        ✅ Review Information
+      </h4>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+        ${app.reviewedBy ? `
+        <div style="background: #f9fafb; padding: 16px; border-radius: 8px; border-left: 3px solid #8b5cf6;">
+          <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">Reviewed By</div>
+          <div style="font-weight: 600; color: #1f2937;">${app.reviewedBy}</div>
+        </div>
+        ` : ''}
+        ${app.reviewedAt ? `
+        <div style="background: #f9fafb; padding: 16px; border-radius: 8px; border-left: 3px solid #8b5cf6;">
+          <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">Review Date</div>
+          <div style="font-weight: 600; color: #1f2937;">${formatDate(app.reviewedAt)}</div>
+        </div>
+        ` : ''}
+      </div>
+    </div>
+    ` : ''}
+
     ${app.documents && app.documents.length > 0 ? `
-    <div class="detail-row">
-      <div class="detail-label">Uploaded Documents:</div>
-      <div class="detail-value">
+    <!-- Uploaded Documents Section -->
+    <div style="margin-bottom: 24px;">
+      <h4 style="font-size: 16px; font-weight: 700; color: #1f2937; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e5e7eb;">
+        📎 Uploaded Documents (${app.documents.length})
+      </h4>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
         ${app.documents.map((doc, index) => {
           // Debug: Log document structure
           console.log(`Document ${index}:`, doc);
@@ -3862,66 +3915,69 @@ async function viewApplication(appId) {
           
           // Check if URL exists before proceeding
           if (!docUrl) {
-            return `<div class="document-card" style="margin-top: 12px; padding: 12px; border: 1px solid #ef4444; border-radius: 8px; background: #fef2f2;">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="font-size: 24px;">❌</div>
-                <div style="flex: 1;">
-                  <div style="font-weight: 500; color: #dc2626; margin-bottom: 4px;">${docName}</div>
-                  <div style="font-size: 12px; color: #7f1d1d;">
-                    File URL not available - Document may be corrupted
-                  </div>
-                </div>
-              </div>
-            </div>`;
+            return `
+              <div style="background: #fef2f2; border: 2px dashed #ef4444; border-radius: 12px; padding: 20px; text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 12px;">❌</div>
+                <div style="font-weight: 600; color: #dc2626; margin-bottom: 8px; font-size: 14px;">${docName}</div>
+                <div style="font-size: 12px; color: #991b1b;">File URL not available</div>
+              </div>`;
           }
           
           if (docType && docType.startsWith('image/')) {
-            return `<div class="document-card" style="margin-top: 12px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <div style="font-weight: 500; color: #374151; flex: 1;">${docName}</div>
-                <div style="font-size: 11px; color: #6b7280;">
-                  ${docSize ? formatFileSize(docSize) : ''}
-                  ${isCloudinary ? ' • Optimized' : ''}
+            return `
+              <div style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.05); hover: box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                <div style="position: relative; background: #f9fafb; aspect-ratio: 16/10; overflow: hidden;">
+                  <img src="${thumbnailUrl}" alt="${docName}" 
+                       style="width: 100%; height: 100%; object-fit: cover; cursor: pointer; transition: transform 0.3s ease;" 
+                       onclick="window.open('${highQualityUrl}', '_blank')"
+                       onmouseover="this.style.transform='scale(1.05)'; this.src='${highQualityUrl}'" 
+                       onmouseout="this.style.transform='scale(1)'; this.src='${thumbnailUrl}'" />
+                  <div style="position: absolute; top: 8px; right: 8px; background: rgba(16, 185, 129, 0.95); color: white; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    View
+                  </div>
+                  ${isCloudinary ? `<div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px;">✓ Optimized</div>` : ''}
                 </div>
-              </div>
-              <div style="position: relative; margin-bottom: 8px;">
-                <img src="${thumbnailUrl}" alt="${docName}" 
-                     style="width: 100%; max-height: 150px; object-fit: cover; border-radius: 6px; border: 1px solid #d1d5db; cursor: pointer;" 
-                     onclick="window.open('${highQualityUrl}', '_blank')"
-                     onmouseover="this.src='${highQualityUrl}'" 
-                     onmouseout="this.src='${thumbnailUrl}'" />
-                <div style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">
-                  🔍 Click to enlarge
+                <div style="padding: 12px;">
+                  <div style="font-weight: 600; color: #1f2937; margin-bottom: 4px; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${docName}">${docName}</div>
+                  <div style="font-size: 11px; color: #6b7280;">${docSize ? formatFileSize(docSize) : 'Unknown size'}</div>
                 </div>
-              </div>
-            </div>`;
+              </div>`;
           } else {
             // Handle documents (PDF, Word, etc.)
             const fileIcon = getFileIcon(docType || docName);
-            return `<div class="document-card" style="margin-top: 12px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb;">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="font-size: 24px;">${fileIcon}</div>
-                <div style="flex: 1;">
-                  <div style="font-weight: 500; color: #374151; margin-bottom: 4px;">${docName}</div>
-                  <div style="font-size: 12px; color: #6b7280;">
-                    ${docSize ? formatFileSize(docSize) : ''}
-                    ${isCloudinary ? ' • Cloudinary Hosted' : ''}
+            return `
+              <div style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.05); hover: box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                  <div style="font-size: 40px; flex-shrink: 0;">${fileIcon}</div>
+                  <div style="flex: 1; min-width: 0;">
+                    <div style="font-weight: 600; color: #1f2937; margin-bottom: 4px; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${docName}">${docName}</div>
+                    <div style="font-size: 11px; color: #6b7280;">
+                      ${docSize ? formatFileSize(docSize) : 'Unknown size'}
+                      ${isCloudinary ? ' • Cloud Storage' : ''}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div style="display: flex; gap: 8px; margin-top: 8px;">
-                <button onclick="downloadFile('${docUrl}', '${docName}')" style="
-                  background: #10b981;
+                <button onclick="window.open('${docUrl}', '_blank')" style="
+                  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
                   color: white;
                   border: none;
-                  padding: 6px 12px;
-                  border-radius: 4px;
-                  font-size: 12px;
+                  padding: 10px 16px;
+                  border-radius: 8px;
+                  font-size: 13px;
+                  font-weight: 600;
                   cursor: pointer;
                   width: 100%;
-                ">Download</button>
-              </div>
-            </div>`;
+                  transition: all 0.2s ease;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 8px;
+                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Download
+                </button>
+              </div>`;
           }
         }).join('')}
       </div>
