@@ -2141,13 +2141,13 @@ function buildApplicationRowHtml(app) {
   const canDelete = app.status === 'pending' || app.status === 'under review' || app.status === 'rejected' || needsResubmit;
 
   return `
-      <td>${app.applicationId || app.id}</td>
-      <td>${app.permitType || 'N/A'}</td>
-      <td>${dateFormatted}</td>
-      <td>
+      <td data-label="Application ID">${app.applicationId || app.id}</td>
+      <td data-label="Permit Type">${app.permitType || 'N/A'}</td>
+      <td data-label="Date Submitted">${dateFormatted}</td>
+      <td data-label="Status">
         <span class="status-badge ${statusClass}">${app.status || 'PENDING'}</span>
       </td>
-      <td>
+      <td data-label="Actions">
         <div class="table-actions">
           <button class="action-btn btn-view" onclick="viewApplication('${app.id}')">View</button>
           ${canEdit ? `
@@ -3687,15 +3687,24 @@ function updateStats() {
   const pendingApps = document.getElementById('pendingApps');
   const approvedApps = document.getElementById('approvedApps');
   const rejectedApps = document.getElementById('rejectedApps');
+  const myAppsTotal = document.getElementById('myAppsTotal');
+  const myAppsPending = document.getElementById('myAppsPending');
+  const myAppsNeedsAction = document.getElementById('myAppsNeedsAction');
+  const myAppsApproved = document.getElementById('myAppsApproved');
   
   const pending = userApplications.filter(app => app.status === 'pending' || app.status === 'under review').length;
   const approved = userApplications.filter(app => app.status === 'approved').length;
   const rejected = userApplications.filter(app => app.status === 'rejected').length;
+  const needsAction = userApplications.filter(app => app.status === 'needs revision' || app.status === 'needs resubmit').length;
   
   if (totalApps) totalApps.textContent = userApplications.length;
   if (pendingApps) pendingApps.textContent = pending;
   if (approvedApps) approvedApps.textContent = approved;
   if (rejectedApps) rejectedApps.textContent = rejected;
+  if (myAppsTotal) myAppsTotal.textContent = userApplications.length;
+  if (myAppsPending) myAppsPending.textContent = pending;
+  if (myAppsNeedsAction) myAppsNeedsAction.textContent = needsAction;
+  if (myAppsApproved) myAppsApproved.textContent = approved;
 }
 
 // Get CSS class for status

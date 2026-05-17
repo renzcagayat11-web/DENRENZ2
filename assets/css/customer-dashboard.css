@@ -8,6 +8,32 @@ body* {
   line-height: 1.6;
 }
 
+.new-application-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 8px;
+}
+
+.new-application-section .dashboard-container-wrapper {
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 12px;
+}
+
+.new-application-section .welcome-section {
+  padding: 36px 32px;
+  border-radius: 12px;
+}
+
+.new-application-section .welcome-title {
+  font-size: 32px;
+}
+
+.new-application-section .welcome-subtitle {
+  font-size: 16px;
+}
+
 /* Password Change Styles for Customer Dashboard */
 .password-change-section {
   margin-bottom: 32px;
@@ -2045,26 +2071,28 @@ body* {
 
 .dashboard-main {
   min-height: calc(100vh - 80px);
-  padding-top: 16px;
-  padding-bottom: 40px;
+  padding-top: 4px;
+  padding-bottom: 32px;
 }
 
 .dashboard-container {
+  width: 100%;
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 24px;
+  min-width: 0;
 }
 
 /* Professional Container Cards */
 .dashboard-container-wrapper {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e2e8f0;
-  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(15, 60, 25, 0.05);
+  border: 1px solid rgba(15, 60, 25, 0.05);
+  overflow: visible;
   margin-bottom: 24px;
+  padding: 24px;
 }
-
 
 /* Page Sections */
 .page-section {
@@ -2078,19 +2106,84 @@ body* {
 }
 
 /* Applications Content Wrapper - Unique Design */
-.applications-content-wrapper {
-  max-width: 1400px;
-  margin: 0 auto 24px auto;
+.my-applications-card {
   background: linear-gradient(145deg, #ffffff 0%, #f8fafc 50%, #f0fdf4 100%);
   border-radius: 20px;
-  padding: 32px;
-  border: 2px solid rgba(0, 102, 51, 0.15);
+  padding: 24px;
+  border: 1px solid rgba(0, 102, 51, 0.12);
   box-shadow:
-    0 12px 40px rgba(0, 102, 51, 0.08),
-    0 6px 20px rgba(0, 102, 51, 0.06),
+    0 18px 45px rgba(0, 102, 51, 0.08),
+    0 8px 30px rgba(0, 102, 51, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+}
+
+.my-apps-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.my-apps-header-text .eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #0b5f2c;
+  margin: 0 0 6px 0;
+}
+
+.my-apps-header-text h3 {
+  margin: 0;
+  font-size: 28px;
+  color: #0b1727;
+}
+
+.my-apps-header-text .subtitle {
+  margin: 4px 0 0 0;
+  color: #475467;
+  font-size: 14px;
+}
+
+.my-apps-badges {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.apps-badge {
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(15,60,25,0.12);
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 120px;
+}
+
+.apps-badge span {
+  font-size: 12px;
+  color: #475467;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.apps-badge strong {
+  font-size: 22px;
+  color: #0b5f2c;
+}
+
+.apps-badge.attention {
+  background: #fff7ed;
+  border-color: #fdba74;
+}
+
+.apps-badge.success {
+  background: #ecfdf3;
+  border-color: #86efac;
 }
 
 .applications-content-wrapper::before {
@@ -2131,7 +2224,7 @@ body* {
 
 /* Welcome Section - DENR Emerald Green */
 .welcome-section {
-  background: linear-gradient(135deg, #0b5f2c 0%, #0a7a3c 50%, #50C878 100%);
+  background: #0b5f2c;
   padding: 56px 48px;
   color: white;
   border-radius: 0;
@@ -2142,30 +2235,9 @@ body* {
   justify-content: space-between;
 }
 
-.welcome-section::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -10%;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
-  border-radius: 50%;
-  z-index: -1;
-  pointer-events: none;
-}
-
+.welcome-section::before,
 .welcome-section::after {
-  content: '';
-  position: absolute;
-  bottom: -30%;
-  left: -5%;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
-  border-radius: 50%;
-  z-index: -1;
-  pointer-events: none;
+  content: none;
 }
 
 .welcome-title {
@@ -2468,6 +2540,8 @@ body* {
   box-shadow: 
     0 4px 16px rgba(0, 102, 51, 0.06),
     0 2px 8px rgba(0, 102, 51, 0.04);
+  position: relative;
+  overflow: hidden;
 }
 
 .filter-row {
@@ -2761,9 +2835,19 @@ body* {
   padding: 18px 24px;
   font-size: 14px;
   color: #1f2937;
-  border-bottom: 1px solid #f0fdf4;
+  border-bottom: 1px solid #e8f5e9;
   vertical-align: middle;
   background: #ffffff;
+}
+
+.data-table-enhanced tbody tr {
+  background: #fff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.data-table-enhanced tbody tr:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(15,60,25,0.08);
 }
 
 .data-table-enhanced td:last-child {
@@ -5093,10 +5177,11 @@ textarea:hover {
 
 .step-card {
   background: #ffffff;
-  padding: 32px;
-  border-radius: 16px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
   border: 1px solid #e2e8f0;
+  margin-bottom: 20px;
   position: relative;
   width: 100%;
 }
@@ -7598,22 +7683,25 @@ textarea:hover {
    APPLICATION PROGRESS - IMAGE MATCHING STYLES
    ============================================ */
 
+
 .application-progress-container {
-  border-top: 4px solid #0d5c3b;
-  border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-top: 3px solid #0b5f2c;
+  border-radius: 16px;
+  background: #f9fbf9;
+  box-shadow: 0 2px 6px rgba(15, 60, 25, 0.05);
+  padding: 12px;
 }
 
 .application-progress-container .step-indicator {
   background: #ffffff;
-  border-radius: 8px;
-  padding: 32px 24px;
+  border-radius: 12px;
+  padding: 24px 20px;
 }
+
 
 .application-progress-container .progress-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 24px;
 }
 
 .application-progress-container .progress-title {
@@ -7634,7 +7722,8 @@ textarea:hover {
   justify-content: space-between;
   align-items: flex-start;
   position: relative;
-  padding: 0 20px;
+  padding-top: 16px;
+  gap: 18px;
 }
 
 /* Connecting line between steps */
@@ -8064,6 +8153,16 @@ textarea:hover {
   .dashboard-nav { display: none !important; }
   .dash-mobile-nav { display: flex; }
 
+  .dashboard-main { padding-bottom: 80px; }
+  .dashboard-container { padding: 0 16px; }
+  .dashboard-container-wrapper,
+  .my-applications-card { padding: 16px !important; margin-bottom: 16px; }
+  .my-applications-card { border-radius: 16px; }
+  .page-section { padding: 0 !important; }
+
+  .my-apps-header { flex-direction: column; align-items: flex-start; }
+  .my-apps-badges { grid-template-columns: repeat(2, minmax(140px, 1fr)); width: 100%; }
+
   .nav-inner { flex-wrap: nowrap; padding: 12px 16px; }
 
   .brand-title {
@@ -8091,10 +8190,16 @@ textarea:hover {
   .profile-info-grid { grid-template-columns: 1fr !important; }
 
   body { overflow-x: hidden; }
-  .page-section { padding: 8px !important; }
 }
 
 @media (max-width: 480px) {
+  .dashboard-main { padding-top: 8px; }
+  .dashboard-container { padding: 0 12px; }
+  .dashboard-container-wrapper,
+  .my-applications-card { padding: 12px !important; }
+
+  .my-apps-badges { grid-template-columns: 1fr; }
+
   .brand-title { display: none; }
   .stats-grid { gap: 8px; }
   .stat-card { padding: 14px 12px !important; }

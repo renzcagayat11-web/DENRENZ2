@@ -116,8 +116,7 @@
           <!-- Dashboard Overview Section -->
           <section id="dashboardSection" class="page-section active">
             <!-- Welcome Section Container -->
-            <div class="dashboard-container-wrapper">
-              <section class="welcome-section">
+            <section class="welcome-section">
                 <div class="welcome-flex">
                   <div class="welcome-main">
                     <h2 class="welcome-title">Welcome, <span id="welcomeName">Customer</span>!</h2>
@@ -150,8 +149,7 @@
                     </div>
                   </div>
                 </div>
-              </section>
-            </div>
+            </section>
 
             <!-- Quick Stats Container -->
             <div class="dashboard-container-wrapper">
@@ -343,7 +341,33 @@
               </section>
             </div>
 
-            <div class="applications-content-wrapper">
+            <div class="dashboard-container-wrapper my-applications-card">
+
+            <div class="my-apps-header">
+              <div class="my-apps-header-text">
+                <p class="eyebrow">My Applications</p>
+                <h3>Applications Workspace</h3>
+                <p class="subtitle">Monitor submissions, refine filters, and take action without leaving this view.</p>
+              </div>
+              <div class="my-apps-badges" aria-live="polite">
+                <div class="apps-badge">
+                  <span>Total</span>
+                  <strong id="myAppsTotal">0</strong>
+                </div>
+                <div class="apps-badge">
+                  <span>Pending</span>
+                  <strong id="myAppsPending">0</strong>
+                </div>
+                <div class="apps-badge attention">
+                  <span>Needs Action</span>
+                  <strong id="myAppsNeedsAction">0</strong>
+                </div>
+                <div class="apps-badge success">
+                  <span>Approved</span>
+                  <strong id="myAppsApproved">0</strong>
+                </div>
+              </div>
+            </div>
 
             <!-- Filter Section -->
             <div class="filter-section">
@@ -425,7 +449,7 @@
           </section>
 
           <!-- New Application Form Section -->
-          <section class="page-section" id="newApplicationSection">
+          <section class="page-section new-application-section" id="newApplicationSection">
             <!-- Welcome Section Container -->
             <div class="dashboard-container-wrapper">
               <section class="welcome-section">
