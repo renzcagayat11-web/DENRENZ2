@@ -3056,6 +3056,14 @@ body* {
   cursor: pointer;
 }
 
+.form-group select:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.7;
+  border-color: #e2e8f0;
+}
+
 .form-group select option {
   padding: 14px;
   font-size: 15px;
@@ -7830,5 +7838,156 @@ textarea:hover {
   
   .application-progress-container .step-description {
     max-width: none;
+  }
+}
+
+/* =========================================
+   Step Card Close (X) Button
+   ========================================= */
+.step-card-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  border: 2px solid #fca5a5;
+  background: #fff1f1;
+  color: #dc2626;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+}
+
+.step-card-close:hover {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+  transform: scale(1.05);
+}
+
+/* =========================================
+   PDF Auto-Attach Slot (Step 5)
+   ========================================= */
+.pdf-slot {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background: #f0fdf4;
+  transition: all 0.3s ease;
+}
+
+.pdf-slot--ready {
+  border-color: #86efac;
+  background: #f0fdf4;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.1);
+}
+
+.pdf-slot--missing {
+  border-color: #fcd34d;
+  background: #fffbeb;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.1);
+}
+
+.pdf-slot__icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.pdf-slot--ready .pdf-slot__icon {
+  background: #dcfce7;
+}
+
+.pdf-slot--missing .pdf-slot__icon {
+  background: #fef9c3;
+}
+
+.pdf-slot__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pdf-slot__label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pdf-slot__badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.pdf-slot__badge--warn {
+  background: #fef9c3;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
+.pdf-slot__filename {
+  font-size: 12px;
+  color: #374151;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 4px;
+}
+
+.pdf-slot__meta {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.pdf-slot__status {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: #16a34a;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+@media (max-width: 480px) {
+  .pdf-slot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .pdf-slot__status {
+    flex-direction: row;
+    gap: 6px;
   }
 }

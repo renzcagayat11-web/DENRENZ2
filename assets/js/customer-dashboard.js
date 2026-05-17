@@ -406,16 +406,21 @@ function setupBarangaySelection() {
     const selectedMunicipal = municipalSelect.value;
 
     // Clear current barangay options
-    barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
+    barangaySelect.innerHTML = '<option value="" disabled selected>Select Barangay</option>';
 
     if (selectedMunicipal && lagunaBarangays[selectedMunicipal]) {
-      // Add barangay options for selected municipal
+      // Enable barangay and populate options
+      barangaySelect.disabled = false;
       lagunaBarangays[selectedMunicipal].forEach(barangay => {
         const option = document.createElement('option');
         option.value = barangay;
         option.textContent = barangay;
         barangaySelect.appendChild(option);
       });
+    } else {
+      // No municipal selected — disable barangay
+      barangaySelect.disabled = true;
+      barangaySelect.innerHTML = '<option value="" disabled selected>Select Municipal first</option>';
     }
   }
 
@@ -4814,7 +4819,18 @@ document.addEventListener('DOMContentLoaded', () => {
   setupApplicantTypeToggle();
   setupBarangaySelection();
   setupProfileBarangaySelection();
-  
+
+  // Restore application form data (must run after setupBarangaySelection so municipal change event works)
+  restoreFormData('newApplicationForm');
+
+  // Safety: if no municipal is selected after restore, force barangay back to disabled
+  const barangayEl = document.getElementById('barangay');
+  const municipalEl = document.getElementById('municipal');
+  if (barangayEl && municipalEl && !municipalEl.value) {
+    barangayEl.disabled = true;
+    barangayEl.innerHTML = '<option value="" disabled selected>Select Municipal first</option>';
+  }
+
   // Restore form step on page load
   restoreFormStep();
   
@@ -8989,9 +9005,30 @@ async function generateFormPDF() {
       });
       addDenrFormCanvasToPdf(doc, canvas, { documentTitle: docTitle });
       doc.save(filename);
+
+      // AUTO-ATTACH: Save the PDF as base64 in sessionStorage so it gets auto-attached on submit
+      try {
+        const pdfBase64 = doc.output('datauristring');
+        const pdfSizeKB = Math.round(pdfBase64.length * 0.75 / 1024);
+        const formPdfData = {
+          base64: pdfBase64,
+          name: filename,
+          size: Math.round(pdfBase64.length * 0.75),
+          type: 'application/pdf',
+          timestamp: Date.now(),
+          permitType
+        };
+        sessionStorage.setItem('generatedFormPDF', JSON.stringify(formPdfData));
+        console.log(`Form PDF saved to sessionStorage: ${filename} (~${pdfSizeKB} KB)`);
+        // Refresh the auto-attach slot in Step 5 if it's visible
+        refreshFormPdfSlot(filename);
+      } catch (storageErr) {
+        console.warn('Could not save form PDF to sessionStorage:', storageErr);
+      }
+
       showFormDownloadAwareness();
       showAlert(
-        'PDF downloaded \u2014 fits on a single A4 page with formal margins and footer. For the blank Word checklist, use \u201cOfficial checklist (Word)\u201d.',
+        'PDF downloaded \u2014 ang form ay automatic na ilalakip sa iyong application. For the blank Word checklist, use \u201cOfficial checklist (Word)\u201d.',
         'success'
       );
       return;
@@ -9029,12 +9066,42 @@ async function generateFormPDF() {
     doc.text('Date:', 120, yPosition);
     doc.line(120, yPosition + 5, 180, yPosition + 5);
     doc.save(filename);
+
+    // AUTO-ATTACH: Save fallback PDF too
+    try {
+      const pdfBase64 = doc.output('datauristring');
+      const formPdfData = {
+        base64: pdfBase64,
+        name: filename,
+        size: Math.round(pdfBase64.length * 0.75),
+        type: 'application/pdf',
+        timestamp: Date.now(),
+        permitType
+      };
+      sessionStorage.setItem('generatedFormPDF', JSON.stringify(formPdfData));
+      refreshFormPdfSlot(filename);
+    } catch (storageErr) {
+      console.warn('Could not save form PDF to sessionStorage:', storageErr);
+    }
+
     showFormDownloadAwareness();
-    showAlert('Form downloaded successfully! Please sign the form and upload it in the document upload step.', 'success');
+    showAlert('Form downloaded! Ang form ay automatic na ilalakip sa iyong application.', 'success');
   } catch (error) {
     console.error('Error generating PDF:', error);
     showAlert('Error generating PDF. Please try again.', 'error');
   }
+}
+
+/** Refreshes the auto-attach PDF slot in Step 5 if it exists */
+function refreshFormPdfSlot(filename) {
+  const slot = document.getElementById('formPdfAutoAttachSlot');
+  if (!slot) return;
+  const nameEl = slot.querySelector('#formPdfAttachName');
+  const warningEl = document.getElementById('formPdfMissingWarning');
+  if (nameEl) nameEl.textContent = filename || 'Application Form PDF';
+  slot.classList.remove('pdf-slot--missing');
+  slot.classList.add('pdf-slot--ready');
+  if (warningEl) warningEl.style.display = 'none';
 }
 
 /**
@@ -9400,6 +9467,130 @@ function updateDocumentUploadFields(documentType, permitType) {
   uploadContainer.style.display = 'grid';
   uploadContainer.style.gridTemplateColumns = 'repeat(2, 1fr)';
   uploadContainer.style.gap = '16px';
+
+  // AUTO-ATTACH SLOT: Always inject the Application Form PDF slot at the top (full width)
+  const savedPdfRaw = sessionStorage.getItem('generatedFormPDF');
+  const savedPdf = savedPdfRaw ? (() => { try { return JSON.parse(savedPdfRaw); } catch { return null; } })() : null;
+  const pdfSlotWrapper = document.createElement('div');
+  pdfSlotWrapper.style.gridColumn = '1 / -1'; // Full width spanning both columns
+  pdfSlotWrapper.id = 'formPdfAutoAttachSlot';
+
+  if (savedPdf && savedPdf.base64 && savedPdf.name) {
+    const pdfSizeKB = Math.round(savedPdf.size / 1024);
+    pdfSlotWrapper.innerHTML = `
+      <div class="pdf-slot pdf-slot--ready">
+        <div class="pdf-slot__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <path d="M9 15l2 2 4-4"/>
+          </svg>
+        </div>
+        <div class="pdf-slot__info">
+          <div class="pdf-slot__label">Letter Request / Application Form <span class="pdf-slot__badge">Auto-attached</span></div>
+          <div class="pdf-slot__filename" id="formPdfAttachName">${savedPdf.name}</div>
+          <div class="pdf-slot__meta">${pdfSizeKB > 0 ? pdfSizeKB + ' KB' : ''} &bull; PDF &bull; Generated from Step 2</div>
+        </div>
+        <div class="pdf-slot__status">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          <span>Ready</span>
+        </div>
+      </div>
+    `;
+  } else {
+    pdfSlotWrapper.innerHTML = `
+      <div class="pdf-slot pdf-slot--missing" id="formPdfMissingWarning">
+        <div class="pdf-slot__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="12" y1="13" x2="12" y2="17"/>
+            <line x1="12" y1="9" x2="12.01" y2="9"/>
+          </svg>
+        </div>
+        <div class="pdf-slot__info">
+          <div class="pdf-slot__label">Letter Request / Application Form <span class="pdf-slot__badge pdf-slot__badge--warn">Required</span></div>
+          <div class="pdf-slot__filename" id="formPdfAttachName">Not yet attached</div>
+          <div class="pdf-slot__meta" style="color:#b45309;">Go back to Step 2 and click <strong>"Download PDF"</strong>, or upload your downloaded form below.</div>
+          <div style="margin-top:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <label for="manualFormPdfUpload" style="display:inline-flex; align-items:center; gap:6px; background:#fff7ed; border:1.5px solid #fcd34d; color:#92400e; border-radius:8px; padding:7px 14px; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.2s;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload form PDF
+            </label>
+            <input type="file" id="manualFormPdfUpload" accept=".pdf" style="display:none;" />
+            <span id="manualFormPdfName" style="font-size:12px; color:#374151; font-weight:600;"></span>
+          </div>
+        </div>
+        <div class="pdf-slot__status" style="color:#d97706;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span id="manualFormPdfStatus">Pending</span>
+        </div>
+      </div>
+    `;
+  }
+  uploadContainer.appendChild(pdfSlotWrapper);
+
+  // Manual upload fallback: if user uploads their downloaded form PDF manually
+  const manualInput = document.getElementById('manualFormPdfUpload');
+  if (manualInput) {
+    manualInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const base64 = ev.target.result;
+          const formPdfData = {
+            base64,
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            timestamp: Date.now(),
+            permitType
+          };
+          sessionStorage.setItem('generatedFormPDF', JSON.stringify(formPdfData));
+          // Update UI to ready state
+          const slot = document.getElementById('formPdfMissingWarning');
+          if (slot) {
+            slot.className = 'pdf-slot pdf-slot--ready';
+            slot.id = '';
+            slot.innerHTML = `
+              <div class="pdf-slot__icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <path d="M9 15l2 2 4-4"/>
+                </svg>
+              </div>
+              <div class="pdf-slot__info">
+                <div class="pdf-slot__label">Letter Request / Application Form <span class="pdf-slot__badge">Auto-attached</span></div>
+                <div class="pdf-slot__filename" id="formPdfAttachName">${file.name}</div>
+                <div class="pdf-slot__meta">${Math.round(file.size/1024)} KB &bull; PDF &bull; Uploaded manually</div>
+              </div>
+              <div class="pdf-slot__status">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                <span>Ready</span>
+              </div>
+            `;
+          }
+          console.log(`Manual form PDF uploaded: ${file.name}`);
+        } catch (err) {
+          console.error('Failed to save manual form PDF:', err);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
 
   // Generate upload fields for each required document
   requirements.forEach((req, index) => {
@@ -10214,7 +10405,31 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
   // Collect files for background upload
   const requirements = PERMIT_REQUIREMENTS[permitType] || [];
   const filesToUpload = [];
-  
+
+  // AUTO-ATTACH: Prepend the generated form PDF as the first document
+  try {
+    const savedPdfRaw = sessionStorage.getItem('generatedFormPDF');
+    if (savedPdfRaw) {
+      const savedPdf = JSON.parse(savedPdfRaw);
+      if (savedPdf && savedPdf.base64 && savedPdf.name) {
+        const base64Data = savedPdf.base64.split(',')[1];
+        const binaryString = atob(base64Data);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: 'application/pdf' });
+        const pdfFile = new File([blob], savedPdf.name, { type: 'application/pdf', lastModified: savedPdf.timestamp || Date.now() });
+        filesToUpload.push({ fileId: `formPDF_${Date.now()}`, file: pdfFile, requirement: 'Letter Request / Application Form', index: -1 });
+        console.log(`Auto-attached form PDF: ${savedPdf.name} (${Math.round(savedPdf.size / 1024)} KB)`);
+      }
+    } else {
+      console.warn('No generated form PDF found in sessionStorage — application form will not be auto-attached.');
+    }
+  } catch (pdfErr) {
+    console.error('Failed to auto-attach form PDF:', pdfErr);
+  }
+
   // Initialize IndexedDB
   await initEditIndexedDB();
   
@@ -10378,6 +10593,9 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
     // Clear editing state
     window.editingAppId = null;
     window.existingDocuments = [];
+
+    // Clear the auto-attached form PDF from sessionStorage (fresh start for next application)
+    sessionStorage.removeItem('generatedFormPDF');
     
     // Reset ALL submit buttons to prevent stuck loading state
     const submitBtns = [
@@ -10749,14 +10967,29 @@ function restoreFormData(formId) {
     const form = document.getElementById(formId);
     if (!form) return;
 
+    // Restore all fields except barangay (restore it after triggering municipal change)
+    const savedBarangay = formData['barangay'];
     Object.keys(formData).forEach(fieldId => {
+      if (fieldId === 'barangay') return; // handled after municipal change
       const input = document.getElementById(fieldId);
       if (input) {
-        // Skip file inputs - browsers don't allow setting their value programmatically
         if (input.type === 'file') return;
         input.value = formData[fieldId];
       }
     });
+
+    // Trigger municipal change to populate and enable barangay, then restore barangay value
+    const municipalSelect = document.getElementById('municipal');
+    if (municipalSelect && municipalSelect.value) {
+      municipalSelect.dispatchEvent(new Event('change'));
+      // Wait for options to be populated, then restore saved barangay
+      setTimeout(() => {
+        const barangaySelect = document.getElementById('barangay');
+        if (barangaySelect && savedBarangay) {
+          barangaySelect.value = savedBarangay;
+        }
+      }, 50);
+    }
   } catch (error) {
     console.error('Error restoring form data:', error);
   }
@@ -10773,9 +11006,7 @@ if (newApplicationForm) {
   // Save on input change
   newApplicationForm.addEventListener('input', () => saveFormData('newApplicationForm'));
   newApplicationForm.addEventListener('change', () => saveFormData('newApplicationForm'));
-
-  // Restore on page load
-  restoreFormData('newApplicationForm');
+  // Note: restoreFormData is called in DOMContentLoaded after setupBarangaySelection()
 }
 
 // Setup form data persistence for verify form
