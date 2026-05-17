@@ -36,8 +36,9 @@
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid #e2e8f0;
+  max-width: 100%;
 }
 
 .table-header-info {
@@ -66,12 +67,25 @@
   max-height: 400px;
   overflow-y: auto;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border-radius: 0 0 16px 16px;
+  width: 100%;
+}
+
+/* Table wrapper scroll — applied globally to all wrappers */
+.applications-table-container,
+.table-wrapper,
+.table-scroll-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  max-width: 100%;
 }
 
 /* Modern Data Table Styling */
 .modern-data-table {
   width: 100%;
+  min-width: 600px;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 14px;
@@ -260,10 +274,24 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .applications-table-container,
+  .table-wrapper,
+  .table-scroll-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    display: block;
+    width: 100%;
+  }
+
+  .modern-data-table {
+    min-width: 600px;
+  }
+
   .modern-data-table th,
   .modern-data-table td {
     padding: 10px 12px;
     font-size: 12px;
+    white-space: nowrap;
   }
   
   .modern-data-table .btn-action {
@@ -1015,6 +1043,8 @@ body {
 .dashboard-container {
   display: flex;
   min-height: 100vh;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 /* Sidebar */
@@ -1449,6 +1479,8 @@ body {
   background: #f8fafc;
   min-height: 100vh;
   transition: margin-left 0.3s ease;
+  max-width: calc(100vw - 250px);
+  overflow-x: hidden;
 }
 
 .sidebar.collapsed ~ .main-content {
@@ -1569,7 +1601,7 @@ body {
 /* Quick Stats */
 .quick-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
   margin-bottom: 32px;
 }
@@ -3340,69 +3372,16 @@ textarea:focus {
   }
 }
 
+/* Legacy 768px rules — kept minimal to avoid conflicts with mobile drawer rules below */
 @media (max-width: 768px) {
-  .sidebar {
-    width: 200px;
-  }
-  
-  .sidebar.collapsed {
-    width: 70px;
-  }
-  
-  .main-content {
-    margin-left: 200px;
-  }
-  
-  .sidebar.collapsed ~ .main-content {
-    margin-left: 70px;
-  }
-  
-  .top-header {
-    padding: 16px 20px;
-  }
-  
-  .page-title {
-    font-size: 20px;
-  }
-  
   .stats-grid {
     grid-template-columns: 1fr;
   }
-  
-  .sidebar {
-    transform: translateX(-100%);
-    height: auto;
-  }
-  
-  .main-content {
-    margin-left: 0;
-  }
-  
-  .sidebar.collapsed ~ .main-content {
-    margin-left: 0;
-  }
-  
-  .top-header {
-    padding: 16px;
-  }
-  
-  .content-area {
-    padding: 20px;
-  }
-  
-  .quick-stats {
-    grid-template-columns: 1fr;
-  }
-  
   .section-header {
     flex-direction: column;
     align-items: flex-start;
   }
-  
-  .filter-controls {
-    width: 100%;
-  }
-  
+  .filter-controls,
   .search-input {
     width: 100%;
   }
@@ -4452,3 +4431,240 @@ textarea:focus {
   font-size: 14px;
   font-weight: 500;
 }
+
+/* ===========================================
+   MOBILE RESPONSIVE - STAFF DASHBOARD
+   =========================================== */
+
+/* Mobile top header — hidden on desktop */
+.staff-mobile-header {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1001;
+  background: #0f3c19;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+.staff-mobile-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  height: 56px;
+  gap: 10px;
+}
+
+.staff-mobile-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 15px;
+  flex: 1;
+}
+
+.staff-mobile-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Hamburger */
+.staff-hamburger-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.staff-hamburger-btn span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: #ffffff;
+  border-radius: 2px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.staff-hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.staff-hamburger-btn.open span:nth-child(2) { opacity: 0; }
+.staff-hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Drawer overlay */
+.staff-drawer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 300;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.staff-drawer-overlay.open {
+  opacity: 1;
+}
+
+/* Slide-in drawer */
+.staff-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 260px;
+  background: #0f3c19;
+  z-index: 400;
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.staff-drawer.open {
+  transform: translateX(0);
+}
+
+.staff-drawer-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.staff-drawer-close {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 24px;
+  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  line-height: 1;
+  pointer-events: all;
+  position: relative;
+  z-index: 410;
+  flex-shrink: 0;
+}
+
+.staff-drawer-close:hover { background: rgba(255,255,255,0.1); }
+
+.staff-drawer-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  color: rgba(255,255,255,0.85);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  min-height: 48px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.staff-drawer-item:hover { background: rgba(255,255,255,0.1); color: #ffffff; }
+
+.staff-drawer-logout {
+  margin-top: auto;
+  color: #fca5a5;
+  border-top: 1px solid rgba(255,255,255,0.12);
+}
+
+@media (max-width: 768px) {
+  /* Show mobile header, hide desktop sidebar */
+  .staff-mobile-header { display: block; }
+  .staff-drawer-overlay { display: block; }
+
+  /* Hide desktop sidebar */
+  .sidebar { display: none !important; }
+
+  /* Main content takes full width, offset for mobile header */
+  .main-content {
+    margin-left: 0 !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+    overflow-x: hidden;
+    padding-top: 56px;
+  }
+
+  /* Stats: 2-column */
+  .quick-stats {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px;
+  }
+
+  /* Hide desktop top-header on mobile — replaced by staff-mobile-header */
+  .top-header { display: none !important; }
+
+  /* Content padding */
+  .content-area { padding: 16px !important; }
+
+  /* Table: horizontal scroll */
+  .table-container,
+  .modern-data-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Section header stack */
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .filter-controls,
+  .search-input { width: 100%; }
+
+  /* View all button full-width */
+  .view-all-btn { width: 100%; text-align: center; }
+
+  body { overflow-x: hidden; }
+}
+
+@media (max-width: 480px) {
+  .quick-stats { gap: 8px; }
+
+  .stat-card {
+    padding: 14px 12px;
+  }
+
+  .stat-value { font-size: 22px; }
+  .page-title { font-size: 16px; }
+
+  .welcome-title { font-size: 18px; }
+}
+
+/* ===========================================
+   END MOBILE RESPONSIVE - STAFF DASHBOARD
+   =========================================== */

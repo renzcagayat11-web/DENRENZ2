@@ -891,8 +891,9 @@ body {
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid #e5e7eb;
+  max-width: 100%;
 }
 
 .table-header-info {
@@ -2097,8 +2098,9 @@ body {
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid #e5e7eb;
+  max-width: 100%;
 }
 
 /* Enhanced Action Badges for Audit Logs */
@@ -2295,8 +2297,18 @@ body {
   }
 }
 
+.table-container,
+.table-wrapper,
+.table-scroll-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  max-width: 100%;
+}
+
 .data-table {
   width: 100%;
+  min-width: 520px;
   border-collapse: collapse;
 }
 
@@ -2771,24 +2783,37 @@ body {
 }
 
 @media (max-width: 768px) {
-  .sidebar {
-    width: 200px;
-  }
-  
-  .main-content {
-    margin-left: 200px;
-  }
-  
   .top-header {
     padding: 16px;
   }
   
   .content-area {
-    padding: 20px;
+    padding: 16px;
   }
   
   .summary-cards {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .table-container,
+  .table-wrapper,
+  .table-scroll-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    display: block;
+    width: 100%;
+  }
+
+  .data-table,
+  .analysis-table,
+  .modern-data-table {
+    min-width: 520px;
+    white-space: nowrap;
+  }
+
+  .data-table th,
+  .data-table td {
+    white-space: nowrap;
   }
 }
 

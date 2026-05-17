@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/assets/css/styles.css" />
     <link rel="stylesheet" href="/assets/css/customer-dashboard.css" />
     <link rel="stylesheet" href="/assets/css/leaflet.css" />
+    <link rel="stylesheet" href="/assets/css/responsive.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- jsPDF + html2canvas: PDF matches on-screen DENR form layout -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -50,6 +51,9 @@
           <a href="#new-application" class="nav-item" data-section="newApplicationSection">Apply for Document</a>
           <a href="#my-applications" class="nav-item" data-section="myApplicationsSection">All Applications</a>
         </nav>
+        <button class="dash-hamburger-btn" id="dashHamburgerBtn" aria-label="Toggle menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
         <div class="nav-cta">
           <button class="notification-bell" id="notificationBtn">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -97,6 +101,12 @@
             </div>
           </div>
         </div>
+      </div>
+      <!-- Customer Dashboard Mobile Nav -->
+      <div class="dash-mobile-nav" id="dashMobileNav" aria-hidden="true">
+        <a href="#dashboard" class="dash-mobile-nav-item" data-section="dashboardSection">📊 Dashboard</a>
+        <a href="#new-application" class="dash-mobile-nav-item" data-section="newApplicationSection">📝 Apply for Document</a>
+        <a href="#my-applications" class="dash-mobile-nav-item" data-section="myApplicationsSection">📋 All Applications</a>
       </div>
     </header>
 
@@ -1519,6 +1529,35 @@
     </div>
 
     <script src="/assets/js/file-upload-utils.js"></script>
+    <script>
+      (function() {
+        const btn = document.getElementById('dashHamburgerBtn');
+        const nav = document.getElementById('dashMobileNav');
+        function closeMobileNav() {
+          nav.classList.remove('open');
+          btn.classList.remove('open');
+          btn.setAttribute('aria-expanded', 'false');
+          nav.setAttribute('aria-hidden', 'true');
+        }
+        if (btn && nav) {
+          btn.addEventListener('click', function() {
+            const isOpen = nav.classList.toggle('open');
+            btn.classList.toggle('open', isOpen);
+            btn.setAttribute('aria-expanded', isOpen);
+            nav.setAttribute('aria-hidden', !isOpen);
+          });
+          nav.querySelectorAll('.dash-mobile-nav-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+              const section = item.getAttribute('data-section');
+              if (section && typeof navigateToSection === 'function') {
+                navigateToSection(section);
+              }
+              closeMobileNav();
+            });
+          });
+        }
+      })();
+    </script>
     <script type="module" src="/assets/js/customer-dashboard.js"></script>
   </body>
 </html>

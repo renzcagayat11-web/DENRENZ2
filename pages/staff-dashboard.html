@@ -6,6 +6,7 @@
     <title>Staff Dashboard | DENR CENRO</title>
     <link rel="icon" type="image/png" href="/assets/images/logo.png">
     <link rel="stylesheet" href="/assets/css/staff-dashboard.css" />
+    <link rel="stylesheet" href="/assets/css/responsive.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
@@ -25,6 +26,42 @@
     </script>
   </head>
   <body>
+    <!-- Mobile Top Navbar (hidden on desktop) -->
+    <header class="staff-mobile-header" id="staffMobileHeader">
+      <div class="staff-mobile-header-inner">
+        <button class="staff-hamburger-btn" id="staffHamburgerBtn" aria-label="Toggle menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="staff-mobile-brand">
+          <img src="/assets/images/logo.png" alt="DENR" style="width:28px;height:28px;border-radius:50%;" />
+          <span>DENR-CENRO</span>
+        </div>
+        <div class="staff-mobile-header-right">
+          <button class="notification-btn" style="background:transparent;border:none;cursor:pointer;color:#fff;font-size:18px;">🔔</button>
+          <div class="avatar-circle" id="mobileUserInitials" style="width:34px;height:34px;font-size:13px;">ST</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Mobile Nav Drawer Overlay -->
+    <div class="staff-drawer-overlay" id="staffDrawerOverlay"></div>
+    <!-- Mobile Nav Drawer -->
+    <nav class="staff-drawer" id="staffDrawer" aria-hidden="true">
+      <div class="staff-drawer-header">
+        <img src="/assets/images/logo.png" alt="DENR" style="width:36px;height:36px;border-radius:50%;" />
+        <span>DENR-CENRO Sta. Cruz</span>
+        <button class="staff-drawer-close" id="staffDrawerClose" aria-label="Close menu">&times;</button>
+      </div>
+      <a href="#dashboard" class="staff-drawer-item" data-section="dashboardSection"><span>📊</span> Dashboard</a>
+      <a href="#applications" class="staff-drawer-item" data-section="applicationsSection"><span>📋</span> Applications</a>
+      <a href="#ocr" class="staff-drawer-item" data-section="ocrSection"><span>📄</span> Document OCR</a>
+      <a href="#records" class="staff-drawer-item" data-section="recordsSection"><span>📋</span> My Records</a>
+      <a href="#performance" class="staff-drawer-item" data-section="performanceSection"><span>📈</span> My Performance</a>
+      <a href="#settings" class="staff-drawer-item" data-section="settingsSection"><span>⚙️</span> Settings</a>
+      <a href="#help" class="staff-drawer-item" data-section="helpSection"><span>❓</span> Help</a>
+      <button class="staff-drawer-item staff-drawer-logout" id="mobileLogoutBtn"><span>🚪</span> Logout</button>
+    </nav>
+
     <div class="dashboard-container">
       <!-- Sidebar -->
       <aside class="sidebar">
@@ -1698,6 +1735,50 @@
           if (toggleIcon) {
             toggleIcon.textContent = '≡';
           }
+        }
+
+        // Mobile drawer
+        const hamburgerBtn = document.getElementById('staffHamburgerBtn');
+        const drawer = document.getElementById('staffDrawer');
+        const overlay = document.getElementById('staffDrawerOverlay');
+        const closeBtn = document.getElementById('staffDrawerClose');
+
+        function openDrawer() {
+          drawer.classList.add('open');
+          overlay.classList.add('open');
+          hamburgerBtn && hamburgerBtn.classList.add('open');
+          drawer.setAttribute('aria-hidden', 'false');
+        }
+        function closeDrawer() {
+          drawer.classList.remove('open');
+          overlay.classList.remove('open');
+          hamburgerBtn && hamburgerBtn.classList.remove('open');
+          drawer.setAttribute('aria-hidden', 'true');
+        }
+
+        if (hamburgerBtn) hamburgerBtn.addEventListener('click', openDrawer);
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function(e) { e.stopPropagation(); closeDrawer(); });
+          closeBtn.addEventListener('touchend', function(e) { e.preventDefault(); e.stopPropagation(); closeDrawer(); });
+        }
+        if (overlay) overlay.addEventListener('click', closeDrawer);
+        if (drawer) drawer.addEventListener('click', function(e) { e.stopPropagation(); });
+
+        drawer && drawer.querySelectorAll('.staff-drawer-item[data-section]').forEach(function(item) {
+          item.addEventListener('click', function() {
+            const section = item.getAttribute('data-section');
+            if (section && typeof navigateToSection === 'function') navigateToSection(section);
+            closeDrawer();
+          });
+        });
+
+        const mobileLogout = document.getElementById('mobileLogoutBtn');
+        if (mobileLogout) {
+          mobileLogout.addEventListener('click', function() {
+            closeDrawer();
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) logoutBtn.click();
+          });
         }
       });
     </script>

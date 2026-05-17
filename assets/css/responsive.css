@@ -1,0 +1,907 @@
+/*
+ * responsive.css
+ * Global mobile-responsive styles for DENR-CENRO Sta. Cruz
+ * Breakpoints: 768px (tablet/mobile), 480px (small/iPhone SE)
+ * All rules are additive — desktop styles are preserved.
+ */
+
+/* ============================================================
+   BASE RESETS
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: hidden; max-width: 100vw; }
+img, video, iframe, embed { max-width: 100%; height: auto; }
+
+/* ============================================================
+   GLOBAL MODAL RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  /* All modal dialogs */
+  .modal-dialog,
+  .auth-modal,
+  .verify-modal,
+  .camera-modal,
+  .custom-modal .modal-content,
+  [class*="modal-dialog"] {
+    width: calc(100vw - 32px) !important;
+    max-width: 100% !important;
+    margin: 16px auto !important;
+    border-radius: 12px !important;
+  }
+
+  /* Modal scroll */
+  .modal-body,
+  .auth-body {
+    max-height: 75vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px !important;
+  }
+
+  /* Modal header */
+  .modal-header,
+  .auth-header {
+    padding: 14px 16px !important;
+    min-height: 56px;
+  }
+
+  /* Modal backdrop */
+  .modal-backdrop {
+    padding: 0 !important;
+    align-items: center !important;
+  }
+
+  /* Modal footer / action buttons */
+  .modal-actions,
+  .validation-modal-actions {
+    flex-direction: column !important;
+    gap: 10px !important;
+    padding: 14px 16px !important;
+  }
+
+  .modal-actions button,
+  .validation-modal-actions button,
+  .validation-modal-btn {
+    width: 100% !important;
+    min-height: 48px !important;
+  }
+
+  /* Auth form inputs in modal */
+  .auth-form input,
+  .auth-form select,
+  .auth-form textarea {
+    width: 100% !important;
+    min-height: 44px !important;
+    font-size: 14px !important;
+  }
+
+  /* Auth name grid: stack on mobile */
+  .name-grid,
+  .pw-grid {
+    grid-template-columns: 1fr !important;
+    display: grid !important;
+  }
+
+  /* Verify/confirm buttons */
+  .verify-btn,
+  .login-cta,
+  .create-cta {
+    width: 100% !important;
+    min-height: 48px !important;
+    font-size: 15px !important;
+  }
+
+  /* Body scroll lock when modal open */
+  body.modal-open { overflow: hidden !important; }
+}
+
+/* ============================================================
+   GLOBAL FORMS
+   ============================================================ */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 14px !important;
+    min-height: 44px;
+  }
+
+  /* Labels above inputs */
+  .form-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px;
+  }
+
+  /* Multi-col form rows collapse */
+  .form-row,
+  .name-grid,
+  .pw-grid {
+    grid-template-columns: 1fr !important;
+    flex-direction: column !important;
+    display: flex !important;
+    gap: 12px !important;
+  }
+
+  /* Full-width inputs */
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100% !important;
+  }
+}
+
+/* ============================================================
+   GLOBAL TABLES — COMPREHENSIVE HORIZONTAL SCROLL
+   Covers every wrapper class used across all pages
+   ============================================================ */
+
+/* --- Universal table wrapper rule (no media query needed) --- */
+/* Make every known wrapper scrollable on all screen sizes,
+   content won't scroll unless table is wider than the container */
+.table-wrapper,
+.table-container,
+.table-container.full-width,
+.table-container-applications,
+.table-scroll-container,
+.applications-table-container,
+.applications-table-wrapper,
+.modern-data-table-wrapper,
+.records-table-wrapper,
+.records-cards-grid,
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
+/* --- On mobile enforce scroll and prevent table from shrinking --- */
+@media (max-width: 768px) {
+  /* ALL known wrapper class names */
+  .table-wrapper,
+  .table-container,
+  .table-container.full-width,
+  .table-container-applications,
+  .table-scroll-container,
+  .applications-table-container,
+  .applications-table-wrapper,
+  .modern-data-table-wrapper,
+  .records-table-wrapper,
+  .records-cards-grid,
+  .table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    display: block;
+  }
+
+  /* Every table inside these wrappers keeps its natural width */
+  .table-wrapper table,
+  .table-container table,
+  .table-container-applications table,
+  .table-scroll-container table,
+  .applications-table-container table,
+  .table-responsive table {
+    min-width: 540px;
+    width: max-content;
+  }
+
+  /* Tables NOT inside a named wrapper — prevent them from blowing out */
+  table {
+    max-width: 100%;
+  }
+
+  /* Ensure table cells don't wrap unnecessarily and break layout */
+  th, td {
+    white-space: nowrap;
+  }
+
+  /* modern-data-table specific */
+  .modern-data-table {
+    min-width: 600px;
+  }
+
+  /* data-table-enhanced (customer dashboard applications) */
+  .data-table-enhanced {
+    min-width: 560px;
+  }
+
+  /* data-table (admin/staff) */
+  .data-table,
+  .analysis-table {
+    min-width: 520px;
+  }
+
+  /* Scroll hint label */
+  .table-wrapper::after,
+  .table-container::after,
+  .table-container-applications::after,
+  .table-scroll-container::after {
+    content: '';
+    display: none;
+  }
+}
+
+/* ============================================================
+   GLOBAL BUTTONS & TAP TARGETS
+   ============================================================ */
+@media (max-width: 768px) {
+  button, a.btn, .btn, [class*="btn-"] {
+    min-height: 44px;
+  }
+
+  /* Form action rows */
+  .form-actions {
+    gap: 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-actions {
+    flex-direction: column !important;
+  }
+  .form-actions button {
+    width: 100% !important;
+    min-height: 48px !important;
+  }
+}
+
+/* ============================================================
+   INDEX PAGE — PUBLIC NAV & HERO
+   Already handled in styles.css but supplemented here
+   ============================================================ */
+@media (max-width: 768px) {
+  /* Ensure no overflow on public pages */
+  .section { padding-left: 16px !important; padding-right: 16px !important; }
+
+  /* Footer grid: stack columns */
+  .footer-content-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+
+  /* Hero content padding */
+  .hero-content {
+    padding: 24px 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-content h1 { font-size: 24px !important; line-height: 1.2 !important; }
+  .hero-content p  { font-size: 14px !important; }
+}
+
+/* ============================================================
+   CUSTOMER DASHBOARD — LAYOUTS
+   Already partially handled in customer-dashboard.css
+   ============================================================ */
+@media (max-width: 768px) {
+  /* Dashboard section padding */
+  .dashboard-section,
+  .page-section {
+    padding: 12px !important;
+  }
+
+  /* Application cards */
+  .application-card,
+  .app-card {
+    padding: 14px !important;
+    width: 100% !important;
+  }
+
+  /* Application detail sections */
+  .detail-grid,
+  .info-grid,
+  .application-info-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Status timeline: vertical */
+  .status-timeline,
+  .stepper,
+  .step-progress {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  /* Document download buttons */
+  .doc-download-btn,
+  .download-btn {
+    width: 100% !important;
+    min-height: 48px !important;
+  }
+
+  /* Filter row: stack */
+  .filter-row,
+  .filters-bar {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .filter-row input,
+  .filter-row select,
+  .filters-bar input,
+  .filters-bar select {
+    width: 100% !important;
+  }
+
+  /* Pagination: center */
+  .pagination {
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .pagination button,
+  .page-btn {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  /* Step card — new application form */
+  .step-card {
+    padding: 16px !important;
+    border-radius: 10px !important;
+  }
+
+  /* Progress steps: shrink */
+  .application-progress-container .step-indicator {
+    padding: 12px 8px !important;
+  }
+
+  .application-progress-container .step-label {
+    font-size: 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Stats: ensure 2-col */
+  .stats-grid,
+  .stat-cards {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .stat-card {
+    padding: 12px 10px !important;
+  }
+
+  .stat-value, .stat-number {
+    font-size: 20px !important;
+  }
+
+  /* Profile completion */
+  .profile-completion {
+    padding: 14px !important;
+  }
+}
+
+/* ============================================================
+   APPLICATION TABLES — STRATEGY B (card view)
+   For the main applications list tables
+   ============================================================ */
+@media (max-width: 768px) {
+  /* Card-view for applications table */
+  .applications-table table,
+  .app-list-table {
+    display: block !important;
+  }
+
+  .applications-table thead,
+  .app-list-table thead {
+    display: none !important;
+  }
+
+  .applications-table tbody,
+  .app-list-table tbody {
+    display: block !important;
+  }
+
+  .applications-table tbody tr,
+  .app-list-table tbody tr {
+    display: block !important;
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 10px !important;
+    padding: 14px !important;
+    margin-bottom: 12px !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+  }
+
+  .applications-table tbody td,
+  .app-list-table tbody td {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 6px 0 !important;
+    border: none !important;
+    font-size: 13px !important;
+    min-height: 0 !important;
+  }
+
+  .applications-table tbody td::before,
+  .app-list-table tbody td::before {
+    content: attr(data-label) !important;
+    font-weight: 600 !important;
+    color: #6b7280 !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.3px !important;
+    flex-shrink: 0 !important;
+    margin-right: 8px !important;
+  }
+
+  /* Action buttons in card */
+  .applications-table tbody td:last-child,
+  .app-list-table tbody td:last-child {
+    justify-content: flex-end !important;
+    padding-top: 10px !important;
+    border-top: 1px solid #f3f4f6 !important;
+    margin-top: 4px !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .applications-table tbody td:last-child button,
+  .app-list-table tbody td:last-child button,
+  .applications-table tbody td:last-child a,
+  .app-list-table tbody td:last-child a {
+    min-height: 36px !important;
+    padding: 6px 14px !important;
+    font-size: 13px !important;
+  }
+}
+
+/* ============================================================
+   STAFF DASHBOARD
+   Already has mobile drawer from previous session
+   Supplement with additional layout fixes
+   ============================================================ */
+@media (max-width: 768px) {
+  /* Quick stats 2-col (already in staff-dashboard.css, reinforce) */
+  .quick-stats {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* Recent apps section */
+  .recent-apps,
+  .recent-applications {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* Section header actions */
+  .section-actions,
+  .header-actions {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .section-actions button,
+  .header-actions button {
+    flex: 1 !important;
+    min-width: 120px !important;
+    min-height: 44px !important;
+  }
+
+  /* Staff review page — action buttons */
+  .review-actions,
+  .application-actions {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .review-actions button,
+  .application-actions button {
+    width: 100% !important;
+    min-height: 48px !important;
+  }
+
+  /* Staff detail page grids */
+  .applicant-info-grid,
+  .review-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Remarks textarea */
+  .remarks-input,
+  textarea.remarks {
+    width: 100% !important;
+    min-height: 100px !important;
+  }
+
+  /* Document attachments */
+  .attachments-list,
+  .document-list {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .attachment-item,
+  .document-item {
+    width: 100% !important;
+  }
+
+  /* View all */
+  .view-all-btn {
+    width: 100% !important;
+    text-align: center !important;
+    min-height: 44px !important;
+  }
+}
+
+/* ============================================================
+   ADMIN DASHBOARD — MOBILE NAV + LAYOUTS
+   ============================================================ */
+
+/* Admin mobile top header */
+.admin-mobile-header {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1001;
+  background: linear-gradient(135deg, #1e5631 0%, #2d7a46 100%);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+.admin-mobile-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  height: 56px;
+  gap: 10px;
+}
+
+.admin-mobile-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 15px;
+  flex: 1;
+}
+
+/* Admin hamburger */
+.admin-hamburger-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.admin-hamburger-btn span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: #ffffff;
+  border-radius: 2px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.admin-hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.admin-hamburger-btn.open span:nth-child(2) { opacity: 0; }
+.admin-hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* Admin drawer overlay */
+.admin-drawer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 300;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.admin-drawer-overlay.open { opacity: 1; }
+
+/* Admin slide-in drawer */
+.admin-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 260px;
+  background: linear-gradient(180deg, #1e5631 0%, #2d7a46 100%);
+  z-index: 400;
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.admin-drawer.open { transform: translateX(0); }
+
+.admin-drawer-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.admin-drawer-close {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 24px;
+  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  line-height: 1;
+  pointer-events: all;
+  position: relative;
+  z-index: 410;
+  flex-shrink: 0;
+}
+
+.admin-drawer-close:hover { background: rgba(255,255,255,0.1); }
+
+.admin-drawer-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  color: rgba(255,255,255,0.85);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  min-height: 48px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-drawer-item:hover,
+.admin-drawer-item.active { background: rgba(255,255,255,0.12); color: #ffffff; }
+
+.admin-drawer-logout {
+  margin-top: auto;
+  color: #fca5a5;
+  border-top: 1px solid rgba(255,255,255,0.12);
+}
+
+@media (max-width: 768px) {
+  /* Show admin mobile header */
+  .admin-mobile-header { display: block; }
+  .admin-drawer-overlay { display: block; }
+
+  /* Hide admin desktop sidebar (override admin-dashboard.css 200px rule) */
+  .admin-page .sidebar {
+    display: none !important;
+    width: 0 !important;
+  }
+
+  /* Hide desktop top-header on mobile — replaced by admin-mobile-header */
+  .admin-page .top-header { display: none !important; }
+
+  /* Main content full width */
+  .admin-page .main-content {
+    margin-left: 0 !important;
+    padding-top: 56px !important;
+    width: 100% !important;
+  }
+
+  /* Summary/stat cards 2-col */
+  .summary-cards,
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* Charts full width */
+  .charts-section {
+    grid-template-columns: 1fr !important;
+  }
+
+  .chart-card,
+  .chart-container {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+  }
+
+  /* User management card view */
+  .users-table thead { display: none !important; }
+  .users-table tbody tr {
+    display: block !important;
+    background: #fff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 10px !important;
+    padding: 14px !important;
+    margin-bottom: 10px !important;
+  }
+  .users-table tbody td {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 5px 0 !important;
+    border: none !important;
+    font-size: 13px !important;
+  }
+  .users-table tbody td::before {
+    content: attr(data-label) !important;
+    font-weight: 600 !important;
+    color: #6b7280 !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    flex-shrink: 0 !important;
+    margin-right: 8px !important;
+  }
+
+  /* Admin content padding */
+  .content-area { padding: 16px !important; }
+  .top-header { padding: 14px 16px !important; }
+
+  /* Bulk actions */
+  .bulk-actions {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .bulk-actions button {
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+
+  /* Settings forms */
+  .settings-grid,
+  .settings-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Report filters */
+  .report-filters {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .report-filters select,
+  .report-filters input {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .summary-cards,
+  .admin-stats-grid {
+    gap: 8px !important;
+  }
+
+  .stat-card { padding: 12px 10px !important; }
+  .stat-value { font-size: 20px !important; }
+  .page-title { font-size: 18px !important; }
+}
+
+/* ============================================================
+   PUBLIC PAGES (About, Services, FAQ, Contact, Permit Types)
+   ============================================================ */
+@media (max-width: 768px) {
+  /* All multi-col grids → single column */
+  .services-grid,
+  .features-grid,
+  .about-grid,
+  .team-grid,
+  .cards-grid,
+  .permit-grid,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  /* FAQ accordion */
+  .faq-item,
+  .accordion-item {
+    width: 100% !important;
+  }
+
+  .faq-question,
+  .accordion-btn {
+    min-height: 48px !important;
+    font-size: 14px !important;
+    padding: 14px 16px !important;
+  }
+
+  /* Contact form */
+  .contact-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .contact-form input,
+  .contact-form textarea,
+  .contact-form select {
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+
+  /* Section headers */
+  .section-title,
+  .section-heading,
+  h2.title {
+    font-size: 22px !important;
+  }
+
+  /* Horizontal paddings for all sections */
+  section,
+  .section {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* Feature/service cards */
+  .service-card,
+  .feature-card,
+  .card {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-title,
+  .section-heading {
+    font-size: 20px !important;
+  }
+}
+
+/* ============================================================
+   MISCELLANEOUS
+   ============================================================ */
+@media (max-width: 768px) {
+  /* Notification dropdown */
+  .notification-dropdown,
+  .notifications-panel {
+    width: calc(100vw - 24px) !important;
+    max-width: 100% !important;
+    left: 12px !important;
+    right: 12px !important;
+  }
+
+  /* User dropdown */
+  .user-dropdown {
+    right: 0 !important;
+    left: auto !important;
+    min-width: 220px !important;
+  }
+
+  /* Toast/snackbar notifications */
+  .toast,
+  .snackbar {
+    width: calc(100vw - 32px) !important;
+    left: 16px !important;
+    right: 16px !important;
+  }
+
+  /* Breadcrumb: wrap */
+  .breadcrumb {
+    flex-wrap: wrap !important;
+    font-size: 13px !important;
+  }
+}

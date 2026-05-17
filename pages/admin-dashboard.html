@@ -6,6 +6,7 @@
     <title>Admin Dashboard | DENR CENRO</title>
     <link rel="icon" type="image/png" href="/assets/images/logo.png">
     <link rel="stylesheet" href="/assets/css/admin-dashboard.css" />
+    <link rel="stylesheet" href="/assets/css/responsive.css" />
     <!-- RBAC Auth Guard - Prevents Unauthorized Access -->
     <script type="module">
       import { initAuthGuard, protectRoute } from '/assets/js/auth-guard.js';
@@ -21,7 +22,44 @@
       });
     </script>
   </head>
-  <body>
+  <body class="admin-page">
+    <!-- Admin Mobile Top Header -->
+    <header class="admin-mobile-header" id="adminMobileHeader">
+      <div class="admin-mobile-header-inner">
+        <button class="admin-hamburger-btn" id="adminHamburgerBtn" aria-label="Toggle menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="admin-mobile-brand">
+          <img src="/assets/images/logo.png" alt="DENR" style="width:28px;height:28px;border-radius:50%;" />
+          <span>DENR-CENRO Admin</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button style="background:transparent;border:none;cursor:pointer;color:#fff;font-size:18px;min-width:44px;min-height:44px;">🔔</button>
+          <div class="avatar-circle" style="width:34px;height:34px;font-size:13px;">SA</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Admin Drawer Overlay -->
+    <div class="admin-drawer-overlay" id="adminDrawerOverlay"></div>
+    <!-- Admin Slide-in Drawer -->
+    <nav class="admin-drawer" id="adminDrawer" aria-hidden="true">
+      <div class="admin-drawer-header">
+        <img src="/assets/images/logo.png" alt="DENR" style="width:36px;height:36px;border-radius:50%;" />
+        <span>DENR-CENRO Sta. Cruz</span>
+        <button class="admin-drawer-close" id="adminDrawerClose" aria-label="Close menu">&times;</button>
+      </div>
+      <a href="#dashboard"    class="admin-drawer-item" data-section="dashboardSection"><span>📊</span> Dashboard</a>
+      <a href="#applications" class="admin-drawer-item" data-section="applicationsSection"><span>📋</span> Applications</a>
+      <a href="#records"      class="admin-drawer-item" data-section="recordsSection"><span>📁</span> Records</a>
+      <a href="#users"        class="admin-drawer-item" data-section="usersSection"><span>👥</span> Manage Users</a>
+      <a href="#reports"      class="admin-drawer-item" data-section="reportsSection"><span>📈</span> Reports</a>
+      <a href="#content"      class="admin-drawer-item" data-section="contentSection"><span>📝</span> Content</a>
+      <a href="#settings"     class="admin-drawer-item" data-section="settingsSection"><span>⚙️</span> Settings</a>
+      <a href="#audit"        class="admin-drawer-item" data-section="auditSection"><span>📝</span> Audit Logs</a>
+      <button class="admin-drawer-item admin-drawer-logout" id="adminMobileLogoutBtn"><span>🚪</span> Logout</button>
+    </nav>
+
     <div class="dashboard-container">
       <!-- Sidebar -->
       <aside class="sidebar" id="sidebar">
@@ -1550,6 +1588,52 @@
           timeElement.textContent = timeString;
         }
       }
+
+      // Admin mobile drawer
+      (function() {
+        const hamburgerBtn = document.getElementById('adminHamburgerBtn');
+        const drawer       = document.getElementById('adminDrawer');
+        const overlay      = document.getElementById('adminDrawerOverlay');
+        const closeBtn     = document.getElementById('adminDrawerClose');
+
+        function openDrawer() {
+          drawer.classList.add('open');
+          overlay.classList.add('open');
+          hamburgerBtn && hamburgerBtn.classList.add('open');
+          drawer.setAttribute('aria-hidden', 'false');
+        }
+        function closeDrawer() {
+          drawer.classList.remove('open');
+          overlay.classList.remove('open');
+          hamburgerBtn && hamburgerBtn.classList.remove('open');
+          drawer.setAttribute('aria-hidden', 'true');
+        }
+
+        if (hamburgerBtn) hamburgerBtn.addEventListener('click', openDrawer);
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function(e) { e.stopPropagation(); closeDrawer(); });
+          closeBtn.addEventListener('touchend', function(e) { e.preventDefault(); e.stopPropagation(); closeDrawer(); });
+        }
+        if (overlay) overlay.addEventListener('click', closeDrawer);
+        if (drawer) drawer.addEventListener('click', function(e) { e.stopPropagation(); });
+
+        drawer && drawer.querySelectorAll('.admin-drawer-item[data-section]').forEach(function(item) {
+          item.addEventListener('click', function() {
+            const section = item.getAttribute('data-section');
+            if (section && typeof navigateToSection === 'function') navigateToSection(section);
+            closeDrawer();
+          });
+        });
+
+        const mobileLogout = document.getElementById('adminMobileLogoutBtn');
+        if (mobileLogout) {
+          mobileLogout.addEventListener('click', function() {
+            closeDrawer();
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) logoutBtn.click();
+          });
+        }
+      })();
     </script>
   </body>
 </html>

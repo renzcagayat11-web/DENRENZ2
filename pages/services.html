@@ -7,6 +7,7 @@
     <link rel="icon" type="image/png" href="/assets/images/logo.png">
     <link rel="stylesheet" href="/assets/css/styles.css">
     <link rel="stylesheet" href="/assets/css/about-enhanced.css">
+    <link rel="stylesheet" href="/assets/css/responsive.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   </head>
@@ -27,6 +28,15 @@
         <div class="nav-cta">
           <button class="btn-getstarted" onclick="openAuthModal('signin')">Get Started</button>
         </div>
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      </div>
+      <div class="mobile-nav" id="mobileNav" aria-hidden="true">
+        <a href="/pages/index.html" class="mobile-nav-item">Home</a>
+        <a href="/pages/about.html" class="mobile-nav-item">About</a>
+        <a href="/pages/services.html" class="mobile-nav-item">Services</a>
+        <a href="/pages/faq.html" class="mobile-nav-item">FAQ</a>
+        <a href="/pages/contact.html" class="mobile-nav-item">Contact Us</a>
+        <button class="mobile-nav-item mobile-getstarted" onclick="openAuthModal('signin');document.getElementById('mobileNav').classList.remove('open');document.getElementById('hamburgerBtn').classList.remove('open');">Get Started</button>
       </div>
     </header>
 
@@ -332,6 +342,7 @@
       </div>
     </div>
 
+    <script>(function(){var b=document.getElementById('hamburgerBtn'),n=document.getElementById('mobileNav');if(b&&n){b.addEventListener('click',function(){var o=n.classList.toggle('open');b.classList.toggle('open',o);b.setAttribute('aria-expanded',o);n.setAttribute('aria-hidden',!o);});}})()</script>
     <!-- Firebase SDK -->
     <script type="module" src="/assets/js/app.js"></script>
   </body>
