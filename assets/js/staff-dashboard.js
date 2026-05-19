@@ -62,13 +62,19 @@ const API_BASE = window.API_BASE || (location.hostname === 'localhost' || locati
 let currentApplication = null;
 let allApplications = [];
 let currentUserEmail = null;
-const staffNotificationCenter = createNotificationCenter({
-  buttonSelector: '.notification-btn',
-  badgeSelector: '#notificationCount',
-  panelId: 'staffNotificationPanel',
-  emptyState: 'No alerts right now',
-  title: 'Team Notifications'
-});
+let staffNotificationCenter = null;
+function getStaffNotificationCenter() {
+  if (!staffNotificationCenter) {
+    staffNotificationCenter = createNotificationCenter({
+      buttonSelector: '.notification-btn',
+      badgeSelector: '#notificationCount',
+      panelId: 'staffNotificationPanel',
+      emptyState: 'No alerts right now',
+      title: 'Team Notifications'
+    });
+  }
+  return staffNotificationCenter;
+}
 
 function getStaffActorInfo() {
   const user = auth.currentUser;
@@ -376,11 +382,11 @@ protectRoute({
     
     loadDashboardData();
     updateUserInfo(state.user, { role: state.role });
-    staffNotificationCenter.start(state.user.uid);
+    getStaffNotificationCenter().start(state.user.uid);
   },
   onUnauthenticated: () => {
     console.log('Staff dashboard: Not authenticated or access denied');
-    staffNotificationCenter.stop();
+    getStaffNotificationCenter().stop();
   }
 });
 
