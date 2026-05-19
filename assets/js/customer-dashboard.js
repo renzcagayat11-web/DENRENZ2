@@ -4,6 +4,8 @@ import {
   getIdToken 
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { protectRoute, logout as authGuardLogout } from './auth-guard.js';
+import { createNotifications } from './notification-service.js';
+import { createNotificationCenter } from './notification-center.js';
 import { 
   collection, 
   getDocs, 
@@ -161,6 +163,86 @@ function isOnline() {
 
 let currentUserData = null;
 let userApplications = [];
+const notificationCenter = createNotificationCenter({
+  buttonSelector: '#notificationBtn',
+  badgeSelector: '.notification-badge',
+  panelId: 'customerNotificationPanel',
+  emptyState: 'You are all caught up!',
+  title: 'My Notifications'
+});
+
+function getCurrentUserDisplayName() {
+  if (currentUserData) {
+    const fullName = `${currentUserData.firstName || ''} ${currentUserData.surname || ''}`.trim();
+    if (fullName) return fullName;
+    if (currentUserData.email) return currentUserData.email.split('@')[0];
+  }
+  const user = auth.currentUser;
+  if (user) {
+    return user.displayName || (user.email ? user.email.split('@')[0] : 'Customer');
+  }
+  return 'Customer';
+}
+
+function buildActorInfo() {
+  const user = auth.currentUser;
+  return {
+    id: user?.uid || currentUserData?.uid || null,
+    name: getCurrentUserDisplayName()
+  };
+}
+
+function buildTeamNotificationCopy(eventType, application) {
+  const permitLabel = application?.permitType || application?.documentType || 'permit';
+  const applicant = application?.applicantName || getCurrentUserDisplayName();
+
+  switch (eventType) {
+    case 'application-resubmitted':
+      return {
+        title: 'Application Resubmitted',
+        message: `${applicant} resubmitted the ${permitLabel} application for review.`
+      };
+    case 'application-edited':
+      return {
+        title: 'Application Updated',
+        message: `${applicant} updated details for the ${permitLabel} application.`
+      };
+    case 'application-submitted':
+    default:
+      return {
+        title: 'New Application Submitted',
+        message: `${applicant} submitted a new ${permitLabel} application.`
+      };
+  }
+}
+
+async function notifyTeamAboutApplication(eventType, application) {
+  try {
+    if (!createNotifications) return;
+    const { title, message } = buildTeamNotificationCopy(eventType, application);
+    const actor = buildActorInfo();
+    await createNotifications({
+      eventType,
+      title,
+      message,
+      payload: {
+        applicationId: application?.applicationId,
+        permitType: application?.permitType,
+        documentType: application?.documentType,
+        applicantName: application?.applicantName,
+        applicantUid: application?.applicantUid,
+        docId: application?.docId
+      },
+      actor,
+      recipients: [
+        { role: 'staff' },
+        { role: 'admin' }
+      ]
+    });
+  } catch (error) {
+    console.error('Failed to create staff/admin notification:', error);
+  }
+}
 
 // Enhanced Modal System
 function showModal(modalId) {
@@ -683,9 +765,11 @@ protectRoute({
     
     loadDashboardData();
     updateUserInfo(state.user, currentUserData);
+    notificationCenter.start(state.user.uid);
   },
   onUnauthenticated: () => {
     console.log('Customer dashboard: Not authenticated or access denied');
+    notificationCenter.stop();
   }
 });
 
@@ -810,7 +894,11 @@ function updateProfileCompletion(userData) {
   
   if (percentElement) percentElement.textContent = percentage;
   if (progressElement) progressElement.style.width = percentage + '%';
-  
+  const completionWrapper = document.getElementById('profileCompletionWrapper');
+  if (completionWrapper) {
+    completionWrapper.style.display = percentage >= 100 ? 'none' : '';
+  }
+
   // Update completion items
   const completionItems = document.querySelectorAll('.completion-item');
   if (completionItems.length >= 4) {
@@ -4828,6 +4916,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setupApplicantTypeToggle();
   setupBarangaySelection();
   setupProfileBarangaySelection();
+  setupResumeCardInteractions();
+  updateResumeProgressCard();
 
   // Restore application form data (must run after setupBarangaySelection so municipal change event works)
   restoreFormData('newApplicationForm');
@@ -5320,7 +5410,8 @@ function goToStep(step) {
   currentStep = step;
   localStorage.setItem('currentFormStep', step);
   console.log('Current step set to:', currentStep);
-  
+  stampDraftProgress({ currentStep: step });
+
   // If moving to step 5 (Documents & Review), generate upload fields
   if (step === 5) {
     const documentType = document.getElementById('documentType')?.value || '';
@@ -5413,6 +5504,7 @@ function resetFormSteps() {
 
   // Reset to default step indicators (4 steps)
   updateStepIndicators('', '');
+  clearDraftProgress();
   
   // Hide all form steps first
   document.querySelectorAll('.form-step').forEach(step => {
@@ -8077,151 +8169,325 @@ const DENR_FORM_TEMPLATES = {
   },
 };
 
-// Dynamic step procedures - generated based on document requirements and type characteristics
-function generateStepProcedure(documentType, permitType) {
-  const requirements = PERMIT_REQUIREMENTS[permitType] || [];
-  const steps = [];
-  let stepNum = 1;
-  
-  // Step 1: Always Document Selection
-  steps.push({
-    step: stepNum++,
-    title: 'Document Selection',
-    description: 'Select category type and permit type',
-    icon: 'document'
-  });
-  
-  // Step 2: Applicant/Owner Information (always required)
-  steps.push({
-    step: stepNum++,
-    title: documentType === 'Lands' ? 'Property Owner Information' : 'Applicant Information',
-    description: documentType === 'Lands' ? 'Provide property owner and contact details' : 'Provide personal and contact information',
-    icon: 'user'
-  });
-  
-  // Step 3: Location/Property Details (for Lands, Forestry, and location-based permits)
-  if (documentType === 'Lands' ||
-      documentType === 'Forestry' ||
-      documentType === 'Land Services' ||
-      permitType.includes('CBFMA') ||
-      permitType.includes('Farm') ||
-      permitType.includes('Mining') ||
-      permitType.includes('Tree Cutting') ||
-      permitType.includes('Tree Planting')) {
+const STEP_ICON_LIBRARY = {
+  document: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`,
+  organization: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
+  location: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`,
+  project: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`,
+  upload: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`,
+  review: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>`,
+  user: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`,
+  business: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`,
+  tool: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>`,
+  purpose: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`,
+  wildlife: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
+  transport: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>`,
+  health: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>`,
+  layout: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>`,
+  environment: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>`,
+  tax: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>`,
+  import: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>`,
+  facility: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M5 21V7l8-4 8 4v14"></path><path d="M17 21v-8.5a1.5 1.5 0 0 0-1.5-1.5h-7a1.5 1.5 0 0 0-1.5 1.5V21"></path></svg>`,
+  product: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>`,
+  clearance: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`
+};
+
+function generateStepProcedure(documentType = '', permitType = '') {
+  const normalizedDocument = (documentType || '').toLowerCase();
+  const normalizedPermit = (permitType || '').toLowerCase();
+  const steps = [
+    {
+      key: 'document',
+      title: 'Document Information',
+      description: documentType
+        ? `Review your ${documentType} selection and permit type.`
+        : 'Select your category and permit to begin.',
+      icon: 'document'
+    },
+    {
+      key: 'applicant',
+      title: 'Applicant Information',
+      description: 'Provide your personal or organization contact details.',
+      icon: 'user'
+    }
+  ];
+
+  if (normalizedDocument.includes('land')) {
     steps.push({
-      step: stepNum++,
-      title: documentType === 'Lands' || documentType === 'Land Services' ? 'Property Location Details' : 'Location Details',
-      description: documentType === 'Lands' || documentType === 'Land Services' ? 'Specify property location and boundaries' : 'Provide location and site details',
+      key: 'location',
+      title: 'Property & Location',
+      description: 'Pin the property location and share ownership details.',
+      icon: 'location'
+    });
+  } else if (normalizedDocument.includes('forestry')) {
+    steps.push({
+      key: 'environment',
+      title: 'Site & Timber Details',
+      description: 'Log forest inventory, tree counts, and compliance info.',
+      icon: 'environment'
+    });
+  } else if (normalizedDocument.includes('biodiversity')) {
+    steps.push({
+      key: 'facility',
+      title: 'Facility & Habitat',
+      description: 'Describe habitats, facility layout, and care plans.',
+      icon: 'facility'
+    });
+  } else {
+    steps.push({
+      key: 'location',
+      title: 'Location Details',
+      description: 'Provide address, district, and barangay information.',
       icon: 'location'
     });
   }
-  
-  // Step 4: Business/Organization Details (if required)
-  if (requirements.some(req => 
-    req.toLowerCase().includes('business') ||
-    req.toLowerCase().includes('sec') ||
-    req.toLowerCase().includes('cda') ||
-    req.toLowerCase().includes('dole') ||
-    req.toLowerCase().includes('registration'))) {
-    steps.push({
-      step: stepNum++,
-      title: 'Business/Organization Details',
-      description: 'Provide business registration and organization information',
-      icon: 'business'
-    });
-  }
-  
-  // Step 5: Specific Details based on document type
-  if (permitType.includes('Chainsaw')) {
-    steps.push({
-      step: stepNum++,
-      title: 'Chainsaw Information',
-      description: 'Specify chainsaw details and justification',
-      icon: 'chainsaw'
-    });
-  } else if (permitType.includes('Wildlife') || permitType.includes('Transport')) {
-    steps.push({
-      step: stepNum++,
-      title: 'Transport Information',
-      description: 'Provide transport route and wildlife details',
+
+  let detailStep = {
+    key: 'purpose',
+    title: 'Project Purpose',
+    description: 'Describe the project scope, intent, and environmental impact.',
+    icon: 'purpose'
+  };
+
+  if (normalizedPermit.includes('chainsaw')) {
+    detailStep = {
+      key: 'tool',
+      title: 'Chainsaw Details',
+      description: 'Share serial numbers, owners, and safety compliance.',
+      icon: 'tool'
+    };
+  } else if (normalizedPermit.includes('wildlife')) {
+    detailStep = {
+      key: 'wildlife',
+      title: 'Wildlife Compliance',
+      description: 'List species, legal sources, and transport logistics.',
+      icon: 'wildlife'
+    };
+  } else if (normalizedPermit.includes('import')) {
+    detailStep = {
+      key: 'import',
+      title: 'Import & Logistics',
+      description: 'Document shipping plans, invoices, and clearances.',
+      icon: 'import'
+    };
+  } else if (normalizedPermit.includes('transport')) {
+    detailStep = {
+      key: 'transport',
+      title: 'Transport Details',
+      description: 'Outline routes, schedules, and escort requirements.',
       icon: 'transport'
-    });
-  } else if (permitType.includes('Farm')) {
-    steps.push({
-      step: stepNum++,
-      title: 'Facility Details',
-      description: 'Provide farm layout and facility information',
-      icon: 'facility'
-    });
-  } else if (documentType === 'Lands' || documentType === 'Land Services') {
-    steps.push({
-      step: stepNum++,
-      title: 'Survey Plan Information',
-      description: 'Provide survey plan and technical details',
-      icon: 'survey'
-    });
-  } else if (permitType.includes('Environmental') || permitType.includes('ECC')) {
-    steps.push({
-      step: stepNum++,
-      title: 'Environmental Compliance',
-      description: 'Provide environmental impact and compliance details',
-      icon: 'environment'
-    });
+    };
+  } else if (normalizedPermit.includes('business') || normalizedPermit.includes('permit')) {
+    detailStep = {
+      key: 'business',
+      title: 'Business / Project Details',
+      description: 'Share organization profile and permit-specific data.',
+      icon: 'business'
+    };
   }
-  
-  // Step: Project/Proposal Details (if required)
-  if (requirements.some(req => 
-    req.toLowerCase().includes('project') ||
-    req.toLowerCase().includes('proposal') ||
-    req.toLowerCase().includes('management plan'))) {
-    steps.push({
-      step: stepNum++,
-      title: 'Project Details',
-      description: 'Provide project proposal and management plan',
-      icon: 'project'
-    });
-  }
-  
-  // Step: Document Upload (always required)
+
+  steps.push(detailStep);
+
   steps.push({
-    step: stepNum++,
-    title: 'Document Upload',
-    description: `Upload required documents (${requirements.length} documents needed)`,
+    key: 'upload',
+    title: 'Documents & Review',
+    description: 'Upload requirements and review before submission.',
     icon: 'upload'
   });
-  
-  // Final Step: Review & Submit
-  steps.push({
-    step: stepNum,
-    title: 'Review & Submit',
-    description: 'Review your application and submit',
-    icon: 'review'
-  });
-  
-  return steps;
+
+  return steps.map((step, index) => ({
+    ...step,
+    step: index + 1,
+    icon: STEP_ICON_LIBRARY[step.icon] ? step.icon : 'document'
+  }));
 }
 
-// Default step procedure (used when no specific procedure is defined)
-const defaultStepProcedure = [
-  { step: 1, title: 'Document Selection', description: 'Select category type and permit type', icon: 'document' },
-  { step: 2, title: 'Applicant Information', description: 'Provide personal and contact details', icon: 'user' },
-  { step: 3, title: 'Location Details', description: 'Provide location and map pin', icon: 'location' },
-  { step: 4, title: 'Application Details', description: 'Describe purpose and environmental impact', icon: 'document' },
-  { step: 5, title: 'Documents & Review', description: 'Upload documents and submit application', icon: 'upload' }
-];
+const defaultStepProcedure = generateStepProcedure();
 
+const DRAFT_PROGRESS_STORAGE_KEY = 'draftApplicationProgress';
 
-Object.values(categoryTypePermitOptions)
-  .flat()
-  .forEach((label) => {
-    if (!documentTypeDetails[label]) {
-      documentTypeDetails[label] = {
-        classification: "See DENR Regional Office / Citizen's Charter",
-        fees: 'Contact the office for applicable fees',
-        minimumProcessingTime: 'Processing time varies by application type'
-      };
+const resumeProgressCard = document.getElementById('resumeProgressCard');
+const resumeProgressSteps = document.getElementById('resumeProgressSteps');
+const resumeProgressMeta = document.getElementById('resumeProgressMeta');
+const resumeContinueBtn = document.getElementById('resumeContinueBtn');
+const resumeStartOverBtn = document.getElementById('resumeStartOverBtn');
+
+function formatDraftTimestamp(timestamp) {
+  if (!timestamp) return 'Just now';
+  const diffMs = Date.now() - timestamp;
+  const diffMinutes = Math.floor(diffMs / 60000);
+  if (diffMinutes <= 0) return 'Just now';
+  if (diffMinutes < 60) {
+    return `${diffMinutes} minute${diffMinutes === 1 ? '' : 's'} ago`;
+  }
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) {
+    return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+  }
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+}
+
+function getSavedDraftProgress() {
+  const raw = localStorage.getItem(DRAFT_PROGRESS_STORAGE_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch (error) {
+    console.warn('Unable to parse draft progress payload:', error);
+    return null;
+  }
+}
+
+function stampDraftProgress(overrides = {}) {
+  if (window.editingAppId) return;
+  const documentType = overrides.documentType ?? (documentTypeSelect?.value || localStorage.getItem('selectedDocumentType') || '');
+  const permitType = overrides.permitType ?? (permitTypeSelect?.value || localStorage.getItem('selectedPermitType') || '');
+  if (!documentType || !permitType) {
+    return;
+  }
+  const stepProcedure = getStepProcedure(documentType, permitType);
+  const maxSteps = stepProcedure.length || defaultStepProcedure.length;
+  const inferredStep = Number(overrides.currentStep ?? localStorage.getItem('currentFormStep') ?? currentStep ?? 1) || 1;
+  const payload = {
+    documentType,
+    permitType,
+    currentStep: Math.min(maxSteps, Math.max(1, inferredStep)),
+    totalSteps: maxSteps,
+    updatedAt: Date.now()
+  };
+  localStorage.setItem(DRAFT_PROGRESS_STORAGE_KEY, JSON.stringify(payload));
+  updateResumeProgressCard();
+}
+
+function clearDraftProgress() {
+  localStorage.removeItem(DRAFT_PROGRESS_STORAGE_KEY);
+  updateResumeProgressCard();
+}
+
+function focusNewApplicationSection() {
+  return new Promise((resolve) => {
+    navigateToSection('newApplicationSection');
+    setTimeout(() => {
+      const progress = getSavedDraftProgress();
+      if (progress && documentTypeSelect && progress.documentType) {
+        documentTypeSelect.value = progress.documentType;
+        documentTypeSelect.dispatchEvent(new Event('change'));
+      }
+      setTimeout(() => {
+        const progressInner = getSavedDraftProgress();
+        if (progressInner && permitTypeSelect && progressInner.permitType) {
+          permitTypeSelect.value = progressInner.permitType;
+          permitTypeSelect.dispatchEvent(new Event('change'));
+        }
+        setTimeout(resolve, 350);
+      }, 250);
+    }, 300);
+  });
+}
+
+function renderResumeProgressSteps(stepProcedure, currentStepValue) {
+  if (!resumeProgressSteps) return;
+  resumeProgressSteps.innerHTML = '';
+  stepProcedure.forEach((step) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'resume-progress-step';
+    button.dataset.step = step.step;
+    if (step.step < currentStepValue) {
+      button.classList.add('completed');
+    } else if (step.step === currentStepValue) {
+      button.classList.add('current');
+    }
+    const iconSvg = STEP_ICON_LIBRARY[step.icon] || STEP_ICON_LIBRARY.document;
+    button.innerHTML = `
+      <span class="resume-progress-step-icon">${iconSvg}</span>
+      <span class="resume-progress-step-text">
+        <span class="resume-progress-step-label">${step.title}</span>
+        <span class="resume-progress-step-desc">${step.description}</span>
+      </span>
+    `;
+    resumeProgressSteps.appendChild(button);
+  });
+}
+
+function updateResumeProgressCard() {
+  if (!resumeProgressCard) return;
+  if (window.editingAppId) {
+    resumeProgressCard.hidden = true;
+    return;
+  }
+  const progress = getSavedDraftProgress();
+  if (!progress) {
+    resumeProgressCard.hidden = true;
+    if (resumeProgressSteps) {
+      resumeProgressSteps.innerHTML = '';
+    }
+    return;
+  }
+  const stepProcedure = getStepProcedure(progress.documentType, progress.permitType);
+  const activeStep = Math.min(stepProcedure.length || progress.totalSteps || 1, progress.currentStep || 1);
+  renderResumeProgressSteps(stepProcedure, activeStep);
+  if (resumeProgressMeta) {
+    const statusCopy = `${progress.documentType || 'Draft application'} • Step ${activeStep} of ${stepProcedure.length}`;
+    resumeProgressMeta.textContent = `${statusCopy} • ${formatDraftTimestamp(progress.updatedAt)}`;
+  }
+  resumeProgressCard.hidden = false;
+}
+
+function handleResumeContinueClick() {
+  const progress = getSavedDraftProgress();
+  if (!progress) return;
+  focusNewApplicationSection().then(() => {
+    goToStep(progress.currentStep || 1);
+    const targetSection = document.getElementById('newApplicationSection');
+    if (targetSection) {
+      targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   });
+}
+
+function handleResumeStartOverClick() {
+  const confirmed = confirm('Start over your saved application? This will clear your draft progress.');
+  if (!confirmed) return;
+  clearDraftProgress();
+  focusNewApplicationSection().then(() => {
+    resetFormSteps();
+    const targetSection = document.getElementById('newApplicationSection');
+    if (targetSection) {
+      targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+}
+
+function handleResumeStepClick(step) {
+  const numericStep = Number(step);
+  if (!numericStep || Number.isNaN(numericStep)) return;
+  focusNewApplicationSection().then(() => {
+    goToStep(numericStep);
+  });
+}
+
+function setupResumeCardInteractions() {
+  if (resumeContinueBtn) {
+    resumeContinueBtn.addEventListener('click', handleResumeContinueClick);
+  }
+  if (resumeStartOverBtn) {
+    resumeStartOverBtn.addEventListener('click', handleResumeStartOverClick);
+  }
+  if (resumeProgressSteps) {
+    resumeProgressSteps.addEventListener('click', (event) => {
+      const stepTarget = event.target.closest?.('.resume-progress-step');
+      if (!stepTarget) return;
+      handleResumeStepClick(stepTarget.dataset.step);
+    });
+  }
+  window.addEventListener('storage', (event) => {
+    if (event.key === DRAFT_PROGRESS_STORAGE_KEY) {
+      updateResumeProgressCard();
+    }
+  });
+}
 
 // Custom Form Elements
 const formSelectionNotice = document.getElementById('formSelectionNotice');
@@ -8285,9 +8551,9 @@ function updateRequirementsSection() {
   const requirements = PERMIT_REQUIREMENTS[permit];
 
   if (requirements && requirements.length > 0) {
-    requirementsList.innerHTML = requirements.map((req, index) => `
+    requirementsList.innerHTML = requirements.map((req) => `
       <div class="requirement-item">
-        <div class="requirement-number">${index + 1}</div>
+        <div class="requirement-number" aria-hidden="true"></div>
         <div class="requirement-text">${req}</div>
       </div>
     `).join('');
@@ -9344,6 +9610,11 @@ if (documentTypeSelect) {
     }
 
     updateStep1AwarenessBanner();
+    if (selectedType) {
+      stampDraftProgress({ documentType: selectedType, currentStep: 1 });
+    } else {
+      clearDraftProgress();
+    }
   });
 }
 
@@ -9371,44 +9642,13 @@ function updateStepIndicators(documentType, permitType) {
   // Clear existing steps
   stepsContainer.innerHTML = '';
   
-  // Step icons mapping
-  const stepIcons = {
-    document: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`,
-    organization: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
-    location: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`,
-    project: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`,
-    upload: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`,
-    review: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>`,
-    user: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`,
-    business: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`,
-    tool: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>`,
-    purpose: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`,
-    wildlife: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
-    transport: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>`,
-    health: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>`,
-    layout: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>`,
-    environment: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>`,
-    tax: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>`,
-    import: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>`,
-    facility: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M5 21V7l8-4 8 4v14"></path><path d="M17 21v-8.5a1.5 1.5 0 0 0-1.5-1.5h-7a1.5 1.5 0 0 0-1.5 1.5V21"></path></svg>`,
-    product: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>`,
-    clearance: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`,
-    residency: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`,
-    property: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`,
-    survey: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`,
-    amendment: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`,
-    technical: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>`,
-    cancellation: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>`,
-    details: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>`
-  };
-  
   // Generate step items
-  stepProcedure.forEach((step, index) => {
+  stepProcedure.forEach((step) => {
     const stepItem = document.createElement('div');
     stepItem.className = 'step-item';
     stepItem.dataset.step = step.step;
-    
-    const iconSvg = stepIcons[step.icon] || stepIcons.document;
+
+    const iconSvg = STEP_ICON_LIBRARY[step.icon] || STEP_ICON_LIBRARY.document;
     
     stepItem.innerHTML = `
       <div class="step-icon-wrapper">
@@ -9451,6 +9691,7 @@ if (permitTypeSelect) {
       updateStepIndicators(selectedDocumentType, selectedPermitType);
       updateFormSteps(selectedDocumentType, selectedPermitType);
       updateDocumentUploadFields(selectedDocumentType, selectedPermitType);
+      stampDraftProgress({ permitType: selectedPermitType });
     }
   });
 }
@@ -10573,8 +10814,20 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
         showAlert('Error updating application: ' + updateError.message, 'error');
         throw updateError;
       }
+
+      // Notify staff/admin about resubmission/update
+      await notifyTeamAboutApplication('application-resubmitted', {
+        ...applicationData,
+        docId: appRef.id || isEditing
+      });
     } else {
       appRef = await addDoc(collection(db, 'applications'), applicationData);
+
+      // Notify staff/admin about new submission
+      await notifyTeamAboutApplication('application-submitted', {
+        ...applicationData,
+        docId: appRef.id
+      });
     }
     
     // INSTANT: Show success modal and redirect
@@ -10963,6 +11216,7 @@ function saveFormData(formId) {
   });
 
   localStorage.setItem(formId + '_data', JSON.stringify(formData));
+  stampDraftProgress();
   console.log('Form data saved (excluding files)');
 }
 
@@ -11566,6 +11820,8 @@ window.addEventListener('load', function() {
       console.log('No permit type found at all, skipping restore');
     }
   }, 1000);
+
+  updateResumeProgressCard();
 });
 
 // Separate function to restore uploaded documents

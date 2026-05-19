@@ -37,6 +37,8 @@ import {
   EmailAuthProvider
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { protectRoute, logout as authGuardLogout } from './auth-guard.js';
+import { createNotifications } from './notification-service.js';
+import { createNotificationCenter } from './notification-center.js';
 import { 
   collection, 
   getDocs, 
@@ -60,6 +62,100 @@ const API_BASE = window.API_BASE || (location.hostname === 'localhost' || locati
 let currentApplication = null;
 let allApplications = [];
 let currentUserEmail = null;
+const staffNotificationCenter = createNotificationCenter({
+  buttonSelector: '.notification-btn',
+  badgeSelector: '#notificationCount',
+  panelId: 'staffNotificationPanel',
+  emptyState: 'No alerts right now',
+  title: 'Team Notifications'
+});
+
+function getStaffActorInfo() {
+  const user = auth.currentUser;
+  if (!user) {
+    return { id: null, name: 'Staff' };
+  }
+  return {
+    id: user.uid,
+    name: user.displayName || user.email || 'Staff'
+  };
+}
+
+function buildCustomerNotificationCopy(eventType, application, options = {}) {
+  const permitLabel = application?.permitType || application?.documentType || 'permit';
+  switch (eventType) {
+    case 'application-approved':
+      return {
+        title: 'Application Approved',
+        message: `Your ${permitLabel} application has been approved.`
+      };
+    case 'application-rejected':
+      return {
+        title: 'Application Rejected',
+        message: options.rejectionReason
+          ? `Your ${permitLabel} application was rejected. Reason: ${options.rejectionReason}`
+          : `Your ${permitLabel} application was rejected.`
+      };
+    case 'application-resubmit-requested':
+      return {
+        title: 'Resubmission Requested',
+        message: options.revisionComments
+          ? `Updates are needed for your ${permitLabel} application: ${options.revisionComments}`
+          : `Updates are needed for your ${permitLabel} application.`
+      };
+    case 'application-pickup-scheduled':
+      return {
+        title: 'Permit Pickup Scheduled',
+        message: options.pickupSchedule
+          ? `Pickup scheduled on ${options.pickupSchedule.date} at ${options.pickupSchedule.time}.`
+          : 'Your permit pickup has been scheduled.'
+      };
+    case 'application-status-change':
+    default:
+      return {
+        title: 'Application Update',
+        message: `Your ${permitLabel} application status is now "${application.status || options.newStatus || 'updated'}".`
+      };
+  }
+}
+
+async function notifyCustomerAndAdmin(eventType, application, options = {}) {
+  try {
+    if (!createNotifications || !application) return;
+
+    const { title, message } = buildCustomerNotificationCopy(eventType, application, options);
+    const actor = getStaffActorInfo();
+
+    const recipients = [];
+    if (application.applicantUid) {
+      recipients.push({ userId: application.applicantUid });
+    }
+    recipients.push({ role: 'admin' });
+
+    if (recipients.length === 0) return;
+
+    await createNotifications({
+      eventType,
+      title,
+      message,
+      payload: {
+        applicationId: application.applicationId || application.id,
+        permitType: application.permitType,
+        documentType: application.documentType,
+        applicantName: application.applicantName,
+        applicantUid: application.applicantUid,
+        status: application.status || options.newStatus,
+        revisionComments: options.revisionComments,
+        rejectionReason: options.rejectionReason,
+        pickupSchedule: options.pickupSchedule
+      },
+      actor,
+      recipients
+    });
+  } catch (error) {
+    console.error('Failed to notify customer/admin:', error);
+  }
+}
 
 // Debug function to fix staff role
 window.fixStaffRole = async function() {
@@ -280,9 +376,11 @@ protectRoute({
     
     loadDashboardData();
     updateUserInfo(state.user, { role: state.role });
+    staffNotificationCenter.start(state.user.uid);
   },
   onUnauthenticated: () => {
     console.log('Staff dashboard: Not authenticated or access denied');
+    staffNotificationCenter.stop();
   }
 });
 
@@ -1210,6 +1308,29 @@ async function updateApplicationStatus(appId, newStatus, rejectionReason = null,
     loadRecentApplications(); // Refresh recent applications table
     
     alert(`Application ${newStatus} successfully!`);
+
+    // Notify customer + admin about the change
+    const updatedApplication = {
+      ...application,
+      status: newStatus,
+      rejectionReason,
+      revisionComments,
+      applicantUid: application.applicantUid,
+      applicantName: application.applicantName,
+      permitType: application.permitType,
+      documentType: application.documentType,
+      applicationId: application.applicationId || application.id
+    };
+
+    if (newStatus === 'approved') {
+      await notifyCustomerAndAdmin('application-approved', updatedApplication);
+    } else if (newStatus === 'rejected') {
+      await notifyCustomerAndAdmin('application-rejected', updatedApplication, { rejectionReason });
+    } else if (newStatus === 'needs resubmit') {
+      await notifyCustomerAndAdmin('application-resubmit-requested', updatedApplication, { revisionComments });
+    } else {
+      await notifyCustomerAndAdmin('application-status-change', updatedApplication, { newStatus });
+    }
     
   } catch (error) {
     console.error('Error updating application:', error);
@@ -1394,6 +1515,17 @@ document.getElementById('confirmSchedule').addEventListener('click', async () =>
       }
 
       alert('Application approved and pickup scheduled successfully!');
+
+      await notifyCustomerAndAdmin('application-pickup-scheduled', {
+        ...currentApplication,
+        status: 'approved'
+      }, {
+        pickupSchedule: {
+          date: pickupDate,
+          time: pickupTime,
+          notes: pickupNotes || ''
+        }
+      });
       document.getElementById('approveScheduleModal').style.display = 'none';
       document.getElementById('pickupDate').value = '';
       document.getElementById('pickupTime').value = '';

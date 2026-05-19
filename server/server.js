@@ -9,6 +9,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const { uploadFromBase64, deleteFile, uploadSingle, uploadSingleMemory } = require('./cloudinary');
+const nodemailer = require('nodemailer');
+const twilio = require('twilio');
 
 const admin = initFirebase();
 if (!admin) {
@@ -24,6 +26,59 @@ app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 app.use(express.static(path.join(__dirname, '..'))); // Serve static files from parent directory
+
+// Notification delivery helpers
+const emailConfig = {
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT || 587),
+  secure: process.env.SMTP_SECURE === 'true' || Number(process.env.SMTP_PORT) === 465,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
+  }
+};
+
+const emailEnabled = Boolean(emailConfig.host && emailConfig.auth.user && emailConfig.auth.pass && process.env.EMAIL_FROM);
+const mailTransport = emailEnabled ? nodemailer.createTransport(emailConfig) : null;
+
+const smsEnabled = Boolean(
+  process.env.TWILIO_ACCOUNT_SID &&
+  process.env.TWILIO_AUTH_TOKEN &&
+  process.env.TWILIO_FROM
+);
+const smsClient = smsEnabled ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN) : null;
+
+async function sendEmailNotification(notification) {
+  if (!mailTransport || !notification.recipientEmail) return { skipped: true };
+  try {
+    await mailTransport.sendMail({
+      from: process.env.EMAIL_FROM,
+      to: notification.recipientEmail,
+      subject: notification.title,
+      text: notification.message,
+      html: `<p>${notification.message}</p>`
+    });
+    return { success: true };
+  } catch (err) {
+    console.error('Email delivery failed:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+async function sendSmsNotification(notification) {
+  if (!smsClient || !notification.recipientPhone) return { skipped: true };
+  try {
+    await smsClient.messages.create({
+      body: `${notification.title}\n${notification.message}`,
+      to: notification.recipientPhone,
+      from: process.env.TWILIO_FROM
+    });
+    return { success: true };
+  } catch (err) {
+    console.error('SMS delivery failed:', err);
+    return { success: false, error: err.message };
+  }
+}
 
 // Serve pages directly
 app.get('/pages/:file', (req, res) => {
@@ -65,6 +120,78 @@ app.get('/about.html', (req, res) => {
     res.redirect('/pages/about.html');
   } else {
     res.sendFile(path.join(__dirname, '../pages/about.html'));
+  }
+});
+
+// Trigger outbound notification deliveries (email/SMS)
+app.post('/notifications/deliver', verifyToken, async (req, res) => {
+  try {
+    const { notificationIds } = req.body || {};
+    if (!Array.isArray(notificationIds) || notificationIds.length === 0) {
+      return res.status(400).json({ error: 'notificationIds array required' });
+    }
+
+    const db = admin.firestore();
+    const results = [];
+
+    for (const notificationId of notificationIds) {
+      try {
+        const docRef = db.collection('notifications').doc(notificationId);
+        const docSnap = await docRef.get();
+
+        if (!docSnap.exists) {
+          results.push({ id: notificationId, status: 'missing' });
+          continue;
+        }
+
+        const data = docSnap.data();
+        if (data.createdBy && data.createdBy !== req.user.uid && req.user.role !== 'admin') {
+          results.push({ id: notificationId, status: 'forbidden' });
+          continue;
+        }
+
+        const updates = {};
+
+        if (data.channels?.email && data.emailStatus === 'pending') {
+          if (!emailEnabled) {
+            updates.emailStatus = 'disabled';
+          } else {
+            const emailResult = await sendEmailNotification(data);
+            updates.emailStatus = emailResult.success ? 'sent' : 'failed';
+            if (emailResult.error) {
+              updates.emailError = emailResult.error;
+            }
+          }
+        }
+
+        if (data.channels?.sms && data.smsStatus === 'pending') {
+          if (!smsEnabled) {
+            updates.smsStatus = 'disabled';
+          } else {
+            const smsResult = await sendSmsNotification(data);
+            updates.smsStatus = smsResult.success ? 'sent' : 'failed';
+            if (smsResult.error) {
+              updates.smsError = smsResult.error;
+            }
+          }
+        }
+
+        if (Object.keys(updates).length > 0) {
+          updates.lastDeliveredAt = admin.firestore.FieldValue.serverTimestamp();
+          await docRef.update(updates);
+        }
+
+        results.push({ id: notificationId, status: 'processed' });
+      } catch (err) {
+        console.error('Notification delivery error:', err);
+        results.push({ id: notificationId, status: 'error', error: err.message });
+      }
+    }
+
+    res.json({ success: true, results });
+  } catch (err) {
+    console.error('notifications/deliver error', err);
+    res.status(500).json({ error: err.message });
   }
 });
 

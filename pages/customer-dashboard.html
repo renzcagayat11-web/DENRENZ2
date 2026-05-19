@@ -193,8 +193,26 @@
               </section>
             </div>
 
+            <div class="dashboard-container-wrapper resume-progress-wrapper" id="resumeProgressCard" hidden>
+              <div class="resume-progress-card">
+                <div class="resume-progress-header">
+                  <div>
+                    <p class="resume-progress-eyebrow">Draft in progress</p>
+                    <h3 class="resume-progress-title">Resume your application</h3>
+                    <p class="resume-progress-meta" id="resumeProgressMeta">We saved your latest step so you can continue anytime.</p>
+                  </div>
+                  <div class="resume-progress-actions">
+                    <button type="button" class="btn-secondary" id="resumeStartOverBtn">Start over</button>
+                    <button type="button" class="btn-primary" id="resumeContinueBtn">Continue</button>
+                  </div>
+                </div>
+                <div class="resume-progress-steps" id="resumeProgressSteps"></div>
+                <p class="resume-progress-hint">Tap any step to jump directly into that section.</p>
+              </div>
+            </div>
+
             <!-- Profile Completion Status Container -->
-            <div class="dashboard-container-wrapper">
+            <div class="dashboard-container-wrapper" id="profileCompletionWrapper">
               <section class="profile-completion-section">
                 <div class="profile-completion-card">
                   <div class="completion-header">

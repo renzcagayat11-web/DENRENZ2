@@ -8,6 +8,7 @@ import {
   EmailAuthProvider
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { protectRoute, logout as authGuardLogout, getCurrentUser, getCurrentRole } from './auth-guard.js';
+import { createNotificationCenter } from './notification-center.js';
 import { 
   collection, 
   getDocs, 
@@ -27,6 +28,13 @@ import {
 const API_BASE = window.API_BASE || (location.hostname === 'localhost' || location.hostname === '127.0.0.1' ? 'http://127.0.0.1:3000' : '');
 
 let allApplications = [];
+const adminNotificationCenter = createNotificationCenter({
+  buttonSelector: '.notification-btn',
+  badgeSelector: '.notification-badge',
+  panelId: 'adminNotificationPanel',
+  emptyState: 'No system alerts right now',
+  title: 'System Notifications'
+});
 
 // Sidebar Toggle Function
 window.toggleSidebar = function() {
@@ -227,9 +235,11 @@ protectRoute({
     console.log('Admin dashboard: User authenticated, role:', state.role);
     updateUserInfo(state.user, { role: state.role });
     loadDashboardData();
+    adminNotificationCenter.start(state.user.uid);
   },
   onUnauthenticated: () => {
     console.log('Admin dashboard: Not authenticated or access denied');
+    adminNotificationCenter.stop();
   }
 });
 
