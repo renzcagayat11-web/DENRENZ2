@@ -1,4 +1,31 @@
 import { auth, db } from './firebase-config.js';
+import { 
+  signOut, 
+  getIdToken,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider
+} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { protectRoute, logout as authGuardLogout } from './auth-guard.js';
+import { createNotifications } from './notification-service.js';
+import { createNotificationCenter } from './notification-center.js';
+import { 
+  collection, 
+  getDocs, 
+  query, 
+  orderBy, 
+  limit,
+  doc,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+  where,
+  serverTimestamp,
+  addDoc,
+  increment,
+  arrayUnion,
+  onSnapshot
+} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 // Sidebar Toggle Function
 window.toggleSidebar = function() {
@@ -29,33 +56,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 });
-import { 
-  signOut, 
-  getIdToken,
-  updatePassword,
-  reauthenticateWithCredential,
-  EmailAuthProvider
-} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { protectRoute, logout as authGuardLogout } from './auth-guard.js';
-import { createNotifications } from './notification-service.js';
-import { createNotificationCenter } from './notification-center.js';
-import { 
-  collection, 
-  getDocs, 
-  query, 
-  orderBy, 
-  limit,
-  doc,
-  getDoc,
-  updateDoc,
-  deleteDoc,
-  where,
-  serverTimestamp,
-  addDoc,
-  increment,
-  arrayUnion,
-  onSnapshot
-} from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const API_BASE = window.API_BASE || (location.hostname === 'localhost' || location.hostname === '127.0.0.1' ? 'http://127.0.0.1:3000' : '');
 
@@ -611,54 +611,6 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
-
-// Load sample applications for demo mode
-function loadSampleApplications() {
-  allApplications = [
-    {
-      id: 'DENR-20260424-502361',
-      applicantName: 'CAGAYAT LORENCE',
-      permitType: 'Wildlife Permit',
-      createdAt: new Date('2026-04-24'),
-      status: 'pending',
-      email: 'lorence@example.com'
-    },
-    {
-      id: 'DENR-20260424-502362',
-      applicantName: 'SANTOS MARIA',
-      permitType: 'Tree Cutting Permit',
-      createdAt: new Date('2026-04-24'),
-      status: 'pending',
-      email: 'maria@example.com'
-    },
-    {
-      id: 'DENR-20260424-502363',
-      applicantName: 'REYES JUAN',
-      permitType: 'Mining Permit',
-      createdAt: new Date('2026-04-24'),
-      status: 'under review',
-      email: 'juan@example.com'
-    },
-    {
-      id: 'DENR-20260423-502360',
-      applicantName: 'GARCIA ANA',
-      permitType: 'Tree Planting Permit',
-      createdAt: new Date('2026-04-23'),
-      status: 'approved',
-      email: 'ana@example.com'
-    },
-    {
-      id: 'DENR-20260422-502359',
-      applicantName: 'DELACRUZ PEDRO',
-      permitType: 'Mining Permit',
-      createdAt: new Date('2026-04-22'),
-      status: 'rejected',
-      email: 'pedro@example.com'
-    }
-  ];
-  
-  filterAndDisplayApplications();
-}
 
 // Filter and display applications
 function filterAndDisplayApplications() {

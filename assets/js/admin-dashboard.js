@@ -287,30 +287,21 @@ async function loadDashboardData() {
 // Update statistics with real-time updates
 async function updateStats() {
   try {
-    console.log('🔍 ADMIN STATS DEBUG: Setting up real-time listener for applications...');
+    // Prevent duplicate listeners on re-auth
+    if (window.adminStatsUnsubscribe) {
+      window.adminStatsUnsubscribe();
+      window.adminStatsUnsubscribe = null;
+    }
+
     const applicationsRef = collection(db, 'applications');
     const q = query(applicationsRef);
     
     // Set up real-time listener for stats
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      console.log('🔍 ADMIN STATS DEBUG: Received data update, snapshot size:', querySnapshot.size);
       let applications = [];
       querySnapshot.forEach((doc) => {
-        const appData = doc.data();
-        console.log('🔍 ADMIN STATS DEBUG: Application found:', {
-          id: doc.id,
-          status: appData.status,
-          applicantEmail: appData.applicantEmail,
-          createdAt: appData.createdAt
-        });
-        applications.push({
-          id: doc.id,
-          ...appData
-        });
+        applications.push({ id: doc.id, ...doc.data() });
       });
-      
-      console.log('🔍 ADMIN STATS DEBUG: Total applications loaded:', applications.length);
-      console.log('🔍 ADMIN STATS DEBUG: Application statuses:', applications.map(app => ({ id: app.id, status: app.status })));
       
       const totalApps = document.getElementById('totalApps');
       const summaryTotal = document.getElementById('summaryTotal');
@@ -324,27 +315,11 @@ async function updateStats() {
       const approved = applications.filter(app => app.status === 'approved').length;
       const rejected = applications.filter(app => app.status === 'rejected').length;
       
-      console.log('🔍 ADMIN STATS DEBUG: Calculated counts:', {
-        total,
-        pending,
-        underReview,
-        approved,
-        rejected
-      });
-      
       if (totalApps) totalApps.textContent = total;
       if (summaryTotal) summaryTotal.textContent = total;
       if (summaryPending) summaryPending.textContent = pending;
       if (summaryApproved) summaryApproved.textContent = approved;
       if (summaryRejected) summaryRejected.textContent = rejected;
-      
-      console.log('🔍 ADMIN STATS DEBUG: Updated UI elements:', {
-        totalApps: totalApps?.textContent,
-        summaryTotal: summaryTotal?.textContent,
-        summaryPending: summaryPending?.textContent,
-        summaryApproved: summaryApproved?.textContent,
-        summaryRejected: summaryRejected?.textContent
-      });
       
       // Update summary card sub-texts with real-time data
       const today = new Date();
