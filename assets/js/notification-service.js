@@ -48,13 +48,18 @@ async function fetchUser(userId) {
 async function fetchUsersByRole(role) {
   if (!role) return [];
   if (roleCache.has(role)) return roleCache.get(role);
-  const q = query(usersRef, where('role', '==', role));
-  const snap = await getDocs(q);
-  const users = snap.docs
-    .map(doc => ({ id: doc.id, ...doc.data() }))
-    .filter(user => user.status !== 'inactive');
-  roleCache.set(role, users);
-  return users;
+  try {
+    const q = query(usersRef, where('role', '==', role));
+    const snap = await getDocs(q);
+    const users = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(user => user.status !== 'inactive');
+    if (users.length > 0) roleCache.set(role, users);
+    return users;
+  } catch (err) {
+    console.error(`[notification-service] fetchUsersByRole(${role}) failed:`, err);
+    return [];
+  }
 }
 
 function buildChannels(user, role, eventType, overrides = {}) {
@@ -167,12 +172,17 @@ export function subscribeToNotifications({ userId, onUpdate, limitCount = 20 }) 
   if (!userId || !onUpdate) return () => {};
   const q = query(
     notificationsRef,
-    where('recipientId', '==', userId),
-    orderBy('createdAt', 'desc'),
-    limit(limitCount)
+    where('recipientId', '==', userId)
   );
   return onSnapshot(q, snapshot => {
-    const items = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+    const items = snapshot.docs
+      .map(docSnap => ({ id: docSnap.id, ...docSnap.data() }))
+      .sort((a, b) => {
+        const ta = a.createdAt?.toMillis?.() ?? (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+        const tb = b.createdAt?.toMillis?.() ?? (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+        return tb - ta;
+      })
+      .slice(0, limitCount);
     onUpdate(items);
   });
 }
