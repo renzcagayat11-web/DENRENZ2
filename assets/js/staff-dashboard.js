@@ -1267,7 +1267,13 @@ async function updateApplicationStatus(appId, newStatus, rejectionReason = null,
     updateStats();
     loadRecentApplications(); // Refresh recent applications table
     
-    alert(`Application ${newStatus} successfully!`);
+    const toastMsgs = {
+      'approved': '✅ Application approved! Notification sent to customer.',
+      'rejected': '❌ Application rejected. Customer has been notified.',
+      'needs resubmit': '📝 Resubmission requested. Customer has been notified.',
+      'under review': '🔍 Application marked as Under Review.',
+    };
+    showToast(toastMsgs[newStatus] || `Application ${newStatus} successfully.`, newStatus === 'rejected' ? 'error' : newStatus === 'needs resubmit' ? 'warning' : 'success');
 
     // Notify customer + admin about the change
     const updatedApplication = {
@@ -1474,7 +1480,7 @@ document.getElementById('confirmSchedule').addEventListener('click', async () =>
         };
       }
 
-      alert('Application approved and pickup scheduled successfully!');
+      showToast('✅ Application approved & pickup scheduled! Customer has been notified.', 'success');
 
       await notifyCustomerAndAdmin('application-pickup-scheduled', {
         ...currentApplication,
@@ -2334,6 +2340,45 @@ function updateChangePasswordButton() {
                      currentPassword !== newPassword;
   
   changeBtn.disabled = !isFormValid;
+}
+
+// General purpose toast notification
+function showToast(message, type = 'success') {
+  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+  const colors = { success: '#0b5f2c', error: '#dc2626', info: '#2563eb', warning: '#d97706' };
+
+  const toast = document.createElement('div');
+  toast.className = 'staff-toast';
+  toast.innerHTML = `<span style="margin-right:8px;font-size:16px;">${icons[type] || '✅'}</span>${message}`;
+
+  Object.assign(toast.style, {
+    position: 'fixed',
+    top: '24px',
+    right: '24px',
+    background: colors[type] || colors.success,
+    color: 'white',
+    padding: '14px 20px',
+    borderRadius: '10px',
+    fontWeight: '600',
+    fontSize: '14px',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+    zIndex: '99999',
+    display: 'flex',
+    alignItems: 'center',
+    opacity: '0',
+    transform: 'translateY(-16px)',
+    transition: 'opacity 0.3s ease, transform 0.3s ease',
+    maxWidth: '380px',
+    lineHeight: '1.4'
+  });
+
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '1'; toast.style.transform = 'translateY(0)'; }, 30);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(-16px)';
+    setTimeout(() => toast.remove(), 350);
+  }, 3500);
 }
 
 // Show Password Message

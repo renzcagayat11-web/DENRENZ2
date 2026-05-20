@@ -587,18 +587,47 @@ function setupApplicantTypeToggle() {
 
 // Simple Alert Function (modal removed)
 function showAlert(message, type = 'warning', options = {}) {
-  // Use native browser alert since modal is removed
-  // Only use for critical errors where field validation isn't enough
   console.log(`[${type.toUpperCase()}] ${message}`);
-  
-  // For critical errors only, show native alert
-  if (type === 'error' && options.critical) {
-    alert(message);
-  }
-  
-  // Call callback if provided
+
+  const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+  const colors = { success: '#0b5f2c', error: '#dc2626', warning: '#d97706', info: '#2563eb' };
+
+  const toast = document.createElement('div');
+  toast.className = 'cust-toast';
+  toast.innerHTML = `<span style="margin-right:8px;font-size:16px;flex-shrink:0;">${icons[type] || '⚠️'}</span><span>${message}</span>`;
+
+  Object.assign(toast.style, {
+    position: 'fixed',
+    top: '24px',
+    right: '24px',
+    background: colors[type] || colors.warning,
+    color: 'white',
+    padding: '14px 20px',
+    borderRadius: '10px',
+    fontWeight: '600',
+    fontSize: '14px',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+    zIndex: '99999',
+    display: 'flex',
+    alignItems: 'center',
+    opacity: '0',
+    transform: 'translateY(-16px)',
+    transition: 'opacity 0.3s ease, transform 0.3s ease',
+    maxWidth: '380px',
+    lineHeight: '1.4'
+  });
+
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '1'; toast.style.transform = 'translateY(0)'; }, 30);
+  const duration = type === 'error' ? 5000 : 3500;
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(-16px)';
+    setTimeout(() => toast.remove(), 350);
+  }, duration);
+
   if (options.onClose) {
-    options.onClose();
+    setTimeout(options.onClose, duration + 350);
   }
 }
 

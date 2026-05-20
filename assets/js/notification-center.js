@@ -385,8 +385,19 @@ export function createNotificationCenter({
   function togglePanel(forceState) {
     if (!panel) return;
     const shouldShow = forceState !== undefined ? forceState : !panel.classList.contains('is-open');
-    if (shouldShow) { positionPanel(); panel.classList.add('is-open'); }
-    else { panel.classList.remove('is-open'); }
+    if (shouldShow) {
+      positionPanel();
+      panel.classList.add('is-open');
+      // Mark all as read when panel opens (like Facebook)
+      if (currentUserId) {
+        const hasUnread = notifications.some(n => !n.read);
+        if (hasUnread) {
+          markAllNotificationsAsRead(currentUserId).catch(() => {});
+        }
+      }
+    } else {
+      panel.classList.remove('is-open');
+    }
   }
 
   function updateBadge(unreadCount) {
@@ -397,13 +408,13 @@ export function createNotificationCenter({
   }
 
   function renderNotifications() {
+    const unreadCount = notifications.filter((n) => !n.read).length;
+    updateBadge(unreadCount);
+
     const list = panel?.querySelector('.nc-list');
     const pill = panel?.querySelector('.nc-unread-pill');
     const markAllBtn = panel?.querySelector('.nc-mark-all-btn');
     if (!list) return;
-
-    const unreadCount = notifications.filter((n) => !n.read).length;
-    updateBadge(unreadCount);
 
     if (pill) {
       pill.textContent = unreadCount;
