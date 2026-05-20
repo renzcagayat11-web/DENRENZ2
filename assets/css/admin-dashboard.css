@@ -57,9 +57,9 @@ body {
 
 .toggle-icon {
   color: white;
-  font-size: 14px;
-  font-weight: bold;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sidebar.collapsed .toggle-icon {
@@ -137,12 +137,18 @@ body {
 }
 
 .nav-icon {
-  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  width: 20px;
+  height: 20px;
 }
 
-.sidebar.collapsed .nav-icon {
-  font-size: 20px;
+.nav-icon svg,
+.logout-btn svg {
+  stroke: currentColor;
+  flex-shrink: 0;
 }
 
 .nav-text {
@@ -514,8 +520,21 @@ body {
   border-radius: 8px;
   padding: 10px;
   cursor: pointer;
-  font-size: 18px;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  transition: background 0.2s, color 0.2s;
+}
+
+.notification-btn:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.notification-btn svg {
+  stroke: currentColor;
 }
 
 .notification-badge {
@@ -701,17 +720,19 @@ body {
 }
 
 .summary-icon {
-  font-size: 13px;
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 12px;
-  display: block;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  text-align: center;
-  padding: 8px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   background: #f8fafc;
-  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.summary-icon svg {
+  stroke: currentColor;
 }
 
 .summary-card.blue .summary-icon {
