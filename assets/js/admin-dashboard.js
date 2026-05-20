@@ -32,7 +32,7 @@ let adminNotificationCenter = null;
 function getAdminNotificationCenter() {
   if (!adminNotificationCenter) {
     adminNotificationCenter = createNotificationCenter({
-      buttonSelector: '.notification-btn',
+      buttonSelector: '#notificationBtn',
       badgeSelector: '.notification-badge',
       panelId: 'adminNotificationPanel',
       emptyState: 'No system alerts right now',

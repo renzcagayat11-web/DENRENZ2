@@ -66,8 +66,8 @@ let staffNotificationCenter = null;
 function getStaffNotificationCenter() {
   if (!staffNotificationCenter) {
     staffNotificationCenter = createNotificationCenter({
-      buttonSelector: '.notification-btn',
-      badgeSelector: '#notificationCount',
+      buttonSelector: '#notificationBtn',
+      badgeSelector: '.notification-badge',
       panelId: 'staffNotificationPanel',
       emptyState: 'No alerts right now',
       title: 'Team Notifications'

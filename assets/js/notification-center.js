@@ -231,12 +231,15 @@ export function createNotificationCenter({
   emptyState = 'No notifications yet',
   title = 'Notifications'
 } = {}) {
-  const button = buttonSelector ? document.querySelector(buttonSelector) : null;
-  const badge = badgeSelector
-    ? (badgeSelector.startsWith('#') || badgeSelector.startsWith('.')
-        ? document.querySelector(badgeSelector)
-        : button?.querySelector(badgeSelector))
-    : button?.querySelector('.notification-badge');
+  let buttons = [];
+  let button = null;
+  let badges = [];
+
+  function resolveElements() {
+    buttons = buttonSelector ? Array.from(document.querySelectorAll(buttonSelector)) : [];
+    button = buttons[0] || null;
+    badges = badgeSelector ? Array.from(document.querySelectorAll(badgeSelector)) : [];
+  }
 
   let panel = null;
   let unsubscribe = null;
@@ -298,7 +301,7 @@ export function createNotificationCenter({
     document.addEventListener('click', (event) => {
       if (!panel?.classList.contains('is-open')) return;
       if (panel.contains(event.target)) return;
-      if (button && button.contains(event.target)) return;
+      if (buttons.some(btn => btn.contains(event.target))) return;
       togglePanel(false);
     });
 
@@ -387,9 +390,10 @@ export function createNotificationCenter({
   }
 
   function updateBadge(unreadCount) {
-    if (!badge) return;
-    badge.textContent = unreadCount;
-    badge.style.display = unreadCount > 0 ? 'inline-flex' : 'none';
+    badges.forEach(badge => {
+      badge.textContent = unreadCount;
+      badge.style.display = unreadCount > 0 ? 'inline-flex' : 'none';
+    });
   }
 
   function renderNotifications() {
@@ -438,7 +442,10 @@ export function createNotificationCenter({
 
   async function start(userId) {
     if (!userId) return;
+    resolveElements();
+    attachButtonListeners();
     ensurePanel();
+    window._ncToggle = () => togglePanel();
     if (unsubscribe) { unsubscribe(); unsubscribe = null; }
     currentUserId = userId;
     unsubscribe = subscribeToNotifications({
@@ -457,11 +464,15 @@ export function createNotificationCenter({
     updateBadge(0);
   }
 
-  if (button) {
-    button.addEventListener('click', (event) => {
-      event.preventDefault();
-      ensurePanel();
-      togglePanel();
+  function attachButtonListeners() {
+    buttons.forEach(btn => {
+      if (btn._ncListenerAttached) return;
+      btn._ncListenerAttached = true;
+      btn.addEventListener('click', (event) => {
+        event.preventDefault();
+        ensurePanel();
+        togglePanel();
+      });
     });
   }
 
