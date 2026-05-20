@@ -2752,13 +2752,13 @@ document.getElementById('profileMiddleName')?.addEventListener('input', () => {
   clearFieldError('profileMiddleName');
 });
 
-// Mobile number input validation - only allow numbers, max 13 digits
+// Mobile number input validation - only allow numbers, max 11 digits (09xxxxxxxxx)
 document.getElementById('profileMobile')?.addEventListener('input', (e) => {
   // Remove any non-numeric characters
   let value = e.target.value.replace(/[^0-9]/g, '');
-  // Limit to 13 digits maximum
-  if (value.length > 13) {
-    value = value.slice(0, 13);
+  // Limit to 11 digits maximum
+  if (value.length > 11) {
+    value = value.slice(0, 11);
   }
   e.target.value = value;
   clearFieldError('profileMobile');
@@ -2769,8 +2769,10 @@ document.getElementById('profileMobile')?.addEventListener('blur', (e) => {
   const value = e.target.value;
   if (value && value.length >= 2) {
     const prefix = value.substring(0, 2);
-    if (prefix !== '09' && prefix !== '63') {
-      showFieldError('profileMobile', 'Mobile number must start with 09 or 63.');
+    if (prefix !== '09') {
+      showFieldError('profileMobile', 'Mobile number must start with 09.');
+    } else if (value.length !== 11) {
+      showFieldError('profileMobile', 'Mobile number must be exactly 11 digits (e.g. 09xxxxxxxxx).');
     }
   }
 });
@@ -4957,14 +4959,8 @@ function validateStep(step) {
         showFieldError(mobileFieldId, 'Must be exactly 11 digits (e.g., 09123456789).');
         isValid = false;
       }
-    } else if (applicantMobile.startsWith('63')) {
-      // 63 prefix must be exactly 13 digits
-      if (applicantMobile.length !== 13) {
-        showFieldError(mobileFieldId, 'Must be exactly 13 digits (e.g., 639123456789).');
-        isValid = false;
-      }
     } else {
-      showFieldError(mobileFieldId, 'Must start with 09 or 63.');
+      showFieldError(mobileFieldId, 'Mobile number must start with 09 and be exactly 11 digits.');
       isValid = false;
     }
     
@@ -10300,9 +10296,9 @@ function setupMobileValidation(inputElement) {
     inputElement.addEventListener('input', (e) => {
       // Remove any non-numeric characters
       let value = e.target.value.replace(/[^0-9]/g, '');
-      // Limit to 13 digits maximum
-      if (value.length > 13) {
-        value = value.slice(0, 13);
+      // Limit to 11 digits maximum
+      if (value.length > 11) {
+        value = value.slice(0, 11);
       }
       e.target.value = value;
     });
@@ -10311,12 +10307,10 @@ function setupMobileValidation(inputElement) {
       const value = e.target.value;
       if (value && value.length >= 2) {
         const prefix = value.substring(0, 2);
-        if (prefix !== '09' && prefix !== '63') {
-          showFieldError(e.target.id, 'Mobile number must start with 09 or 63.');
-        } else if (prefix === '09' && value.length !== 11) {
-          showFieldError(e.target.id, 'Mobile number starting with 09 must be exactly 11 digits.');
-        } else if (prefix === '63' && value.length !== 13) {
-          showFieldError(e.target.id, 'Mobile number starting with 63 must be exactly 13 digits.');
+        if (prefix !== '09') {
+          showFieldError(e.target.id, 'Mobile number must start with 09.');
+        } else if (value.length !== 11) {
+          showFieldError(e.target.id, 'Mobile number must be exactly 11 digits (e.g. 09xxxxxxxxx).');
         }
       }
     });

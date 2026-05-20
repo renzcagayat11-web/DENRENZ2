@@ -289,15 +289,15 @@ function clearFieldAlert(fieldId) {
   field.classList.remove('field-error');
 }
 
-// Mobile number input validation - only allow numbers, max 13 digits
+// Mobile number input validation - only allow numbers, max 11 digits (09xxxxxxxxx)
 function setupMobileValidation(inputElement) {
   if (inputElement) {
     inputElement.addEventListener('input', (e) => {
       // Remove any non-numeric characters
       let value = e.target.value.replace(/[^0-9]/g, '');
-      // Limit to 13 digits maximum
-      if (value.length > 13) {
-        value = value.slice(0, 13);
+      // Limit to 11 digits maximum
+      if (value.length > 11) {
+        value = value.slice(0, 11);
       }
       e.target.value = value;
     });
@@ -306,12 +306,10 @@ function setupMobileValidation(inputElement) {
       const value = e.target.value;
       if (value && value.length >= 2) {
         const prefix = value.substring(0, 2);
-        if (prefix !== '09' && prefix !== '63') {
-          showFieldError(e.target.id, 'Mobile number must start with 09 or 63.');
-        } else if (prefix === '09' && value.length !== 11) {
-          showFieldError(e.target.id, 'Mobile number starting with 09 must be exactly 11 digits.');
-        } else if (prefix === '63' && value.length !== 13) {
-          showFieldError(e.target.id, 'Mobile number starting with 63 must be exactly 13 digits.');
+        if (prefix !== '09') {
+          showFieldError(e.target.id, 'Mobile number must start with 09.');
+        } else if (value.length !== 11) {
+          showFieldError(e.target.id, 'Mobile number must be exactly 11 digits (e.g. 09xxxxxxxxx).');
         }
       }
     });
@@ -468,8 +466,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!mob) {
           showFieldAlert('mobile', 'Please enter your mobile number.');
           isValid = false;
-        } else if (mob.length < 11) {
-          showFieldAlert('mobile', 'Mobile number must be 11 digits starting with 09.');
+        } else if (!/^09\d{9}$/.test(mob)) {
+          showFieldAlert('mobile', 'Mobile number must start with 09 and be exactly 11 digits.');
           isValid = false;
         }
         
