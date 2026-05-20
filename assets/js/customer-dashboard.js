@@ -2409,173 +2409,108 @@ function generateApplicationDetailsHTML(app) {
   const statusClass = getStatusClass(app.status);
   const dateSubmitted = formatDate(app.createdAt);
   const lastUpdated = formatDate(app.updatedAt || app.createdAt);
-  const statusUpper = (app.status || 'pending').toUpperCase();
+  const statusRaw = (app.status || 'pending').toLowerCase();
+  const statusUpper = statusRaw.toUpperCase();
 
-  // Status color config
-  const statusConfig = {
-    approved:        { bg: '#f0fdf4', border: '#10b981', color: '#065f46', icon: '✅' },
-    rejected:        { bg: '#fef2f2', border: '#ef4444', color: '#991b1b', icon: '❌' },
-    pending:         { bg: '#eff6ff', border: '#3b82f6', color: '#1e40af', icon: '⏳' },
-    'under review':  { bg: '#fefce8', border: '#f59e0b', color: '#92400e', icon: '🔍' },
-    'needs resubmit':{ bg: '#fffbeb', border: '#f59e0b', color: '#92400e', icon: '📝' },
-    'needs revision':{ bg: '#fffbeb', border: '#f59e0b', color: '#92400e', icon: '📝' },
+  // Hero CSS class based on status
+  const heroStatusMap = {
+    'approved': 'status-approved',
+    'rejected': 'status-rejected',
+    'pending': 'status-pending',
+    'under review': 'status-review',
+    'needs resubmit': 'status-resubmit',
+    'needs revision': 'status-resubmit',
   };
-  const sc = statusConfig[(app.status || '').toLowerCase()] || { bg: '#f8fafc', border: '#94a3b8', color: '#374151', icon: '📄' };
+  const heroStatusIcon = {
+    'approved': '✅', 'rejected': '❌', 'pending': '⏳',
+    'under review': '🔍', 'needs resubmit': '📝', 'needs revision': '📝',
+  };
+  const heroClass = heroStatusMap[statusRaw] || 'status-pending';
+  const heroIcon = heroStatusIcon[statusRaw] || '📄';
 
-  // Documents HTML
+  // ── Documents ──────────────────────────────────────────
   const isUploading = app.uploadStatus === 'uploading';
-  let documentsHTML = '';
+  let docsInner = '';
   if (app.documents && app.documents.length > 0) {
-    documentsHTML = app.documents.map((doc, index) => {
-      const docName = doc.name || `Document ${index + 1}`;
-      const docData = doc.url || doc.data || '';
-      const docType = doc.type || '';
-      const isImage = docType.startsWith('image/');
-      const isPDF = docType.includes('pdf');
-      const sizeLabel = doc.size ? (doc.size / 1024).toFixed(1) + ' KB' : '';
+    docsInner = app.documents.map((doc, i) => {
+      const name = doc.name || `Document ${i + 1}`;
+      const src  = doc.url || doc.data || '';
+      const type = doc.type || '';
+      const isImg = type.startsWith('image/');
+      const isPDF = type.includes('pdf');
+      const size  = doc.size ? (doc.size / 1024).toFixed(1) + ' KB' : '';
+      const onclick = isImg
+        ? `openImageViewer('${src}','${name.replace(/'/g,"\\'")}')`
+        : `window.open('${src}','_blank')`;
 
-      if (!docData) return `
-        <div style="background:#fff;border:1px solid #fca5a5;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;">
-          <div style="height:120px;display:flex;align-items:center;justify-content:center;background:#fef2f2;color:#ef4444;font-size:13px;font-weight:600;">⚠️ Unavailable</div>
-          <div style="padding:12px;"><div style="font-weight:600;font-size:13px;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${docName}</div></div>
+      if (!src) return `
+        <div class="appview-doc-card" style="border-color:#fca5a5;cursor:default;">
+          <div class="appview-doc-preview" style="background:#fef2f2;color:#ef4444;font-size:13px;font-weight:600;">⚠️ Unavailable</div>
+          <div class="appview-doc-info"><div class="appview-doc-name">${name}</div></div>
         </div>`;
 
       return `
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.10)'" onmouseout="this.style.boxShadow='none'">
-          <div style="height:130px;display:flex;align-items:center;justify-content:center;background:#f8fafc;overflow:hidden;cursor:pointer;" onclick="${isImage ? `openImageViewer('${docData}','${docName.replace(/'/g,"\\'")}')` : `window.open('${docData}','_blank')`}">
-            ${isImage
-              ? `<img src="${docData}" alt="${docName}" style="max-width:100%;max-height:130px;object-fit:cover;" />`
-              : `<div style="text-align:center;color:#64748b;">
-                  <div style="font-size:44px;margin-bottom:6px;">${isPDF ? '📄' : '📎'}</div>
-                  <div style="font-size:12px;font-weight:600;">${isPDF ? 'View PDF' : 'View File'}</div>
-                </div>`
-            }
+        <div class="appview-doc-card" onclick="${onclick}">
+          <div class="appview-doc-preview">
+            ${isImg
+              ? `<img src="${src}" alt="${name}" />`
+              : `<div class="appview-doc-icon">${isPDF ? '📄' : '📎'}<span>${isPDF ? 'PDF' : 'File'}</span></div>`}
           </div>
-          <div style="padding:12px 14px;border-top:1px solid #f1f5f9;">
-            <div style="font-weight:600;font-size:13px;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${docName}">${docName}</div>
-            ${sizeLabel ? `<div style="font-size:11px;color:#94a3b8;margin-top:3px;">${sizeLabel}</div>` : ''}
+          <div class="appview-doc-info">
+            <div class="appview-doc-name" title="${name}">${name}</div>
+            ${size ? `<div class="appview-doc-size">${size}</div>` : ''}
           </div>
         </div>`;
     }).join('');
   } else if (isUploading) {
-    documentsHTML = `<div style="grid-column:1/-1;text-align:center;padding:32px;background:#fef3c7;border-radius:10px;border:1px solid #fbbf24;">
-      <div style="font-size:32px;margin-bottom:8px;">⏳</div>
-      <div style="font-weight:600;color:#92400e;">Documents are being uploaded...</div>
-      <div style="font-size:13px;color:#a16207;margin-top:4px;">Please refresh in a moment.</div>
+    docsInner = `<div class="appview-empty" style="background:#fef3c7;border-radius:10px;border:1px solid #fbbf24;">
+      <div class="appview-empty-icon">⏳</div>
+      <div class="appview-empty-text" style="color:#92400e;">Documents uploading... please wait.</div>
     </div>`;
   } else {
-    documentsHTML = `<div style="grid-column:1/-1;text-align:center;padding:32px;color:#94a3b8;">
-      <div style="font-size:36px;margin-bottom:8px;">📂</div>
-      <div style="font-weight:600;">No documents uploaded</div>
+    docsInner = `<div class="appview-empty">
+      <div class="appview-empty-icon">📂</div>
+      <div class="appview-empty-text">No documents uploaded</div>
     </div>`;
   }
 
-  // Pickup schedule
+  // ── Pickup schedule ────────────────────────────────────
   const schedule = app.pickupSchedule || {};
-  const pickupHTML = (app.status || '').toLowerCase() === 'approved' ? `
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:28px;margin-bottom:24px;">
-      <h4 class="section-title">📅 Pickup Schedule</h4>
-      ${schedule.date ? `
-        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;">
-          <div><div style="font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;">Date</div><div style="font-size:18px;font-weight:700;color:#065f46;margin-top:4px;">${schedule.date}</div></div>
-          <div><div style="font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;">Time</div><div style="font-size:18px;font-weight:700;color:#065f46;margin-top:4px;">${schedule.time || 'TBD'}</div></div>
-          ${schedule.notes ? `<div style="grid-column:1/-1;"><div style="font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;">Notes</div><div style="font-size:14px;color:#374151;margin-top:4px;">${schedule.notes}</div></div>` : ''}
-        </div>
-      ` : `
-        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:20px;text-align:center;color:#92400e;">
-          <div style="font-size:28px;margin-bottom:8px;">📅</div>
-          <div style="font-weight:700;margin-bottom:4px;">Pickup Schedule Pending</div>
-          <div style="font-size:13px;">Your application is approved. DENR will assign your pickup schedule shortly.</div>
-        </div>`}
+  const pickupHTML = statusRaw === 'approved' ? `
+    <div class="appview-card">
+      <div class="appview-card-title">📅 Pickup Schedule</div>
+      ${schedule.date
+        ? `<div class="appview-pickup-grid">
+            <div><div class="appview-pickup-label">Date</div><div class="appview-pickup-value">${schedule.date}</div></div>
+            <div><div class="appview-pickup-label">Time</div><div class="appview-pickup-value">${schedule.time || 'TBD'}</div></div>
+            ${schedule.notes ? `<div style="grid-column:1/-1;"><div class="appview-pickup-label">Notes</div><div style="font-size:14px;color:#374151;margin-top:4px;">${schedule.notes}</div></div>` : ''}
+           </div>`
+        : `<div class="appview-pickup-pending">
+            <div style="font-size:28px;margin-bottom:8px;">📅</div>
+            <div style="font-weight:700;margin-bottom:4px;">Pickup Schedule Pending</div>
+            <div style="font-size:13px;">Your application is approved. DENR will assign your pickup schedule shortly.</div>
+           </div>`}
     </div>` : '';
 
-  // Rejection reason
+  // ── Alert banners ──────────────────────────────────────
   const rejectionHTML = app.status === 'rejected' && app.rejectionReason ? `
-    <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:16px;padding:24px;margin-bottom:24px;">
-      <h4 class="section-title" style="color:#991b1b;border-color:#fca5a5;">❌ Rejection Reason</h4>
-      <div style="color:#7f1d1d;font-size:15px;line-height:1.7;white-space:pre-wrap;">${app.rejectionReason}</div>
-      ${app.reviewedBy ? `<div style="margin-top:12px;font-size:13px;color:#b91c1c;">By: <strong>${app.reviewedBy}</strong>${app.reviewedAt ? ' · ' + formatDate(app.reviewedAt) : ''}</div>` : ''}
+    <div class="appview-alert alert-rejected">
+      <div class="appview-alert-title">❌ Rejection Reason</div>
+      <div class="appview-alert-body">${app.rejectionReason}</div>
+      ${app.reviewedBy ? `<div class="appview-alert-meta">By: <strong>${app.reviewedBy}</strong>${app.reviewedAt ? ' · ' + formatDate(app.reviewedAt) : ''}</div>` : ''}
     </div>` : '';
 
-  // Resubmission notice
-  const resubmitHTML = (app.status === 'needs resubmit' || app.status === 'needs revision') && app.revisionComments ? `
-    <div style="background:#fffbeb;border:2px solid #f59e0b;border-radius:16px;padding:24px;margin-bottom:24px;">
-      <h4 class="section-title" style="color:#92400e;border-color:#fde68a;">📝 Resubmission Required</h4>
-      <div style="color:#78350f;font-size:15px;line-height:1.7;white-space:pre-wrap;">${app.revisionComments}</div>
-      ${app.revisionRequestedAt ? `<div style="margin-top:12px;font-size:13px;color:#b45309;">Requested by: <strong>${app.revisionRequestedBy || 'Staff'}</strong> · ${formatDate(app.revisionRequestedAt)}</div>` : ''}
+  const resubmitHTML = (statusRaw === 'needs resubmit' || statusRaw === 'needs revision') && app.revisionComments ? `
+    <div class="appview-alert alert-resubmit">
+      <div class="appview-alert-title">📝 Resubmission Required</div>
+      <div class="appview-alert-body">${app.revisionComments}</div>
+      ${app.revisionRequestedAt ? `<div class="appview-alert-meta">Requested by: <strong>${app.revisionRequestedBy || 'Staff'}</strong> · ${formatDate(app.revisionRequestedAt)}</div>` : ''}
     </div>` : '';
 
-  // Timeline items builder
-  const tlItem = (icon, title, date, sub, color='#10b981') => `
-    <div style="display:flex;gap:16px;padding-bottom:24px;position:relative;">
-      <div style="flex-shrink:0;width:40px;height:40px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:18px;z-index:1;">${icon}</div>
-      <div style="padding-top:8px;">
-        <div style="font-weight:700;color:#1f2937;font-size:14px;">${title}</div>
-        <div style="font-size:13px;color:#64748b;margin-top:2px;">${date}</div>
-        ${sub ? `<div style="font-size:12px;color:#94a3b8;margin-top:2px;">${sub}</div>` : ''}
-      </div>
-    </div>`;
-
-  const timelineHTML = `
-    <div style="position:relative;padding-left:8px;">
-      <div style="position:absolute;left:28px;top:0;bottom:0;width:2px;background:#e5e7eb;z-index:0;"></div>
-      ${tlItem('📝', 'Application Submitted', dateSubmitted, '')}
-      ${app.status !== 'pending' ? tlItem('🔍', 'Under Review', app.reviewedAt ? formatDate(app.reviewedAt) : 'In progress', '', '#3b82f6') : tlItem('🔍', 'Under Review', 'Pending', '', '#94a3b8')}
-      ${app.revisionRequestedAt ? tlItem('📋', 'Resubmission Requested', formatDate(app.revisionRequestedAt), `By: ${app.revisionRequestedBy || 'Staff'}`, '#f59e0b') : ''}
-      ${app.revisionSubmittedAt ? tlItem('✅', `Resubmission Submitted (${app.revisionCount || 1}×)`, formatDate(app.revisionSubmittedAt), '', '#10b981') : ''}
-      ${app.status === 'approved' ? tlItem('🎉', 'Application Approved', app.reviewedAt ? formatDate(app.reviewedAt) : '', app.reviewedBy ? `By: ${app.reviewedBy}` : '', '#10b981') : ''}
-      ${app.status === 'rejected' ? tlItem('❌', 'Application Rejected', app.reviewedAt ? formatDate(app.reviewedAt) : '', app.reviewedBy ? `By: ${app.reviewedBy}` : '', '#ef4444') : ''}
-    </div>`;
-
-  // Build document cards
-  const buildDocCards = () => {
-    if (app.documents && app.documents.length > 0) {
-      return app.documents.map((doc, i) => {
-        const name = doc.name || `Document ${i + 1}`;
-        const data = doc.url || doc.data || '';
-        const type = doc.type || '';
-        const isImg = type.startsWith('image/');
-        const isPDF = type.includes('pdf');
-        const size = doc.size ? (doc.size / 1024).toFixed(1) + ' KB' : '';
-        if (!data) return `
-          <div class="appview-doc-card" style="border-color:#fca5a5;">
-            <div class="appview-doc-preview" style="background:#fef2f2;">
-              <div class="appview-doc-icon"><span class="icon-emoji">⚠️</span><span class="icon-label" style="color:#ef4444;">Unavailable</span></div>
-            </div>
-            <div class="appview-doc-info"><div class="appview-doc-name" title="${name}">${name}</div></div>
-          </div>`;
-        const clickAttr = isImg
-          ? `onclick="openImageViewer('${data}','${name.replace(/'/g,"\\'")}')"` 
-          : `onclick="window.open('${data}','_blank')"`;
-        return `
-          <div class="appview-doc-card" ${clickAttr}>
-            <div class="appview-doc-preview">
-              ${isImg ? `<img src="${data}" alt="${name}" />` : `<div class="appview-doc-icon"><span class="icon-emoji">${isPDF ? '📄' : '📎'}</span><span class="icon-label">${isPDF ? 'View PDF' : 'View File'}</span></div>`}
-            </div>
-            <div class="appview-doc-info">
-              <div class="appview-doc-name" title="${name}">${name}</div>
-              ${size ? `<div class="appview-doc-size">${size}</div>` : ''}
-            </div>
-          </div>`;
-      }).join('');
-    }
-    if (isUploading) return `
-      <div class="appview-doc-empty">
-        <div class="empty-icon">⏳</div>
-        <div class="empty-text">Documents are being uploaded...</div>
-        <div style="font-size:13px;margin-top:4px;">Please wait a moment.</div>
-      </div>`;
-    return `
-      <div class="appview-doc-empty">
-        <div class="empty-icon">📂</div>
-        <div class="empty-text">No documents uploaded yet</div>
-      </div>`;
-  };
-
-  // Build timeline items
-  const tlItem = (icon, title, date, sub, color) => `
-    <div class="appview-tl-item">
-      <div class="appview-tl-dot" style="background:${color};">${icon}</div>
+  // ── Timeline ───────────────────────────────────────────
+  const tlItem = (icon, title, date, sub, bg = '#10b981') =>
+    `<div class="appview-tl-item">
+      <div class="appview-tl-dot" style="background:${bg};">${icon}</div>
       <div class="appview-tl-body">
         <div class="appview-tl-title">${title}</div>
         <div class="appview-tl-date">${date}</div>
@@ -2583,122 +2518,94 @@ function generateApplicationDetailsHTML(app) {
       </div>
     </div>`;
 
-  const timelineItems = [
-    tlItem('📝', 'Application Submitted', dateSubmitted, '', '#046307'),
-    app.status !== 'pending'
-      ? tlItem('🔍', 'Under Review', app.reviewedAt ? formatDate(app.reviewedAt) : 'In progress', '', '#3b82f6')
-      : tlItem('🔍', 'Under Review', 'Pending', '', '#d1d5db'),
-    app.revisionRequestedAt ? tlItem('📋', 'Resubmission Requested', formatDate(app.revisionRequestedAt), `By: ${app.revisionRequestedBy || 'Staff'}`, '#f59e0b') : '',
-    app.revisionSubmittedAt ? tlItem('✅', `Resubmission Submitted (${app.revisionCount || 1}×)`, formatDate(app.revisionSubmittedAt), '', '#10b981') : '',
-    app.status === 'approved' ? tlItem('🎉', 'Application Approved', app.reviewedAt ? formatDate(app.reviewedAt) : '', app.reviewedBy ? `By: ${app.reviewedBy}` : '', '#10b981') : '',
-    app.status === 'rejected' ? tlItem('❌', 'Application Rejected', app.reviewedAt ? formatDate(app.reviewedAt) : '', app.reviewedBy ? `By: ${app.reviewedBy}` : '', '#ef4444') : '',
-  ].join('');
+  const timelineHTML = `
+    <div class="appview-tl-inner">
+      ${tlItem('📝', 'Application Submitted', dateSubmitted, '', '#046307')}
+      ${statusRaw !== 'pending'
+        ? tlItem('🔍', 'Under Review', app.reviewedAt ? formatDate(app.reviewedAt) : 'In progress', '', '#3b82f6')
+        : tlItem('🔍', 'Under Review', 'Pending', '', '#94a3b8')}
+      ${app.revisionRequestedAt ? tlItem('📋', 'Resubmission Requested', formatDate(app.revisionRequestedAt), `By: ${app.revisionRequestedBy || 'Staff'}`, '#f59e0b') : ''}
+      ${app.revisionSubmittedAt ? tlItem('✅', `Resubmission Submitted${app.revisionCount ? ` (${app.revisionCount}×)` : ''}`, formatDate(app.revisionSubmittedAt), '', '#10b981') : ''}
+      ${statusRaw === 'approved' ? tlItem('🎉', 'Application Approved', app.reviewedAt ? formatDate(app.reviewedAt) : '', app.reviewedBy ? `By: ${app.reviewedBy}` : '', '#10b981') : ''}
+      ${statusRaw === 'rejected' ? tlItem('❌', 'Application Rejected', app.reviewedAt ? formatDate(app.reviewedAt) : '', app.reviewedBy ? `By: ${app.reviewedBy}` : '', '#ef4444') : ''}
+    </div>`;
 
-  // Alerts
-  const alertRejection = app.status === 'rejected' && app.rejectionReason ? `
-    <div class="appview-alert" style="background:#fef2f2;border-color:#fca5a5;">
-      <div class="appview-alert-title" style="color:#991b1b;">❌ Rejection Reason</div>
-      <div class="appview-alert-body" style="color:#7f1d1d;">${app.rejectionReason}</div>
-      ${app.reviewedBy ? `<div class="appview-alert-meta" style="color:#b91c1c;">By: <strong>${app.reviewedBy}</strong>${app.reviewedAt ? ' · ' + formatDate(app.reviewedAt) : ''}</div>` : ''}
-    </div>` : '';
-
-  const alertResubmit = (app.status === 'needs resubmit' || app.status === 'needs revision') && app.revisionComments ? `
-    <div class="appview-alert" style="background:#fffbeb;border-color:#f59e0b;">
-      <div class="appview-alert-title" style="color:#92400e;">📝 Resubmission Required</div>
-      <div class="appview-alert-body" style="color:#78350f;">${app.revisionComments}</div>
-      ${app.revisionRequestedAt ? `<div class="appview-alert-meta" style="color:#b45309;">Requested by: <strong>${app.revisionRequestedBy || 'Staff'}</strong> · ${formatDate(app.revisionRequestedAt)}</div>` : ''}
-    </div>` : '';
-
-  const pickupCard = (app.status || '').toLowerCase() === 'approved' ? `
-    <div class="appview-card">
-      <div class="appview-card-title"><span>📅</span> Pickup Schedule</div>
-      ${(app.pickupSchedule || {}).date ? `
-        <div class="appview-pickup-grid">
-          <div><div class="appview-pickup-label">Date</div><div class="appview-pickup-value">${app.pickupSchedule.date}</div></div>
-          <div><div class="appview-pickup-label">Time</div><div class="appview-pickup-value">${app.pickupSchedule.time || 'TBD'}</div></div>
-          ${app.pickupSchedule.notes ? `<div style="grid-column:1/-1;"><div class="appview-pickup-label">Notes</div><div style="font-size:14px;color:#374151;margin-top:4px;">${app.pickupSchedule.notes}</div></div>` : ''}
-        </div>` : `
-        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:20px;text-align:center;color:#92400e;">
-          <div style="font-size:26px;margin-bottom:8px;">📅</div>
-          <div style="font-weight:700;margin-bottom:4px;">Pickup Schedule Pending</div>
-          <div style="font-size:13px;">DENR will assign your pickup schedule shortly.</div>
-        </div>`}
-    </div>` : '';
-
+  // ── Full HTML ──────────────────────────────────────────
   return `
-    <!-- Hero Banner -->
-    <div class="appview-hero" style="background:${sc.bg};border-color:${sc.border};">
+    <!-- Status Hero -->
+    <div class="appview-hero ${heroClass}">
       <div class="appview-hero-left">
-        <div class="appview-hero-label" style="color:${sc.color};">Application ID</div>
+        <div class="appview-hero-label">Application ID</div>
         <div class="appview-hero-id">${app.applicationId || app.id}</div>
-        <div class="appview-hero-meta">Submitted: <strong>${dateSubmitted}</strong> &nbsp;·&nbsp; Last updated: <strong>${lastUpdated}</strong></div>
+        <div class="appview-hero-meta">
+          <span>📅 Submitted: <strong>${dateSubmitted}</strong></span>
+          <span>🔄 Updated: <strong>${lastUpdated}</strong></span>
+        </div>
       </div>
       <div class="appview-hero-right">
-        <div class="appview-hero-icon">${sc.icon}</div>
-        <span class="status-badge ${statusClass}" style="font-size:13px;padding:6px 18px;">${statusUpper}</span>
-        ${app.documentType ? `<div class="appview-hero-type">${app.documentType}</div>` : ''}
+        <div class="appview-hero-icon">${heroIcon}</div>
+        <span class="status-badge ${statusClass}">${statusUpper}</span>
+        ${app.documentType ? `<div class="appview-hero-doctype">${app.documentType}</div>` : ''}
         ${app.permitType ? `<div class="appview-hero-permit">${app.permitType}</div>` : ''}
       </div>
     </div>
 
-    ${alertRejection}
-    ${alertResubmit}
-    ${pickupCard}
+    ${rejectionHTML}
+    ${resubmitHTML}
+    ${pickupHTML}
 
-    <!-- Main Grid -->
-    <div class="appview-grid">
+    <!-- Two-column layout -->
+    <div class="appview-layout">
 
       <!-- Left: Info Cards -->
       <div>
-        <!-- Applicant Info -->
+        <!-- Applicant Information -->
         <div class="appview-card">
-          <div class="appview-card-title"><span>👤</span> Applicant Information</div>
-          <div class="appview-detail-grid">
-            <div class="appview-detail-item"><label>Full Name</label><span>${[app.firstName,app.middleName,app.surname,app.suffix].filter(Boolean).join(' ') || '—'}</span></div>
-            ${app.applicantName ? `<div class="appview-detail-item"><label>Company / Business</label><span>${app.applicantName}</span></div>` : ''}
-            ${app.email ? `<div class="appview-detail-item"><label>Email</label><span>${app.email}</span></div>` : ''}
-            ${app.mobile || app.applicantMobile ? `<div class="appview-detail-item"><label>Mobile</label><span>${app.mobile || app.applicantMobile}</span></div>` : ''}
-            ${app.applicantAddress || app.address ? `<div class="appview-detail-item" style="grid-column:1/-1;"><label>Address</label><span>${app.applicantAddress || app.address}</span></div>` : ''}
+          <div class="appview-card-title">👤 Applicant Information</div>
+          <div class="appview-fields">
+            <div class="appview-field">
+              <div class="appview-field-label">Full Name</div>
+              <div class="appview-field-value">${[app.firstName,app.middleName,app.surname,app.suffix].filter(Boolean).join(' ') || 'N/A'}</div>
+            </div>
+            ${app.applicantName ? `<div class="appview-field"><div class="appview-field-label">Company / Business</div><div class="appview-field-value">${app.applicantName}</div></div>` : ''}
+            ${app.email ? `<div class="appview-field"><div class="appview-field-label">Email</div><div class="appview-field-value">${app.email}</div></div>` : ''}
+            ${app.mobile || app.applicantMobile ? `<div class="appview-field"><div class="appview-field-label">Mobile</div><div class="appview-field-value">${app.mobile || app.applicantMobile}</div></div>` : ''}
+            ${app.applicantAddress || app.address ? `<div class="appview-field" style="grid-column:1/-1;"><div class="appview-field-label">Address</div><div class="appview-field-value">${app.applicantAddress || app.address}</div></div>` : ''}
           </div>
         </div>
 
         ${app.projectTitle ? `
+        <!-- Project Details -->
         <div class="appview-card">
-          <div class="appview-card-title"><span>📋</span> Project Details</div>
-          <div class="appview-detail-grid">
-            <div class="appview-detail-item"><label>Project Title</label><span>${app.projectTitle}</span></div>
-            ${app.projectLocation ? `<div class="appview-detail-item"><label>Location</label><span>${app.projectLocation}</span></div>` : ''}
-            ${app.projectCost ? `<div class="appview-detail-item"><label>Estimated Cost</label><span>₱${parseFloat(app.projectCost).toLocaleString()}</span></div>` : ''}
+          <div class="appview-card-title">📋 Project Details</div>
+          <div class="appview-fields">
+            <div class="appview-field"><div class="appview-field-label">Project Title</div><div class="appview-field-value">${app.projectTitle}</div></div>
+            ${app.projectLocation ? `<div class="appview-field"><div class="appview-field-label">Location</div><div class="appview-field-value">${app.projectLocation}</div></div>` : ''}
+            ${app.projectCost ? `<div class="appview-field"><div class="appview-field-label">Estimated Cost</div><div class="appview-field-value">₱${parseFloat(app.projectCost).toLocaleString()}</div></div>` : ''}
           </div>
-          ${app.projectDescription ? `
-            <div class="appview-desc-block">
-              <div class="appview-desc-label">Description</div>
-              ${app.projectDescription}
-            </div>` : ''}
+          ${app.projectDescription ? `<div class="appview-desc-box">${app.projectDescription}</div>` : ''}
         </div>` : ''}
 
-        <!-- Documents -->
+        <!-- Uploaded Documents -->
         <div class="appview-card">
           <div class="appview-card-title">
-            <span>📁</span> Uploaded Documents
-            ${app.documents?.length ? `<span style="font-size:12px;background:#f0fdf4;color:#046307;padding:2px 8px;border-radius:20px;margin-left:4px;">${app.documents.length}</span>` : ''}
-            ${isUploading ? `<span style="font-size:12px;color:#f59e0b;margin-left:4px;">⏳ uploading...</span>` : ''}
+            📁 Uploaded Documents
+            ${app.documents?.length ? `<span style="font-size:12px;font-weight:500;color:#64748b;text-transform:none;letter-spacing:0;">(${app.documents.length})</span>` : ''}
+            ${isUploading ? `<span style="font-size:11px;font-weight:500;color:#f59e0b;text-transform:none;letter-spacing:0;margin-left:4px;">⏳ uploading...</span>` : ''}
           </div>
-          <div class="appview-docs-grid">${buildDocCards()}</div>
+          <div class="appview-docs-grid">${docsInner}</div>
         </div>
       </div>
 
       <!-- Right: Timeline -->
-      <div class="appview-sidebar">
-        <div class="appview-card">
-          <div class="appview-card-title"><span>📊</span> Application Timeline</div>
-          <div class="appview-timeline">${timelineItems}</div>
-          ${app.notes ? `
-            <div class="appview-notes">
-              <div class="appview-notes-label">Staff Notes</div>
-              <div class="appview-notes-text">${app.notes}</div>
-            </div>` : ''}
-        </div>
+      <div class="appview-timeline">
+        <div class="appview-card-title">📊 Application Timeline</div>
+        ${timelineHTML}
+        ${app.notes ? `
+          <div class="appview-notes-box">
+            <div class="appview-notes-label">Staff Notes</div>
+            <div class="appview-notes-text">${app.notes}</div>
+          </div>` : ''}
       </div>
 
     </div>
