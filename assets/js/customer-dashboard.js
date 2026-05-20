@@ -3955,11 +3955,42 @@ async function viewApplication(appId) {
 };
 
 // Delete application
-window.deleteApplication = async function(appId) {
-  if (!confirm('Are you sure you want to delete this application? This action cannot be undone.')) {
+window.deleteApplication = function(appId) {
+  const modal = document.getElementById('deleteAppModal');
+  const confirmBtn = document.getElementById('confirmDeleteApp');
+  const cancelBtn = document.getElementById('cancelDeleteApp');
+  if (!modal || !confirmBtn || !cancelBtn) {
+    // fallback
+    if (!confirm('Are you sure you want to delete this application?')) return;
+    _doDeleteApplication(appId);
     return;
   }
-  
+
+  modal.style.display = 'flex';
+  setTimeout(() => modal.classList.add('validation-modal-show'), 10);
+
+  const cleanup = () => {
+    modal.classList.remove('validation-modal-show');
+    setTimeout(() => { modal.style.display = 'none'; }, 250);
+    confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+    cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+  };
+
+  document.getElementById('confirmDeleteApp').addEventListener('click', async () => {
+    cleanup();
+    await _doDeleteApplication(appId);
+  }, { once: true });
+
+  document.getElementById('cancelDeleteApp').addEventListener('click', () => {
+    cleanup();
+  }, { once: true });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) cleanup();
+  }, { once: true });
+};
+
+async function _doDeleteApplication(appId) {
   try {
     const app = userApplications.find(a => a.id === appId);
     await deleteDoc(doc(db, 'applications', appId));
@@ -3979,7 +4010,7 @@ window.deleteApplication = async function(appId) {
     console.error('Error deleting application:', error);
     showAlert('Error deleting application. Please try again.', 'error');
   }
-};
+}
 
 // Edit application
 window.editApplication = function(appId) {
@@ -4020,31 +4051,31 @@ window.editApplication = function(appId) {
   localStorage.removeItem('currentFormStep');
   console.log('Cleared localStorage for edit mode');
   
-  // Navigate to new application section first to ensure form is loaded
+  // Navigate first, then reset and populate AFTER animation settles (300ms+)
   navigateToSection('newApplicationSection');
-  
-  // IMPORTANT: Reset form to step 1 so form elements are visible
-  resetFormSteps();
-  goToStep(1);
-  console.log('Reset form to step 1 for editing');
-  
-  // Wait for navigateToSection (300ms) + resetFormSteps to fully settle before populating
+
   setTimeout(() => {
-    try {
-      const documentTypeEl = document.getElementById('documentType');
-      const permitTypeEl = document.getElementById('permitType');
-      
-      if (!documentTypeEl || !permitTypeEl) {
-        // Retry once more if elements still not ready
-        setTimeout(() => populateEditForm(app), 500);
-        return;
+    // Reset form to step 1 so all elements are visible/ready
+    resetFormSteps();
+    goToStep(1);
+    console.log('Reset form to step 1 for editing');
+
+    setTimeout(() => {
+      try {
+        const documentTypeEl = document.getElementById('documentType');
+        const permitTypeEl = document.getElementById('permitType');
+
+        if (!documentTypeEl || !permitTypeEl) {
+          setTimeout(() => populateEditForm(app), 500);
+          return;
+        }
+
+        populateEditForm(app);
+      } catch (error) {
+        console.error('❌ Error populating edit form:', error);
       }
-      
-      populateEditForm(app);
-    } catch (error) {
-      console.error('❌ Error populating edit form:', error);
-    }
-  }, 500);
+    }, 400);
+  }, 350);
 };
 
 // Function to populate edit form with existing application data
@@ -5252,15 +5283,7 @@ function resetFormSteps() {
   localStorage.removeItem('selectedDocumentType');
   localStorage.removeItem('selectedPermitType');
   
-  // Clear editing state
-  window.editingAppId = null;
-  window.existingDocuments = [];
-  window.editingApplicationData = null;
-  const _banner2 = document.getElementById('resubmitNoticeBanner'); if (_banner2) _banner2.style.display = 'none';
-  const _wt2 = document.querySelector('#newApplicationSection .welcome-title'); if (_wt2) _wt2.textContent = 'New Permit Application';
-  const _ws2 = document.querySelector('#newApplicationSection .welcome-subtitle'); if (_ws2) _ws2.textContent = 'Complete the form below to apply for an environmental permit';
-  
-  // Clear form data
+  // Clear form data (do NOT reset window.editingAppId here — editApplication sets it before calling resetFormSteps)
   clearFormData('newApplicationForm');
   
   console.log('Form steps and editing state reset');
