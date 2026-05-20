@@ -8381,3 +8381,289 @@ textarea:hover {
 /* ===========================================
    END MOBILE RESPONSIVE - CUSTOMER DASHBOARD
    =========================================== */
+
+/* ===========================================
+   APPLICATION VIEW PAGE
+   =========================================== */
+
+/* Hero Status Banner */
+.appview-hero {
+  border-radius: 16px;
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  border-width: 2px;
+  border-style: solid;
+}
+.appview-hero-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 6px;
+}
+.appview-hero-id {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1f2937;
+  margin-bottom: 6px;
+}
+.appview-hero-meta {
+  font-size: 13px;
+  color: #64748b;
+}
+.appview-hero-meta strong { color: #374151; }
+.appview-hero-right {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.appview-hero-icon { font-size: 32px; line-height: 1; }
+.appview-hero-type { font-size: 12px; color: #64748b; }
+.appview-hero-permit { font-size: 14px; font-weight: 700; color: #1f2937; }
+
+/* Alert Boxes */
+.appview-alert {
+  border-radius: 14px;
+  padding: 22px 24px;
+  margin-bottom: 20px;
+  border-width: 2px;
+  border-style: solid;
+}
+.appview-alert-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.appview-alert-body {
+  font-size: 14px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+.appview-alert-meta {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0,0,0,.08);
+  font-size: 12px;
+}
+
+/* Two-column layout */
+.appview-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  align-items: start;
+}
+
+/* Cards */
+.appview-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 26px 28px;
+  margin-bottom: 20px;
+}
+.appview-card:last-child { margin-bottom: 0; }
+.appview-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1f2937;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+  border-bottom: 2px solid #f0fdf4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.appview-card-title span { color: #046307; }
+
+/* Detail rows inside cards */
+.appview-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+.appview-detail-item label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 4px;
+}
+.appview-detail-item span {
+  font-size: 14px;
+  color: #1f2937;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+/* Description block */
+.appview-desc-block {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border-left: 3px solid #046307;
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.75;
+}
+.appview-desc-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 6px;
+}
+
+/* Document cards */
+.appview-docs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+}
+.appview-doc-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow .2s, transform .15s;
+}
+.appview-doc-card:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,.10);
+  transform: translateY(-2px);
+}
+.appview-doc-preview {
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  overflow: hidden;
+}
+.appview-doc-preview img { width: 100%; height: 100%; object-fit: cover; }
+.appview-doc-icon { text-align: center; color: #94a3b8; }
+.appview-doc-icon .icon-emoji { font-size: 40px; display: block; margin-bottom: 4px; }
+.appview-doc-icon .icon-label { font-size: 11px; font-weight: 600; }
+.appview-doc-info { padding: 10px 12px; border-top: 1px solid #f1f5f9; }
+.appview-doc-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.appview-doc-size { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+.appview-doc-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 36px;
+  color: #94a3b8;
+}
+.appview-doc-empty .empty-icon { font-size: 36px; margin-bottom: 8px; }
+.appview-doc-empty .empty-text { font-size: 14px; font-weight: 600; }
+
+/* Timeline */
+.appview-timeline { position: relative; padding-left: 4px; }
+.appview-timeline::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 20px;
+  bottom: 20px;
+  width: 2px;
+  background: #e5e7eb;
+  z-index: 0;
+}
+.appview-tl-item {
+  display: flex;
+  gap: 14px;
+  padding-bottom: 22px;
+  position: relative;
+  z-index: 1;
+}
+.appview-tl-item:last-child { padding-bottom: 0; }
+.appview-tl-dot {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 0 3px #fff;
+}
+.appview-tl-body { padding-top: 9px; }
+.appview-tl-title { font-weight: 700; color: #1f2937; font-size: 14px; }
+.appview-tl-date { font-size: 12px; color: #64748b; margin-top: 2px; }
+.appview-tl-sub { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+
+/* Pickup card */
+.appview-pickup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 14px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 18px;
+}
+.appview-pickup-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 4px;
+}
+.appview-pickup-value { font-size: 18px; font-weight: 700; color: #065f46; }
+
+/* Staff notes */
+.appview-notes {
+  margin-top: 18px;
+  padding: 14px 16px;
+  background: #fef3c7;
+  border-radius: 10px;
+  border-left: 3px solid #f59e0b;
+}
+.appview-notes-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #92400e;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 6px;
+}
+.appview-notes-text { font-size: 13px; color: #78350f; line-height: 1.7; }
+
+/* Sticky sidebar on desktop */
+.appview-sidebar { position: sticky; top: 24px; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .appview-grid { grid-template-columns: 1fr; }
+  .appview-sidebar { position: static; }
+  .appview-hero { padding: 20px; }
+  .appview-hero-id { font-size: 17px; }
+}
+@media (max-width: 480px) {
+  .appview-card { padding: 18px 16px; }
+  .appview-docs-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+}

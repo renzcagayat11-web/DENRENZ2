@@ -140,21 +140,23 @@ async function notifyCustomerAndAdmin(eventType, application, options = {}) {
 
     if (recipients.length === 0) return;
 
+    const payload = {
+      applicationId: application.applicationId || application.id || null,
+      permitType: application.permitType || null,
+      documentType: application.documentType || null,
+      applicantName: application.applicantName || null,
+      applicantUid: application.applicantUid || null,
+      status: application.status || options.newStatus || null,
+    };
+    if (options.revisionComments) payload.revisionComments = options.revisionComments;
+    if (options.rejectionReason) payload.rejectionReason = options.rejectionReason;
+    if (options.pickupSchedule) payload.pickupSchedule = options.pickupSchedule;
+
     await createNotifications({
       eventType,
       title,
       message,
-      payload: {
-        applicationId: application.applicationId || application.id,
-        permitType: application.permitType,
-        documentType: application.documentType,
-        applicantName: application.applicantName,
-        applicantUid: application.applicantUid,
-        status: application.status || options.newStatus,
-        revisionComments: options.revisionComments,
-        rejectionReason: options.rejectionReason,
-        pickupSchedule: options.pickupSchedule
-      },
+      payload,
       actor,
       recipients
     });

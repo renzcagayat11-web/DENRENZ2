@@ -32,7 +32,8 @@ const EVENT_PREFERENCE_MAP = {
   staff: {
     'application-submitted': 'notifyNewApplications',
     'application-resubmitted': 'notifyUrgentApplications',
-    'application-edited': 'notifyNewApplications'
+    'application-edited': 'notifyNewApplications',
+    'application-deleted': 'notifyNewApplications'
   }
 };
 
@@ -54,6 +55,7 @@ async function fetchUsersByRole(role) {
     const users = snap.docs
       .map(d => ({ id: d.id, ...d.data() }))
       .filter(user => user.status !== 'inactive');
+    console.log(`[notification-service] fetchUsersByRole(${role}) found:`, users.map(u => u.id));
     if (users.length > 0) roleCache.set(role, users);
     return users;
   } catch (err) {
@@ -118,7 +120,7 @@ function buildDocData({
     eventType,
     title,
     message,
-    payload: payload || {},
+    payload: Object.fromEntries(Object.entries(payload || {}).filter(([, v]) => v !== undefined)),
     channels,
     emailStatus: channels.email ? 'pending' : 'skipped',
     smsStatus: channels.sms ? 'pending' : 'skipped',

@@ -207,6 +207,11 @@ function buildTeamNotificationCopy(eventType, application) {
         title: 'Application Updated',
         message: `${applicant} updated details for the ${permitLabel} application.`
       };
+    case 'application-deleted':
+      return {
+        title: 'Application Deleted',
+        message: `${applicant} deleted their ${permitLabel} application.`
+      };
     case 'application-submitted':
     default:
       return {
@@ -221,18 +226,19 @@ async function notifyTeamAboutApplication(eventType, application) {
     if (!createNotifications) return;
     const { title, message } = buildTeamNotificationCopy(eventType, application);
     const actor = buildActorInfo();
+    const payload = {};
+    if (application?.applicationId) payload.applicationId = application.applicationId;
+    if (application?.permitType) payload.permitType = application.permitType;
+    if (application?.documentType) payload.documentType = application.documentType;
+    if (application?.applicantName) payload.applicantName = application.applicantName;
+    if (application?.applicantUid) payload.applicantUid = application.applicantUid;
+    if (application?.docId) payload.docId = application.docId;
+
     await createNotifications({
       eventType,
       title,
       message,
-      payload: {
-        applicationId: application?.applicationId,
-        permitType: application?.permitType,
-        documentType: application?.documentType,
-        applicantName: application?.applicantName,
-        applicantUid: application?.applicantUid,
-        docId: application?.docId
-      },
+      payload,
       actor,
       recipients: [
         { role: 'staff' },
@@ -2337,99 +2343,62 @@ function displayApplications() {
   renderApplicationsTable(userApplications, 'No applications yet. Click "New Application" to get started.');
 }
 
-// View application details - Similar to staff dashboard
+// View application details - Full page section
 window.viewApplication = async function(appId) {
   // Unsubscribe from any previous real-time listener
-  if (window._appModalUnsubscribe) {
-    window._appModalUnsubscribe();
-    window._appModalUnsubscribe = null;
+  if (window._appViewUnsubscribe) {
+    window._appViewUnsubscribe();
+    window._appViewUnsubscribe = null;
   }
-  
-  // Fetch fresh data from Firestore to ensure documents are up-to-date
+
+  currentApplicationId = appId;
+  const detailsDiv = document.getElementById('applicationDetails');
+
+  // Show loading state and navigate to section
+  detailsDiv.innerHTML = `
+    <div style="text-align:center;padding:60px 20px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite;"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>
+      <div style="margin-top:16px;font-size:16px;color:#64748b;">Loading application details...</div>
+    </div>
+  `;
+  navigateToSection('applicationViewSection');
+
+  // Fetch fresh data from Firestore
   let application = null;
   try {
     const appRef = doc(db, 'applications', appId);
     const appSnap = await getDoc(appRef);
     if (appSnap.exists()) {
       application = { id: appSnap.id, ...appSnap.data() };
-      console.log('Fetched fresh app data from Firestore for view:', application);
-      
-      // Update the cached list with fresh data
       const cachedIndex = userApplications.findIndex(a => a.id === appId);
-      if (cachedIndex !== -1) {
-        userApplications[cachedIndex] = application;
-      }
+      if (cachedIndex !== -1) userApplications[cachedIndex] = application;
     }
   } catch (error) {
     console.error('Error fetching fresh application data:', error);
-    application = userApplications.find(app => app.id === appId);
+    application = userApplications.find(a => a.id === appId);
   }
-  
+
+  if (!application) application = userApplications.find(a => a.id === appId);
   if (!application) {
-    application = userApplications.find(app => app.id === appId);
+    detailsDiv.innerHTML = `<div style="text-align:center;padding:60px;color:#ef4444;">Application not found.</div>`;
+    return;
   }
-  
-  if (!application) return;
-  
-  // Debug: Log application data
-  console.log('Customer View Application:', application);
-  console.log('Pickup Schedule:', application.pickupSchedule);
-  
-  // Set current application ID for global access
-  currentApplicationId = appId;
-  
-  const modal = document.getElementById('applicationModal');
-  const detailsDiv = document.getElementById('applicationDetails');
-  
-  // Show loading state
-  detailsDiv.innerHTML = `
-    <div style="text-align: center; padding: 40px;">
-      <div style="font-size: 48px; margin-bottom: 16px;">⏳</div>
-      <div style="font-size: 18px; color: #666;">Loading application details...</div>
-    </div>
-  `;
-  
-  modal.style.display = 'flex';
-  
-  // Simulate loading for better UX
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // Generate application details HTML (similar to staff dashboard but customer-focused)
-  const detailsHTML = generateApplicationDetailsHTML(application);
-  detailsDiv.innerHTML = detailsHTML;
-  
-  // Update modal actions for customer
-  const modalActions = document.getElementById('modalActions');
-  modalActions.innerHTML = `
-    <button class="btn-secondary" onclick="printApplication()">🖨️ Print</button>
-    <button class="btn-primary" onclick="downloadAllDocuments()">📥 Download All Documents</button>
-    <button class="btn-secondary" onclick="hideModal('applicationModal')">Close</button>
-  `;
-  
-  modal.style.display = 'flex';
-  
-  // Set up real-time listener for auto-updating documents when uploads complete
+
+  detailsDiv.innerHTML = generateApplicationDetailsHTML(application);
+
+  // Real-time listener to auto-refresh if docs change
   try {
     const appRef = doc(db, 'applications', appId);
-    window._appModalUnsubscribe = onSnapshot(appRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const updatedApp = { id: docSnap.id, ...docSnap.data() };
-        console.log('Real-time update received - documents:', updatedApp.documents?.length || 0, 'uploadStatus:', updatedApp.uploadStatus);
-        
-        // Update cache
-        const cachedIndex = userApplications.findIndex(a => a.id === appId);
-        if (cachedIndex !== -1) {
-          userApplications[cachedIndex] = updatedApp;
-        }
-        
-        // Re-render modal content if modal is still open
-        if (modal.style.display === 'flex') {
-          const newHTML = generateApplicationDetailsHTML(updatedApp);
-          detailsDiv.innerHTML = newHTML;
-        }
+    window._appViewUnsubscribe = onSnapshot(appRef, (docSnap) => {
+      if (!docSnap.exists()) return;
+      const updatedApp = { id: docSnap.id, ...docSnap.data() };
+      const cachedIndex = userApplications.findIndex(a => a.id === appId);
+      if (cachedIndex !== -1) userApplications[cachedIndex] = updatedApp;
+      const section = document.getElementById('applicationViewSection');
+      if (section && section.classList.contains('active')) {
+        detailsDiv.innerHTML = generateApplicationDetailsHTML(updatedApp);
       }
     });
-    console.log('Firestore real-time listener set up for application:', appId);
   } catch (error) {
     console.error('Error setting up real-time listener:', error);
   }
@@ -2440,353 +2409,299 @@ function generateApplicationDetailsHTML(app) {
   const statusClass = getStatusClass(app.status);
   const dateSubmitted = formatDate(app.createdAt);
   const lastUpdated = formatDate(app.updatedAt || app.createdAt);
-  
-  // Documents section
-  let documentsHTML = '';
+  const statusUpper = (app.status || 'pending').toUpperCase();
+
+  // Status color config
+  const statusConfig = {
+    approved:        { bg: '#f0fdf4', border: '#10b981', color: '#065f46', icon: '✅' },
+    rejected:        { bg: '#fef2f2', border: '#ef4444', color: '#991b1b', icon: '❌' },
+    pending:         { bg: '#eff6ff', border: '#3b82f6', color: '#1e40af', icon: '⏳' },
+    'under review':  { bg: '#fefce8', border: '#f59e0b', color: '#92400e', icon: '🔍' },
+    'needs resubmit':{ bg: '#fffbeb', border: '#f59e0b', color: '#92400e', icon: '📝' },
+    'needs revision':{ bg: '#fffbeb', border: '#f59e0b', color: '#92400e', icon: '📝' },
+  };
+  const sc = statusConfig[(app.status || '').toLowerCase()] || { bg: '#f8fafc', border: '#94a3b8', color: '#374151', icon: '📄' };
+
+  // Documents HTML
   const isUploading = app.uploadStatus === 'uploading';
+  let documentsHTML = '';
   if (app.documents && app.documents.length > 0) {
-    documentsHTML = `
-      <div class="detail-section">
-        <h4 class="section-title">📁 Uploaded Documents (${app.documents.length})${isUploading ? ' <span style="color: #f59e0b; font-size: 12px;">⏳ Some files still uploading...</span>' : ''}</h4>
-        <div class="documents-grid">
-          ${app.documents.map((doc, index) => {
-            const docName = doc.name || `Document ${index + 1}`;
-            const docData = doc.url || doc.data || '';
-            const docType = doc.type || '';
-            const isImage = docType && docType.startsWith('image/');
-            const isPDF = docType && docType.includes('pdf');
-            
-            if (!docData) {
-              return `
-                <div class="document-card" style="border-color: #ef4444; opacity: 0.7;">
-                  <div class="document-preview">
-                    <div style="text-align: center; color: #ef4444;">
-                      <div style="font-size: 48px; margin-bottom: 8px;">⚠️</div>
-                      <div style="font-weight: 600;">Data Not Available</div>
-                    </div>
-                  </div>
-                  <div class="document-info">
-                    <div class="document-name">${docName}</div>
-                    <div class="document-meta">
-                      <span>❌ Error</span>
-                    </div>
-                  </div>
-                </div>
-              `;
+    documentsHTML = app.documents.map((doc, index) => {
+      const docName = doc.name || `Document ${index + 1}`;
+      const docData = doc.url || doc.data || '';
+      const docType = doc.type || '';
+      const isImage = docType.startsWith('image/');
+      const isPDF = docType.includes('pdf');
+      const sizeLabel = doc.size ? (doc.size / 1024).toFixed(1) + ' KB' : '';
+
+      if (!docData) return `
+        <div style="background:#fff;border:1px solid #fca5a5;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="height:120px;display:flex;align-items:center;justify-content:center;background:#fef2f2;color:#ef4444;font-size:13px;font-weight:600;">⚠️ Unavailable</div>
+          <div style="padding:12px;"><div style="font-weight:600;font-size:13px;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${docName}</div></div>
+        </div>`;
+
+      return `
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.10)'" onmouseout="this.style.boxShadow='none'">
+          <div style="height:130px;display:flex;align-items:center;justify-content:center;background:#f8fafc;overflow:hidden;cursor:pointer;" onclick="${isImage ? `openImageViewer('${docData}','${docName.replace(/'/g,"\\'")}')` : `window.open('${docData}','_blank')`}">
+            ${isImage
+              ? `<img src="${docData}" alt="${docName}" style="max-width:100%;max-height:130px;object-fit:cover;" />`
+              : `<div style="text-align:center;color:#64748b;">
+                  <div style="font-size:44px;margin-bottom:6px;">${isPDF ? '📄' : '📎'}</div>
+                  <div style="font-size:12px;font-weight:600;">${isPDF ? 'View PDF' : 'View File'}</div>
+                </div>`
             }
-            
-            return `
-              <div class="document-card">
-                <div class="document-preview">
-                  ${isImage ? 
-                    `<img src="${docData}" alt="${docName}" onclick="openImageViewer('${docData}', '${docName.replace(/'/g, "\\'")}')" style="cursor: pointer;" />` :
-                    `<a href="${docData}" ${isPDF ? `download="${docName}"` : 'target="_blank'} style="text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #64748b; cursor: pointer;">
-                      <div style="font-size: 48px; margin-bottom: 8px;">${isPDF ? '📄' : '📎'}</div>
-                      <div style="font-weight: 600;">${isPDF ? 'Click to Download' : 'Click to View'}</div>
-                    </a>`
-                  }
-                </div>
-                <div class="document-info">
-                  <div class="document-name">${docName}</div>
-                  <div class="document-meta">
-                    <span>${doc.size ? (doc.size / 1024).toFixed(1) + ' KB' : 'Unknown size'}</span>
-                  </div>
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      </div>
-    `;
-  }
-  
-  // Show uploading status if documents are still being processed
-  if (isUploading && (!app.documents || app.documents.length === 0)) {
-    documentsHTML = `
-      <div class="detail-section">
-        <h4 class="section-title">📁 Uploaded Documents</h4>
-        <div style="text-align: center; padding: 24px; background: #fef3c7; border-radius: 8px; border: 1px solid #fbbf24;">
-          <div style="font-size: 32px; margin-bottom: 8px;">⏳</div>
-          <div style="font-weight: 600; color: #92400e; margin-bottom: 4px;">Documents are being uploaded...</div>
-          <div style="font-size: 13px; color: #a16207;">Please wait or refresh the page in a moment to see your uploaded files.</div>
-        </div>
-      </div>
-    `;
-  }
-  
-  // Pickup schedule if approved
-  let pickupHTML = '';
-  if (app.status && app.status.toLowerCase() === 'approved') {
-    const schedule = app.pickupSchedule || {};
-    console.log('Customer approved app - status:', app.status);
-    console.log('Customer approved app - schedule:', schedule);
-    if (schedule.date) {
-      pickupHTML = `
-        <div class="detail-section">
-          <h4 class="section-title">📅 Pickup Schedule</h4>
-          <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-              <div>
-                <strong>Date:</strong><br>
-                <span style="font-size: 16px;">${schedule.date}</span>
-              </div>
-              <div>
-                <strong>Time:</strong><br>
-                <span style="font-size: 16px; ${schedule.time ? '' : 'color: #64748b;'}">${schedule.time || 'To be scheduled'}</span>
-              </div>
-              ${schedule.notes ? `
-                <div style="grid-column: 1 / -1;">
-                  <strong>Notes:</strong><br>
-                  <span style="font-size: 14px;">${schedule.notes}</span>
-                </div>
-              ` : ''}
-            </div>
           </div>
-        </div>
-      `;
-    } else {
-      pickupHTML = `
-        <div class="detail-section">
-          <h4 class="section-title">📅 Pickup Schedule</h4>
-          <div style="background: #fef3c7; padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
-            <div style="text-align: center; color: #92400e;">
-              <div style="font-size: 24px; margin-bottom: 8px;">📅</div>
-              <div style="font-weight: 600; margin-bottom: 4px;">Pickup Schedule Pending</div>
-              <div style="font-size: 14px;">Your permit has been approved. Please wait for the pickup schedule to be assigned.</div>
-            </div>
+          <div style="padding:12px 14px;border-top:1px solid #f1f5f9;">
+            <div style="font-weight:600;font-size:13px;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${docName}">${docName}</div>
+            ${sizeLabel ? `<div style="font-size:11px;color:#94a3b8;margin-top:3px;">${sizeLabel}</div>` : ''}
           </div>
+        </div>`;
+    }).join('');
+  } else if (isUploading) {
+    documentsHTML = `<div style="grid-column:1/-1;text-align:center;padding:32px;background:#fef3c7;border-radius:10px;border:1px solid #fbbf24;">
+      <div style="font-size:32px;margin-bottom:8px;">⏳</div>
+      <div style="font-weight:600;color:#92400e;">Documents are being uploaded...</div>
+      <div style="font-size:13px;color:#a16207;margin-top:4px;">Please refresh in a moment.</div>
+    </div>`;
+  } else {
+    documentsHTML = `<div style="grid-column:1/-1;text-align:center;padding:32px;color:#94a3b8;">
+      <div style="font-size:36px;margin-bottom:8px;">📂</div>
+      <div style="font-weight:600;">No documents uploaded</div>
+    </div>`;
+  }
+
+  // Pickup schedule
+  const schedule = app.pickupSchedule || {};
+  const pickupHTML = (app.status || '').toLowerCase() === 'approved' ? `
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:28px;margin-bottom:24px;">
+      <h4 class="section-title">📅 Pickup Schedule</h4>
+      ${schedule.date ? `
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;">
+          <div><div style="font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;">Date</div><div style="font-size:18px;font-weight:700;color:#065f46;margin-top:4px;">${schedule.date}</div></div>
+          <div><div style="font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;">Time</div><div style="font-size:18px;font-weight:700;color:#065f46;margin-top:4px;">${schedule.time || 'TBD'}</div></div>
+          ${schedule.notes ? `<div style="grid-column:1/-1;"><div style="font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;">Notes</div><div style="font-size:14px;color:#374151;margin-top:4px;">${schedule.notes}</div></div>` : ''}
         </div>
-      `;
+      ` : `
+        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:20px;text-align:center;color:#92400e;">
+          <div style="font-size:28px;margin-bottom:8px;">📅</div>
+          <div style="font-weight:700;margin-bottom:4px;">Pickup Schedule Pending</div>
+          <div style="font-size:13px;">Your application is approved. DENR will assign your pickup schedule shortly.</div>
+        </div>`}
+    </div>` : '';
+
+  // Rejection reason
+  const rejectionHTML = app.status === 'rejected' && app.rejectionReason ? `
+    <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:16px;padding:24px;margin-bottom:24px;">
+      <h4 class="section-title" style="color:#991b1b;border-color:#fca5a5;">❌ Rejection Reason</h4>
+      <div style="color:#7f1d1d;font-size:15px;line-height:1.7;white-space:pre-wrap;">${app.rejectionReason}</div>
+      ${app.reviewedBy ? `<div style="margin-top:12px;font-size:13px;color:#b91c1c;">By: <strong>${app.reviewedBy}</strong>${app.reviewedAt ? ' · ' + formatDate(app.reviewedAt) : ''}</div>` : ''}
+    </div>` : '';
+
+  // Resubmission notice
+  const resubmitHTML = (app.status === 'needs resubmit' || app.status === 'needs revision') && app.revisionComments ? `
+    <div style="background:#fffbeb;border:2px solid #f59e0b;border-radius:16px;padding:24px;margin-bottom:24px;">
+      <h4 class="section-title" style="color:#92400e;border-color:#fde68a;">📝 Resubmission Required</h4>
+      <div style="color:#78350f;font-size:15px;line-height:1.7;white-space:pre-wrap;">${app.revisionComments}</div>
+      ${app.revisionRequestedAt ? `<div style="margin-top:12px;font-size:13px;color:#b45309;">Requested by: <strong>${app.revisionRequestedBy || 'Staff'}</strong> · ${formatDate(app.revisionRequestedAt)}</div>` : ''}
+    </div>` : '';
+
+  // Timeline items builder
+  const tlItem = (icon, title, date, sub, color='#10b981') => `
+    <div style="display:flex;gap:16px;padding-bottom:24px;position:relative;">
+      <div style="flex-shrink:0;width:40px;height:40px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:18px;z-index:1;">${icon}</div>
+      <div style="padding-top:8px;">
+        <div style="font-weight:700;color:#1f2937;font-size:14px;">${title}</div>
+        <div style="font-size:13px;color:#64748b;margin-top:2px;">${date}</div>
+        ${sub ? `<div style="font-size:12px;color:#94a3b8;margin-top:2px;">${sub}</div>` : ''}
+      </div>
+    </div>`;
+
+  const timelineHTML = `
+    <div style="position:relative;padding-left:8px;">
+      <div style="position:absolute;left:28px;top:0;bottom:0;width:2px;background:#e5e7eb;z-index:0;"></div>
+      ${tlItem('📝', 'Application Submitted', dateSubmitted, '')}
+      ${app.status !== 'pending' ? tlItem('🔍', 'Under Review', app.reviewedAt ? formatDate(app.reviewedAt) : 'In progress', '', '#3b82f6') : tlItem('🔍', 'Under Review', 'Pending', '', '#94a3b8')}
+      ${app.revisionRequestedAt ? tlItem('📋', 'Resubmission Requested', formatDate(app.revisionRequestedAt), `By: ${app.revisionRequestedBy || 'Staff'}`, '#f59e0b') : ''}
+      ${app.revisionSubmittedAt ? tlItem('✅', `Resubmission Submitted (${app.revisionCount || 1}×)`, formatDate(app.revisionSubmittedAt), '', '#10b981') : ''}
+      ${app.status === 'approved' ? tlItem('🎉', 'Application Approved', app.reviewedAt ? formatDate(app.reviewedAt) : '', app.reviewedBy ? `By: ${app.reviewedBy}` : '', '#10b981') : ''}
+      ${app.status === 'rejected' ? tlItem('❌', 'Application Rejected', app.reviewedAt ? formatDate(app.reviewedAt) : '', app.reviewedBy ? `By: ${app.reviewedBy}` : '', '#ef4444') : ''}
+    </div>`;
+
+  // Build document cards
+  const buildDocCards = () => {
+    if (app.documents && app.documents.length > 0) {
+      return app.documents.map((doc, i) => {
+        const name = doc.name || `Document ${i + 1}`;
+        const data = doc.url || doc.data || '';
+        const type = doc.type || '';
+        const isImg = type.startsWith('image/');
+        const isPDF = type.includes('pdf');
+        const size = doc.size ? (doc.size / 1024).toFixed(1) + ' KB' : '';
+        if (!data) return `
+          <div class="appview-doc-card" style="border-color:#fca5a5;">
+            <div class="appview-doc-preview" style="background:#fef2f2;">
+              <div class="appview-doc-icon"><span class="icon-emoji">⚠️</span><span class="icon-label" style="color:#ef4444;">Unavailable</span></div>
+            </div>
+            <div class="appview-doc-info"><div class="appview-doc-name" title="${name}">${name}</div></div>
+          </div>`;
+        const clickAttr = isImg
+          ? `onclick="openImageViewer('${data}','${name.replace(/'/g,"\\'")}')"` 
+          : `onclick="window.open('${data}','_blank')"`;
+        return `
+          <div class="appview-doc-card" ${clickAttr}>
+            <div class="appview-doc-preview">
+              ${isImg ? `<img src="${data}" alt="${name}" />` : `<div class="appview-doc-icon"><span class="icon-emoji">${isPDF ? '📄' : '📎'}</span><span class="icon-label">${isPDF ? 'View PDF' : 'View File'}</span></div>`}
+            </div>
+            <div class="appview-doc-info">
+              <div class="appview-doc-name" title="${name}">${name}</div>
+              ${size ? `<div class="appview-doc-size">${size}</div>` : ''}
+            </div>
+          </div>`;
+      }).join('');
     }
-  }
-  
+    if (isUploading) return `
+      <div class="appview-doc-empty">
+        <div class="empty-icon">⏳</div>
+        <div class="empty-text">Documents are being uploaded...</div>
+        <div style="font-size:13px;margin-top:4px;">Please wait a moment.</div>
+      </div>`;
+    return `
+      <div class="appview-doc-empty">
+        <div class="empty-icon">📂</div>
+        <div class="empty-text">No documents uploaded yet</div>
+      </div>`;
+  };
+
+  // Build timeline items
+  const tlItem = (icon, title, date, sub, color) => `
+    <div class="appview-tl-item">
+      <div class="appview-tl-dot" style="background:${color};">${icon}</div>
+      <div class="appview-tl-body">
+        <div class="appview-tl-title">${title}</div>
+        <div class="appview-tl-date">${date}</div>
+        ${sub ? `<div class="appview-tl-sub">${sub}</div>` : ''}
+      </div>
+    </div>`;
+
+  const timelineItems = [
+    tlItem('📝', 'Application Submitted', dateSubmitted, '', '#046307'),
+    app.status !== 'pending'
+      ? tlItem('🔍', 'Under Review', app.reviewedAt ? formatDate(app.reviewedAt) : 'In progress', '', '#3b82f6')
+      : tlItem('🔍', 'Under Review', 'Pending', '', '#d1d5db'),
+    app.revisionRequestedAt ? tlItem('📋', 'Resubmission Requested', formatDate(app.revisionRequestedAt), `By: ${app.revisionRequestedBy || 'Staff'}`, '#f59e0b') : '',
+    app.revisionSubmittedAt ? tlItem('✅', `Resubmission Submitted (${app.revisionCount || 1}×)`, formatDate(app.revisionSubmittedAt), '', '#10b981') : '',
+    app.status === 'approved' ? tlItem('🎉', 'Application Approved', app.reviewedAt ? formatDate(app.reviewedAt) : '', app.reviewedBy ? `By: ${app.reviewedBy}` : '', '#10b981') : '',
+    app.status === 'rejected' ? tlItem('❌', 'Application Rejected', app.reviewedAt ? formatDate(app.reviewedAt) : '', app.reviewedBy ? `By: ${app.reviewedBy}` : '', '#ef4444') : '',
+  ].join('');
+
+  // Alerts
+  const alertRejection = app.status === 'rejected' && app.rejectionReason ? `
+    <div class="appview-alert" style="background:#fef2f2;border-color:#fca5a5;">
+      <div class="appview-alert-title" style="color:#991b1b;">❌ Rejection Reason</div>
+      <div class="appview-alert-body" style="color:#7f1d1d;">${app.rejectionReason}</div>
+      ${app.reviewedBy ? `<div class="appview-alert-meta" style="color:#b91c1c;">By: <strong>${app.reviewedBy}</strong>${app.reviewedAt ? ' · ' + formatDate(app.reviewedAt) : ''}</div>` : ''}
+    </div>` : '';
+
+  const alertResubmit = (app.status === 'needs resubmit' || app.status === 'needs revision') && app.revisionComments ? `
+    <div class="appview-alert" style="background:#fffbeb;border-color:#f59e0b;">
+      <div class="appview-alert-title" style="color:#92400e;">📝 Resubmission Required</div>
+      <div class="appview-alert-body" style="color:#78350f;">${app.revisionComments}</div>
+      ${app.revisionRequestedAt ? `<div class="appview-alert-meta" style="color:#b45309;">Requested by: <strong>${app.revisionRequestedBy || 'Staff'}</strong> · ${formatDate(app.revisionRequestedAt)}</div>` : ''}
+    </div>` : '';
+
+  const pickupCard = (app.status || '').toLowerCase() === 'approved' ? `
+    <div class="appview-card">
+      <div class="appview-card-title"><span>📅</span> Pickup Schedule</div>
+      ${(app.pickupSchedule || {}).date ? `
+        <div class="appview-pickup-grid">
+          <div><div class="appview-pickup-label">Date</div><div class="appview-pickup-value">${app.pickupSchedule.date}</div></div>
+          <div><div class="appview-pickup-label">Time</div><div class="appview-pickup-value">${app.pickupSchedule.time || 'TBD'}</div></div>
+          ${app.pickupSchedule.notes ? `<div style="grid-column:1/-1;"><div class="appview-pickup-label">Notes</div><div style="font-size:14px;color:#374151;margin-top:4px;">${app.pickupSchedule.notes}</div></div>` : ''}
+        </div>` : `
+        <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:10px;padding:20px;text-align:center;color:#92400e;">
+          <div style="font-size:26px;margin-bottom:8px;">📅</div>
+          <div style="font-weight:700;margin-bottom:4px;">Pickup Schedule Pending</div>
+          <div style="font-size:13px;">DENR will assign your pickup schedule shortly.</div>
+        </div>`}
+    </div>` : '';
+
   return `
-    <div class="application-overview">
-      <div class="overview-header">
-        <div class="application-id">
-          <strong>Application ID:</strong> ${app.applicationId || app.id}
-        </div>
-        <div class="application-status">
-          <span class="status-badge ${statusClass}">${(app.status || 'PENDING').toUpperCase()}</span>
-        </div>
+    <!-- Hero Banner -->
+    <div class="appview-hero" style="background:${sc.bg};border-color:${sc.border};">
+      <div class="appview-hero-left">
+        <div class="appview-hero-label" style="color:${sc.color};">Application ID</div>
+        <div class="appview-hero-id">${app.applicationId || app.id}</div>
+        <div class="appview-hero-meta">Submitted: <strong>${dateSubmitted}</strong> &nbsp;·&nbsp; Last updated: <strong>${lastUpdated}</strong></div>
       </div>
-      
-      <div class="overview-details">
-        <div class="detail-grid">
-          <div class="detail-item">
-            <label>Permit Type:</label>
-            <span>${app.permitType || 'N/A'}</span>
-          </div>
-          <div class="detail-item">
-            <label>Date Submitted:</label>
-            <span>${dateSubmitted}</span>
-          </div>
-          <div class="detail-item">
-            <label>Last Updated:</label>
-            <span>${lastUpdated}</span>
-          </div>
-        </div>
+      <div class="appview-hero-right">
+        <div class="appview-hero-icon">${sc.icon}</div>
+        <span class="status-badge ${statusClass}" style="font-size:13px;padding:6px 18px;">${statusUpper}</span>
+        ${app.documentType ? `<div class="appview-hero-type">${app.documentType}</div>` : ''}
+        ${app.permitType ? `<div class="appview-hero-permit">${app.permitType}</div>` : ''}
       </div>
     </div>
-    
-    <div class="detail-section">
-      <h4 class="section-title">👤 Applicant Information</h4>
-      <div class="detail-grid">
-        <div class="detail-item">
-          <label>Full Name:</label>
-          <span>${app.firstName || ''} ${app.middleName || ''} ${app.surname || ''} ${app.suffix || ''}</span>
-        </div>
-        <div class="detail-item">
-          <label>Email:</label>
-          <span>${app.email || 'N/A'}</span>
-        </div>
-        <div class="detail-item">
-          <label>Mobile:</label>
-          <span>${app.mobile || 'N/A'}</span>
-        </div>
-        <div class="detail-item">
-          <label>Address:</label>
-          <span>${app.address || 'N/A'}</span>
-        </div>
-      </div>
-    </div>
-    
-    ${app.projectTitle ? `
-      <div class="detail-section">
-        <h4 class="section-title">📋 Project Details</h4>
-        <div class="detail-grid">
-          <div class="detail-item">
-            <label>Project Title:</label>
-            <span>${app.projectTitle || 'N/A'}</span>
+
+    ${alertRejection}
+    ${alertResubmit}
+    ${pickupCard}
+
+    <!-- Main Grid -->
+    <div class="appview-grid">
+
+      <!-- Left: Info Cards -->
+      <div>
+        <!-- Applicant Info -->
+        <div class="appview-card">
+          <div class="appview-card-title"><span>👤</span> Applicant Information</div>
+          <div class="appview-detail-grid">
+            <div class="appview-detail-item"><label>Full Name</label><span>${[app.firstName,app.middleName,app.surname,app.suffix].filter(Boolean).join(' ') || '—'}</span></div>
+            ${app.applicantName ? `<div class="appview-detail-item"><label>Company / Business</label><span>${app.applicantName}</span></div>` : ''}
+            ${app.email ? `<div class="appview-detail-item"><label>Email</label><span>${app.email}</span></div>` : ''}
+            ${app.mobile || app.applicantMobile ? `<div class="appview-detail-item"><label>Mobile</label><span>${app.mobile || app.applicantMobile}</span></div>` : ''}
+            ${app.applicantAddress || app.address ? `<div class="appview-detail-item" style="grid-column:1/-1;"><label>Address</label><span>${app.applicantAddress || app.address}</span></div>` : ''}
           </div>
-          <div class="detail-item">
-            <label>Project Location:</label>
-            <span>${app.projectLocation || 'N/A'}</span>
-          </div>
-          ${app.projectCost ? `
-            <div class="detail-item">
-              <label>Estimated Cost:</label>
-              <span>₱${parseFloat(app.projectCost).toLocaleString()}</span>
-            </div>
-          ` : ''}
         </div>
-        ${app.projectDescription ? `
-          <div style="margin-top: 16px;">
-            <label style="font-weight: 600; color: #374151;">Project Description:</label>
-            <div style="margin-top: 8px; padding: 12px; background: #f9fafb; border-radius: 6px; line-height: 1.6;">
+
+        ${app.projectTitle ? `
+        <div class="appview-card">
+          <div class="appview-card-title"><span>📋</span> Project Details</div>
+          <div class="appview-detail-grid">
+            <div class="appview-detail-item"><label>Project Title</label><span>${app.projectTitle}</span></div>
+            ${app.projectLocation ? `<div class="appview-detail-item"><label>Location</label><span>${app.projectLocation}</span></div>` : ''}
+            ${app.projectCost ? `<div class="appview-detail-item"><label>Estimated Cost</label><span>₱${parseFloat(app.projectCost).toLocaleString()}</span></div>` : ''}
+          </div>
+          ${app.projectDescription ? `
+            <div class="appview-desc-block">
+              <div class="appview-desc-label">Description</div>
               ${app.projectDescription}
-            </div>
+            </div>` : ''}
+        </div>` : ''}
+
+        <!-- Documents -->
+        <div class="appview-card">
+          <div class="appview-card-title">
+            <span>📁</span> Uploaded Documents
+            ${app.documents?.length ? `<span style="font-size:12px;background:#f0fdf4;color:#046307;padding:2px 8px;border-radius:20px;margin-left:4px;">${app.documents.length}</span>` : ''}
+            ${isUploading ? `<span style="font-size:12px;color:#f59e0b;margin-left:4px;">⏳ uploading...</span>` : ''}
           </div>
-        ` : ''}
-      </div>
-    ` : ''}
-    
-    <!-- Resubmit Comments Section - Show when status is "needs resubmit" -->
-    ${(app.status === 'needs revision' || app.status === 'needs resubmit') && app.revisionComments ? `
-      <div class="detail-section">
-        <h4 class="section-title" style="color: #f59e0b;">📝 Resubmission Required</h4>
-        <div style="background: #fffbeb; border: 1px solid #fbbf24; border-radius: 8px; padding: 16px;">
-          <div style="font-weight: 600; color: #92400e; margin-bottom: 8px;">
-            Please address the following:
-          </div>
-          <div style="color: #78350f; line-height: 1.6; white-space: pre-wrap;">
-            ${app.revisionComments}
-          </div>
-          ${app.revisionRequestedAt ? `
-            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #fbbf24; font-size: 13px; color: #a16207;">
-              <strong>Requested by:</strong> ${app.revisionRequestedBy || 'Staff'}<br>
-              <strong>Date:</strong> ${formatDate(app.revisionRequestedAt)}
-            </div>
-          ` : ''}
+          <div class="appview-docs-grid">${buildDocCards()}</div>
         </div>
       </div>
-    ` : ''}
-    
-    ${documentsHTML}
-    ${pickupHTML}
-    
-    <!-- Always show pickup schedule section for approved apps -->
-    ${app.status && app.status.toLowerCase() === 'approved' ? `
-      <div class="detail-section">
-        <h4 class="section-title">📅 Pickup Schedule</h4>
-        ${app.pickupSchedule && app.pickupSchedule.date ? `
-          <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-              <div>
-                <strong>Date:</strong><br>
-                <span style="font-size: 16px;">${app.pickupSchedule.date}</span>
-              </div>
-              <div>
-                <strong>Time:</strong><br>
-                <span style="font-size: 16px; ${app.pickupSchedule.time ? '' : 'color: #64748b;'}">${app.pickupSchedule.time || 'To be scheduled'}</span>
-              </div>
-              ${app.pickupSchedule.notes ? `
-                <div style="grid-column: 1 / -1;">
-                  <strong>Notes:</strong><br>
-                  <span style="font-size: 14px;">${app.pickupSchedule.notes}</span>
-                </div>
-              ` : ''}
-            </div>
-          </div>
-        ` : `
-          <div style="background: #fef3c7; padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
-            <div style="text-align: center; color: #92400e;">
-              <div style="font-size: 24px; margin-bottom: 8px;">📅</div>
-              <div style="font-weight: 600; margin-bottom: 4px;">Pickup Schedule Pending</div>
-              <div style="font-size: 14px;">Your permit has been approved. Please wait for the pickup schedule to be assigned.</div>
-            </div>
-          </div>
-        `}
+
+      <!-- Right: Timeline -->
+      <div class="appview-sidebar">
+        <div class="appview-card">
+          <div class="appview-card-title"><span>📊</span> Application Timeline</div>
+          <div class="appview-timeline">${timelineItems}</div>
+          ${app.notes ? `
+            <div class="appview-notes">
+              <div class="appview-notes-label">Staff Notes</div>
+              <div class="appview-notes-text">${app.notes}</div>
+            </div>` : ''}
+        </div>
       </div>
-    ` : ''}
-    
-    <!-- Application Timeline Section -->
-    <div class="detail-section">
-      <h4 class="section-title">📊 Application Timeline</h4>
-      <div class="status-timeline">
-        <div class="timeline-item">
-          <div class="timeline-marker completed">📝</div>
-          <div class="timeline-content">
-            <div class="timeline-title">Application Submitted</div>
-            <div class="timeline-date">${dateSubmitted}</div>
-          </div>
-        </div>
-        ${app.status !== 'pending' ? `
-        <div class="timeline-item">
-          <div class="timeline-marker completed">👁️</div>
-          <div class="timeline-content">
-            <div class="timeline-title">Application Under Review</div>
-            <div class="timeline-date">${app.reviewedAt ? formatDate(app.reviewedAt) : 'In Progress'}</div>
-          </div>
-        </div>
-        ` : `
-        <div class="timeline-item">
-          <div class="timeline-marker pending">👁️</div>
-          <div class="timeline-content">
-            <div class="timeline-title">Application Under Review</div>
-            <div class="timeline-date">Pending</div>
-          </div>
-        </div>
-        `}
-        
-        <!-- Resubmit Timeline Events -->
-        ${app.revisionRequestedAt ? `
-        <div class="timeline-item">
-          <div class="timeline-marker completed" style="background: #f59e0b;">📝</div>
-          <div class="timeline-content">
-            <div class="timeline-title">Resubmission Requested</div>
-            <div class="timeline-date">${formatDate(app.revisionRequestedAt)}</div>
-            <div style="color: #92400e; font-size: 12px; margin-top: 2px;">By: ${app.revisionRequestedBy || 'Staff'}</div>
-          </div>
-        </div>
-        ` : ''}
-        
-        ${app.revisionSubmittedAt ? `
-        <div class="timeline-item">
-          <div class="timeline-marker completed" style="background: #10b981;">✅</div>
-          <div class="timeline-content">
-            <div class="timeline-title">Resubmission Submitted</div>
-            <div class="timeline-date">${formatDate(app.revisionSubmittedAt)}</div>
-            <div style="color: #059669; font-size: 12px; margin-top: 2px;">Resubmit #${app.revisionCount || 1}</div>
-          </div>
-        </div>
-        ` : ''}
-        
-        ${app.status === 'approved' ? `
-        <div class="timeline-item">
-          <div class="timeline-marker completed">✅</div>
-          <div class="timeline-content">
-            <div class="timeline-title">Application Approved</div>
-            <div class="timeline-date">${app.reviewedAt ? formatDate(app.reviewedAt) : 'Completed'}</div>
-          </div>
-        </div>
-        ` : app.status === 'rejected' ? `
-        <div class="timeline-item">
-          <div class="timeline-marker completed">❌</div>
-          <div class="timeline-content">
-            <div class="timeline-title">Application Rejected</div>
-            <div class="timeline-date">${app.reviewedAt ? formatDate(app.reviewedAt) : 'Completed'}</div>
-            ${app.rejectionReason ? `<div style="color: #ef4444; font-size: 14px; margin-top: 4px;">Reason: ${app.rejectionReason}</div>` : ''}
-          </div>
-        </div>
-        ` : ''}
-      </div>
-      ${app.reviewedBy ? `
-      <div style="margin-top: 20px; padding: 16px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #10b981;">
-        <div style="font-weight: 600; color: #1e293b; margin-bottom: 4px;">👤 Reviewed By</div>
-        <div style="color: #64748b;">${app.reviewedBy}</div>
-      </div>
-      ` : ''}
+
     </div>
-    
-    ${app.notes ? `
-      <div class="detail-section">
-        <h4 class="section-title">📝 Notes</h4>
-        <div style="padding: 12px; background: #fef3c7; border-radius: 6px; border-left: 4px solid #f59e0b;">
-          ${app.notes}
-        </div>
-      </div>
-    ` : ''}
   `;
 }
 
@@ -4139,7 +4054,16 @@ window.deleteApplication = async function(appId) {
   }
   
   try {
+    const app = userApplications.find(a => a.id === appId);
     await deleteDoc(doc(db, 'applications', appId));
+    if (app) {
+      await notifyTeamAboutApplication('application-deleted', {
+        ...app,
+        applicantName: app.applicantName || getCurrentUserDisplayName(),
+        permitType: app.permitType || app.documentType || 'Application',
+        docId: appId
+      });
+    }
     showAlert('Application deleted successfully!', 'success');
     await fetchUserApplications();
     updateStats();
@@ -4161,9 +4085,29 @@ window.editApplication = function(appId) {
   // Store the application ID and existing documents for update BEFORE navigation
   window.editingAppId = appId;
   window.existingDocuments = app.documents || [];
-  window.editingApplicationData = app; // Store full app data for reference
-  console.log('Stored existing documents for editing:', window.existingDocuments);
-  
+  window.editingApplicationData = app;
+
+  // Show/hide resubmit notice banner
+  const isResubmit = app.status === 'needs resubmit' || app.status === 'needs revision';
+  const banner = document.getElementById('resubmitNoticeBanner');
+  const welcomeTitle = document.querySelector('#newApplicationSection .welcome-title');
+  const welcomeSubtitle = document.querySelector('#newApplicationSection .welcome-subtitle');
+
+  if (banner) {
+    if (isResubmit && app.revisionComments) {
+      document.getElementById('resubmitNoticeComments').textContent = app.revisionComments;
+      const byEl = document.getElementById('resubmitNoticeBy');
+      byEl.textContent = `Requested by: ${app.revisionRequestedBy || 'Staff'}${app.revisionRequestedAt ? ' — ' + new Date(app.revisionRequestedAt.toDate ? app.revisionRequestedAt.toDate() : app.revisionRequestedAt).toLocaleDateString() : ''}`;
+      banner.style.display = 'block';
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+  if (welcomeTitle) welcomeTitle.textContent = isResubmit ? 'Resubmit Application' : 'Edit Application';
+  if (welcomeSubtitle) welcomeSubtitle.textContent = isResubmit
+    ? 'Update the required fields based on staff comments, then resubmit.'
+    : 'Update your application details below.';
+
   // Clear localStorage to prevent conflicts with edit mode
   localStorage.removeItem('newApplicationForm_data');
   localStorage.removeItem('currentFormStep');
@@ -4177,43 +4121,23 @@ window.editApplication = function(appId) {
   goToStep(1);
   console.log('Reset form to step 1 for editing');
   
-  // Wait for the section and form steps to load properly, then populate the form
+  // Wait for navigateToSection (300ms) + resetFormSteps to fully settle before populating
   setTimeout(() => {
     try {
-      console.log('Starting form population for edit mode...');
-      
-      // Check if form elements exist before trying to set values
       const documentTypeEl = document.getElementById('documentType');
       const permitTypeEl = document.getElementById('permitType');
-      const firstNameEl = document.getElementById('firstName');
-      const lastNameEl = document.getElementById('lastName');
-      const applicantNameEl = document.getElementById('applicantName');
       
       if (!documentTypeEl || !permitTypeEl) {
-        console.error('❌ Form elements not found even after reset. Retrying with longer delay...');
-        // Retry after a longer delay
-        setTimeout(() => {
-          resetFormSteps();
-          goToStep(1);
-          setTimeout(() => populateEditForm(app), 300);
-        }, 800);
+        // Retry once more if elements still not ready
+        setTimeout(() => populateEditForm(app), 500);
         return;
       }
       
-      console.log('✅ Form elements found:', {
-        documentType: !!documentTypeEl,
-        permitType: !!permitTypeEl,
-        firstName: !!firstNameEl,
-        lastName: !!lastNameEl,
-        applicantName: !!applicantNameEl
-      });
-      console.log('✅ Proceeding with form population...');
-      // Call the population function
       populateEditForm(app);
     } catch (error) {
       console.error('❌ Error populating edit form:', error);
     }
-  }, 600);
+  }, 500);
 };
 
 // Function to populate edit form with existing application data
@@ -4221,7 +4145,7 @@ function populateEditForm(app) {
   console.log('Populating edit form with data:', app);
   
   try {
-    // Step 1: Document Type and Permit Type
+    // Step 1: Set document type first, which populates permitType options via change event
     const documentTypeEl = document.getElementById('documentType');
     const permitTypeEl = document.getElementById('permitType');
     
@@ -4235,11 +4159,13 @@ function populateEditForm(app) {
       }
       documentTypeEl.value = app.documentType;
       documentTypeEl.dispatchEvent(new Event('change'));
-      console.log('Set document type:', app.documentType);
     }
     
-    if (permitTypeEl && app.permitType) {
-      setTimeout(() => {
+    // After documentType change has populated permitType options, set permitType
+    // then set all other fields in one batch
+    setTimeout(() => {
+      // Set permit type
+      if (permitTypeEl && app.permitType) {
         const hasOption = Array.from(permitTypeEl.options).some((o) => o.value === app.permitType);
         if (!hasOption) {
           const opt = document.createElement('option');
@@ -4249,121 +4175,43 @@ function populateEditForm(app) {
         }
         permitTypeEl.value = app.permitType;
         permitTypeEl.dispatchEvent(new Event('change'));
-        console.log('Set permit type:', app.permitType);
-      }, 100);
-    }
-    
-    // Step 2: Applicant Information
-    setTimeout(() => {
-      // Personal Information fields
-      const firstNameEl = document.getElementById('firstName');
-      const lastNameEl = document.getElementById('lastName');
-      const middleNameEl = document.getElementById('middleName');
-      const suffixEl = document.getElementById('suffix');
-      
-      // Company/Business fields
-      const applicantNameEl = document.getElementById('applicantName');
-      const applicantAddressEl = document.getElementById('applicantAddress');
-      const applicantMobileIndividualEl = document.getElementById('applicantMobileIndividual');
-      const applicantMobileCompanyEl = document.getElementById('applicantMobileCompany');
-      const applicationDetailsEl = document.getElementById('applicationDetailsInput');
-      
-      // Set personal information (from database fields: firstName, middleName, surname)
-      if (firstNameEl && app.firstName) {
-        firstNameEl.value = app.firstName;
       }
-      if (lastNameEl && app.surname) {
-        lastNameEl.value = app.surname;
-      }
-      if (middleNameEl && app.middleName) {
-        middleNameEl.value = app.middleName;
-      }
-      if (suffixEl && app.suffix) {
-        suffixEl.value = app.suffix;
-      }
-      
-      // Set company/business information
-      if (applicantNameEl && app.applicantName) {
-        applicantNameEl.value = app.applicantName;
-      }
-      if (applicantAddressEl && app.applicantAddress) {
-        applicantAddressEl.value = app.applicantAddress;
-      }
-      if (applicantMobileIndividualEl && app.applicantMobile) {
-        applicantMobileIndividualEl.value = app.applicantMobile;
-      }
-      if (applicantMobileCompanyEl && app.applicantMobile) {
-        applicantMobileCompanyEl.value = app.applicantMobile;
-      }
-      if (applicationDetailsEl && app.applicationDetails) {
-        applicationDetailsEl.value = app.applicationDetails;
-      }
-      
-      console.log('Populated applicant information:', {
-        firstName: app.firstName,
-        surname: app.surname,
-        middleName: app.middleName,
-        applicantName: app.applicantName,
-        applicantAddress: app.applicantAddress
-      });
+
+      // Applicant information
+      const setVal = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+      setVal('firstName', app.firstName);
+      setVal('lastName', app.surname);
+      setVal('middleName', app.middleName);
+      setVal('suffix', app.suffix);
+      setVal('applicantName', app.applicantName);
+      setVal('applicantAddress', app.applicantAddress);
+      setVal('applicantMobileIndividual', app.applicantMobile);
+      setVal('applicantMobileCompany', app.applicantMobile);
+      setVal('applicationDetailsInput', app.applicationDetails);
+
+      // Project details
+      setVal('projectTitle', app.projectTitle);
+      setVal('projectLocation', app.projectLocation);
+      setVal('projectDescription', app.projectDescription);
+      setVal('projectCost', app.projectCost);
+
+      // Location coordinates
+      setVal('appLatitude', app.latitude);
+      setVal('appLongitude', app.longitude);
+
+      // Submit button text
+      const submitBtn = document.getElementById('submitStep5') || document.querySelector('#newApplicationForm button[type="submit"]');
+      if (submitBtn) submitBtn.textContent = 'Update Application';
+
+      console.log('✅ Edit form population complete!');
     }, 200);
-    
-    // Step 3: Project Details
-    setTimeout(() => {
-      const projectTitleEl = document.getElementById('projectTitle');
-      const projectLocationEl = document.getElementById('projectLocation');
-      const projectDescriptionEl = document.getElementById('projectDescription');
-      const projectCostEl = document.getElementById('projectCost');
-      
-      if (projectTitleEl && app.projectTitle) {
-        projectTitleEl.value = app.projectTitle;
-      }
-      if (projectLocationEl && app.projectLocation) {
-        projectLocationEl.value = app.projectLocation;
-      }
-      if (projectDescriptionEl && app.projectDescription) {
-        projectDescriptionEl.value = app.projectDescription;
-      }
-      if (projectCostEl && app.projectCost) {
-        projectCostEl.value = app.projectCost;
-      }
-      
-      console.log('Populated project details');
-    }, 300);
-    
-    // Step 4: Location coordinates
-    setTimeout(() => {
-      const appLatitudeEl = document.getElementById('appLatitude');
-      const appLongitudeEl = document.getElementById('appLongitude');
-      
-      if (appLatitudeEl && app.latitude) {
-        appLatitudeEl.value = app.latitude;
-      }
-      if (appLongitudeEl && app.longitude) {
-        appLongitudeEl.value = app.longitude;
-      }
-      
-      console.log('Populated location coordinates');
-    }, 400);
-    
-    // Step 5: Display existing documents
+
+    // Display existing documents after permitType change has regenerated upload fields
     setTimeout(() => {
       if (app.documents && app.documents.length > 0) {
         displayExistingDocuments(app.documents);
       }
-      console.log('Displayed existing documents:', app.documents?.length || 0);
     }, 500);
-    
-    // Step 6: Update submit button text
-    setTimeout(() => {
-      const submitBtn = document.getElementById('submitStep5') || document.querySelector('#newApplicationForm button[type="submit"]');
-      if (submitBtn) {
-        submitBtn.textContent = 'Update Application';
-        console.log('Updated submit button text');
-      }
-    }, 600);
-    
-    console.log('✅ Edit form population complete!');
     
   } catch (error) {
     console.error('❌ Error in populateEditForm:', error);
@@ -4549,6 +4397,9 @@ if (createAppBtn) {
       hideRequirementsSection();
       window.editingAppId = null;
       window.existingDocuments = [];
+      const _banner1 = document.getElementById('resubmitNoticeBanner'); if (_banner1) _banner1.style.display = 'none';
+      const _wt1 = document.querySelector('#newApplicationSection .welcome-title'); if (_wt1) _wt1.textContent = 'New Permit Application';
+      const _ws1 = document.querySelector('#newApplicationSection .welcome-subtitle'); if (_ws1) _ws1.textContent = 'Complete the form below to apply for an environmental permit';
       const submitBtn = document.getElementById('submitStep5') || document.querySelector('#newApplicationForm button[type="submit"]');
       if (submitBtn) {
         submitBtn.textContent = 'Submit Application';
@@ -4920,7 +4771,9 @@ document.addEventListener('DOMContentLoaded', () => {
   updateResumeProgressCard();
 
   // Restore application form data (must run after setupBarangaySelection so municipal change event works)
-  restoreFormData('newApplicationForm');
+  if (!window.editingAppId) {
+    restoreFormData('newApplicationForm');
+  }
 
   // Safety: if no municipal is selected after restore, force barangay back to disabled
   const barangayEl = document.getElementById('barangay');
@@ -5496,6 +5349,9 @@ function resetFormSteps() {
   window.editingAppId = null;
   window.existingDocuments = [];
   window.editingApplicationData = null;
+  const _banner2 = document.getElementById('resubmitNoticeBanner'); if (_banner2) _banner2.style.display = 'none';
+  const _wt2 = document.querySelector('#newApplicationSection .welcome-title'); if (_wt2) _wt2.textContent = 'New Permit Application';
+  const _ws2 = document.querySelector('#newApplicationSection .welcome-subtitle'); if (_ws2) _ws2.textContent = 'Complete the form below to apply for an environmental permit';
   
   // Clear form data
   clearFormData('newApplicationForm');
@@ -10816,7 +10672,8 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
       }
 
       // Notify staff/admin about resubmission/update
-      await notifyTeamAboutApplication('application-resubmitted', {
+      const editEventType = applicationData.status === 'needs resubmit' ? 'application-resubmitted' : 'application-edited';
+      await notifyTeamAboutApplication(editEventType, {
         ...applicationData,
         docId: appRef.id || isEditing
       });
@@ -10855,6 +10712,9 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
     // Clear editing state
     window.editingAppId = null;
     window.existingDocuments = [];
+    const _banner3 = document.getElementById('resubmitNoticeBanner'); if (_banner3) _banner3.style.display = 'none';
+    const _wt3 = document.querySelector('#newApplicationSection .welcome-title'); if (_wt3) _wt3.textContent = 'New Permit Application';
+    const _ws3 = document.querySelector('#newApplicationSection .welcome-subtitle'); if (_ws3) _ws3.textContent = 'Complete the form below to apply for an environmental permit';
 
     // Clear the auto-attached form PDF from sessionStorage (fresh start for next application)
     sessionStorage.removeItem('generatedFormPDF');
@@ -11577,9 +11437,15 @@ window.navigateToSection = function(sectionId) {
     
     // Save current section to localStorage
     localStorage.setItem('currentSection', sectionId);
+
+    // Unsubscribe application view real-time listener when leaving that section
+    if (sectionId !== 'applicationViewSection' && window._appViewUnsubscribe) {
+      window._appViewUnsubscribe();
+      window._appViewUnsubscribe = null;
+    }
     
-    // Restore form data when navigating to sections with forms
-    if (sectionId === 'newApplicationSection') {
+    // Restore form data when navigating to sections with forms (skip in edit mode)
+    if (sectionId === 'newApplicationSection' && !window.editingAppId) {
       restoreFormData('newApplicationForm');
       const documentTypeField = document.getElementById('documentType');
       const permitTypeField = document.getElementById('permitType');
@@ -11610,6 +11476,7 @@ window.navigateToSection = function(sectionId) {
         'dashboardSection': 'Customer Dashboard',
         'myApplicationsSection': 'My Applications',
         'newApplicationSection': 'New Application',
+        'applicationViewSection': 'Application Details',
         'profileSection': 'My Profile',
         'settingsSection': 'Settings',
         'helpSection': 'Help & Support'
