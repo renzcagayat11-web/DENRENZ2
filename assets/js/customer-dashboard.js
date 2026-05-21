@@ -2272,12 +2272,12 @@ function buildApplicationRowHtml(app) {
       </td>
       <td data-label="Actions">
         <div class="table-actions">
-          <button class="action-btn btn-view" onclick="viewApplication('${app.id}')">View</button>
-          ${canEdit ? `
-          <button class="action-btn btn-edit" onclick="openResubmitPage('${app.id}')">Resubmit</button>
-          ` : ''}
+          ${needsResubmit
+            ? `<button class="action-btn btn-edit" onclick="openResubmitPage('${app.id}')">Resubmit</button>`
+            : `<button class="action-btn btn-view" onclick="viewApplication('${app.id}')">View</button>`
+          }
           ${canDelete ? `
-          <button class="action-btn btn-delete" onclick="deleteApplication('${app.id}')">🗑️</button>
+          <button class="action-btn btn-delete" onclick="deleteApplication('${app.id}')" title="Delete"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
           ` : ''}
         </div>
       </td>
@@ -2374,6 +2374,12 @@ function displayApplications() {
 
 // View application details - Full page section
 window.viewApplication = async function(appId) {
+  // If status is needs resubmit/revision, go directly to resubmit page
+  const cachedApp = userApplications.find(a => a.id === appId);
+  if (cachedApp && (cachedApp.status === 'needs resubmit' || cachedApp.status === 'needs revision')) {
+    return openResubmitPage(appId);
+  }
+
   // Unsubscribe from any previous real-time listener
   if (window._appViewUnsubscribe) {
     window._appViewUnsubscribe();
@@ -4156,7 +4162,7 @@ window.openResubmitPage = async function(appId) {
     if (rows.length === 0) {
       uploadsContainer.innerHTML = failedBanner + '<p style="color:#64748b;font-size:13px;">No documents found for this application.</p>';
     } else {
-      uploadsContainer.innerHTML = failedBanner + rows.map((row, i) => {
+      const rowsHTML = rows.map((row, i) => {
         const existingName = row.existing
           ? (row.existing.name || row.existing.fileName || `Uploaded document ${i + 1}`)
           : null;
@@ -4165,7 +4171,7 @@ window.openResubmitPage = async function(appId) {
         // Dropzone hidden by default if doc already exists; visible by default if missing
         const dropzoneDisplay = hasExisting ? 'none' : 'flex';
         return `
-          <div style="margin-bottom:16px;border:1.5px solid #e2e8f0;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+          <div style="border:1.5px solid #e2e8f0;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
             <!-- Row header -->
             <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
               <div style="font-weight:700;color:#0f172a;font-size:13px;">${i + 1}. ${row.label}</div>
@@ -4205,6 +4211,9 @@ window.openResubmitPage = async function(appId) {
             </div>
           </div>`;
       }).join('');
+
+      uploadsContainer.innerHTML = failedBanner +
+        `<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;">${rowsHTML}</div>`;
 
       // Attach dropzone behaviour for each upload slot
       _attachResubmitDropzones(rows);
