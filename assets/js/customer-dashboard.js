@@ -2274,7 +2274,7 @@ function buildApplicationRowHtml(app) {
         <div class="table-actions">
           <button class="action-btn btn-view" onclick="viewApplication('${app.id}')">View</button>
           ${canEdit ? `
-          <button class="action-btn btn-edit" onclick="editApplication('${app.id}')">Resubmit</button>
+          <button class="action-btn btn-edit" onclick="openResubmitPage('${app.id}')">Resubmit</button>
           ` : ''}
           ${canDelete ? `
           <button class="action-btn btn-delete" onclick="deleteApplication('${app.id}')">🗑️</button>
@@ -2466,11 +2466,9 @@ function generateApplicationDetailsHTML(app) {
       const src  = doc.url || doc.data || '';
       const type = doc.type || '';
       const isImg = type.startsWith('image/');
-      const isPDF = type.includes('pdf');
+      const isPDF = type.includes('pdf') || name.toLowerCase().endsWith('.pdf');
       const size  = doc.size ? (doc.size / 1024).toFixed(1) + ' KB' : '';
-      const onclick = isImg
-        ? `openImageViewer('${src}','${name.replace(/'/g,"\\'")}')`
-        : `window.open('${src}','_blank')`;
+      const req   = doc.requirement || '';
 
       if (!src) return `
         <div class="appview-doc-card" style="border-color:#fca5a5;cursor:default;">
@@ -2478,23 +2476,40 @@ function generateApplicationDetailsHTML(app) {
           <div class="appview-doc-info"><div class="appview-doc-name">${name}</div></div>
         </div>`;
 
+      const onclick = isImg
+        ? `openImageViewer('${src}','${name.replace(/'/g,"\\'")}')`
+        : `window.open('${src}','_blank')`;
+
       return `
-        <div class="appview-doc-card" onclick="${onclick}">
+        <div class="appview-doc-card" onclick="${onclick}" style="cursor:pointer;">
           <div class="appview-doc-preview">
             ${isImg
               ? `<img src="${src}" alt="${name}" />`
               : `<div class="appview-doc-icon">${isPDF ? '📄' : '📎'}<span>${isPDF ? 'PDF' : 'File'}</span></div>`}
           </div>
           <div class="appview-doc-info">
+            ${req ? `<div style="font-size:10px;color:#6b7280;margin-bottom:2px;font-weight:500;">${req}</div>` : ''}
             <div class="appview-doc-name" title="${name}">${name}</div>
-            ${size ? `<div class="appview-doc-size">${size}</div>` : ''}
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
+              ${size ? `<div class="appview-doc-size">${size}</div>` : '<div></div>'}
+              <span style="font-size:11px;color:#2563eb;font-weight:600;">🔗 View</span>
+            </div>
           </div>
         </div>`;
     }).join('');
   } else if (isUploading) {
-    docsInner = `<div class="appview-empty" style="background:#fef3c7;border-radius:10px;border:1px solid #fbbf24;">
+    const hasNoDocuments = !app.documents || app.documents.length === 0;
+    docsInner = `<div class="appview-empty" style="background:#fef3c7;border-radius:10px;border:1px solid #fbbf24;padding:24px;">
       <div class="appview-empty-icon">⏳</div>
-      <div class="appview-empty-text" style="color:#92400e;">Documents uploading... please wait.</div>
+      <div class="appview-empty-text" style="color:#92400e;">
+        ${hasNoDocuments
+          ? 'Your documents failed to upload. Please re-upload your documents.'
+          : 'Documents are still being uploaded, please wait...'}
+      </div>
+      ${hasNoDocuments ? `
+      <button onclick="openResubmitPage('${app.id}')" style="margin-top:12px;padding:8px 20px;background:#d97706;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;">
+        📤 Re-upload Documents
+      </button>` : ''}
     </div>`;
   } else {
     docsInner = `<div class="appview-empty">
@@ -2529,11 +2544,17 @@ function generateApplicationDetailsHTML(app) {
       ${app.reviewedBy ? `<div class="appview-alert-meta">By: <strong>${app.reviewedBy}</strong>${app.reviewedAt ? ' · ' + formatDate(app.reviewedAt) : ''}</div>` : ''}
     </div>` : '';
 
-  const resubmitHTML = (statusRaw === 'needs resubmit' || statusRaw === 'needs revision') && app.revisionComments ? `
+  const resubmitHTML = (statusRaw === 'needs resubmit' || statusRaw === 'needs revision') ? `
     <div class="appview-alert alert-resubmit">
       <div class="appview-alert-title">📝 Resubmission Required</div>
-      <div class="appview-alert-body">${app.revisionComments}</div>
+      ${app.revisionComments ? `<div class="appview-alert-body">${app.revisionComments}</div>` : ''}
       ${app.revisionRequestedAt ? `<div class="appview-alert-meta">Requested by: <strong>${app.revisionRequestedBy || 'Staff'}</strong> · ${formatDate(app.revisionRequestedAt)}</div>` : ''}
+      <div style="margin-top:14px;">
+        <button onclick="openResubmitPage('${app.id}')" style="padding:10px 22px;background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,4 1,10 7,10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
+          Resubmit Application
+        </button>
+      </div>
     </div>` : '';
 
   // ── Timeline ───────────────────────────────────────────
@@ -4043,6 +4064,381 @@ async function _doDeleteApplication(appId) {
   }
 }
 
+// Open dedicated resubmit page
+window.openResubmitPage = async function(appId) {
+  // Always re-fetch fresh data from Firestore so documents array is current
+  let app = null;
+  try {
+    const freshSnap = await getDoc(doc(db, 'applications', appId));
+    if (freshSnap.exists()) {
+      app = { id: freshSnap.id, ...freshSnap.data() };
+      // Sync back to cache
+      const idx = userApplications.findIndex(a => a.id === appId);
+      if (idx !== -1) userApplications[idx] = app;
+    }
+  } catch(e) {
+    console.warn('[resubmit] Could not re-fetch from Firestore, using cache:', e);
+  }
+  if (!app) app = userApplications.find(a => a.id === appId);
+  if (!app) { showAlert('Application not found.', 'error'); return; }
+
+  window._resubmitAppId = appId;
+  window._resubmitApp = app;
+
+  console.log('[resubmit] FRESH from Firestore — full app keys:', Object.keys(app));
+  console.log('[resubmit] documents:', app.documents);
+  console.log('[resubmit] uploadedDocuments:', app.uploadedDocuments);
+  console.log('[resubmit] files:', app.files);
+  console.log('[resubmit] uploadStatus:', app.uploadStatus);
+  console.log('[resubmit] permitType:', app.permitType);
+
+  // Staff comment banner
+  const commentBox = document.getElementById('resubmitStaffComment');
+  const commentText = document.getElementById('resubmitStaffCommentText');
+  const commentBy = document.getElementById('resubmitStaffCommentBy');
+  if (commentBox && app.revisionComments) {
+    commentText.textContent = app.revisionComments;
+    const byDate = app.revisionRequestedAt
+      ? ' — ' + new Date(app.revisionRequestedAt.toDate ? app.revisionRequestedAt.toDate() : app.revisionRequestedAt).toLocaleDateString()
+      : '';
+    commentBy.textContent = `Requested by: ${app.revisionRequestedBy || 'Staff'}${byDate}`;
+    commentBox.style.display = 'block';
+  } else if (commentBox) {
+    commentBox.style.display = 'none';
+  }
+
+  // Application summary
+  const summary = document.getElementById('resubmitAppSummary');
+  if (summary) {
+    const fields = [
+      { label: 'Application ID', value: app.applicationId || app.id },
+      { label: 'Permit Type', value: app.permitType || 'N/A' },
+      { label: 'Document Type', value: app.documentType || 'N/A' },
+      { label: 'Applicant Name', value: app.applicantName || 'N/A' },
+      { label: 'Mobile', value: app.applicantMobile || 'N/A' },
+      { label: 'Address', value: app.applicantAddress || 'N/A' },
+    ];
+    summary.innerHTML = fields.map(f => `
+      <div style="background:#f8fafc;border-radius:10px;padding:12px 14px;">
+        <div style="font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">${f.label}</div>
+        <div style="font-size:13px;font-weight:600;color:#0f172a;">${f.value}</div>
+      </div>`).join('');
+  }
+
+  // Document upload fields
+  const uploadsContainer = document.getElementById('resubmitDocumentUploads');
+  if (uploadsContainer) {
+    const resolvedKey = resolvePermitRequirementsKey(app.permitType);
+    const requirements = resolvedKey ? (PERMIT_REQUIREMENTS[resolvedKey] || []) : [];
+    const existingDocs = app.documents || app.uploadedDocuments || app.files || [];
+
+    // Show warning banner ONLY when there are truly no documents saved at all
+    const uploadFailed = existingDocs.length === 0 && app.uploadStatus !== 'complete';
+
+    // Build rows: prefer PERMIT_REQUIREMENTS list, fallback to existing uploaded docs
+    const rows = requirements.length > 0
+      ? requirements.map((req, i) => ({ label: req, existing: existingDocs[i] || null }))
+      : existingDocs.map((doc, i) => ({
+          label: doc.requirement || doc.name || `Document ${i + 1}`,
+          existing: doc
+        }));
+
+    // Prepend warning banner if upload failed
+    const failedBanner = uploadFailed ? `
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:#fff7ed;border:1.5px solid #fed7aa;border-radius:12px;margin-bottom:18px;">
+        <span style="font-size:22px;line-height:1;">⚠️</span>
+        <div>
+          <div style="font-weight:700;color:#9a3412;font-size:14px;margin-bottom:4px;">Your previous documents did not upload successfully.</div>
+          <div style="color:#7c2d12;font-size:13px;">Your application was saved but the files were not received. Please re-upload all required documents below to complete your resubmission.</div>
+        </div>
+      </div>` : '';
+
+    if (rows.length === 0) {
+      uploadsContainer.innerHTML = failedBanner + '<p style="color:#64748b;font-size:13px;">No documents found for this application.</p>';
+    } else {
+      uploadsContainer.innerHTML = failedBanner + rows.map((row, i) => {
+        const existingName = row.existing
+          ? (row.existing.name || row.existing.fileName || `Uploaded document ${i + 1}`)
+          : null;
+        const existingUrl = row.existing ? (row.existing.url || row.existing.data || '') : '';
+        const hasExisting = !!existingName;
+        // Dropzone hidden by default if doc already exists; visible by default if missing
+        const dropzoneDisplay = hasExisting ? 'none' : 'flex';
+        return `
+          <div style="margin-bottom:16px;border:1.5px solid #e2e8f0;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+            <!-- Row header -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+              <div style="font-weight:700;color:#0f172a;font-size:13px;">${i + 1}. ${row.label}</div>
+              ${hasExisting
+                ? `<span style="font-size:11px;font-weight:600;color:#16a34a;background:#dcfce7;padding:3px 10px;border-radius:20px;">✅ Uploaded</span>`
+                : `<span style="font-size:11px;font-weight:600;color:#dc2626;background:#fee2e2;padding:3px 10px;border-radius:20px;">⚠️ Required</span>`}
+            </div>
+            <div style="padding:14px 16px;">
+              ${hasExisting ? `
+              <!-- Existing file card -->
+              <div id="resubmitExisting_${i}" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;margin-bottom:10px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:13px;font-weight:600;color:#15803d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${existingName}</div>
+                  <div style="font-size:11px;color:#6b7280;margin-top:2px;">Previously uploaded</div>
+                </div>
+                ${existingUrl ? `<a href="${existingUrl}" target="_blank" style="flex-shrink:0;font-size:12px;font-weight:700;color:#2563eb;text-decoration:none;padding:4px 10px;background:#eff6ff;border-radius:6px;border:1px solid #bfdbfe;">View</a>` : ''}
+                <button type="button" onclick="toggleResubmitReplace(${i})" style="flex-shrink:0;padding:5px 12px;background:#f59e0b;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">
+                  🔄 Replace
+                </button>
+              </div>` : ''}
+              <!-- New file preview (shown after selecting a replacement) -->
+              <div id="resubmitDoc_${i}_preview" style="display:none;align-items:center;gap:10px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;margin-bottom:10px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <span id="resubmitDoc_${i}_filename" style="flex:1;color:#16a34a;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+                <span style="font-size:11px;color:#6b7280;">New file selected</span>
+                <button type="button" onclick="removeResubmitFile(event,${i})" style="flex-shrink:0;background:#fee2e2;border:none;cursor:pointer;padding:5px 10px;color:#dc2626;border-radius:6px;font-size:12px;font-weight:600;">✕ Remove</button>
+              </div>
+              <!-- Dropzone -->
+              <div id="resubmitDropzone_${i}" style="position:relative;border:3px dashed #10b981;border-radius:12px;padding:24px 20px;text-align:center;cursor:pointer;transition:all 0.3s;background:#f0fdf4;display:${dropzoneDisplay};flex-direction:column;justify-content:center;align-items:center;gap:6px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <p style="color:#065f46;font-size:14px;margin:0;font-weight:700;">${hasExisting ? 'Drop replacement file here' : 'Drop your document here'}</p>
+                <p style="color:#6b7280;font-size:12px;margin:0;">or click to browse · PDF, JPG, PNG, DOC</p>
+                <input type="file" id="resubmitDoc_${i}" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display:none;" />
+                ${hasExisting ? `<button type="button" onclick="toggleResubmitReplace(${i})" style="margin-top:4px;padding:4px 14px;background:transparent;color:#6b7280;border:1px solid #d1d5db;border-radius:6px;font-size:12px;cursor:pointer;">Cancel</button>` : ''}
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+
+      // Attach dropzone behaviour for each upload slot
+      _attachResubmitDropzones(rows);
+
+      // Restore previously saved files from sessionStorage
+      _restoreResubmitFiles(rows);
+    }
+  }
+
+  navigateToSection('resubmitSection');
+};
+
+// Attach dropzone events for resubmit upload slots
+function _attachResubmitDropzones(rows) {
+  rows.forEach((_, i) => {
+    const dropzone = document.getElementById(`resubmitDropzone_${i}`);
+    const fileInput = document.getElementById(`resubmitDoc_${i}`);
+    const preview   = document.getElementById(`resubmitDoc_${i}_preview`);
+    const filename  = document.getElementById(`resubmitDoc_${i}_filename`);
+    if (!dropzone || !fileInput) return;
+    dropzone.addEventListener('click', (e) => {
+      if (e.target.closest('button')) return;
+      fileInput.click();
+    });
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.style.borderColor = '#059669';
+      dropzone.style.background = '#f0fdf4';
+    });
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.style.borderColor = '#10b981';
+      dropzone.style.background = '#fff';
+    });
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.style.borderColor = '#10b981';
+      dropzone.style.background = '#fff';
+      const file = e.dataTransfer.files[0];
+      if (file) setResubmitFile(i, file, fileInput, preview, filename, dropzone);
+    });
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) setResubmitFile(i, fileInput.files[0], fileInput, preview, filename, dropzone);
+    });
+  });
+}
+
+// Set a file on a resubmit dropzone slot and persist to sessionStorage
+function setResubmitFile(i, file, fileInput, preview, filename, dropzone) {
+  try {
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    fileInput.files = dt.files;
+  } catch(e) { /* Safari fallback */ }
+  if (filename) filename.textContent = file.name;
+  if (preview)  { preview.style.display = 'flex'; }
+  // Hide the dropzone after selection — keep it clean
+  if (dropzone) dropzone.style.display = 'none';
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = { name: file.name, type: file.type, size: file.size, base64: e.target.result };
+      sessionStorage.setItem(`resubmitDoc_${i}`, JSON.stringify(data));
+    } catch(err) { console.warn('Could not save resubmit file to sessionStorage:', err); }
+  };
+  reader.readAsDataURL(file);
+}
+
+// Restore previously saved resubmit files from sessionStorage
+function _restoreResubmitFiles(rows) {
+  rows.forEach((_, i) => {
+    const saved = sessionStorage.getItem(`resubmitDoc_${i}`);
+    if (!saved) return;
+    try {
+      const data = JSON.parse(saved);
+      const bytes = atob(data.base64.split(',')[1]);
+      const arr = new Uint8Array(bytes.length);
+      for (let j = 0; j < bytes.length; j++) arr[j] = bytes.charCodeAt(j);
+      const file = new File([arr], data.name, { type: data.type });
+      const fileInput = document.getElementById(`resubmitDoc_${i}`);
+      const preview   = document.getElementById(`resubmitDoc_${i}_preview`);
+      const filename  = document.getElementById(`resubmitDoc_${i}_filename`);
+      const dropzone  = document.getElementById(`resubmitDropzone_${i}`);
+      if (fileInput && preview && filename && dropzone) {
+        setResubmitFile(i, file, fileInput, preview, filename, dropzone);
+      } else if (fileInput && filename) {
+        // Minimal restore: just update filename display even if dropzone isn't ready
+        try { const dt = new DataTransfer(); dt.items.add(file); fileInput.files = dt.files; } catch(e) {}
+        if (filename) filename.textContent = file.name;
+        if (preview)  preview.style.display = 'flex';
+      }
+    } catch(err) { console.warn('Could not restore resubmit file:', err); }
+  });
+}
+
+// Toggle the replace dropzone open/close for a row that already has an existing doc
+window.toggleResubmitReplace = function(i) {
+  const dropzone  = document.getElementById(`resubmitDropzone_${i}`);
+  const preview   = document.getElementById(`resubmitDoc_${i}_preview`);
+  const fileInput = document.getElementById(`resubmitDoc_${i}`);
+  if (!dropzone) return;
+  const isOpen = dropzone.style.display !== 'none';
+  if (isOpen) {
+    // Cancel — hide dropzone and clear any selected file
+    dropzone.style.display = 'none';
+    if (preview)   preview.style.display = 'none';
+    if (fileInput) { try { fileInput.value = ''; } catch(e) {} }
+    sessionStorage.removeItem(`resubmitDoc_${i}`);
+  } else {
+    dropzone.style.display = 'flex';
+  }
+};
+
+// Remove file from resubmit dropzone
+window.removeResubmitFile = function(event, i) {
+  event.stopPropagation();
+  const fileInput  = document.getElementById(`resubmitDoc_${i}`);
+  const preview    = document.getElementById(`resubmitDoc_${i}_preview`);
+  const dropzone   = document.getElementById(`resubmitDropzone_${i}`);
+  const existingEl = document.getElementById(`resubmitExisting_${i}`);
+  if (fileInput) { try { fileInput.value = ''; } catch(e) {} }
+  if (preview)   preview.style.display = 'none';
+  // If there's an existing doc, hide the dropzone again (cancel replace mode)
+  // If there's no existing doc, keep the dropzone visible so they can upload
+  if (dropzone)  {
+    dropzone.style.display = existingEl ? 'none' : 'flex';
+    dropzone.style.borderColor = '#10b981';
+    dropzone.style.background = '#f0fdf4';
+  }
+  sessionStorage.removeItem(`resubmitDoc_${i}`);
+};
+
+// Submit resubmission from dedicated resubmit page
+window.submitResubmitApplication = async function() {
+  const appId = window._resubmitAppId;
+  const app = window._resubmitApp;
+  if (!appId || !app) { showAlert('No application selected.', 'error'); return; }
+
+  const btn = document.getElementById('resubmitSubmitBtn');
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; btn.textContent = 'Submitting…'; }
+
+  try {
+    const resolvedKey = resolvePermitRequirementsKey(app.permitType);
+    const requirements = resolvedKey ? (PERMIT_REQUIREMENTS[resolvedKey] || []) : [];
+    const existingDocs = [...(app.documents || app.uploadedDocuments || app.files || [])];
+
+    // Build rows same as openResubmitPage — fallback to existingDocs if no requirements match
+    const rows = requirements.length > 0
+      ? requirements.map((req, i) => ({ label: req, existing: existingDocs[i] || null }))
+      : existingDocs.map((doc, i) => ({
+          label: doc.requirement || doc.name || `Document ${i + 1}`,
+          existing: doc
+        }));
+
+    // Validate: block only rows that have NO existing doc and NO new file
+    const missingLabels = [];
+    for (let i = 0; i < rows.length; i++) {
+      const input = document.getElementById(`resubmitDoc_${i}`);
+      const hasNew = input && input.files && input.files[0];
+      const hasExisting = !!rows[i].existing;
+      if (!hasNew && !hasExisting) missingLabels.push(`${i + 1}. ${rows[i].label}`);
+    }
+    if (missingLabels.length > 0) {
+      showAlert(`Please upload the following required documents:\n${missingLabels.join('\n')}`, 'warning');
+      if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,4 1,10 7,10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg> Submit Resubmission'; }
+      return;
+    }
+
+    const uploadPromises = [];
+    for (let i = 0; i < rows.length; i++) {
+      const input = document.getElementById(`resubmitDoc_${i}`);
+      if (input && input.files && input.files[0]) {
+        const file = input.files[0];
+        if (file.size > MAX_FILE_SIZE) {
+          showAlert(`File "${file.name}" exceeds ${MAX_FILE_SIZE_MB}MB limit.`, 'warning');
+          if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,4 1,10 7,10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg> Submit Resubmission'; }
+          return;
+        }
+        uploadPromises.push({ index: i, file, requirement: rows[i].label });
+      }
+    }
+
+    // Upload new files to Cloudinary
+    for (const item of uploadPromises) {
+      const formData = new FormData();
+      formData.append('file', item.file);
+      formData.append('folder', 'denr-permits');
+      const resp = await fetch('/upload-file-to-cloudinary', { method: 'POST', body: formData });
+      if (!resp.ok) throw new Error(`Upload failed for ${item.file.name}`);
+      const result = await resp.json();
+      existingDocs[item.index] = {
+        name: item.file.name,
+        url: result.url,
+        public_id: result.public_id,
+        type: item.file.type,
+        size: item.file.size,
+        requirement: item.requirement,
+        cloudinary: true
+      };
+    }
+
+    // Update Firestore
+    const currentCount = app.revisionCount || 0;
+    await updateDoc(doc(db, 'applications', appId), {
+      status: 'pending',
+      documents: existingDocs,
+      uploadStatus: 'complete',
+      revisionSubmittedAt: serverTimestamp(),
+      revisionSubmittedBy: auth.currentUser?.email || 'customer',
+      revisionCount: currentCount + 1,
+      updatedAt: serverTimestamp()
+    });
+
+    // Notify staff
+    await notifyTeamAboutApplication('application-resubmitted', {
+      ...app,
+      docId: appId,
+      applicantName: app.applicantName || getCurrentUserDisplayName(),
+      permitType: app.permitType || 'Application'
+    });
+
+    showAlert('Application resubmitted successfully!', 'success');
+    // Clear resubmit sessionStorage files
+    for (let i = 0; i < 30; i++) sessionStorage.removeItem(`resubmitDoc_${i}`);
+    window._resubmitAppId = null;
+    window._resubmitApp = null;
+    await fetchUserApplications();
+    setTimeout(() => navigateToSection('myApplicationsSection'), 1500);
+  } catch (err) {
+    console.error('Resubmit error:', err);
+    showAlert('Error submitting resubmission: ' + err.message, 'error');
+    if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,4 1,10 7,10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg> Submit Resubmission'; }
+  }
+};
+
 // Edit application
 window.editApplication = function(appId) {
   const app = userApplications.find(a => a.id === appId);
@@ -5496,6 +5892,34 @@ const CATEGORY_AWARENESS_COPY = {
     body: 'All forestry activities such as tree cutting, chainsaw use, transport, and timber harvesting are regulated under Presidential Decree No. 705 (Revised Forestry Code of the Philippines) and related DENR regulations. Unauthorized activities may result in fines, confiscation, and imprisonment.'
   }
 };
+
+/** Maps legacy/display permit names → PERMIT_REQUIREMENTS keys */
+const LEGACY_TO_REQUIREMENTS_KEY = {
+  'Certification for the Transport of Non-Timber Forest Product Except Rattan': 'RO-F-03a – Issuance of Certificate of Verification (COV) for transport of planted trees/non-timber products',
+  'Special Local Transport Permit (SLTP) (Wildlife)':                            'R4A-B-05 – Issuance of Special Local Transport Permit (SLTP) (Wildlife)',
+  'Local Transport Permit (Wildlife)':                                            'R4A-B-04 – Issuance of Local Transport Permit (Wildlife)',
+  'Wildlife Farm Permit - Small Scale Farming':                                   'R4A-B-01 – Issuance of Wildlife Farm Permit – Small Scale Farming',
+  'Wildlife Farm Permit - Medium to Large Scale Farming':                         'R4A-B-02 – Issuance of Wildlife Farm Permit – Medium to Large Scale Farming',
+  'Certificate of Wildlife Registration (CWR)':                                   'R4A-B-03 – Issuance of Certificate of Wildlife Registration (CWR)',
+  'Permit to Import Chainsaw':                                                     'R4A-F-08 – Issuance of Permit to Import Chainsaw',
+  'Permit to Purchase Chainsaw':                                                   'RO-F-04 – Application for Chainsaw Registration',
+  'Certificate of Registration as Lumber Dealer':                                  'RO-F-03b – Issuance of Certificate of Timber/Lumber Origin (CTO/CLO)',
+  'Certificate of Registration as Importer of Lumber and Wood Materials':          'RO-F-03b – Issuance of Certificate of Timber/Lumber Origin (CTO/CLO)',
+  'Community-Based Forest Management Agreement (CBFMA)':                           'RO-F-01 – Issuance of Private Tree Plantation Registration (PTPR)',
+};
+
+/** Resolve a permit type string to its PERMIT_REQUIREMENTS key (exact → legacy map → fuzzy) */
+function resolvePermitRequirementsKey(permitType) {
+  if (!permitType) return null;
+  if (PERMIT_REQUIREMENTS[permitType]) return permitType;
+  if (LEGACY_TO_REQUIREMENTS_KEY[permitType]) return LEGACY_TO_REQUIREMENTS_KEY[permitType];
+  const lower = permitType.toLowerCase();
+  return Object.keys(PERMIT_REQUIREMENTS).find(key => {
+    const k = key.toLowerCase();
+    return k.includes(lower) || lower.includes(k) ||
+      lower.split(' ').filter(w => w.length > 4).every(w => k.includes(w));
+  }) || null;
+}
 
 /** Permit requirements data (keys must match option values in categoryTypePermitOptions). */
 const PERMIT_REQUIREMENTS = {
@@ -10938,8 +11362,8 @@ async function backgroundUploadFiles(appId, filesToUpload) {
         }
       });
       
-      // Determine upload status based on failed uploads
-      const uploadStatus = failedUploads.length > 0 ? 'uploading' : 'complete';
+      // Mark complete if at least some files uploaded — don't leave stuck at 'uploading'
+      const uploadStatus = allDocuments.length > 0 ? 'complete' : 'uploading';
       
       await updateDoc(appRef, {
         documents: allDocuments,

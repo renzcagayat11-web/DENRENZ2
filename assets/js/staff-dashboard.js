@@ -801,6 +801,17 @@ function formatDate(timestamp) {
 window.viewApplication = async function(appId) {
   currentApplication = allApplications.find(app => app.id === appId);
   if (!currentApplication) return;
+
+  // Always re-fetch from Firestore to get the latest documents
+  try {
+    const freshSnap = await getDoc(doc(db, 'applications', appId));
+    if (freshSnap.exists()) {
+      currentApplication = { id: freshSnap.id, ...freshSnap.data() };
+      // Sync back into allApplications cache
+      const idx = allApplications.findIndex(a => a.id === appId);
+      if (idx !== -1) allApplications[idx] = currentApplication;
+    }
+  } catch(e) { console.warn('Could not re-fetch application:', e); }
   
   const modal = document.getElementById('applicationModal');
   const detailsDiv = document.getElementById('applicationDetails');
@@ -921,6 +932,18 @@ window.viewApplication = async function(appId) {
     ` : ''}
 
     <!-- Documents Section -->
+    ${(!currentApplication.documents || currentApplication.documents.length === 0) && currentApplication.uploadStatus === 'uploading' ? `
+    <div class="detail-section">
+      <div class="section-header">
+        <h3 class="section-title">📁 Uploaded Documents</h3>
+      </div>
+      <div class="section-content">
+        <div style="padding:16px;background:#fffbeb;border:1px solid #f59e0b;border-radius:8px;color:#92400e;font-size:14px;">
+          ⏳ <strong>Documents are still being uploaded.</strong> The customer submitted the application but the file upload is still in progress. Please check back later or ask the customer to resubmit if the issue persists.
+        </div>
+      </div>
+    </div>
+    ` : ''}
     ${currentApplication.documents && currentApplication.documents.length > 0 ? `
     <div class="detail-section">
       <div class="section-header">
