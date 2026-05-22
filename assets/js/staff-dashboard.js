@@ -813,11 +813,10 @@ window.viewApplication = async function(appId) {
     }
   } catch(e) { console.warn('Could not re-fetch application:', e); }
   
-  const modal = document.getElementById('applicationModal');
   const detailsDiv = document.getElementById('applicationDetails');
   const actionsDiv = document.getElementById('modalActions');
   
-  // Show loading state
+  // Show loading state and navigate to full page section
   detailsDiv.innerHTML = `
     <div style="text-align: center; padding: 60px 20px; color: #64748b;">
       <div style="font-size: 48px; margin-bottom: 16px; animation: pulse 2s infinite;">⏳</div>
@@ -826,7 +825,7 @@ window.viewApplication = async function(appId) {
     </div>
   `;
   
-  modal.style.display = 'flex';
+  navigateToSection('applicationViewSection');
   
   // Simulate loading for better UX
   await new Promise(resolve => setTimeout(resolve, 500));
@@ -1147,8 +1146,6 @@ window.viewApplication = async function(appId) {
   } else {
     actionsDiv.style.display = 'none';
   }
-  
-  modal.style.display = 'flex';
 };
 
 // Quick approve from table
@@ -1335,11 +1332,6 @@ async function updateApplicationStatus(appId, newStatus, rejectionReason = null,
   }
 }
 
-// Modal event listeners
-document.getElementById('closeAppModal').addEventListener('click', () => {
-  document.getElementById('applicationModal').style.display = 'none';
-});
-
 document.getElementById('btnUnderReview').addEventListener('click', () => {
   if (currentApplication) {
     // Show under review confirmation modal
@@ -1360,24 +1352,20 @@ function showUnderReviewModal() {
   
   // Show modal
   document.getElementById('underReviewModal').style.display = 'flex';
-  document.getElementById('applicationModal').style.display = 'none';
 }
 
 document.getElementById('btnApprove').addEventListener('click', () => {
   if (currentApplication) {
-    // Set minimum date to today
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('pickupDate').min = today;
-    
-    document.getElementById('applicationModal').style.display = 'none';
     document.getElementById('approveScheduleModal').style.display = 'flex';
   }
 });
 
 document.getElementById('btnReject').addEventListener('click', () => {
-  document.getElementById('applicationModal').style.display = 'none';
   document.getElementById('rejectModal').style.display = 'flex';
 });
+
 
 // Reject modal
 document.getElementById('closeRejectModal').addEventListener('click', () => {
@@ -1533,13 +1521,6 @@ document.getElementById('confirmSchedule').addEventListener('click', async () =>
       confirmBtn.style.opacity = '1';
       confirmBtn.style.cursor = 'pointer';
     }
-  }
-});
-
-// Close modals when clicking outside
-document.getElementById('applicationModal').addEventListener('click', (e) => {
-  if (e.target.id === 'applicationModal') {
-    document.getElementById('applicationModal').style.display = 'none';
   }
 });
 
@@ -1907,7 +1888,8 @@ window.navigateToSection = function(sectionId) {
       'recordsSection': 'My Records',
       'performanceSection': 'My Performance',
       'settingsSection': 'Settings',
-      'helpSection': 'Help'
+      'helpSection': 'Help',
+      'applicationViewSection': 'Application Details'
     };
     pageTitle.textContent = sectionNames[sectionId] || 'Staff Dashboard';
   }

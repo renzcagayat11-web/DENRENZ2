@@ -1,5 +1,5 @@
 import { auth, db } from './firebase-config.js';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 import { collection, query, where, getDocs, doc, getDoc, setDoc, orderBy, limit, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 import { redirectIfAuthenticated, initAuthGuard } from './auth-guard.js';
 
@@ -615,6 +615,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isValid) return;
         
         console.log('🔍 LOGIN DEBUG: Calling signInWithEmailAndPassword');
+        const rememberMe = document.getElementById('rememberMe');
+        await setPersistence(auth, rememberMe && rememberMe.checked ? browserLocalPersistence : browserSessionPersistence);
         const cred = await signInWithEmailAndPassword(auth, email, pass);
         console.log('🔍 LOGIN DEBUG: Sign in successful, user:', cred.user.email);
         
