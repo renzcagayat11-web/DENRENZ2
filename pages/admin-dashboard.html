@@ -1417,6 +1417,23 @@
             </div>
           </section>
 
+          <!-- Application View Section (Full Page) -->
+          <section id="applicationViewSection" class="page-section">
+            <div style="padding:24px 0 0 0;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+                <div>
+                  <h2 style="margin:0;font-size:20px;font-weight:700;color:#0f172a;">Application Details</h2>
+                  <p style="margin:4px 0 0 0;font-size:13px;color:#64748b;">Review full application information and take action</p>
+                </div>
+                <button onclick="navigateToSection('applicationsSection')" style="display:inline-flex;align-items:center;gap:8px;padding:9px 18px;background:#fff;border:1.5px solid #d1d5db;border-radius:10px;font-size:13px;font-weight:600;color:#374151;cursor:pointer;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                  Back to Applications
+                </button>
+              </div>
+              <div class="application-details" id="applicationDetails"></div>
+            </div>
+          </section>
+
           <!-- Footer -->
           <footer class="dashboard-footer">
             © 2026 DENR CENRO Sta. Cruz, Laguna. All rights reserved.
@@ -1449,20 +1466,7 @@
       </div>
     </div>
 
-    <!-- Application Details Modal -->
-    <div id="applicationModal" class="modal-backdrop" style="display:none">
-      <div class="modal-dialog large-modal">
-        <div class="modal-header">
-          <h3>Application Details</h3>
-          <button class="modal-close" id="closeAppModal">×</button>
-        </div>
-        <div class="modal-body">
-          <div class="application-details" id="applicationDetails">
-            <!-- Application details will be loaded here -->
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- applicationModal removed — view is now a full page section (applicationViewSection) -->
 
     <!-- View User Modal -->
     <div id="viewUserModal" class="modal-backdrop" style="display:none">

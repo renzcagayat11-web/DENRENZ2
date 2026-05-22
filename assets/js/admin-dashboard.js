@@ -649,11 +649,9 @@ if (logoutModal) {
 // Staff account creation modal
 const createStaffModal = document.getElementById('createStaffModal');
 const closeStaffModal = document.getElementById('closeStaffModal');
-const closeAppModal = document.getElementById('closeAppModal');
 const closeViewUserModal = document.getElementById('closeViewUserModal');
 const closeDeactivateModal = document.getElementById('closeDeactivateModal');
 const createStaffForm = document.getElementById('createStaffForm');
-const applicationModal = document.getElementById('applicationModal');
 const viewUserModal = document.getElementById('viewUserModal');
 const deactivateUserModal = document.getElementById('deactivateUserModal');
 
@@ -673,14 +671,6 @@ if (closeStaffModal) {
   });
 }
 
-// Close application modal
-if (closeAppModal) {
-  closeAppModal.addEventListener('click', () => {
-    if (applicationModal) {
-      applicationModal.style.display = 'none';
-    }
-  });
-}
 
 // Close view user modal
 if (closeViewUserModal) {
@@ -709,13 +699,6 @@ if (createStaffModal) {
   });
 }
 
-if (applicationModal) {
-  applicationModal.addEventListener('click', (e) => {
-    if (e.target === applicationModal) {
-      applicationModal.style.display = 'none';
-    }
-  });
-}
 
 if (viewUserModal) {
   viewUserModal.addEventListener('click', (e) => {
@@ -846,7 +829,8 @@ window.navigateToSection = function(sectionId) {
       'reportsSection': 'Reports',
       'contentSection': 'Content Management',
       'settingsSection': 'Settings',
-      'auditSection': 'Audit Logs'
+      'auditSection': 'Audit Logs',
+      'applicationViewSection': 'Application Details'
     };
     pageTitle.textContent = sectionNames[sectionId] || 'Dashboard';
   }
@@ -1306,7 +1290,6 @@ window.viewApplication = async function(appId) {
     }
   }
   
-  const modal = document.getElementById('applicationModal');
   const detailsDiv = document.getElementById('applicationDetails');
   
   // Get status icon
@@ -1592,7 +1575,7 @@ window.viewApplication = async function(appId) {
     </div>
   `;
   
-  modal.style.display = 'flex';
+  navigateToSection('applicationViewSection');
 };
 
 // Show approved permits
