@@ -231,30 +231,6 @@ let currentImagePublicId = null;
   function initializeFormSubmission() {
     announcementsForm.addEventListener('submit', handleFormSubmit);
     
-    // Add debug button functionality
-    const debugBtn = document.getElementById('debugImageData');
-    if (debugBtn) {
-      debugBtn.addEventListener('click', function() {
-        console.log('🔍 DEBUGGING IMAGE DATA...');
-        console.log('Current Image Data:', currentImageData);
-        console.log('Image Data Type:', typeof currentImageData);
-        console.log('Image Data Length:', currentImageData ? currentImageData.length : 0);
-        console.log('Image Data Preview:', currentImageData ? currentImageData.substring(0, 100) : 'NULL');
-        
-        // Test form data
-        const title = announcementTitle.value.trim();
-        const content = announcementContent.innerHTML.trim();
-        const active = document.getElementById('announcementActive').checked;
-        
-        console.log('FORM DATA:');
-        console.log('  - Title:', title);
-        console.log('  - Content Length:', content.length);
-        console.log('  - Active:', active);
-        console.log('  - Will Include Image:', !!currentImageData);
-        
-        showNotification(`Debug: Image data ${currentImageData ? 'present' : 'missing'} (${currentImageData ? currentImageData.length : 0} chars)`, 'info');
-      });
-    }
   }
   
   // Handle form submission
