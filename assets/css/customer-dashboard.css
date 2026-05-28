@@ -5253,14 +5253,11 @@ textarea:hover {
   background: rgba(255, 255, 255, 0.65);
   cursor: pointer;
   text-align: left;
-  transition: all 0.25s ease;
   min-height: 92px;
 }
 
 .resume-progress-step:hover {
-  transform: translateY(-2px);
   border-color: rgba(15, 118, 110, 0.4);
-  box-shadow: 0 15px 30px rgba(15, 118, 110, 0.12);
 }
 
 .resume-progress-step.completed {
