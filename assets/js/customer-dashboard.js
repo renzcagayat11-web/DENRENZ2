@@ -8744,6 +8744,8 @@ const downloadPdfBtn = document.getElementById('downloadPdfBtn');
 const formDownloadAwareness = document.getElementById('formDownloadAwareness');
 const dismissAwareness = document.getElementById('dismissAwareness');
 const downloadFormBtn = document.getElementById('downloadFormBtn');
+
+const receiptSignaturePads = new Map();
 const proceedWithoutDownloadBtn = document.getElementById('proceedWithoutDownloadBtn');
 const downloadChecklistDocxBtn = document.getElementById('downloadChecklistDocxBtn');
 
@@ -8892,6 +8894,7 @@ function loadCustomForm(permitType, formTemplate) {
   
   // Load form content
   formContentArea.innerHTML = formTemplate.template;
+  setupReceiptSignaturePads();
 
   const titleSection = document.querySelector('#customFormContainer .form-title-section');
   if (titleSection) {
@@ -8903,6 +8906,8 @@ function loadCustomForm(permitType, formTemplate) {
   
   // Restore saved form data if exists
   restoreDenrFormData(permitType);
+  // Hydrate signatures after canvas is ready (deferred via double-rAF in createReceiptSignaturePad)
+  setTimeout(() => hydrateReceiptSignaturePads(), 120);
   
   // Add input validation and limits
   setupInputValidation();
@@ -8912,6 +8917,279 @@ function loadCustomForm(permitType, formTemplate) {
   
   // Add auto-save on input changes
   setupFormAutoSave(permitType);
+}
+
+function setupReceiptSignaturePads() {
+  if (!formContentArea) return;
+  receiptSignaturePads.clear();
+
+  const applicantFields = formContentArea.querySelectorAll('.denr-cc-receipt-field input[id$="_ackApplicant"]');
+  applicantFields.forEach((input) => {
+    if (!input || receiptSignaturePads.has(input.id)) return;
+    createReceiptSignaturePad(input);
+  });
+}
+
+function createReceiptSignaturePad(input) {
+  const field = input.closest('.denr-cc-receipt-field');
+  if (!field) return;
+
+  field.classList.add('denr-cc-receipt-field--with-signature');
+
+  // Create a "Signature:" receipt field row, same layout as Name/Date fields
+  const sigField = document.createElement('div');
+  sigField.className = 'denr-cc-receipt-field denr-cc-receipt-signature-field';
+  sigField.innerHTML = `
+    <span class="denr-cc-receipt-label">Signature:</span>
+    <div class="denr-cc-signature-container">
+      <div class="denr-cc-signature-pad" role="img" aria-label="Applicant signature pad">
+        <canvas></canvas>
+        <div class="denr-cc-signature-placeholder">Draw your signature here</div>
+      </div>
+      <div class="denr-cc-signature-actions">
+        <small>Use mouse, touchpad, or finger to sign</small>
+        <button type="button" class="denr-cc-signature-clear">✕ Clear</button>
+      </div>
+    </div>
+  `;
+
+  // Insert signature field ABOVE the Name of Applicant field
+  field.parentNode.insertBefore(sigField, field);
+
+  const signatureContainer = sigField.querySelector('.denr-cc-signature-container');
+
+  let hiddenInput = signatureContainer.querySelector(`#${input.id}_signatureData`);
+  if (!hiddenInput) {
+    hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.id = `${input.id}_signatureData`;
+    hiddenInput.name = `${input.id}_signatureData`;
+    hiddenInput.className = 'denr-cc-signature-data';
+    signatureContainer.appendChild(hiddenInput);
+  }
+
+  const canvas = signatureContainer.querySelector('canvas');
+  const placeholder = signatureContainer.querySelector('.denr-cc-signature-placeholder');
+  const clearBtn = signatureContainer.querySelector('.denr-cc-signature-clear');
+
+  const padState = {
+    canvas,
+    placeholder,
+    clearBtn,
+    hiddenInput,
+    associatedInputId: input.id,
+    drawing: false,
+    hasStroke: false,
+    lastX: 0,
+    lastY: 0,
+    cssWidth: 0,
+    cssHeight: 0,
+    ctx: null
+  };
+
+  // Defer canvas setup to ensure DOM is laid out
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      prepareSignatureCanvas(padState);
+    });
+  });
+  attachSignatureEvents(padState);
+  clearSignaturePad(padState, { silent: true });
+
+  clearBtn.addEventListener('click', (event) => {
+    event.preventDefault();
+    clearSignaturePad(padState);
+  });
+
+  receiptSignaturePads.set(input.id, padState);
+}
+
+function prepareSignatureCanvas(padState) {
+  if (!padState?.canvas) return;
+
+  const parent = padState.canvas.parentElement;
+  const cssWidth = parent?.clientWidth || padState.canvas.clientWidth || 0;
+  const cssHeight = parent?.clientHeight || 120;
+
+  // If not rendered yet, defer until next frame
+  if (cssWidth < 10) {
+    requestAnimationFrame(() => prepareSignatureCanvas(padState));
+    return;
+  }
+
+  // Force canvas to fill entire signature pad area
+  padState.canvas.style.width = '100%';
+  padState.canvas.style.height = '100%';
+  padState.canvas.style.display = 'block';
+  padState.canvas.style.position = 'absolute';
+  padState.canvas.style.inset = '0';
+
+  const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+  padState.canvas.width = Math.round(cssWidth * pixelRatio);
+  padState.canvas.height = Math.round(cssHeight * pixelRatio);
+
+  const ctx = padState.canvas.getContext('2d');
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(pixelRatio, pixelRatio);
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = '#000000';
+  ctx.fillStyle = '#000000';
+
+  padState.ctx = ctx;
+  padState.cssWidth = cssWidth;
+  padState.cssHeight = cssHeight;
+}
+
+function attachSignatureEvents(padState) {
+  if (!padState?.canvas) return;
+  const canvas = padState.canvas;
+
+  const startDrawing = (event) => {
+    event.preventDefault();
+    canvas.setPointerCapture?.(event.pointerId);
+
+    // Re-calibrate canvas if not initialized or parent resized
+    const parent = canvas.parentElement;
+    const currentWidth = parent?.clientWidth || 0;
+    if (!padState.ctx || currentWidth < 10) return;
+    if (Math.abs(currentWidth - padState.cssWidth) > 2) {
+      prepareSignatureCanvas(padState);
+    }
+
+    padState.drawing = true;
+    padState.strokeMoved = false;
+    const { x, y } = getSignatureCoordinates(event, canvas);
+    padState.lastX = x;
+    padState.lastY = y;
+    padState.ctx.beginPath();
+    padState.ctx.moveTo(x, y);
+  };
+
+  const draw = (event) => {
+    if (!padState.drawing) return;
+    event.preventDefault();
+    const { x, y } = getSignatureCoordinates(event, canvas);
+
+    if (!padState.strokeMoved) {
+      padState.strokeMoved = true;
+      padState.placeholder.classList.add('denr-cc-signature-placeholder--hidden');
+    }
+
+    // Midpoint quadratic Bézier — produces silky smooth connected curves
+    const midX = (padState.lastX + x) / 2;
+    const midY = (padState.lastY + y) / 2;
+
+    padState.ctx.quadraticCurveTo(padState.lastX, padState.lastY, midX, midY);
+    padState.ctx.stroke();
+
+    // Continue from the midpoint so next segment connects seamlessly
+    padState.ctx.beginPath();
+    padState.ctx.moveTo(midX, midY);
+
+    padState.lastX = x;
+    padState.lastY = y;
+  };
+
+  const endDrawing = (event) => {
+    if (!padState.drawing) return;
+    if (event) {
+      canvas.releasePointerCapture?.(event.pointerId);
+    }
+    padState.drawing = false;
+
+    if (!padState.strokeMoved) {
+      // Single tap — draw a small dot
+      padState.ctx.beginPath();
+      padState.ctx.arc(padState.lastX, padState.lastY, padState.ctx.lineWidth / 2, 0, Math.PI * 2);
+      padState.ctx.fill();
+      padState.placeholder.classList.add('denr-cc-signature-placeholder--hidden');
+    } else {
+      // Finish the last segment to the final point
+      padState.ctx.lineTo(padState.lastX, padState.lastY);
+      padState.ctx.stroke();
+    }
+
+    persistSignatureData(padState);
+  };
+
+  canvas.addEventListener('pointerdown', startDrawing);
+  canvas.addEventListener('pointermove', draw);
+  canvas.addEventListener('pointerup', endDrawing);
+  canvas.addEventListener('pointercancel', endDrawing);
+}
+
+function getSignatureCoordinates(event, canvas) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top
+  };
+}
+
+function persistSignatureData(padState) {
+  if (!padState?.canvas || !padState.hiddenInput) return;
+  try {
+    const dataUrl = padState.canvas.toDataURL('image/png');
+    padState.hiddenInput.value = dataUrl;
+    padState.placeholder.classList.add('denr-cc-signature-placeholder--hidden');
+    padState.hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
+  } catch (error) {
+    console.warn('Unable to capture signature data:', error);
+  }
+}
+
+function drawSignatureFromData(padState, dataUrl, retries = 0) {
+  if (!dataUrl) return;
+  if (!padState?.ctx) {
+    if (retries < 10) {
+      setTimeout(() => drawSignatureFromData(padState, dataUrl, retries + 1), 50);
+    }
+    return;
+  }
+  const img = new Image();
+  img.onload = () => {
+    padState.ctx.clearRect(0, 0, padState.cssWidth, padState.cssHeight);
+    padState.ctx.drawImage(img, 0, 0, padState.cssWidth, padState.cssHeight);
+    padState.placeholder.classList.add('denr-cc-signature-placeholder--hidden');
+  };
+  img.onerror = () => clearSignaturePad(padState, { silent: true });
+  img.src = dataUrl;
+}
+
+function hydrateReceiptSignaturePads() {
+  receiptSignaturePads.forEach((padState) => {
+    if (!padState) return;
+    const storedValue = padState.hiddenInput?.value;
+    if (storedValue) {
+      drawSignatureFromData(padState, storedValue);
+    } else {
+      clearSignaturePad(padState, { silent: true });
+    }
+  });
+}
+
+function clearReceiptSignaturePads(options = {}) {
+  receiptSignaturePads.forEach((padState) => {
+    clearSignaturePad(padState, options);
+  });
+}
+
+function clearSignaturePad(padState, options = {}) {
+  if (!padState) return;
+  if (padState.ctx) {
+    padState.ctx.clearRect(0, 0, padState.cssWidth, padState.cssHeight);
+  }
+  padState.placeholder?.classList.remove('denr-cc-signature-placeholder--hidden');
+  padState.hasStroke = false;
+  padState.strokeMoved = false;
+  if (padState.hiddenInput) {
+    padState.hiddenInput.value = '';
+    if (!options.silent) {
+      padState.hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
 }
 
 function autoPopulateFormFields() {
@@ -9420,6 +9698,7 @@ function clearCustomForm() {
       input.value = '';
     }
   });
+  clearReceiptSignaturePads({ silent: true });
   
   // Clear saved form data from localStorage
   const permitType = document.getElementById('permitType')?.value || '';
@@ -9479,6 +9758,40 @@ async function generateFormPDF() {
       );
 
       denrForm.classList.add('denr-form--pdf-snapshot');
+
+      // For PDF: replace signature canvas with a clean <img> in the signature field row
+      const sigSwaps = [];
+      const sigLoadPromises = [];
+      receiptSignaturePads.forEach((padState) => {
+        if (!padState?.canvas) return;
+        let dataUrl = padState.hiddenInput?.value;
+        if (!dataUrl) {
+          try { dataUrl = padState.canvas.toDataURL('image/png'); } catch (_) {}
+        }
+        if (!dataUrl || dataUrl === 'data:,') return;
+
+        const sigField = padState.canvas.closest('.denr-cc-receipt-signature-field');
+        if (!sigField) return;
+
+        // Hide the entire signature container UI (pad, actions, placeholder)
+        const sigContainer = sigField.querySelector('.denr-cc-signature-container');
+        if (sigContainer) sigContainer.style.display = 'none';
+
+        // Insert a clean signature image in its place
+        const img = document.createElement('img');
+        img.style.cssText = 'height:60px;width:auto;max-width:100%;object-fit:contain;display:block;margin:0 auto;';
+        sigField.appendChild(img);
+
+        sigSwaps.push({ img, sigField, sigContainer });
+
+        sigLoadPromises.push(new Promise((resolve) => {
+          img.onload = resolve;
+          img.onerror = resolve;
+          img.src = dataUrl;
+        }));
+      });
+      await Promise.all(sigLoadPromises);
+
       if (document.fonts?.ready) {
         try {
           await document.fonts.ready;
@@ -9512,6 +9825,11 @@ async function generateFormPDF() {
         });
       } finally {
         denrForm.classList.remove('denr-form--pdf-snapshot');
+        // Restore signature UI and remove injected PDF images
+        sigSwaps.forEach(({ img, sigContainer }) => {
+          img.remove();
+          if (sigContainer) sigContainer.style.display = '';
+        });
       }
 
       const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
