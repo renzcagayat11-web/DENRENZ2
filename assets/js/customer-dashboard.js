@@ -8657,26 +8657,25 @@ function renderResumeProgressSteps(stepProcedure, currentStepValue) {
 
 function updateResumeProgressCard() {
   if (!resumeProgressCard) return;
-  if (window.editingAppId) {
-    resumeProgressCard.hidden = true;
-    return;
-  }
+
   const progress = getSavedDraftProgress();
-  if (!progress) {
+  if (!progress || !progress.documentType || !progress.permitType) {
     resumeProgressCard.hidden = true;
-    if (resumeProgressSteps) {
-      resumeProgressSteps.innerHTML = '';
-    }
     return;
   }
-  const stepProcedure = getStepProcedure(progress.documentType, progress.permitType);
-  const activeStep = Math.min(stepProcedure.length || progress.totalSteps || 1, progress.currentStep || 1);
-  renderResumeProgressSteps(stepProcedure, activeStep);
-  if (resumeProgressMeta) {
-    const statusCopy = `${progress.documentType || 'Draft application'} • Step ${activeStep} of ${stepProcedure.length}`;
-    resumeProgressMeta.textContent = `${statusCopy} • ${formatDraftTimestamp(progress.updatedAt)}`;
-  }
+
+  // Show the card
   resumeProgressCard.hidden = false;
+
+  // Update metadata text
+  if (resumeProgressMeta) {
+    const timeAgo = formatDraftTimestamp(progress.updatedAt);
+    resumeProgressMeta.textContent = `${progress.permitType} • Step ${progress.currentStep} of ${progress.totalSteps} • ${timeAgo}`;
+  }
+
+  // Render the step buttons
+  const stepProcedure = getStepProcedure(progress.documentType, progress.permitType);
+  renderResumeProgressSteps(stepProcedure, progress.currentStep);
 }
 
 function handleResumeContinueClick() {
