@@ -8657,7 +8657,25 @@ function renderResumeProgressSteps(stepProcedure, currentStepValue) {
 
 function updateResumeProgressCard() {
   if (!resumeProgressCard) return;
-  resumeProgressCard.hidden = true;
+  const progress = getSavedDraftProgress();
+  if (!progress || window.editingAppId) {
+    resumeProgressCard.hidden = true;
+    return;
+  }
+  const stepProcedure = getStepProcedure(progress.documentType, progress.permitType);
+  if (!stepProcedure || stepProcedure.length === 0) {
+    resumeProgressCard.hidden = true;
+    return;
+  }
+  const permitLabel = progress.permitType || 'Application';
+  const docLabel = progress.documentType || '';
+  const stepLabel = `Step ${progress.currentStep} of ${progress.totalSteps || stepProcedure.length}`;
+  const timeLabel = formatDraftTimestamp(progress.updatedAt);
+  if (resumeProgressMeta) {
+    resumeProgressMeta.textContent = `${docLabel}${docLabel && permitLabel ? ' \u2022 ' : ''}${permitLabel} \u2022 ${stepLabel} \u2022 ${timeLabel}`;
+  }
+  renderResumeProgressSteps(stepProcedure, progress.currentStep);
+  resumeProgressCard.hidden = false;
 }
 
 function handleResumeContinueClick() {
