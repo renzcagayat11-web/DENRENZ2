@@ -8657,7 +8657,25 @@ function renderResumeProgressSteps(stepProcedure, currentStepValue) {
 
 function updateResumeProgressCard() {
   if (!resumeProgressCard) return;
-  resumeProgressCard.hidden = true;
+  
+  const progress = getSavedDraftProgress();
+  if (!progress || !progress.documentType || !progress.permitType) {
+    resumeProgressCard.hidden = true;
+    return;
+  }
+  
+  // Show the card
+  resumeProgressCard.hidden = false;
+  
+  // Update meta text
+  if (resumeProgressMeta) {
+    const timestamp = formatDraftTimestamp(progress.updatedAt);
+    resumeProgressMeta.textContent = `${progress.documentType} — ${progress.permitType} • Saved ${timestamp}`;
+  }
+  
+  // Render clickable step indicators
+  const stepProcedure = getStepProcedure(progress.documentType, progress.permitType);
+  renderResumeProgressSteps(stepProcedure, progress.currentStep || 1);
 }
 
 function handleResumeContinueClick() {
