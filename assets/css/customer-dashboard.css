@@ -8734,3 +8734,336 @@ textarea:hover {
   .appview-docs-grid { grid-template-columns: repeat(2, 1fr); }
   .appview-fields { grid-template-columns: 1fr; }
 }
+
+/* =========================================
+   Dashboard Application Progress Widget
+   ========================================= */
+.dashboard-progress-section {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+  animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.progress-widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.progress-info {
+  flex: 1;
+}
+
+.progress-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.progress-badge {
+  background: linear-gradient(145deg, #0d5c3b 0%, #16a34a 100%);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.progress-info .progress-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.progress-info .progress-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+.progress-info .progress-subtitle span {
+  font-weight: 600;
+  color: #0d5c3b;
+}
+
+.progress-percentage {
+  background: linear-gradient(145deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 2px solid #86efac;
+  border-radius: 12px;
+  padding: 8px 16px;
+  text-align: center;
+  min-width: 70px;
+}
+
+.progress-percentage span {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0d5c3b;
+  line-height: 1;
+}
+
+.progress-percentage::after {
+  content: '';
+  display: block;
+  font-size: 11px;
+  color: #16a34a;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-top: 2px;
+}
+
+/* Progress Bar */
+.dashboard-progress-bar {
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.dashboard-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0d5c3b 0%, #16a34a 100%);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+/* Footer */
+.progress-widget-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.progress-hint {
+  font-size: 12px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.progress-hint::before {
+  content: '💡';
+  font-size: 14px;
+}
+
+.progress-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.progress-actions .btn-secondary,
+.progress-actions .btn-primary {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.progress-actions .btn-secondary {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+}
+
+.progress-actions .btn-secondary:hover {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.progress-actions .btn-primary {
+  background: #0d5c3b;
+  border: 1px solid #0d5c3b;
+  color: #ffffff;
+}
+
+.progress-actions .btn-primary:hover {
+  background: #0a4a2e;
+  border-color: #0a4a2e;
+}
+
+/* Dashboard Step Indicator */
+.dashboard-step-indicator {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  position: relative;
+}
+
+.dashboard-step-indicator::before {
+  content: '';
+  position: absolute;
+  top: 24px;
+  left: 60px;
+  right: 60px;
+  height: 3px;
+  background: #e2e8f0;
+  z-index: 0;
+}
+
+.dashboard-step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  max-width: 140px;
+  position: relative;
+  z-index: 1;
+  cursor: default;
+}
+
+.dashboard-step-item.clickable {
+  cursor: pointer;
+}
+
+.dashboard-step-item.clickable:hover .dashboard-step-icon {
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(13, 92, 59, 0.25);
+}
+
+.dashboard-step-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  color: #94a3b8;
+  transition: all 0.2s ease;
+}
+
+.dashboard-step-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2;
+}
+
+/* Completed step */
+.dashboard-step-item.completed .dashboard-step-icon {
+  background: #0d5c3b;
+  border-color: #0d5c3b;
+  color: #ffffff;
+}
+
+.dashboard-step-item.completed.clickable .dashboard-step-icon {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+/* Current/Active step */
+.dashboard-step-item.current .dashboard-step-icon {
+  background: #ffffff;
+  border-color: #0d5c3b;
+  color: #0d5c3b;
+  box-shadow: 0 0 0 4px rgba(13, 92, 59, 0.15);
+}
+
+.dashboard-step-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.dashboard-step-item.completed .dashboard-step-label {
+  color: #0d5c3b;
+}
+
+.dashboard-step-item.current .dashboard-step-label {
+  color: #0d5c3b;
+  font-weight: 700;
+}
+
+.dashboard-step-item.clickable .dashboard-step-label {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .progress-widget-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .progress-percentage {
+    align-self: flex-end;
+  }
+  
+  .progress-widget-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 16px;
+  }
+  
+  .progress-hint {
+    text-align: center;
+    justify-content: center;
+  }
+  
+  .progress-actions {
+    justify-content: center;
+  }
+  
+  .progress-actions .btn-primary,
+  .progress-actions .btn-secondary {
+    flex: 1;
+  }
+  
+  .dashboard-step-indicator {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .dashboard-step-indicator::before {
+    display: none;
+  }
+  
+  .dashboard-step-item {
+    flex-direction: row;
+    width: 100%;
+    max-width: none;
+    text-align: left;
+    gap: 16px;
+  }
+  
+  .dashboard-step-icon {
+    flex-shrink: 0;
+  }
+}

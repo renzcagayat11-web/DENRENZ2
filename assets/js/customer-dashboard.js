@@ -5143,6 +5143,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setupProfileBarangaySelection();
   setupResumeCardInteractions();
   updateResumeProgressCard();
+  setupDashboardProgressInteractions();
+  updateDashboardProgressWidget();
 
   // Restore application form data (must run after setupBarangaySelection so municipal change event works)
   if (!window.editingAppId) {
@@ -8607,6 +8609,10 @@ function stampDraftProgress(overrides = {}) {
 function clearDraftProgress() {
   localStorage.removeItem(DRAFT_PROGRESS_STORAGE_KEY);
   updateResumeProgressCard();
+  // Also hide dashboard widget if it exists
+  if (dashboardProgressWidget) {
+    dashboardProgressWidget.hidden = true;
+  }
 }
 
 function focusNewApplicationSection() {
@@ -8676,6 +8682,9 @@ function updateResumeProgressCard() {
   // Render clickable step indicators
   const stepProcedure = getStepProcedure(progress.documentType, progress.permitType);
   renderResumeProgressSteps(stepProcedure, progress.currentStep || 1);
+  
+  // Also update dashboard widget (keep both in sync)
+  updateDashboardProgressWidget();
 }
 
 function handleResumeContinueClick() {
@@ -8730,6 +8739,143 @@ function setupResumeCardInteractions() {
       updateResumeProgressCard();
     }
   });
+}
+
+// Dashboard Progress Widget Elements
+const dashboardProgressWidget = document.getElementById('dashboardProgressWidget');
+const draftDocType = document.getElementById('draftDocType');
+const draftTimestamp = document.getElementById('draftTimestamp');
+const draftProgressPercent = document.getElementById('draftProgressPercent');
+const draftProgressFill = document.getElementById('draftProgressFill');
+const dashboardStepIndicator = document.getElementById('dashboardStepIndicator');
+const discardDraftBtn = document.getElementById('discardDraftBtn');
+const continueDraftBtn = document.getElementById('continueDraftBtn');
+
+// Step icons for dashboard
+const DASHBOARD_STEP_ICONS = {
+  document: '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>',
+  user: '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>',
+  business: '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
+  upload: '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>',
+  review: '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M9 15l2 2 4-4"></path></svg>',
+  location: '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>'
+};
+
+function updateDashboardProgressWidget() {
+  if (!dashboardProgressWidget) return;
+  
+  const progress = getSavedDraftProgress();
+  if (!progress || !progress.documentType || !progress.permitType) {
+    dashboardProgressWidget.hidden = true;
+    return;
+  }
+  
+  // Show the widget
+  dashboardProgressWidget.hidden = false;
+  
+  // Update document type text
+  if (draftDocType) {
+    draftDocType.textContent = `${progress.documentType} — ${progress.permitType}`;
+  }
+  
+  // Update timestamp
+  if (draftTimestamp) {
+    draftTimestamp.textContent = formatDraftTimestamp(progress.updatedAt);
+  }
+  
+  // Calculate and update progress percentage
+  const stepProcedure = getStepProcedure(progress.documentType, progress.permitType);
+  const totalSteps = stepProcedure.length || 5;
+  const currentStepValue = progress.currentStep || 1;
+  const percent = Math.round(((currentStepValue - 1) / totalSteps) * 100);
+  
+  if (draftProgressPercent) {
+    draftProgressPercent.textContent = percent;
+  }
+  if (draftProgressFill) {
+    draftProgressFill.style.width = percent + '%';
+  }
+  
+  // Render clickable step indicators
+  renderDashboardSteps(stepProcedure, currentStepValue);
+}
+
+function renderDashboardSteps(stepProcedure, currentStepValue) {
+  if (!dashboardStepIndicator) return;
+  dashboardStepIndicator.innerHTML = '';
+  
+  stepProcedure.forEach((step) => {
+    const stepEl = document.createElement('div');
+    stepEl.className = 'dashboard-step-item';
+    stepEl.dataset.step = step.step;
+    
+    const iconSvg = DASHBOARD_STEP_ICONS[step.icon] || DASHBOARD_STEP_ICONS.document;
+    
+    // Determine state
+    if (step.step < currentStepValue) {
+      stepEl.classList.add('completed', 'clickable');
+    } else if (step.step === currentStepValue) {
+      stepEl.classList.add('current', 'clickable');
+    }
+    // Future steps have no additional class (default gray state)
+    
+    stepEl.innerHTML = `
+      <div class="dashboard-step-icon">
+        ${iconSvg}
+      </div>
+      <div class="dashboard-step-label">${step.title}</div>
+    `;
+    
+    // Add click handler for clickable steps
+    if (step.step <= currentStepValue) {
+      stepEl.addEventListener('click', () => handleDashboardStepClick(step.step));
+    }
+    
+    dashboardStepIndicator.appendChild(stepEl);
+  });
+}
+
+function handleDashboardStepClick(stepNum) {
+  const progress = getSavedDraftProgress();
+  if (!progress) return;
+  
+  focusNewApplicationSection().then(() => {
+    goToStep(stepNum);
+    const targetSection = document.getElementById('newApplicationSection');
+    if (targetSection) {
+      targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+}
+
+function handleDashboardContinueClick() {
+  const progress = getSavedDraftProgress();
+  if (!progress) return;
+  
+  focusNewApplicationSection().then(() => {
+    goToStep(progress.currentStep || 1);
+    const targetSection = document.getElementById('newApplicationSection');
+    if (targetSection) {
+      targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+}
+
+function handleDashboardDiscardClick() {
+  const confirmed = confirm('Discard your saved application? This will clear all your progress.');
+  if (!confirmed) return;
+  
+  clearDraftProgress();
+  dashboardProgressWidget.hidden = true;
+}
+
+function setupDashboardProgressInteractions() {
+  if (continueDraftBtn) {
+    continueDraftBtn.addEventListener('click', handleDashboardContinueClick);
+  }
+  if (discardDraftBtn) {
+    discardDraftBtn.addEventListener('click', handleDashboardDiscardClick);
+  }
 }
 
 // Custom Form Elements
@@ -11411,6 +11557,7 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
     hidePermitAwarenessBanner();
     hideRequirementsSection();
     resetFormSteps();
+    clearDraftProgress(); // Clear draft to hide dashboard widget
     
     // Clear editing state
     window.editingAppId = null;

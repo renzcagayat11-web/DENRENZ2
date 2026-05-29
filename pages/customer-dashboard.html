@@ -193,6 +193,42 @@
               </section>
             </div>
 
+            <!-- Application Progress Widget (shows when there's saved draft) -->
+            <div class="dashboard-container-wrapper" id="dashboardProgressWidget" hidden>
+              <section class="dashboard-progress-section">
+                <div class="progress-widget-header">
+                  <div class="progress-info">
+                    <div class="progress-title-row">
+                      <span class="progress-badge">Draft</span>
+                      <h4 class="progress-title">Continue Your Application</h4>
+                    </div>
+                    <p class="progress-subtitle"><span id="draftDocType">-</span> • Saved <span id="draftTimestamp">-</span></p>
+                  </div>
+                  <div class="progress-percentage">
+                    <span id="draftProgressPercent">0</span>%
+                  </div>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="dashboard-progress-bar">
+                  <div class="dashboard-progress-fill" id="draftProgressFill" style="width: 0%;"></div>
+                </div>
+                
+                <!-- Clickable Step Indicator -->
+                <div class="dashboard-step-indicator" id="dashboardStepIndicator">
+                  <!-- Steps will be dynamically generated -->
+                </div>
+                
+                <div class="progress-widget-footer">
+                  <span class="progress-hint">Click any completed step to review or edit</span>
+                  <div class="progress-actions">
+                    <button class="btn-secondary" id="discardDraftBtn">Discard</button>
+                    <button class="btn-primary" id="continueDraftBtn">Continue Application</button>
+                  </div>
+                </div>
+              </section>
+            </div>
+
             <!-- Profile Completion Status Container -->
             <div class="dashboard-container-wrapper" id="profileCompletionWrapper">
               <section class="profile-completion-section">
