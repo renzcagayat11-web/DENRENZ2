@@ -39,7 +39,7 @@
         <a href="/pages/services.html" class="mobile-nav-item">Services</a>
         <a href="/pages/faq.html" class="mobile-nav-item">FAQ</a>
         <a href="/pages/contact.html" class="mobile-nav-item">Contact Us</a>
-        <button class="mobile-nav-item mobile-getstarted" onclick="openAuthModal('signin'); document.getElementById('mobileNav').classList.remove('open'); document.getElementById('hamburgerBtn').classList.remove('open');">Get Started</button>
+        <button class="mobile-nav-item mobile-getstarted" onclick="openAuthModal('signin')">Get Started</button>
       </div>
     </header>
 
@@ -468,20 +468,7 @@
       </div>
     </div>
 
-    <script>
-      (function() {
-        const btn = document.getElementById('hamburgerBtn');
-        const nav = document.getElementById('mobileNav');
-        if (btn && nav) {
-          btn.addEventListener('click', function() {
-            const isOpen = nav.classList.toggle('open');
-            btn.classList.toggle('open', isOpen);
-            btn.setAttribute('aria-expanded', isOpen);
-            nav.setAttribute('aria-hidden', !isOpen);
-          });
-        }
-      })();
-    </script>
+    <script src="/assets/js/mobile-nav.js"></script>
     <script type="module" src="/assets/js/app.js"></script>
     <script src="/assets/js/dynamic-slider.js"></script>
     <script src="/assets/js/image-modal.js"></script>

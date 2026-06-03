@@ -36,11 +36,11 @@
         <a href="/pages/services.html" class="mobile-nav-item">Services</a>
         <a href="/pages/faq.html" class="mobile-nav-item">FAQ</a>
         <a href="/pages/contact.html" class="mobile-nav-item">Contact Us</a>
-        <button class="mobile-nav-item mobile-getstarted" onclick="openAuthModal('signin');document.getElementById('mobileNav').classList.remove('open');document.getElementById('hamburgerBtn').classList.remove('open');">Get Started</button>
+        <button class="mobile-nav-item mobile-getstarted" onclick="openAuthModal('signin')">Get Started</button>
       </div>
     </header>
 
-    <main style="padding-top: 100px;">
+    <main class="page-content">
       <section class="section alt visible">
         <div class="container">
           <div class="section-header">
@@ -354,7 +354,7 @@
       </div>
     </div>
 
-    <script>(function(){var b=document.getElementById('hamburgerBtn'),n=document.getElementById('mobileNav');if(b&&n){b.addEventListener('click',function(){var o=n.classList.toggle('open');b.classList.toggle('open',o);b.setAttribute('aria-expanded',o);n.setAttribute('aria-hidden',!o);});}})()</script>
+    <script src="/assets/js/mobile-nav.js"></script>
     <!-- Firebase SDK -->
     <script type="module" src="/assets/js/app.js"></script>
   </body>

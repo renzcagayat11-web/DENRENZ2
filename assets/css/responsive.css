@@ -1,9 +1,231 @@
 /*
  * responsive.css
  * Global mobile-responsive styles for DENR-CENRO Sta. Cruz
- * Breakpoints: 768px (tablet/mobile), 480px (small/iPhone SE)
- * All rules are additive — desktop styles are preserved.
+ * Mobile-first: base = mobile, 768px tablet, 1024px desktop
  */
+
+/* ============================================================
+   MOBILE-FIRST FOUNDATION (base = screens < 768px)
+   ============================================================ */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-size: 0.875rem; /* 14px minimum readable body text */
+  min-width: 0;
+}
+
+h1 {
+  font-size: 1.8rem;
+  line-height: 1.25;
+}
+
+h2 {
+  font-size: 1.4rem;
+  line-height: 1.3;
+}
+
+img,
+video,
+iframe,
+embed,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.container {
+  width: 100%;
+  max-width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+section,
+.section {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Stack multi-column layouts on mobile */
+.services-grid,
+.contact-grid,
+.permit-types-grid,
+.footer-content-grid,
+.about-header,
+.benefits-grid,
+.tech-grid,
+.services-grid-enhanced {
+  display: grid;
+  grid-template-columns: 1fr !important;
+  gap: 1rem !important;
+}
+
+.hero-stats,
+.header-stats {
+  flex-wrap: wrap;
+}
+
+.hero-actions,
+.hero-btn,
+.form-actions {
+  flex-direction: column;
+}
+
+.hero-btn,
+.form-actions button {
+  width: 100%;
+}
+
+/* Page-specific titles — mobile scale */
+.about-title,
+.services-title,
+.contact-title,
+.latest-updates-title {
+  font-size: 1.8rem;
+  line-height: 1.25;
+}
+
+.overview-header h3,
+.service-highlights h3,
+.tech-stack h3 {
+  font-size: 1.4rem;
+}
+
+/* Stack horizontal scroll grids vertically on mobile */
+.feature-grid,
+.highlights-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  overflow-x: visible !important;
+  gap: 1rem !important;
+  padding-bottom: 0 !important;
+}
+
+.feature-card,
+.highlight-item {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  flex: 1 1 auto !important;
+}
+
+/* Tablet (≥768px) */
+@media (min-width: 768px) {
+  body {
+    font-size: 1rem;
+  }
+
+  h1 {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+  }
+
+  h2 {
+    font-size: clamp(1.4rem, 3vw, 1.75rem);
+  }
+
+  .container {
+    padding-left: 1.125rem;
+    padding-right: 1.125rem;
+  }
+
+  section,
+  .section {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .about-header {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 2.5rem !important;
+  }
+
+  .about-stats {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  .benefits-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .tech-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .hero-actions,
+  .form-actions {
+    flex-direction: row;
+  }
+
+  .hero-btn {
+    width: auto;
+  }
+
+  .about-title,
+  .services-title,
+  .contact-title {
+    font-size: 2.5rem;
+  }
+
+  .feature-grid,
+  .highlights-grid {
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    padding-bottom: 1.25rem !important;
+    gap: 1.5rem !important;
+  }
+
+  .feature-card {
+    min-width: 17.5rem !important;
+    max-width: 20rem !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+  }
+
+  .highlight-item {
+    min-width: 16.25rem !important;
+    max-width: 17.5rem !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+  }
+
+  .footer-content-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Desktop (≥1024px) */
+@media (min-width: 1024px) {
+  h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+  }
+
+  h2 {
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+  }
+
+  .container {
+    max-width: var(--max, 1200px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .footer-content-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+  }
+
+  .benefits-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  .about-title,
+  .services-title,
+  .contact-title {
+    font-size: 3rem;
+  }
+}
 
 /* ============================================================
    BASE RESETS
