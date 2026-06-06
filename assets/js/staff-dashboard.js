@@ -967,13 +967,14 @@ window.viewApplication = async function(appId) {
           ${currentApplication.documents.map((doc, index) => {
             const originalName = doc.name || `Document ${index + 1}`;
             const docName = getCleanDocumentName(originalName, doc.type, index);
-            const docData = doc.url || doc.data || '';
+            const docUrl  = doc.url  || doc.data || '';
+            const docPath = doc.storagePath || '';   // plain path e.g. "denr-permits/file.pdf"
             const docType = doc.type || '';
             const docSize = doc.size || 0;
             const isImage = docType && docType.startsWith('image/');
-            const isPDF = docType && docType.includes('pdf');
-            
-            if (!docData) {
+            const isPDF   = docType && docType.includes('pdf');
+
+            if (!docUrl && !docPath) {
               return `
                 <div class="document-card" style="border-color: #ef4444; opacity: 0.7;">
                   <div class="document-preview">
@@ -992,15 +993,17 @@ window.viewApplication = async function(appId) {
                 </div>
               `;
             }
-            
-            const safeUrl = docData.replace(/'/g, "\\'");
-            const safeName = docName.replace(/'/g, "\\'");
+
+            // Use storagePath for server proxy (avoids URL parsing issues entirely)
+            const serverRef = encodeURIComponent(docPath || docUrl);
+            const safeName  = docName.replace(/'/g, "\\'");
+            const safeUrl   = docUrl.replace(/'/g, "\\'");
 
             return `
               <div class="document-card" style="display:flex;flex-direction:column;">
-                <div class="document-preview" style="cursor:pointer;" onclick="${isImage ? `openImageViewer('${safeUrl}','${safeName}')` : `viewDocumentInBrowser('${safeUrl}')`}">
+                <div class="document-preview" style="cursor:pointer;" onclick="${isImage ? `openImageViewer('${safeUrl}','${safeName}')` : `window.open('/download-file?storagePath=${serverRef}&inline=1','_blank','noopener,noreferrer')`}">
                   ${isImage
-                    ? `<img src="${docData}" alt="${docName}" style="width:100%;height:100%;object-fit:cover;" />`
+                    ? `<img src="${docUrl}" alt="${docName}" style="width:100%;height:100%;object-fit:cover;" />`
                     : `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#64748b;">
                         <div style="font-size:48px;margin-bottom:6px;">${isPDF ? '📄' : '📎'}</div>
                         <div style="font-weight:600;font-size:13px;">${isPDF ? 'PDF Document' : 'Document'}</div>
@@ -1016,14 +1019,14 @@ window.viewApplication = async function(appId) {
                   </div>
                 </div>
                 <div style="display:flex;gap:6px;padding:8px 10px 10px;">
-                  <button onclick="viewDocumentInBrowser('${safeUrl}')" style="flex:1;padding:6px 0;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;" title="Open in new tab">
+                  <button onclick="window.open('/download-file?storagePath=${serverRef}&inline=1','_blank','noopener,noreferrer')" style="flex:1;padding:6px 0;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;" title="Open in new tab">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                     View
                   </button>
-                  <button onclick="downloadDocumentFromServer('${safeUrl}','${safeName}')" style="flex:1;padding:6px 0;background:#059669;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;" title="Download file">
+                  <a href="/download-file?storagePath=${serverRef}&filename=${encodeURIComponent(docName)}" download="${docName}" target="_blank" rel="noopener noreferrer" style="flex:1;padding:6px 0;background:#059669;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;text-decoration:none;" title="Download file">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Download
-                  </button>
+                  </a>
                 </div>
               </div>
             `;

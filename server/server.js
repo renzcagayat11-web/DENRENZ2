@@ -681,23 +681,21 @@ app.get('/download-file', async (req, res) => {
 
     const bucket = admin.storage().bucket();
 
-    // Resolve storagePath from various URL formats:
-    // 1. Already a plain path like "denr-permits/file.pdf"
+    // Resolve storagePath from various input formats:
+    // 1. Plain path (preferred): "denr-permits/file.pdf"
     // 2. Firebase download URL: https://...firebasestorage.app/o/denr-permits%2Ffile.pdf?...
     // 3. Direct public URL: https://storage.googleapis.com/<bucket>/denr-permits/file.pdf
     let resolvedPath = decodeURIComponent(storagePath);
     if (resolvedPath.startsWith('http')) {
       if (resolvedPath.includes('/o/')) {
-        // Firebase download URL — extract path after /o/
         resolvedPath = decodeURIComponent(resolvedPath.split('/o/')[1].split('?')[0]);
       } else if (resolvedPath.includes('storage.googleapis.com/')) {
-        // Direct public URL — strip scheme + host + bucket name
         const afterHost = resolvedPath.split('storage.googleapis.com/')[1] || '';
-        // afterHost = "<bucket>/<path>" — skip the bucket segment
         const slashIdx = afterHost.indexOf('/');
         resolvedPath = slashIdx >= 0 ? afterHost.slice(slashIdx + 1) : afterHost;
       }
     }
+    console.log('📂 Resolved storage path:', resolvedPath);
 
     const file = bucket.file(resolvedPath);
     const decodedFilename = filename ? decodeURIComponent(filename) : resolvedPath.split('/').pop();
