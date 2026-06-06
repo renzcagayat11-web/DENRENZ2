@@ -7,49 +7,29 @@ let initialized = false;
 function initFirebase() {
   if (initialized) return admin;
   
-  // Try the actual service account key filename first (in parent directory)
-  const keyPath = path.join(__dirname, '..', 'denr-permit-firebase-adminsdk-fbsvc-278e8293a6.json');
+  // Load serviceAccountKey.json
+  const keyPath = path.join(__dirname, 'serviceAccountKey.json');
   if (fs.existsSync(keyPath)) {
     try {
       const serviceAccount = require(keyPath);
-      
-      // Initialize Firebase with proper configuration
-      const firebaseConfig = {
+      const projectId = serviceAccount.project_id;
+      // New Firebase projects use .firebasestorage.app; older ones use .appspot.com
+      const storageBucket = process.env.FIREBASE_STORAGE_BUCKET
+        || `${projectId}.firebasestorage.app`;
+
+      admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
-        projectId: serviceAccount.project_id,
-        databaseURL: `https://${serviceAccount.project_id}-default-rtdb.firebaseio.com`,
-        storageBucket: `${serviceAccount.project_id}.appspot.com`
-      };
-      
-      admin.initializeApp(firebaseConfig);
-      
-      initialized = true;
-      console.log('Firebase initialized successfully using denr-permit-firebase-adminsdk-fbsvc-278e8293a6.json');
-      console.log('Project ID:', serviceAccount.project_id);
-      return admin;
-    } catch (error) {
-      console.error('Error initializing Firebase with service account:', error);
-    }
-  }
-  
-  // Fallback to generic serviceAccountKey.json
-  const fallbackKeyPath = path.join(__dirname, 'serviceAccountKey.json');
-  if (fs.existsSync(fallbackKeyPath)) {
-    try {
-      const serviceAccount = require(fallbackKeyPath);
-      const firebaseConfig = {
-        credential: admin.credential.cert(serviceAccount),
-        projectId: serviceAccount.project_id,
-        databaseURL: `https://${serviceAccount.project_id}-default-rtdb.firebaseio.com`,
-        storageBucket: `${serviceAccount.project_id}.appspot.com`
-      };
-      
-      admin.initializeApp(firebaseConfig);
+        projectId,
+        databaseURL: `https://${projectId}-default-rtdb.firebaseio.com`,
+        storageBucket
+      });
+
       initialized = true;
       console.log('Firebase initialized using serviceAccountKey.json');
+      console.log('Project ID:', projectId, '| Storage bucket:', storageBucket);
       return admin;
     } catch (error) {
-      console.error('Error initializing Firebase with fallback service account:', error);
+      console.error('Error initializing Firebase:', error);
     }
   }
 

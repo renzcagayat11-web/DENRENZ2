@@ -109,28 +109,10 @@ async function logAudit(action, details = '', category = 'user', resourceId = nu
   }
 }
 
-// Download document function - Enhanced for auto-download
+// Download document function
 window.downloadDocument = function(url, filename) {
   try {
-    // Handle Cloudinary URLs for proper download
-    let downloadUrl = url;
-    
-    // Check if it's a Cloudinary URL and add download parameter
-    if (url.includes('cloudinary.com')) {
-      // For Cloudinary URLs, we need to modify them to force download
-      if (url.includes('/upload/')) {
-        // Replace /upload/ with /upload/fl_attachment/ to force download
-        downloadUrl = url.replace('/upload/', '/upload/fl_attachment/');
-      }
-      // For raw files, ensure proper download handling
-      if (url.includes('/raw/upload/')) {
-        downloadUrl = url.replace('/raw/upload/', '/raw/upload/fl_attachment/');
-      }
-      // Add additional parameters for better download handling
-      if (!downloadUrl.includes('fl_attachment')) {
-        downloadUrl += downloadUrl.includes('?') ? '&fl_attachment=true' : '?fl_attachment=true';
-      }
-    }
+    const downloadUrl = url;
     
     // Create a temporary anchor element for download
     const link = document.createElement('a');
@@ -1424,7 +1406,6 @@ window.viewApplication = async function(appId) {
             const docData = doc.url || doc.data || '';
             const docType = doc.type || '';
             const docSize = doc.size || 0;
-            const isCloudinary = doc.cloudinary || doc.public_id || doc.publicId;
             const isImage = docType && docType.startsWith('image/');
             const isPDF = docType && docType.includes('pdf');
             
@@ -1441,7 +1422,7 @@ window.viewApplication = async function(appId) {
                     <div class="document-name">${docName}</div>
                     <div class="document-meta">
                       <span>❌ Error</span>
-                      <span>${isCloudinary ? 'Cloudinary' : 'Local'}</span>
+                      <span>☁️ Firebase</span>
                     </div>
                   </div>
                 </div>
@@ -1463,7 +1444,7 @@ window.viewApplication = async function(appId) {
                   <div class="document-name">${docName}</div>
                   <div class="document-meta">
                     <span>${docSize ? (docSize / 1024).toFixed(1) + ' KB' : 'Unknown size'}</span>
-                    <span>${isCloudinary ? '☁️ Cloud' : '💾 Local'}</span>
+                    <span>☁️ Firebase</span>
                   </div>
                 </div>
               </div>

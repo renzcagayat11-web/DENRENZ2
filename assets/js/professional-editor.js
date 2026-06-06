@@ -103,24 +103,23 @@ let currentImagePublicId = null;
       return;
     }
     
-    console.log('📸 Processing image for Cloudinary storage...');
+    console.log('📸 Processing image for Firebase Storage...');
     console.log('📊 Original file size:', (file.size / 1024 / 1024).toFixed(2), 'MB');
     
-    // Upload to Cloudinary
-    uploadToCloudinary(file);
+    // Upload to Firebase Storage
+    uploadToStorage(file);
   }
   
-  // Upload image to Cloudinary
-  async function uploadToCloudinary(file) {
+  // Upload image to Firebase Storage
+  async function uploadToStorage(file) {
     try {
-      console.log('📤 Uploading to Cloudinary...');
+      console.log('📤 Uploading to Firebase Storage...');
       
-      // Upload directly to Cloudinary
       const formData = new FormData();
       formData.append('file', file);
       formData.append('folder', 'announcements');
 
-      const uploadResponse = await fetch('/upload-file-to-cloudinary', {
+      const uploadResponse = await fetch('/upload-file-to-storage', {
         method: 'POST',
         body: formData
       });
@@ -153,18 +152,18 @@ let currentImagePublicId = null;
       }
       
       if (uploadResult.success) {
-        console.log('✅ Image uploaded to Cloudinary');
-        console.log('📊 Cloudinary URL:', uploadResult.url);
+        console.log('✅ Image uploaded to Firebase Storage');
+        console.log('📊 Firebase Storage URL:', uploadResult.url);
         
         currentImageData = uploadResult.url;
-        currentImagePublicId = uploadResult.public_id;
+        currentImagePublicId = uploadResult.storagePath;
         showImagePreview(currentImageData);
         updateLiveImagePreview(currentImageData);
       } else {
         throw new Error(uploadResult.error || 'Upload failed');
       }
     } catch (error) {
-      console.error('❌ Cloudinary upload error:', error);
+      console.error('❌ Firebase Storage upload error:', error);
       console.error('❌ Error details:', {
         message: error.message,
         stack: error.stack
@@ -267,8 +266,7 @@ let currentImagePublicId = null;
       content: content,
       active: active,
       image: currentImageData,
-      imagePublicId: currentImagePublicId,
-      cloudinary: currentImagePublicId ? true : false,
+      imageStoragePath: currentImagePublicId,
       timestamp: new Date().toISOString()
     };
     

@@ -956,7 +956,6 @@ window.viewApplication = async function(appId) {
             const docData = doc.url || doc.data || '';
             const docType = doc.type || '';
             const docSize = doc.size || 0;
-            const isCloudinary = doc.cloudinary || doc.public_id;
             const isImage = docType && docType.startsWith('image/');
             const isPDF = docType && docType.includes('pdf');
             
@@ -973,17 +972,14 @@ window.viewApplication = async function(appId) {
                     <div class="document-name">${docName}</div>
                     <div class="document-meta">
                       <span>❌ Error</span>
-                      <span>${isCloudinary ? 'Cloudinary' : 'Local'}</span>
+                      <span>☁️ Firebase</span>
                     </div>
                   </div>
                 </div>
               `;
             }
             
-            // Generate proper download URL for Cloudinary files
-            const downloadUrl = isCloudinary && doc.public_id ? 
-              docData : 
-              docData;
+            const downloadUrl = docData;
 
             return `
               <div class="document-card">
@@ -1000,7 +996,7 @@ window.viewApplication = async function(appId) {
                   <div class="document-name">${docName}</div>
                   <div class="document-meta">
                     <span>${docSize ? (docSize / 1024).toFixed(1) + ' KB' : 'Unknown size'}</span>
-                    <span>${isCloudinary ? '☁️ Cloud' : '💾 Local'}</span>
+                    <span>☁️ Firebase</span>
                   </div>
                 </div>
               </div>
@@ -1743,7 +1739,7 @@ function updateImageInfo(img) {
       const sizeInKB = (sizeInBytes / 1024).toFixed(1);
       sizeSpan.textContent = `Size: ~${sizeInKB} KB`;
     } else {
-      sizeSpan.textContent = 'Size: Cloudinary hosted';
+      sizeSpan.textContent = 'Size: Firebase hosted';
     }
   }
 }
@@ -2493,12 +2489,12 @@ window.handleAvatarUpload = async function(event) {
         return;
       }
       
-      // Upload directly to Cloudinary
+      // Upload directly to Firebase Storage
       const formData = new FormData();
       formData.append('file', file);
       formData.append('folder', 'staff-avatars');
 
-      const uploadResponse = await fetch('/upload-file-to-cloudinary', {
+      const uploadResponse = await fetch('/upload-file-to-storage', {
         method: 'POST',
         body: formData
       });
@@ -3373,7 +3369,7 @@ window.saveOCRResults = async function() {
   }
 
   try {
-    // Upload image to Cloudinary first
+    // Upload image to Firebase Storage first
     const uploadManager = new FileUploadManager();
     const uploadResult = await uploadManager.uploadFile(uploadedFile, {
       folder: 'denr-ocr-documents',
@@ -3383,7 +3379,7 @@ window.saveOCRResults = async function() {
     });
 
     if (!uploadResult.success || !uploadResult.url) {
-      throw new Error('Failed to upload image to Cloudinary');
+      throw new Error('Failed to upload image to Firebase Storage');
     }
 
     const ocrData = {
@@ -3398,17 +3394,8 @@ window.saveOCRResults = async function() {
       documentType: uploadedFile.type.split('/')[0],
       ocrEngine: 'OCR.space API',
       url: uploadResult.url,
-      public_id: uploadResult.public_id,
-      cloudinary: true
+      storagePath: uploadResult.storagePath
     };
-
-    // Add optional Cloudinary fields only if they exist
-    if (uploadResult.resource_type) {
-      ocrData.cloudinaryResourceType = uploadResult.resource_type;
-    }
-    if (uploadResult.format) {
-      ocrData.cloudinaryFormat = uploadResult.format;
-    }
 
     await addDoc(collection(db, 'ocrDocuments'), ocrData);
 
@@ -4634,13 +4621,12 @@ window.viewDocuments = async function(appId) {
         // Generate user-friendly name instead of technical file name
         const originalName = doc.name || `Document ${index + 1}`;
         const docName = getCleanDocumentName(originalName, doc.type, index);
-        // Handle both Cloudinary documents (url field) and base64 documents (data field)
+        // Handle both Firebase Storage documents (url field) and base64 documents (data field)
         const docData = doc.url || doc.data || '';
         const docType = doc.type || '';
         const docSize = doc.size || 0;
         const isImage = docType && docType.startsWith('image/');
         const isPDF = docType && docType.includes('pdf');
-        const isCloudinary = doc.cloudinary || doc.public_id;
         const fileIcon = isImage ? '🖼️' : (isPDF ? '📄' : '📎');
         const fileSize = docSize ? `(${(docSize / 1024).toFixed(1)} KB)` : '';
         
@@ -4651,7 +4637,7 @@ window.viewDocuments = async function(appId) {
                 <span class="document-icon">⚠️</span>
                 <div class="document-info">
                   <h4 style="color: #ef4444;">${docName}</h4>
-                  <p class="document-meta">Data not available ${isCloudinary ? '(Cloudinary)' : ''}</p>
+                  <p class="document-meta">Data not available</p>
                 </div>
               </div>
               <div class="document-preview">
@@ -4665,10 +4651,7 @@ window.viewDocuments = async function(appId) {
           return;
         }
         
-        // Generate proper download URL for Cloudinary files
-        const downloadUrl = isCloudinary && doc.public_id ? 
-          docData : 
-          docData;
+        const downloadUrl = docData;
         
         documentsHTML += `
           <div class="document-item">
@@ -4707,7 +4690,7 @@ window.viewDocuments = async function(appId) {
                 </a>
               ` : ''}
               ${isPDF ? '<span style="color: #059669; font-size: 11px; display: block; margin-top: 4px;">• Auto-download enabled</span>' : ''}
-              ${isCloudinary ? '<span style="color: #059669; font-size: 11px; display: block; margin-top: 2px;">• Cloudinary hosted</span>' : ''}
+              <span style="color: #059669; font-size: 11px; display: block; margin-top: 2px;">☁️ Firebase hosted</span>
             </div>
           </div>
         `;

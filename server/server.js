@@ -8,7 +8,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const multer = require('multer');
-const { uploadFromBase64, deleteFile, uploadSingle, uploadSingleMemory } = require('./cloudinary');
+const { uploadFromBase64, deleteFile, uploadSingleMemory, uploadBuffer } = require('./firebase-storage');
 const nodemailer = require('nodemailer');
 const twilio = require('twilio');
 
@@ -551,308 +551,123 @@ app.get('/admin/audit-logs', verifyToken, requireAdmin, async (req, res) => {
 });
 
 
-// Direct file upload route (preferred method)
-app.post('/upload-file-to-cloudinary', (req, res, next) => {
+// Direct file upload route — Firebase Storage
+app.post('/upload-file-to-storage', (req, res, next) => {
+  console.log('📥 Upload request incoming, content-type:', req.headers['content-type']);
   uploadSingleMemory(req, res, function(err) {
     if (err instanceof multer.MulterError) {
-      // A Multer error occurred when uploading.
-      console.error('Multer error:', err);
-      return res.status(400).json({
-        success: false,
-        error: 'File upload error',
-        details: err.message
-      });
+      console.error('❌ Multer error code:', err.code, 'message:', err.message);
+      return res.status(400).json({ success: false, error: 'File upload error', details: err.message });
     } else if (err) {
-      // An unknown error occurred when uploading.
-      console.error('Upload middleware error:', err);
-      return res.status(400).json({
-        success: false,
-        error: 'File validation error',
-        details: err.message
-      });
+      console.error('❌ Upload middleware error:', err.message);
+      return res.status(400).json({ success: false, error: 'File validation error', details: err.message });
     }
-    // Everything went fine, continue to the actual upload handler
     next();
   });
 }, async (req, res) => {
   try {
     console.log('Upload request received at:', new Date().toISOString());
-    
-    // Check if Cloudinary is configured
-    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-      console.error('Cloudinary not configured - missing environment variables');
-      return res.status(500).json({ 
-        success: false,
-        error: 'Cloudinary not configured',
-        details: 'Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in your .env file'
-      });
-    }
 
     if (!req.file) {
-      console.error('No file in request');
-      return res.status(400).json({ 
-        success: false,
-        error: 'No file uploaded' 
-      });
+      console.error('❌ No file in request. Body keys:', Object.keys(req.body));
+      return res.status(400).json({ success: false, error: 'No file uploaded' });
     }
-    
-    console.log('File received:', req.file.originalname, 'Size:', req.file.size, 'Type:', req.file.mimetype);
-    
+
+    console.log('✅ File received:', req.file.originalname, 'Size:', req.file.size, 'Type:', req.file.mimetype);
+
     const { folder = 'denr-permits' } = req.body;
-    
-    // Convert buffer to base64 for Cloudinary
-    const base64Data = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-    
-    console.log('Uploading to Cloudinary...');
-    const result = await uploadFromBase64(base64Data, req.file.originalname, folder);
-    console.log('Upload successful:', result.public_id);
-    
-    // Ensure we always return a proper JSON response
-    const response = {
+    const result = await uploadBuffer(req.file.buffer, req.file.originalname, req.file.mimetype, folder);
+
+    res.json({
       success: true,
       url: result.url,
-      public_id: result.public_id,
-      format: result.format,
+      storagePath: result.storagePath,
       size: result.size,
-      original_filename: result.original_filename
-    };
-    
-    console.log('Sending response:', JSON.stringify(response, null, 2));
-    res.json(response);
-    
+      original_filename: result.original_filename,
+      contentType: result.contentType
+    });
   } catch (error) {
-    console.error('Direct file upload error:', error);
-    console.error('Error stack:', error.stack);
-    
-    // Ensure we always return a proper JSON error response
-    const errorResponse = { 
-      success: false,
-      error: 'Failed to upload file to Cloudinary',
-      details: error.message 
-    };
-    
-    console.log('Sending error response:', JSON.stringify(errorResponse, null, 2));
-    res.status(500).json(errorResponse);
+    console.error('Firebase Storage upload error:', error);
+    res.status(500).json({ success: false, error: 'Failed to upload file', details: error.message });
   }
 });
 
-// Cloudinary upload route (fallback for small files)
-app.post('/upload-to-cloudinary', async (req, res) => {
+// Base64 upload route — Firebase Storage
+app.post('/upload-to-storage', async (req, res) => {
   try {
     const { base64Data, fileName, folder = 'denr-permits' } = req.body;
-    
+
     if (!base64Data || !fileName) {
       return res.status(400).json({ error: 'Base64 data and filename are required' });
     }
-    
+
     const result = await uploadFromBase64(base64Data, fileName, folder);
-    
+
     res.json({
       success: true,
       url: result.url,
-      public_id: result.public_id,
-      format: result.format,
+      storagePath: result.storagePath,
       size: result.size,
-      original_filename: result.original_filename
+      original_filename: result.original_filename,
+      contentType: result.contentType
     });
-    
   } catch (error) {
-    console.error('Cloudinary upload error:', error);
-    res.status(500).json({ 
-      error: 'Failed to upload file to Cloudinary',
-      details: error.message 
-    });
+    console.error('Firebase Storage base64 upload error:', error);
+    res.status(500).json({ error: 'Failed to upload file', details: error.message });
   }
 });
 
-// Cloudinary delete route
-app.delete('/delete-from-cloudinary/:publicId', async (req, res) => {
+// Firebase Storage delete route
+app.delete('/delete-from-storage', async (req, res) => {
   try {
-    const { publicId } = req.params;
-    
-    if (!publicId) {
-      return res.status(400).json({ error: 'Public ID is required' });
+    const { storagePath } = req.body;
+
+    if (!storagePath) {
+      return res.status(400).json({ error: 'storagePath is required' });
     }
-    
-    const result = await deleteFile(publicId);
-    
-    res.json({
-      success: true,
-      result: result
-    });
-    
+
+    const result = await deleteFile(storagePath);
+    res.json({ success: true, result });
   } catch (error) {
-    console.error('Cloudinary delete error:', error);
-    res.status(500).json({ 
-      error: 'Failed to delete file from Cloudinary',
-      details: error.message 
-    });
+    console.error('Firebase Storage delete error:', error);
+    res.status(500).json({ error: 'Failed to delete file', details: error.message });
   }
 });
 
-// Download original file from Cloudinary
-app.get('/download-file/:publicId/:filename', async (req, res) => {
-  // Set CORS headers for this endpoint
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  
+// Firebase Storage signed download URL route
+app.get('/download-file', async (req, res) => {
   try {
-    const { publicId, filename } = req.params;
-    
-    // Decode the URL-encoded publicId and filename
-    const decodedPublicId = decodeURIComponent(publicId);
-    const decodedFilename = decodeURIComponent(filename);
-    
-    if (!decodedPublicId || !decodedFilename) {
-      return res.status(400).json({ error: 'Public ID and filename are required' });
-    }
-    
-    // Import Cloudinary v2 and fetch for file download
-    const cloudinary = require('cloudinary').v2;
-    const https = require('https');
-    const http = require('http');
-    
-    // Set proper headers for file download
-    const fileExtension = decodedFilename.split('.').pop().toLowerCase();
-    const mimeTypes = {
-      'pdf': 'application/pdf',
-      'doc': 'application/msword',
-      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'xls': 'application/vnd.ms-excel',
-      'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'jpg': 'image/jpeg',
-      'jpeg': 'image/jpeg',
-      'png': 'image/png',
-      'gif': 'image/gif'
-    };
-    
-    const contentType = mimeTypes[fileExtension] || 'application/octet-stream';
-    
-    // Determine resource type based on file extension
-    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension);
-    const resourceType = isImage ? 'image' : 'raw';
-    
-    try {
-      // Generate the correct download URL directly without API call
-      const downloadUrl = cloudinary.url(decodedPublicId, {
-        resource_type: resourceType,
-        secure: true,
-        // For raw files, add attachment flag
-        ...(resourceType === 'raw' && { flags: 'attachment' })
-      });
-      
-      console.log('Downloading from:', downloadUrl);
-      
-      // Set headers for file download
-      res.setHeader('Content-Type', contentType);
-      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(decodedFilename)}"`);
-      res.setHeader('Cache-Control', 'no-cache');
-      
-      // Fetch the file from Cloudinary and collect chunks for proper binary handling
-      const urlModule = downloadUrl.startsWith('https:') ? https : http;
-      
-      const fileRequest = urlModule.get(downloadUrl, (fileRes) => {
-        // If Cloudinary returns an error
-        if (fileRes.statusCode === 404 || fileRes.statusCode === 400) {
-          return res.status(404).json({ error: 'File not found on Cloudinary' });
-        }
-        
-        if (fileRes.statusCode >= 400) {
-          return res.status(fileRes.statusCode).json({ 
-            error: 'Cloudinary error', 
-            status: fileRes.statusCode 
-          });
-        }
-        
-        // Collect data chunks to ensure proper binary handling
-        const chunks = [];
-        fileRes.on('data', (chunk) => {
-          chunks.push(chunk);
-        });
-        
-        fileRes.on('end', () => {
-          const buffer = Buffer.concat(chunks);
-          res.end(buffer);
-        });
-        
-        fileRes.on('error', (err) => {
-          console.error('File stream error:', err);
-          if (!res.headersSent) {
-            res.status(500).json({ 
-              error: 'Failed to stream file',
-              details: err.message 
-            });
-          }
-        });
-      });
-      
-    } catch (apiError) {
-      console.error('Cloudinary API error:', apiError);
-      return res.status(404).json({ 
-        error: 'File not found',
-        details: apiError.message 
-      });
-    }
-    
-  } catch (error) {
-    console.error('File download error:', error);
-    res.status(500).json({ 
-      error: 'Failed to download file',
-      details: error.message 
-    });
-  }
-});
+    const { storagePath, filename } = req.query;
 
-// Test endpoint to check Cloudinary URLs
-app.get('/test-cloudinary/:publicId', async (req, res) => {
-  try {
-    const { publicId } = req.params;
-    const cloudinary = require('cloudinary').v2;
-    
-    // Try both image and raw resource types
-    let result = null;
-    let resourceType = null;
-    
-    try {
-      result = await cloudinary.api.resource(publicId, {
-        resource_type: 'raw',
-        type: 'upload'
-      });
-      resourceType = 'raw';
-    } catch (rawError) {
-      try {
-        result = await cloudinary.api.resource(publicId, {
-          resource_type: 'image',
-          type: 'upload'
-        });
-        resourceType = 'image';
-      } catch (imageError) {
-        return res.json({
-          error: 'File not found',
-          rawError: rawError.message,
-          imageError: imageError.message
-        });
-      }
+    if (!storagePath) {
+      return res.status(400).json({ error: 'storagePath query param is required' });
     }
-    
-    const downloadUrl = cloudinary.url(publicId, {
-      resource_type: resourceType,
-      secure: true
-    });
-    
-    res.json({
-      found: true,
-      resourceType: resourceType,
-      publicId: result.public_id,
-      format: result.format,
-      size: result.bytes,
-      url: result.secure_url,
-      downloadUrl: downloadUrl
-    });
-    
+
+    const bucket = admin.storage().bucket();
+    const file = bucket.file(decodeURIComponent(storagePath));
+    const decodedFilename = filename ? decodeURIComponent(filename) : storagePath.split('/').pop();
+
+    const [exists] = await file.exists();
+    if (!exists) {
+      return res.status(404).json({ error: 'File not found in Firebase Storage' });
+    }
+
+    const [metadata] = await file.getMetadata();
+    const contentType = metadata.contentType || 'application/octet-stream';
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(decodedFilename)}"`);
+    res.setHeader('Cache-Control', 'no-cache');
+
+    file.createReadStream()
+      .on('error', (err) => {
+        console.error('File stream error:', err);
+        if (!res.headersSent) res.status(500).json({ error: 'Failed to stream file', details: err.message });
+      })
+      .pipe(res);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Firebase Storage download error:', error);
+    res.status(500).json({ error: 'Failed to download file', details: error.message });
   }
 });
 

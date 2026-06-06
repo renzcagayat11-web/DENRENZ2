@@ -30,24 +30,23 @@ import {
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 const MAX_FILE_SIZE_MB = 5;
 
-// Helper function to upload file to Cloudinary with error handling
-async function uploadToCloudinary(file, folder = 'denr-permits') {
+// Helper function to upload file to Firebase Storage
+async function uploadToStorage(file, folder = 'denr-permits') {
   try {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('folder', folder);
     
-    console.log(`Uploading ${file.name} to Cloudinary...`);
+    console.log(`Uploading ${file.name} to Firebase Storage...`);
     
-    const uploadResponse = await fetch('/upload-file-to-cloudinary', {
+    const uploadResponse = await fetch('/upload-file-to-storage', {
       method: 'POST',
       body: formData
     });
     
-    // Check if response is ok
     if (!uploadResponse.ok) {
       const errorText = await uploadResponse.text();
-      console.error('Cloudinary upload failed:', errorText);
+      console.error('Firebase Storage upload failed:', errorText);
       throw new Error(`Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
     }
     
@@ -57,17 +56,17 @@ async function uploadToCloudinary(file, folder = 'denr-permits') {
       throw new Error(uploadResult.error || 'Upload failed');
     }
     
-    console.log('Cloudinary upload successful:', uploadResult.url);
+    console.log('Firebase Storage upload successful:', uploadResult.url);
     return uploadResult;
   } catch (error) {
-    console.error('Cloudinary upload error:', error);
+    console.error('Firebase Storage upload error:', error);
     throw error;
   }
 }
 
-// IndexedDB for persistent file storage (edit mode)
+// IndexedDB for persistent file storage (edit mode + new app drafts)
 const EDIT_DB_NAME = 'DENREditFileStorage';
-const EDIT_DB_VERSION = 1;
+const EDIT_DB_VERSION = 2; // bumped to add draftUploads store
 let editDb = null;
 
 // Initialize IndexedDB for edit mode file storage
@@ -87,7 +86,67 @@ function initEditIndexedDB() {
         const store = database.createObjectStore('editPendingFiles', { keyPath: 'fileId' });
         store.createIndex('appId', 'appId', { unique: false });
       }
+      // Store for already-uploaded draft files (new application flow)
+      if (!database.objectStoreNames.contains('draftUploads')) {
+        database.createObjectStore('draftUploads', { keyPath: 'index' });
+      }
     };
+  });
+}
+
+// Save an already-uploaded file's result to the draft store
+async function saveDraftUpload(index, data) {
+  if (!editDb) await initEditIndexedDB();
+  return new Promise((resolve, reject) => {
+    const tx = editDb.transaction(['draftUploads'], 'readwrite');
+    const store = tx.objectStore('draftUploads');
+    const req = store.put({ index, ...data });
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// Get all draft uploads
+async function getAllDraftUploads() {
+  if (!editDb) await initEditIndexedDB();
+  return new Promise((resolve, reject) => {
+    const tx = editDb.transaction(['draftUploads'], 'readonly');
+    const req = tx.objectStore('draftUploads').getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// Get one draft upload by slot index
+async function getDraftUpload(index) {
+  if (!editDb) await initEditIndexedDB();
+  return new Promise((resolve, reject) => {
+    const tx = editDb.transaction(['draftUploads'], 'readonly');
+    const req = tx.objectStore('draftUploads').get(index);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// Remove one draft upload by slot index
+async function removeDraftUpload(index) {
+  if (!editDb) await initEditIndexedDB();
+  return new Promise((resolve, reject) => {
+    const tx = editDb.transaction(['draftUploads'], 'readwrite');
+    const req = tx.objectStore('draftUploads').delete(index);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// Clear all draft uploads
+async function clearAllDraftUploads() {
+  if (!editDb) await initEditIndexedDB();
+  return new Promise((resolve, reject) => {
+    const tx = editDb.transaction(['draftUploads'], 'readwrite');
+    const req = tx.objectStore('draftUploads').clear();
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
   });
 }
 
@@ -493,11 +552,9 @@ function setupBarangaySelection() {
   function updateBarangays() {
     const selectedMunicipal = municipalSelect.value;
 
-    // Clear current barangay options
-    barangaySelect.innerHTML = '<option value="" disabled selected>Select Barangay</option>';
-
     if (selectedMunicipal && lagunaBarangays[selectedMunicipal]) {
       // Enable barangay and populate options
+      barangaySelect.innerHTML = '<option value="" disabled selected>Select Barangay</option>';
       barangaySelect.disabled = false;
       lagunaBarangays[selectedMunicipal].forEach(barangay => {
         const option = document.createElement('option');
@@ -506,7 +563,8 @@ function setupBarangaySelection() {
         barangaySelect.appendChild(option);
       });
     } else {
-      // No municipal selected — disable barangay
+      // No municipal selected — always lock barangay
+      barangaySelect.value = '';
       barangaySelect.disabled = true;
       barangaySelect.innerHTML = '<option value="" disabled selected>Select Municipal first</option>';
     }
@@ -514,7 +572,7 @@ function setupBarangaySelection() {
 
   municipalSelect.addEventListener('change', updateBarangays);
 
-  // Initialize
+  // Always enforce correct initial state
   updateBarangays();
 }
 
@@ -3061,14 +3119,14 @@ async function handleProfilePictureUpload(e) {
         }
       });
     } else {
-      // Fallback: upload directly to Cloudinary server endpoint
+      // Fallback: upload directly to Firebase Storage server endpoint
       console.log('FileUploadManager not available, using fallback upload');
       
       const formData = new FormData();
       formData.append('file', file);
       formData.append('folder', 'profile-pictures');
       
-      const uploadResponse = await fetch('/upload-file-to-cloudinary', {
+      const uploadResponse = await fetch('/upload-file-to-storage', {
         method: 'POST',
         body: formData
       });
@@ -3084,11 +3142,11 @@ async function handleProfilePictureUpload(e) {
       
       uploadResult = {
         url: result.url,
-        public_id: result.public_id
+        storagePath: result.storagePath
       };
     }
     
-    // Update user profile with Cloudinary URL
+    // Update user profile with Firebase Storage URL
     const userUid = currentUserData.uid || auth.currentUser.uid;
     if (!userUid) {
       throw new Error('User ID not found. Please log in again.');
@@ -3097,13 +3155,13 @@ async function handleProfilePictureUpload(e) {
     const userRef = doc(db, 'users', userUid);
     await updateDoc(userRef, {
       profilePicture: uploadResult.url,
-      profilePicturePublicId: uploadResult.public_id,
+      profilePictureStoragePath: uploadResult.storagePath,
       lastUpdated: new Date().toISOString()
     });
     
     showAlert('Profile picture updated successfully!', 'success');
     currentUserData.profilePicture = uploadResult.url;
-    currentUserData.profilePicturePublicId = uploadResult.public_id;
+    currentUserData.profilePictureStoragePath = uploadResult.storagePath;
     loadProfileData();
     updateProfileCompletion(currentUserData);
     
@@ -3146,19 +3204,6 @@ function getFileIcon(fileTypeOrName) {
   return '📁'; // Default icon
 }
 
-// Clean Cloudinary URL to fix double extensions
-function cleanCloudinaryUrl(url) {
-  if (!url.includes('cloudinary')) return url;
-  
-  // Remove query parameters first
-  const baseUrl = url.split('?')[0];
-  
-  // Fix double extensions (e.g., .pdf.pdf -> .pdf)
-  let cleanUrl = baseUrl.replace(/(\.[^.]+)\1+$/, '$1');
-  
-  return cleanUrl;
-}
-
 // Download file function
 window.downloadFile = function(url, filename) {
   try {
@@ -3170,24 +3215,7 @@ window.downloadFile = function(url, filename) {
     // Create a temporary anchor element
     const link = document.createElement('a');
     let downloadUrl = url.trim();
-    
-    // For Cloudinary URLs, handle different resource types
-    if (url.includes('cloudinary')) {
-      // Clean the URL to fix double extensions
-      const cleanBaseUrl = cleanCloudinaryUrl(url);
-      
-      // For raw documents (PDFs, etc.), use different download approach
-      if (url.includes('/raw/upload/')) {
-        downloadUrl = cleanBaseUrl; // Raw files download directly
-      } else if (url.includes('/image/upload/')) {
-        downloadUrl = `${cleanBaseUrl}?fl_attachment=true`; // Images need attachment flag
-      }
-      
-      // Set download attribute to help with filename
-      link.download = filename || 'download';
-    } else {
-      link.download = filename || 'download';
-    }
+    link.download = filename || 'download';
     
     link.href = downloadUrl;
     link.target = '_blank';
@@ -3870,30 +3898,15 @@ async function viewApplication(appId) {
           console.log(`Document ${index}:`, doc);
           
           // Handle different document URL field names
-          const docUrl = doc.url || doc.data || doc.downloadUrl || doc.cloudinaryUrl || '';
+          const docUrl = doc.url || doc.data || doc.downloadUrl || '';
           const docName = doc.name || doc.fileName || doc.originalName || `Document ${index + 1}`;
           const docType = doc.type || doc.mimeType || doc.contentType || '';
           const docSize = doc.size || doc.fileSize || 0;
-          const docPublicId = doc.public_id || doc.publicId || doc.cloudinaryPublicId || '';
           
-          // Generate Cloudinary optimized URLs if available
-          const isCloudinary = docPublicId || (docUrl && docUrl.includes('cloudinary'));
           const isImage = docType && docType.startsWith('image/');
           
           let thumbnailUrl = docUrl;
           let highQualityUrl = docUrl;
-          
-          // Only apply transformations for images uploaded to image/upload
-          if (isCloudinary && docPublicId && isImage && docUrl.includes('/image/upload/')) {
-            const urlParts = docUrl.split('/image/upload/');
-            if (urlParts.length === 2) {
-              const baseUrl = urlParts[0] + '/image/upload/';
-              const imageId = urlParts[1];
-              
-              thumbnailUrl = `${baseUrl}q_auto:good,f_auto,w_200,h_150,c_fill,q_80/${imageId}`;
-              highQualityUrl = `${baseUrl}q_auto:best,f_auto,w_800,h_600,c_limit,q_90/${imageId}`;
-            }
-          }
           
           // Check if URL exists before proceeding
           if (!docUrl) {
@@ -3918,7 +3931,7 @@ async function viewApplication(appId) {
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                     View
                   </div>
-                  ${isCloudinary ? `<div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px;">✓ Optimized</div>` : ''}
+                  <div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px;">☁️ Firebase</div>
                 </div>
                 <div style="padding: 12px;">
                   <div style="font-weight: 600; color: #1f2937; margin-bottom: 4px; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${docName}">${docName}</div>
@@ -3935,8 +3948,7 @@ async function viewApplication(appId) {
                   <div style="flex: 1; min-width: 0;">
                     <div style="font-weight: 600; color: #1f2937; margin-bottom: 4px; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${docName}">${docName}</div>
                     <div style="font-size: 11px; color: #6b7280;">
-                      ${docSize ? formatFileSize(docSize) : 'Unknown size'}
-                      ${isCloudinary ? ' • Cloud Storage' : ''}
+                      ${docSize ? formatFileSize(docSize) : 'Unknown size'} • Cloud Storage
                     </div>
                   </div>
                 </div>
@@ -4395,22 +4407,21 @@ window.submitResubmitApplication = async function() {
       }
     }
 
-    // Upload new files to Cloudinary
+    // Upload new files to Firebase Storage
     for (const item of uploadPromises) {
       const formData = new FormData();
       formData.append('file', item.file);
       formData.append('folder', 'denr-permits');
-      const resp = await fetch('/upload-file-to-cloudinary', { method: 'POST', body: formData });
+      const resp = await fetch('/upload-file-to-storage', { method: 'POST', body: formData });
       if (!resp.ok) throw new Error(`Upload failed for ${item.file.name}`);
       const result = await resp.json();
       existingDocs[item.index] = {
         name: item.file.name,
         url: result.url,
-        public_id: result.public_id,
+        storagePath: result.storagePath,
         type: item.file.type,
         size: item.file.size,
-        requirement: item.requirement,
-        cloudinary: true
+        requirement: item.requirement
       };
     }
 
@@ -4956,6 +4967,10 @@ goToStep = function(step) {
     const permitType = document.getElementById('permitType')?.value || '';
     updateDocumentUploadFields(documentType, permitType);
     updateRequirementsList5(documentType, permitType);
+    // After upload fields render, restore any draft uploads from IndexedDB
+    if (!window.editingAppId) {
+      setTimeout(() => restoreDraftUploadsToUI(), 400);
+    }
   }
   return originalGoToStep(step);
 };
@@ -5023,22 +5038,28 @@ document.getElementById('submitStep5')?.addEventListener('click', async (e) => {
     return;
   }
   
-  // OPTIMIZED: Fast document validation
+  // OPTIMIZED: Fast document validation — check IndexedDB drafts AND file inputs
   const documentType = document.getElementById('documentType')?.value || '';
   const permitType = document.getElementById('permitType')?.value || '';
   const requirements = PERMIT_REQUIREMENTS[permitType] || [];
-  
-  // Quick parallel document check
-  const documentChecks = requirements.map(async (requirement, index) => {
+
+  // Load draft uploads from IndexedDB first
+  let draftMap = {};
+  try {
+    await initEditIndexedDB();
+    const drafts = await getAllDraftUploads();
+    drafts.forEach(d => { draftMap[d.index] = d; });
+  } catch (_) {}
+
+  // Check each requirement — has draft upload OR has file in input
+  const documentChecks = requirements.map((requirement, index) => {
     const uploadField = document.getElementById(`docUpload_${index}`);
-    return {
-      requirement,
-      hasFile: uploadField && uploadField.files && uploadField.files.length > 0
-    };
+    const hasFileInput = uploadField && uploadField.files && uploadField.files.length > 0;
+    const hasDraft = !!draftMap[index];
+    return { requirement, hasFile: hasFileInput || hasDraft };
   });
-  
-  const documentResults = await Promise.all(documentChecks);
-  const missingDocuments = documentResults.filter(({ hasFile }) => !hasFile).map(({ requirement }) => requirement);
+
+  const missingDocuments = documentChecks.filter(({ hasFile }) => !hasFile).map(({ requirement }) => requirement);
   
   // Check default upload field if no dynamic requirements
   if (requirements.length === 0) {
@@ -5149,15 +5170,33 @@ document.addEventListener('DOMContentLoaded', () => {
   // Restore application form data (must run after setupBarangaySelection so municipal change event works)
   if (!window.editingAppId) {
     restoreFormData('newApplicationForm');
+
+    // Re-run applicant type toggle after restore so the correct fields are visible
+    const personalType = document.getElementById('personalType');
+    const companyType  = document.getElementById('companyType');
+    const personalFields = document.getElementById('personalFields');
+    const companyFields  = document.getElementById('companyFields');
+    if (personalType && companyType && personalFields && companyFields) {
+      if (companyType.checked) {
+        personalFields.style.display = 'none';
+        companyFields.style.display  = 'block';
+      } else {
+        personalFields.style.display = 'block';
+        companyFields.style.display  = 'none';
+      }
+    }
   }
 
-  // Safety: if no municipal is selected after restore, force barangay back to disabled
-  const barangayEl = document.getElementById('barangay');
-  const municipalEl = document.getElementById('municipal');
-  if (barangayEl && municipalEl && !municipalEl.value) {
-    barangayEl.disabled = true;
-    barangayEl.innerHTML = '<option value="" disabled selected>Select Municipal first</option>';
-  }
+  // Safety: after restore settles, re-enforce barangay lock if no municipal selected
+  setTimeout(() => {
+    const barangayEl = document.getElementById('barangay');
+    const municipalEl = document.getElementById('municipal');
+    if (barangayEl && municipalEl && !municipalEl.value) {
+      barangayEl.disabled = true;
+      barangayEl.value = '';
+      barangayEl.innerHTML = '<option value="" disabled selected>Select Municipal first</option>';
+    }
+  }, 100);
 
   // Restore form step on page load
   restoreFormStep();
@@ -9988,24 +10027,34 @@ async function generateFormPDF() {
       addDenrFormCanvasToPdf(doc, canvas, { documentTitle: docTitle });
       doc.save(filename);
 
-      // AUTO-ATTACH: Save the PDF as base64 in sessionStorage so it gets auto-attached on submit
+      // AUTO-ATTACH: Upload generated PDF to Firebase Storage, save only URL metadata (no base64 in localStorage)
       try {
-        const pdfBase64 = doc.output('datauristring');
-        const pdfSizeKB = Math.round(pdfBase64.length * 0.75 / 1024);
-        const formPdfData = {
-          base64: pdfBase64,
-          name: filename,
-          size: Math.round(pdfBase64.length * 0.75),
-          type: 'application/pdf',
-          timestamp: Date.now(),
-          permitType
-        };
-        sessionStorage.setItem('generatedFormPDF', JSON.stringify(formPdfData));
-        console.log(`Form PDF saved to sessionStorage: ${filename} (~${pdfSizeKB} KB)`);
-        // Refresh the auto-attach slot in Step 5 if it's visible
-        refreshFormPdfSlot(filename);
+        const pdfBlob = doc.output('blob');
+        const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
+        const formData = new FormData();
+        formData.append('file', pdfFile);
+        refreshFormPdfSlot(filename); // show green immediately while uploading
+        const uploadRes = await fetch('/upload-file-to-storage', { method: 'POST', body: formData });
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json();
+          const formPdfMeta = {
+            url: uploadData.url,
+            storagePath: uploadData.storagePath,
+            name: filename,
+            size: pdfFile.size,
+            type: 'application/pdf',
+            timestamp: Date.now(),
+            permitType
+          };
+          localStorage.setItem('generatedFormPDF', JSON.stringify(formPdfMeta));
+          console.log(`Form PDF uploaded & saved: ${filename} (${Math.round(pdfFile.size/1024)} KB)`);
+        } else {
+          console.warn('Form PDF upload failed, will re-upload on submit.');
+          // Save minimal metadata so slot shows green; base64 skipped to avoid quota
+          localStorage.setItem('generatedFormPDF', JSON.stringify({ name: filename, size: pdfBlob.size, type: 'application/pdf', timestamp: Date.now(), permitType, pendingBlob: true }));
+        }
       } catch (storageErr) {
-        console.warn('Could not save form PDF to sessionStorage:', storageErr);
+        console.warn('Could not upload form PDF:', storageErr);
       }
 
       showFormDownloadAwareness();
@@ -10049,21 +10098,22 @@ async function generateFormPDF() {
     doc.line(120, yPosition + 5, 180, yPosition + 5);
     doc.save(filename);
 
-    // AUTO-ATTACH: Save fallback PDF too
+    // AUTO-ATTACH: Upload fallback PDF to Firebase Storage, save only metadata
     try {
-      const pdfBase64 = doc.output('datauristring');
-      const formPdfData = {
-        base64: pdfBase64,
-        name: filename,
-        size: Math.round(pdfBase64.length * 0.75),
-        type: 'application/pdf',
-        timestamp: Date.now(),
-        permitType
-      };
-      sessionStorage.setItem('generatedFormPDF', JSON.stringify(formPdfData));
+      const pdfBlob = doc.output('blob');
+      const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
+      const formData = new FormData();
+      formData.append('file', pdfFile);
       refreshFormPdfSlot(filename);
+      const uploadRes = await fetch('/upload-file-to-storage', { method: 'POST', body: formData });
+      if (uploadRes.ok) {
+        const uploadData = await uploadRes.json();
+        localStorage.setItem('generatedFormPDF', JSON.stringify({ url: uploadData.url, storagePath: uploadData.storagePath, name: filename, size: pdfFile.size, type: 'application/pdf', timestamp: Date.now(), permitType }));
+      } else {
+        localStorage.setItem('generatedFormPDF', JSON.stringify({ name: filename, size: pdfBlob.size, type: 'application/pdf', timestamp: Date.now(), permitType, pendingBlob: true }));
+      }
     } catch (storageErr) {
-      console.warn('Could not save form PDF to sessionStorage:', storageErr);
+      console.warn('Could not upload fallback form PDF:', storageErr);
     }
 
     showFormDownloadAwareness();
@@ -10076,14 +10126,56 @@ async function generateFormPDF() {
 
 /** Refreshes the auto-attach PDF slot in Step 5 if it exists */
 function refreshFormPdfSlot(filename) {
-  const slot = document.getElementById('formPdfAutoAttachSlot');
-  if (!slot) return;
-  const nameEl = slot.querySelector('#formPdfAttachName');
-  const warningEl = document.getElementById('formPdfMissingWarning');
-  if (nameEl) nameEl.textContent = filename || 'Application Form PDF';
-  slot.classList.remove('pdf-slot--missing');
-  slot.classList.add('pdf-slot--ready');
-  if (warningEl) warningEl.style.display = 'none';
+  // Try wrapper (Step 5 slot container) or the missing-warning div directly
+  const wrapper = document.getElementById('formPdfAutoAttachSlot');
+  const missingDiv = document.getElementById('formPdfMissingWarning');
+
+  // If neither exists, Step 5 hasn't rendered yet — localStorage will handle it on next visit
+  if (!wrapper && !missingDiv) return;
+
+  const savedPdfRaw = localStorage.getItem('generatedFormPDF');
+  const savedPdf = savedPdfRaw ? (() => { try { return JSON.parse(savedPdfRaw); } catch { return null; } })() : null;
+  const pdfSizeKB = savedPdf ? Math.round(savedPdf.size / 1024) : 0;
+  const displayName = filename || (savedPdf && savedPdf.name) || 'Application Form PDF';
+
+  const readyHTML = `
+    <div class="pdf-slot pdf-slot--ready">
+      <div class="pdf-slot__icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <path d="M9 15l2 2 4-4"/>
+        </svg>
+      </div>
+      <div class="pdf-slot__info">
+        <div class="pdf-slot__label">Letter Request / Application Form <span class="pdf-slot__badge">Auto-attached</span></div>
+        <div class="pdf-slot__filename" id="formPdfAttachName">${displayName}</div>
+        <div class="pdf-slot__meta">${pdfSizeKB > 0 ? pdfSizeKB + ' KB &bull; ' : ''}PDF &bull; Generated from Step 2</div>
+      </div>
+      <div class="pdf-slot__status">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        <span>Ready</span>
+      </div>
+    </div>`;
+
+  // Case 1: wrapper exists — replace its full content
+  if (wrapper) {
+    wrapper.innerHTML = readyHTML;
+    return;
+  }
+
+  // Case 2: user is on Step 5 already and missing-warning div is visible — replace it in-place
+  if (missingDiv) {
+    const parent = missingDiv.parentElement;
+    if (parent) {
+      const temp = document.createElement('div');
+      temp.innerHTML = readyHTML;
+      parent.replaceChild(temp.firstElementChild, missingDiv);
+    }
+  }
 }
 
 /**
@@ -10426,7 +10518,7 @@ function updateDocumentUploadFields(documentType, permitType) {
   uploadContainer.style.gap = '16px';
 
   // AUTO-ATTACH SLOT: Always inject the Application Form PDF slot at the top (full width)
-  const savedPdfRaw = sessionStorage.getItem('generatedFormPDF');
+  const savedPdfRaw = localStorage.getItem('generatedFormPDF');
   const savedPdf = savedPdfRaw ? (() => { try { return JSON.parse(savedPdfRaw); } catch { return null; } })() : null;
   const pdfSlotWrapper = document.createElement('div');
   pdfSlotWrapper.style.gridColumn = '1 / -1'; // Full width spanning both columns
@@ -10512,7 +10604,7 @@ function updateDocumentUploadFields(documentType, permitType) {
             timestamp: Date.now(),
             permitType
           };
-          sessionStorage.setItem('generatedFormPDF', JSON.stringify(formPdfData));
+          localStorage.setItem('generatedFormPDF', JSON.stringify(formPdfData));
           // Update UI to ready state
           const slot = document.getElementById('formPdfMissingWarning');
           if (slot) {
@@ -10567,7 +10659,7 @@ function updateDocumentUploadFields(documentType, permitType) {
           <p style="color: #1f2937; font-size: 15px; margin: 0 0 6px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Drop your document here</p>
           <p style="color: #6b7280; font-size: 13px; margin: 0; font-weight: 500;">or click to select file</p>
         </div>
-        <input type="file" id="docUpload_${index}" name="${safeName}" accept=".pdf,.jpg,.jpeg,.png" style="display: none;" />
+        <input type="file" id="docUpload_${index}" name="${safeName}" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display: none;" />
         <div id="docUpload_${index}_preview" style="position: absolute; bottom: 12px; left: 12px; right: 12px; display: none;">
           <div style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #f0fdf4; padding: 8px 14px; border-radius: 8px; border: 1px solid #bbf7d0; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -10584,7 +10676,7 @@ function updateDocumentUploadFields(documentType, permitType) {
           </div>
         </div>
       </div>
-      <small style="display: block; margin-top: 6px; color: #9ca3af; font-size: 11px;">Accepted: PDF, JPG, PNG (up to 50MB)</small>
+      <small style="display: block; margin-top: 6px; color: #9ca3af; font-size: 11px;">Accepted: PDF, JPG, PNG, DOC, DOCX (up to 50MB)</small>
     `;
     uploadContainer.appendChild(uploadGroup);
 
@@ -10656,111 +10748,135 @@ function updateDocumentUploadFields(documentType, permitType) {
   if (isEditing) {
     setTimeout(() => {
       console.log('Displaying existing documents after creating upload fields...');
-      
-      // First, let's check if all upload areas exist
-      const requirements = PERMIT_REQUIREMENTS[permitType] || [];
-      console.log('Checking upload areas for', requirements.length, 'requirements');
-      
-      requirements.forEach((req, index) => {
-        const uploadArea = document.getElementById(`docUpload_${index}_preview`);
-        const dropzone = document.getElementById(`dropzone_${index}`);
-        console.log(`Index ${index} - Upload area: ${!!uploadArea}, Dropzone: ${!!dropzone}`);
-      });
-      
       displayExistingDocuments(window.existingDocuments || []);
     }, 300);
   }
+
+  // Restore draft uploads from IndexedDB after DOM has rendered
+  if (!isEditing) {
+    setTimeout(() => restoreDraftUploadsToUI(), 350);
+  }
 }
 
-// Helper function to handle file selection
-function handleFileSelect(index, file) {
+// Standalone: restore all draft uploads to the upload field UI
+async function restoreDraftUploadsToUI() {
+  try {
+    await initEditIndexedDB();
+    const drafts = await getAllDraftUploads();
+    if (drafts.length === 0) return;
+    console.log(`🔄 Restoring ${drafts.length} draft upload(s) from IndexedDB...`);
+    let restored = 0;
+    drafts.forEach(draft => {
+      const idx = draft.index;
+      const preview    = document.getElementById(`docUpload_${idx}_preview`);
+      const filenameSpan = document.getElementById(`docUpload_${idx}_filename`);
+      const dropzone   = document.getElementById(`dropzone_${idx}`);
+      if (!preview || !filenameSpan || !dropzone) {
+        console.warn(`  ⚠️ Slot ${idx} DOM not ready — skipping restore`);
+        return;
+      }
+      preview.style.display = 'block';
+      filenameSpan.textContent = `${draft.name} (${(draft.size / 1024).toFixed(1)} KB) ✓ Uploaded`;
+      filenameSpan.style.color = '#059669';
+      dropzone.style.borderColor = '#16a34a';
+      dropzone.style.background  = '#f0fdf4';
+      dropzone.style.boxShadow   = '0 1px 3px rgba(22,163,74,0.1)';
+      const svg = dropzone.querySelector('svg');
+      if (svg) svg.style.stroke = '#16a34a';
+      restored++;
+      console.log(`  ✅ Slot ${idx}: ${draft.name} restored`);
+    });
+    console.log(`🔄 Draft restore complete: ${restored}/${drafts.length} slots restored`);
+
+    // Show a banner so the user knows their files were saved
+    if (restored > 0) {
+      const container = document.getElementById('dynamicDocumentUploads');
+      if (container && !document.getElementById('draftRestoredBanner')) {
+        const banner = document.createElement('div');
+        banner.id = 'draftRestoredBanner';
+        banner.style.cssText = 'grid-column:1/-1;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 16px;display:flex;align-items:center;gap:10px;font-size:13px;color:#166534;margin-bottom:4px;';
+        banner.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span><strong>${restored} file(s) restored from draft.</strong> Your previously uploaded documents are saved — just click Submit when ready.</span>`;
+        container.insertBefore(banner, container.firstChild);
+      }
+    }
+  } catch (e) {
+    console.warn('Could not restore draft uploads:', e);
+  }
+}
+
+// Helper function to handle file selection — uploads immediately to Firebase Storage
+// and saves result to IndexedDB so it survives page reload
+async function handleFileSelect(index, file) {
   const preview = document.getElementById(`docUpload_${index}_preview`);
   const filenameSpan = document.getElementById(`docUpload_${index}_filename`);
   const dropzone = document.getElementById(`dropzone_${index}`);
-  
+
+  // ── Show uploading state ──────────────────────────────────────────────────
   if (preview && filenameSpan) {
     preview.style.display = 'block';
-    filenameSpan.textContent = file.name;
-    
-    // Update dropzone appearance
-    dropzone.style.borderColor = '#16a34a';
-    dropzone.style.background = '#f0fdf4';
-    dropzone.style.boxShadow = '0 1px 3px rgba(22, 163, 74, 0.1)';
-    const svg = dropzone.querySelector('svg');
-    if (svg) {
-      svg.style.stroke = '#16a34a';
-    }
+    filenameSpan.textContent = `${file.name} — Uploading…`;
+    filenameSpan.style.color = '#d97706';
   }
-  
-  // Simple approach: Use sessionStorage for immediate testing
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const fileData = {
+  if (dropzone) {
+    dropzone.style.borderColor = '#f59e0b';
+    dropzone.style.background = '#fffbeb';
+    dropzone.style.boxShadow = '0 1px 3px rgba(245,158,11,0.15)';
+    const svg = dropzone.querySelector('svg');
+    if (svg) svg.style.stroke = '#f59e0b';
+  }
+
+  // ── Upload to Firebase Storage immediately ────────────────────────────────
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', 'denr-permits');
+
+    const response = await fetch('/upload-file-to-storage', { method: 'POST', body: formData });
+    if (!response.ok) throw new Error(`Server error ${response.status}`);
+    const result = await response.json();
+    if (!result.success) throw new Error(result.error || 'Upload failed');
+
+    // ── Persist result to IndexedDB so page reload keeps this file ──────────
+    await initEditIndexedDB();
+    await saveDraftUpload(index, {
+      url: result.url,
+      storagePath: result.storagePath,
       name: file.name,
       size: file.size,
       type: file.type,
-      lastModified: file.lastModified,
-      base64: e.target.result,
-      timestamp: Date.now()
-    };
-    
-    try {
-      // Save to sessionStorage (and localStorage backup for smaller files)
-      const fileSizeMB = fileData.base64.length / 1024 / 1024;
-      
-      if (fileSizeMB > 4) { // If larger than 4MB
-        console.log(`File ${file.name} too large for storage (${fileSizeMB.toFixed(2)} MB), keeping in memory only`);
-        // Store only metadata, not the full data
-        const metadataOnly = {
-          name: fileData.name,
-          size: fileData.size,
-          type: fileData.type,
-          lastModified: fileData.lastModified,
-          timestamp: fileData.timestamp,
-          storedInMemory: true
-        };
-        sessionStorage.setItem(`docUpload_${index}`, JSON.stringify(metadataOnly));
-      } else {
-        // Save to sessionStorage
-        sessionStorage.setItem(`docUpload_${index}`, JSON.stringify(fileData));
-        
-        // Also save to localStorage as backup (for smaller files only)
-        if (fileSizeMB < 2) {
-          try {
-            localStorage.setItem(`docUpload_${index}_backup`, JSON.stringify(fileData));
-            console.log(`File ${file.name} also saved to localStorage backup`);
-          } catch (localError) {
-            console.warn('localStorage backup failed:', localError);
-          }
-        }
-      }
-      console.log(`File ${file.name} saved to sessionStorage as docUpload_${index}`);
-      
-      // Update UI to show saved status
-      if (filenameSpan) {
-        filenameSpan.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB) - Ready`;
-        filenameSpan.style.color = '#059669';
-      }
-      
-    } catch (error) {
-      console.error('Error saving file to storage:', error);
-      // Don't show error to user, just log it - file is still in memory
-      if (filenameSpan) {
-        filenameSpan.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB) - Ready`;
-        filenameSpan.style.color = '#059669';
-      }
-    }
-  };
-  
-  reader.onerror = function() {
-    console.error('Error reading file:', reader.error);
+      requirement: ''  // filled in later at submit from requirements array
+    });
+
+    console.log(`✅ Draft upload saved for slot ${index}: ${result.url}`);
+
+    // ── Show success state ──────────────────────────────────────────────────
     if (filenameSpan) {
-      filenameSpan.textContent = `${file.name} - Read failed`;
+      filenameSpan.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB) ✓ Uploaded`;
+      filenameSpan.style.color = '#059669';
+    }
+    if (dropzone) {
+      dropzone.style.borderColor = '#16a34a';
+      dropzone.style.background = '#f0fdf4';
+      dropzone.style.boxShadow = '0 1px 3px rgba(22,163,74,0.1)';
+      const svg = dropzone.querySelector('svg');
+      if (svg) svg.style.stroke = '#16a34a';
+    }
+    if (preview) preview.style.display = 'block';
+
+  } catch (error) {
+    console.error(`❌ Draft upload failed for slot ${index}:`, error);
+    if (filenameSpan) {
+      filenameSpan.textContent = `${file.name} — Upload failed. Please try again.`;
       filenameSpan.style.color = '#dc2626';
     }
-  };
-  
-  reader.readAsDataURL(file);
+    if (dropzone) {
+      dropzone.style.borderColor = '#ef4444';
+      dropzone.style.background = '#fef2f2';
+      const svg = dropzone.querySelector('svg');
+      if (svg) svg.style.stroke = '#ef4444';
+    }
+  }
 }
 
 // IndexedDB helper functions for robust file storage
@@ -10924,6 +11040,8 @@ window.removeFile = function(event, index) {
   localStorage.removeItem(`docUpload_${index}`);
   localStorage.removeItem(`docUpload_${index}_backup`);
   localStorage.removeItem(`docUpload_${index}_meta`);
+  // Remove from IndexedDB draft store so the slot is free for a new file
+  removeDraftUpload(index).catch(() => {});
   console.log(`File removed from all storage: docUpload_${index}`);
 };
 
@@ -11361,94 +11479,79 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
   const requirements = PERMIT_REQUIREMENTS[permitType] || [];
   const filesToUpload = [];
 
-  // AUTO-ATTACH: Prepend the generated form PDF as the first document
+  // AUTO-ATTACH: Prepend the generated form PDF — use pre-uploaded URL if available
   try {
-    const savedPdfRaw = sessionStorage.getItem('generatedFormPDF');
+    const savedPdfRaw = localStorage.getItem('generatedFormPDF');
     if (savedPdfRaw) {
       const savedPdf = JSON.parse(savedPdfRaw);
-      if (savedPdf && savedPdf.base64 && savedPdf.name) {
-        const base64Data = savedPdf.base64.split(',')[1];
-        const binaryString = atob(base64Data);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
+      if (savedPdf && savedPdf.name) {
+        if (savedPdf.url && savedPdf.storagePath) {
+          // Already uploaded — use URL directly (no re-upload needed)
+          filesToUpload.push({
+            fileId: `formPDF_${Date.now()}`,
+            file: null,
+            requirement: 'Letter Request / Application Form',
+            index: -1,
+            alreadyUploaded: { url: savedPdf.url, storagePath: savedPdf.storagePath, name: savedPdf.name, size: savedPdf.size, type: 'application/pdf' }
+          });
+          console.log(`Auto-attached pre-uploaded form PDF: ${savedPdf.name}`);
+        } else {
+          console.warn('Form PDF metadata found but no URL — may not have uploaded yet.');
         }
-        const blob = new Blob([bytes], { type: 'application/pdf' });
-        const pdfFile = new File([blob], savedPdf.name, { type: 'application/pdf', lastModified: savedPdf.timestamp || Date.now() });
-        filesToUpload.push({ fileId: `formPDF_${Date.now()}`, file: pdfFile, requirement: 'Letter Request / Application Form', index: -1 });
-        console.log(`Auto-attached form PDF: ${savedPdf.name} (${Math.round(savedPdf.size / 1024)} KB)`);
       }
     } else {
-      console.warn('No generated form PDF found in sessionStorage — application form will not be auto-attached.');
+      console.warn('No generated form PDF found — application form will not be auto-attached.');
     }
   } catch (pdfErr) {
     console.error('Failed to auto-attach form PDF:', pdfErr);
   }
 
-  // Initialize IndexedDB
+  // Initialize IndexedDB and load any already-uploaded draft files
   await initEditIndexedDB();
-  
+  const draftUploads = await getAllDraftUploads();
+  const draftMap = {};
+  draftUploads.forEach(d => { draftMap[d.index] = d; });
+  console.log(`📦 Found ${draftUploads.length} pre-uploaded draft file(s) in IndexedDB`);
+
   for (let index = 0; index < requirements.length; index++) {
-    let file = null;
-    
-    // Try to get file from sessionStorage first (where it's stored after selection)
-    try {
-      const storedFileData = sessionStorage.getItem(`docUpload_${index}`);
-      if (storedFileData) {
-        const fileData = JSON.parse(storedFileData);
-        
-        // Convert base64 back to File object
-        const base64Data = fileData.base64.split(',')[1]; // Remove data URL prefix
-        const binaryString = atob(base64Data);
-        const bytes = new Uint8Array(binaryString.length);
-        
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
+    // ── Case 1: File was already uploaded to Firebase Storage (best case) ──
+    if (draftMap[index]) {
+      const draft = draftMap[index];
+      console.log(`✅ Using pre-uploaded draft for slot ${index}: ${draft.name}`);
+      filesToUpload.push({
+        fileId: `draft_${index}`,
+        file: null,
+        requirement: requirements[index],
+        index,
+        alreadyUploaded: {
+          url: draft.url,
+          storagePath: draft.storagePath,
+          name: draft.name,
+          size: draft.size,
+          type: draft.type
         }
-        
-        const blob = new Blob([bytes], { type: fileData.type });
-        file = new File([blob], fileData.name, { type: fileData.type, lastModified: fileData.lastModified });
-        
-        console.log(`Retrieved file ${fileData.name} from sessionStorage for upload`);
-      }
-    } catch (error) {
-      console.error('Error retrieving file from sessionStorage:', error);
+      });
+      continue;
     }
-    
-    // Fallback: Try to get file from input element directly
-    if (!file) {
-      const uploadField = document.getElementById(`docUpload_${index}`);
-      if (uploadField && uploadField.files && uploadField.files[0]) {
-        file = uploadField.files[0];
-        console.log(`Retrieved file ${file.name} from input element for upload`);
-      }
-    }
-    
-    // If we have a file, process it for upload
-    if (file) {
+
+    // ── Case 2: File still in the input (not yet uploaded) ─────────────────
+    const uploadField = document.getElementById(`docUpload_${index}`);
+    if (uploadField && uploadField.files && uploadField.files[0]) {
+      const file = uploadField.files[0];
       if (file.size > MAX_FILE_SIZE) {
-        if (typeof showAlert === 'function') {
-          showAlert(`File "${file.name}" exceeds ${MAX_FILE_SIZE_MB}MB limit.`, 'warning');
-          return;
-        }
+        showAlert(`File "${file.name}" exceeds ${MAX_FILE_SIZE_MB}MB limit.`, 'warning');
+        return;
       }
-      
       const fileId = `edit_${Date.now()}_${index}`;
-      const appId = window.editingAppId || 'new';
-      
-      // Store file in IndexedDB for persistence
       try {
-        await storeEditFileInIndexedDB(fileId, file, requirements[index], appId);
-        filesToUpload.push({ fileId, file, requirement: requirements[index], index });
-        console.log(`File ${file.name} prepared for background upload`);
-      } catch (dbError) {
-        console.error('Failed to store file in IndexedDB:', dbError);
-        // Still try to upload directly
-        filesToUpload.push({ fileId, file, requirement: requirements[index], index });
-      }
-    } else {
-      console.warn(`No file found for requirement index ${index}: ${requirements[index]}`);
+        await storeEditFileInIndexedDB(fileId, file, requirements[index], window.editingAppId || 'new');
+      } catch (_) {}
+      filesToUpload.push({ fileId, file, requirement: requirements[index], index });
+      console.log(`📁 File ${file.name} queued for upload (slot ${index})`);
+      continue;
     }
+
+    console.warn(`⚠️ No file for requirement index ${index}: ${requirements[index]}`);
   }
   
   // INSTANT SUBMISSION: Create application immediately
@@ -11558,6 +11661,7 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
     hideRequirementsSection();
     resetFormSteps();
     clearDraftProgress(); // Clear draft to hide dashboard widget
+    clearAllDraftUploads().catch(() => {}); // Clear pre-uploaded draft files
     
     // Clear editing state
     window.editingAppId = null;
@@ -11567,7 +11671,7 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
     const _ws3 = document.querySelector('#newApplicationSection .welcome-subtitle'); if (_ws3) _ws3.textContent = 'Complete the form below to apply for an environmental permit';
 
     // Clear the auto-attached form PDF from sessionStorage (fresh start for next application)
-    sessionStorage.removeItem('generatedFormPDF');
+    localStorage.removeItem('generatedFormPDF');
     
     // Reset ALL submit buttons to prevent stuck loading state
     const submitBtns = [
@@ -11740,7 +11844,23 @@ async function backgroundUploadFiles(appId, filesToUpload) {
   let completedUploads = 0;
   const totalFiles = filesToUpload.length;
   
-  const uploadPromises = filesToUpload.map(async ({ fileId, file, requirement, index }) => {
+  const uploadPromises = filesToUpload.map(async ({ fileId, file, requirement, index, alreadyUploaded }) => {
+    // ── Already uploaded via draft — skip re-upload ───────────────────────
+    if (alreadyUploaded) {
+      completedUploads++;
+      const progress = (completedUploads / totalFiles) * 100;
+      updateUploadProgress(progress, `Using saved upload: ${alreadyUploaded.name}…`);
+      console.log(`⚡ Slot ${index} already uploaded: ${alreadyUploaded.name}`);
+      return {
+        name: alreadyUploaded.name,
+        type: alreadyUploaded.type,
+        size: alreadyUploaded.size,
+        url: alreadyUploaded.url,
+        storagePath: alreadyUploaded.storagePath,
+        requirement
+      };
+    }
+
     try {
       // Update progress
       completedUploads++;
@@ -11754,7 +11874,7 @@ async function backgroundUploadFiles(appId, filesToUpload) {
       formData.append('folder', 'denr-permits');
       
       console.log(`Sending upload request for ${file.name}...`);
-      const uploadResponse = await fetch('/upload-file-to-cloudinary', {
+      const uploadResponse = await fetch('/upload-file-to-storage', {
         method: 'POST',
         body: formData
       });
@@ -11772,10 +11892,7 @@ async function backgroundUploadFiles(appId, filesToUpload) {
           type: file.type,
           size: file.size,
           url: uploadResult.url,
-          public_id: uploadResult.public_id,
-          format: uploadResult.format || file.name.split('.').pop() || 'unknown',
-          resource_type: uploadResult.resource_type || 'auto',
-          cloudinary: true,
+          storagePath: uploadResult.storagePath,
           requirement: requirement
         };
       } else {
@@ -11919,8 +12036,13 @@ function saveFormData(formId) {
   const formData = {};
   const inputs = form.querySelectorAll('input, select, textarea');
   inputs.forEach(input => {
-    // Skip file inputs as they are handled separately
-    if (input.id && input.type !== 'file') {
+    if (input.type === 'file') return; // handled separately
+    if (input.type === 'radio') {
+      // Save the checked radio value keyed by name
+      if (input.checked) formData['__radio__' + input.name] = input.value;
+    } else if (input.type === 'checkbox') {
+      if (input.id) formData[input.id] = input.checked ? 'true' : 'false';
+    } else if (input.id) {
       formData[input.id] = input.value;
     }
   });
@@ -11944,9 +12066,24 @@ function restoreFormData(formId) {
     const savedBarangay = formData['barangay'];
     Object.keys(formData).forEach(fieldId => {
       if (fieldId === 'barangay') return; // handled after municipal change
+
+      // Radio buttons — keyed by __radio__<name>
+      if (fieldId.startsWith('__radio__')) {
+        const radioName = fieldId.replace('__radio__', '');
+        const radioVal  = formData[fieldId];
+        const radio = form.querySelector(`input[type="radio"][name="${radioName}"][value="${radioVal}"]`);
+        if (radio) {
+          radio.checked = true;
+          radio.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        return;
+      }
+
       const input = document.getElementById(fieldId);
-      if (input) {
-        if (input.type === 'file') return;
+      if (!input || input.type === 'file') return;
+      if (input.type === 'checkbox') {
+        input.checked = formData[fieldId] === 'true';
+      } else {
         input.value = formData[fieldId];
       }
     });
@@ -12156,13 +12293,13 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
         return;
       }
       
-      // Upload directly to Cloudinary
+      // Upload directly to Firebase Storage
       try {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('folder', 'profile-pictures');
 
-        const uploadResponse = await fetch('/upload-file-to-cloudinary', {
+        const uploadResponse = await fetch('/upload-file-to-storage', {
           method: 'POST',
           body: formData
         });
@@ -12171,7 +12308,7 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
         
         if (uploadResult.success) {
           updateData.profilePicture = uploadResult.url;
-          updateData.profilePicturePublicId = uploadResult.public_id;
+          updateData.profilePictureStoragePath = uploadResult.storagePath;
           await saveProfileData(updateData);
         } else {
           throw new Error(uploadResult.error || 'Upload failed');

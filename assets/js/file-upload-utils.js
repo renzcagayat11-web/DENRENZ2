@@ -99,7 +99,7 @@ class FileUploadManager {
     });
   }
 
-  // Upload file to Cloudinary with progress tracking
+  // Upload file to Firebase Storage with progress tracking
   async uploadFile(file, options = {}) {
     const { 
       folder = 'denr-permits',
@@ -146,11 +146,7 @@ class FileUploadManager {
         } else {
           try {
             const errorResponse = JSON.parse(xhr.responseText);
-            if (errorResponse.error === 'Cloudinary not configured') {
-              reject(new Error('Cloudinary is not configured. Please contact administrator to set up Cloudinary credentials.'));
-            } else {
-              reject(new Error(errorResponse.error || errorResponse.details || `Upload failed with status ${xhr.status}`));
-            }
+            reject(new Error(errorResponse.error || errorResponse.details || `Upload failed with status ${xhr.status}`));
           } catch (e) {
             reject(new Error(`Upload failed with status ${xhr.status}`));
           }
@@ -175,12 +171,12 @@ class FileUploadManager {
       });
 
       // Send request
-      xhr.open('POST', '/upload-file-to-cloudinary');
+      xhr.open('POST', '/upload-file-to-storage');
       xhr.send(formData);
     });
   }
 
-  // Upload multiple files
+  // Upload multiple files to Firebase Storage
   async uploadMultipleFiles(files, options = {}) {
     const { 
       folder = 'denr-permits',
