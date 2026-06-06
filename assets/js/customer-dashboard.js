@@ -2296,6 +2296,7 @@ window.fetchUserApplications = async function() {
       displayApplications();
       updateStats(); // Update stats when data arrives
       loadActivityFeed(); // Update activity feed too
+      updateDashboardProgressWidget(); // Keep progress widget in sync
     }, (error) => {
       console.error('Customer dashboard: Real-time listener error:', error);
     });
@@ -5012,7 +5013,10 @@ document.getElementById('submitStep5')?.addEventListener('click', async (e) => {
   
   // OPTIMIZED: Quick validation with early success feedback
   const validationPromises = [];
+  const validationSteps = [];
   for (let step = 1; step <= 4; step++) {
+    if (step === 2) continue;
+    validationSteps.push(step);
     validationPromises.push(Promise.resolve(validateStep(step)));
   }
   
@@ -5025,7 +5029,7 @@ document.getElementById('submitStep5')?.addEventListener('click', async (e) => {
       submitBtn.disabled = false;
       submitBtn.innerHTML = 'Submit Application';
       submitBtn.classList.remove('loading');
-      goToStep(firstInvalidStep + 1);
+      goToStep(validationSteps[firstInvalidStep]);
       return;
     }
   } catch (error) {
@@ -5130,6 +5134,8 @@ document.getElementById('submitStep5')?.addEventListener('click', async (e) => {
     
     // Submit the form with minimal delay
     setTimeout(() => {
+      // Flag so the submit handler skips duplicate validation
+      form.dataset.programmaticSubmit = '1';
       // Use requestSubmit() for proper form submission that triggers all event listeners
       if (form.requestSubmit) {
         form.requestSubmit();
@@ -5170,6 +5176,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Restore application form data (must run after setupBarangaySelection so municipal change event works)
   if (!window.editingAppId) {
     restoreFormData('newApplicationForm');
+    updateStep1AwarenessBanner();
 
     // Re-run applicant type toggle after restore so the correct fields are visible
     const personalType = document.getElementById('personalType');
@@ -5588,6 +5595,11 @@ function goToStep(step) {
   console.log('goToStep called with step:', step);
   const totalSteps = getCurrentTotalSteps();
   console.log('Total steps:', totalSteps);
+
+  const activePermitType = document.getElementById('permitType')?.value || '';
+  if (currentStep === 2 && activePermitType) {
+    saveDenrFormData(activePermitType);
+  }
 
   // Clear field errors when navigating
   clearAllFieldErrors('.form-step.active');
@@ -9078,7 +9090,9 @@ function loadCustomForm(permitType, formTemplate) {
   
   // Load form content
   formContentArea.innerHTML = formTemplate.template;
+  assignDenrFormStorageKeys();
   setupReceiptSignaturePads();
+  setupSingleTransactionCheckbox();
 
   const titleSection = document.querySelector('#customFormContainer .form-title-section');
   if (titleSection) {
@@ -9090,6 +9104,7 @@ function loadCustomForm(permitType, formTemplate) {
   
   // Restore saved form data if exists
   restoreDenrFormData(permitType);
+  saveDenrFormData(permitType);
   // Hydrate signatures after canvas is ready (deferred via double-rAF in createReceiptSignaturePad)
   setTimeout(() => hydrateReceiptSignaturePads(), 120);
   
@@ -9101,6 +9116,27 @@ function loadCustomForm(permitType, formTemplate) {
   
   // Add auto-save on input changes
   setupFormAutoSave(permitType);
+}
+
+function setupSingleTransactionCheckbox() {
+  if (!formContentArea) return;
+  const sectionTitles = formContentArea.querySelectorAll('.denr-cc-section-title-main');
+  sectionTitles.forEach(title => {
+    if (!title.textContent.includes('Type of Transaction')) return;
+    const checklist = title.parentElement?.querySelector('.denr-form-checklist');
+    if (!checklist) return;
+    const checkboxes = checklist.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', () => {
+        if (!checkbox.checked) return;
+        checkboxes.forEach(other => {
+          if (other !== checkbox) other.checked = false;
+        });
+        const activePermitType = document.getElementById('permitType')?.value || '';
+        if (activePermitType) saveDenrFormData(activePermitType);
+      });
+    });
+  });
 }
 
 function setupReceiptSignaturePads() {
@@ -9603,6 +9639,27 @@ function setupFormAutoSave(permitType) {
   });
 }
 
+function getDenrInputStorageKey(input, index) {
+  if (input.id) return input.id;
+  if (input.name) return input.name;
+  if (!input.dataset.denrStorageKey) {
+    input.dataset.denrStorageKey = `field_${index}_${input.type || input.tagName.toLowerCase()}`;
+  }
+  return input.dataset.denrStorageKey;
+}
+
+function assignDenrFormStorageKeys() {
+  if (!formContentArea) return;
+  const inputs = formContentArea.querySelectorAll('input, textarea, select');
+  inputs.forEach((input, index) => {
+    if (input.id || input.name || input.dataset.denrStorageKey) return;
+    const section = input.closest('.denr-form-section, .denr-cc-section');
+    const sectionTitle = section?.querySelector('.denr-cc-section-title-main, .denr-form-section-title')?.textContent?.trim().replace(/\s+/g, ' ') || 'form';
+    const labelText = input.closest('label')?.textContent?.trim().replace(/\s+/g, ' ') || input.previousElementSibling?.textContent?.trim().replace(/\s+/g, ' ') || '';
+    input.dataset.denrStorageKey = `denr_${index}_${input.type || input.tagName.toLowerCase()}_${sectionTitle}_${labelText}`;
+  });
+}
+
 // Save DENR form data to localStorage
 function saveDenrFormData(permitType) {
   if (!formContentArea || !permitType) return;
@@ -9610,15 +9667,16 @@ function saveDenrFormData(permitType) {
   const formData = {};
   const inputs = formContentArea.querySelectorAll('input, textarea, select');
   
-  inputs.forEach(input => {
+  inputs.forEach((input, index) => {
+    const key = getDenrInputStorageKey(input, index);
     if (input.type === 'checkbox') {
-      formData[input.id || input.name] = input.checked;
+      formData[key] = input.checked;
     } else if (input.type === 'radio') {
       if (input.checked) {
-        formData[input.name] = input.value;
+        formData[key] = input.value;
       }
     } else {
-      formData[input.id || input.name] = input.value;
+      formData[key] = input.value;
     }
   });
   
@@ -9638,17 +9696,10 @@ function restoreDenrFormData(permitType) {
   try {
     const formData = JSON.parse(savedData);
     
-    Object.keys(formData).forEach(key => {
-      // Skip empty keys
-      if (!key || key.trim() === '') return;
-      
-      // Try to find input by ID first, then by name
-      let input = formContentArea.querySelector(`#${CSS.escape(key)}`);
-      if (!input) {
-        input = formContentArea.querySelector(`[name="${CSS.escape(key)}"]`);
-      }
-      if (!input) return;
-      
+    const inputs = formContentArea.querySelectorAll('input, textarea, select');
+    inputs.forEach((input, index) => {
+      const key = getDenrInputStorageKey(input, index);
+      if (!Object.prototype.hasOwnProperty.call(formData, key)) return;
       if (input.type === 'checkbox') {
         input.checked = formData[key];
       } else if (input.type === 'radio') {
@@ -9659,9 +9710,24 @@ function restoreDenrFormData(permitType) {
         input.value = formData[key];
       }
     });
+    enforceSingleTransactionCheckboxState();
   } catch (error) {
     console.error('Error restoring form data:', error);
   }
+}
+
+function enforceSingleTransactionCheckboxState() {
+  if (!formContentArea) return;
+  const sectionTitles = formContentArea.querySelectorAll('.denr-cc-section-title-main');
+  sectionTitles.forEach(title => {
+    if (!title.textContent.includes('Type of Transaction')) return;
+    const checklist = title.parentElement?.querySelector('.denr-form-checklist');
+    if (!checklist) return;
+    const checked = checklist.querySelectorAll('input[type="checkbox"]:checked');
+    checked.forEach((checkbox, index) => {
+      if (index > 0) checkbox.checked = false;
+    });
+  });
 }
 
 // Clear saved DENR form data
@@ -9988,7 +10054,7 @@ async function generateFormPDF() {
       let canvas;
       try {
         canvas = await html2canvas(denrForm, {
-          scale: 4,
+          scale: 2,
           useCORS: true,
           logging: false,
           backgroundColor: '#ffffff',
@@ -9997,9 +10063,9 @@ async function generateFormPDF() {
           imageTimeout: 15000
         });
       } catch (e) {
-        console.warn('html2canvas at scale 4 failed, retrying at 3:', e);
+        console.warn('html2canvas at scale 2 failed, retrying at 1.5:', e);
         canvas = await html2canvas(denrForm, {
-          scale: 3,
+          scale: 1.5,
           useCORS: true,
           logging: false,
           backgroundColor: '#ffffff',
@@ -10031,6 +10097,7 @@ async function generateFormPDF() {
       try {
         const pdfBlob = doc.output('blob');
         const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
+        console.log(`Generated form PDF size: ${Math.round(pdfFile.size / 1024)} KB`);
         const formData = new FormData();
         formData.append('file', pdfFile);
         refreshFormPdfSlot(filename); // show green immediately while uploading
@@ -10048,6 +10115,7 @@ async function generateFormPDF() {
           };
           localStorage.setItem('generatedFormPDF', JSON.stringify(formPdfMeta));
           console.log(`Form PDF uploaded & saved: ${filename} (${Math.round(pdfFile.size/1024)} KB)`);
+          refreshFormPdfSlot(filename);
         } else {
           console.warn('Form PDF upload failed, will re-upload on submit.');
           // Save minimal metadata so slot shows green; base64 skipped to avoid quota
@@ -10109,6 +10177,7 @@ async function generateFormPDF() {
       if (uploadRes.ok) {
         const uploadData = await uploadRes.json();
         localStorage.setItem('generatedFormPDF', JSON.stringify({ url: uploadData.url, storagePath: uploadData.storagePath, name: filename, size: pdfFile.size, type: 'application/pdf', timestamp: Date.now(), permitType }));
+        refreshFormPdfSlot(filename);
       } else {
         localStorage.setItem('generatedFormPDF', JSON.stringify({ name: filename, size: pdfBlob.size, type: 'application/pdf', timestamp: Date.now(), permitType, pendingBlob: true }));
       }
@@ -10215,7 +10284,7 @@ function addDenrFormCanvasToPdf(pdf, canvas, options = {}) {
   const x = marginX + (printableW - drawW) / 2;
   const y = marginTop;
 
-  pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, drawW, drawH);
+  pdf.addImage(canvas.toDataURL('image/jpeg', 0.82), 'JPEG', x, y, drawW, drawH, undefined, 'FAST');
 
   // Formal footer: thin separator + document title + date
   const dateStr = generatedAt.toLocaleDateString('en-PH', {
@@ -10524,7 +10593,7 @@ function updateDocumentUploadFields(documentType, permitType) {
   pdfSlotWrapper.style.gridColumn = '1 / -1'; // Full width spanning both columns
   pdfSlotWrapper.id = 'formPdfAutoAttachSlot';
 
-  if (savedPdf && savedPdf.base64 && savedPdf.name) {
+  if (savedPdf && savedPdf.name && ((savedPdf.url && savedPdf.storagePath) || savedPdf.manualPending)) {
     const pdfSizeKB = Math.round(savedPdf.size / 1024);
     pdfSlotWrapper.innerHTML = `
       <div class="pdf-slot pdf-slot--ready">
@@ -10538,7 +10607,7 @@ function updateDocumentUploadFields(documentType, permitType) {
         <div class="pdf-slot__info">
           <div class="pdf-slot__label">Letter Request / Application Form <span class="pdf-slot__badge">Auto-attached</span></div>
           <div class="pdf-slot__filename" id="formPdfAttachName">${savedPdf.name}</div>
-          <div class="pdf-slot__meta">${pdfSizeKB > 0 ? pdfSizeKB + ' KB' : ''} &bull; PDF &bull; Generated from Step 2</div>
+          <div class="pdf-slot__meta">${pdfSizeKB > 0 ? pdfSizeKB + ' KB' : ''} &bull; PDF &bull; ${savedPdf.manualPending ? 'Uploaded manually' : 'Generated from Step 2'}</div>
         </div>
         <div class="pdf-slot__status">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -10589,23 +10658,47 @@ function updateDocumentUploadFields(documentType, permitType) {
   // Manual upload fallback: if user uploads their downloaded form PDF manually
   const manualInput = document.getElementById('manualFormPdfUpload');
   if (manualInput) {
-    manualInput.addEventListener('change', (e) => {
+    manualInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        try {
-          const base64 = ev.target.result;
-          const formPdfData = {
-            base64,
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const uploadRes = await fetch('/upload-file-to-storage', { method: 'POST', body: formData });
+        const uploadData = await uploadRes.json().catch(() => null);
+        if (uploadRes.ok && uploadData?.url && uploadData?.storagePath) {
+          localStorage.setItem('generatedFormPDF', JSON.stringify({
+            url: uploadData.url,
+            storagePath: uploadData.storagePath,
             name: file.name,
             size: file.size,
-            type: file.type,
+            type: file.type || 'application/pdf',
             timestamp: Date.now(),
             permitType
-          };
-          localStorage.setItem('generatedFormPDF', JSON.stringify(formPdfData));
-          // Update UI to ready state
+          }));
+        } else {
+          await initEditIndexedDB();
+          await saveDraftUpload(-1, {
+            file,
+            name: file.name,
+            size: file.size,
+            type: file.type || 'application/pdf',
+            requirement: 'Letter Request / Application Form',
+            manualPending: true,
+            timestamp: Date.now()
+          });
+          localStorage.setItem('generatedFormPDF', JSON.stringify({
+            manualPending: true,
+            draftIndex: -1,
+            uploadError: uploadData?.details || uploadData?.error || 'Manual upload saved locally',
+            name: file.name,
+            size: file.size,
+            type: file.type || 'application/pdf',
+            timestamp: Date.now(),
+            permitType
+          }));
+        }
+        // Update UI to ready state
           const slot = document.getElementById('formPdfMissingWarning');
           if (slot) {
             slot.className = 'pdf-slot pdf-slot--ready';
@@ -10633,11 +10726,10 @@ function updateDocumentUploadFields(documentType, permitType) {
             `;
           }
           console.log(`Manual form PDF uploaded: ${file.name}`);
-        } catch (err) {
-          console.error('Failed to save manual form PDF:', err);
-        }
-      };
-      reader.readAsDataURL(file);
+      } catch (err) {
+        console.error('Failed to save manual form PDF:', err);
+        showAlert('Could not upload form PDF. Please try again.', 'error');
+      }
     });
   }
 
@@ -11469,10 +11561,16 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
     applicantName = companyName;
   }
   
-  // Quick validation
-  if (!documentType || !permitType || !applicantName || !applicantAddress || !applicantMobile) {
-    showAlert('Please complete all required fields marked with *.', 'warning');
-    return;
+  // Skip validation if triggered programmatically from the click handler (already validated)
+  const form = document.getElementById('newApplicationForm');
+  if (form?.dataset.programmaticSubmit === '1') {
+    delete form.dataset.programmaticSubmit;
+  } else {
+    // Quick validation (only when submit is triggered directly, not via click handler)
+    if (!documentType || !permitType || !applicantName || !applicantAddress || !applicantMobile) {
+      showAlert('Please complete all required fields marked with *.', 'warning');
+      return;
+    }
   }
   
   // Collect files for background upload
@@ -11495,6 +11593,19 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
             alreadyUploaded: { url: savedPdf.url, storagePath: savedPdf.storagePath, name: savedPdf.name, size: savedPdf.size, type: 'application/pdf' }
           });
           console.log(`Auto-attached pre-uploaded form PDF: ${savedPdf.name}`);
+        } else if (savedPdf.manualPending) {
+          const manualDraft = await getDraftUpload(savedPdf.draftIndex ?? -1);
+          if (manualDraft?.file) {
+            filesToUpload.push({
+              fileId: `manualFormPDF_${Date.now()}`,
+              file: manualDraft.file,
+              requirement: 'Letter Request / Application Form',
+              index: -1
+            });
+            console.log(`Auto-attached locally saved manual form PDF: ${savedPdf.name}`);
+          } else {
+            console.warn('Manual form PDF metadata found but local draft file is missing.');
+          }
         } else {
           console.warn('Form PDF metadata found but no URL — may not have uploaded yet.');
         }
@@ -11632,11 +11743,10 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
     } else {
       appRef = await addDoc(collection(db, 'applications'), applicationData);
 
-      // Notify staff/admin about new submission
-      await notifyTeamAboutApplication('application-submitted', {
+      notifyTeamAboutApplication('application-submitted', {
         ...applicationData,
         docId: appRef.id
-      });
+      }).catch(error => console.warn('Application submitted, but notification failed:', error));
     }
     
     // INSTANT: Show success modal and redirect
@@ -11693,8 +11803,10 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
     console.log(`Preparing to upload ${filesToUpload.length} files in background...`);
     if (filesToUpload.length > 0) {
       // Log file details for debugging
-      filesToUpload.forEach(({ file, requirement, index }) => {
-        console.log(`File ${index + 1}: ${file.name} (${file.size} bytes) - Requirement: ${requirement}`);
+      filesToUpload.forEach(({ file, requirement, index, alreadyUploaded }) => {
+        const fileName = file?.name || alreadyUploaded?.name || 'Saved upload';
+        const fileSize = file?.size || alreadyUploaded?.size || 0;
+        console.log(`File ${index + 1}: ${fileName} (${fileSize} bytes) - Requirement: ${requirement}`);
       });
       
       // Show upload progress notification
@@ -12455,6 +12567,11 @@ window.navigateToSection = function(sectionId) {
           window.appMap.invalidateSize();
         }
       }, 100);
+    }
+
+    // Refresh dashboard progress widget live when navigating to dashboard
+    if (sectionId === 'dashboardSection') {
+      updateDashboardProgressWidget();
     }
     
     const pageTitle = document.querySelector('.page-title');
