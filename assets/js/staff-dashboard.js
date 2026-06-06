@@ -55,6 +55,8 @@ document.addEventListener('DOMContentLoaded', function() {
       toggleIcon.textContent = '≡';
     }
   }
+
+  initDashboardSidebar();
 });
 
 const API_BASE = window.API_BASE || (location.hostname === 'localhost' || location.hostname === '127.0.0.1' ? 'http://127.0.0.1:3000' : '');
@@ -404,6 +406,23 @@ function updateUserInfo(user, userData) {
   if (userName) userName.textContent = displayName;
   if (userInitials) userInitials.textContent = initials;
   if (welcomeName) welcomeName.textContent = displayName;
+
+  const welcomeSection = document.querySelector('.welcome-section');
+  if (welcomeSection) {
+    const welcomeKey = 'staff_welcome_shown_' + (user.uid || user.email);
+    if (!sessionStorage.getItem(welcomeKey)) {
+      sessionStorage.setItem(welcomeKey, '1');
+      welcomeSection.style.display = '';
+      welcomeSection.style.transition = 'opacity 0.8s ease';
+      welcomeSection.style.opacity = '1';
+      setTimeout(() => {
+        welcomeSection.style.opacity = '0';
+        setTimeout(() => { welcomeSection.style.display = 'none'; }, 850);
+      }, 4000);
+    } else {
+      welcomeSection.style.display = 'none';
+    }
+  }
 }
 
 // Load dashboard data
@@ -494,6 +513,152 @@ function loadRecentApplications() {
   }
 }
 
+// ─── Dashboard Sidebar: Calendar + Pickup Schedule ───────────────────────────
+
+let calViewYear, calViewMonth;
+
+function initDashboardSidebar() {
+  const now = new Date();
+  calViewYear = now.getFullYear();
+  calViewMonth = now.getMonth();
+
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const days   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  const todayEl   = document.getElementById('dashCalToday');
+  const daynameEl = document.getElementById('dashCalDayname');
+  if (todayEl)   todayEl.textContent   = `${now.getDate()} of ${months[now.getMonth()]} ${now.getFullYear()}`;
+  if (daynameEl) daynameEl.textContent = days[now.getDay()];
+
+  renderMiniCalendar();
+
+  document.querySelectorAll('.dash-pickup-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.dash-pickup-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      renderPickupList(tab.getAttribute('data-pickup-tab'));
+    });
+  });
+}
+
+function getPickupDatesSet() {
+  const set = new Set();
+  allApplications.forEach(app => {
+    if (app.pickupSchedule?.date) set.add(app.pickupSchedule.date);
+  });
+  return set;
+}
+
+function renderMiniCalendar() {
+  const container = document.getElementById('dashMiniCalendar');
+  if (!container) return;
+
+  const now   = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const pickupDates = getPickupDatesSet();
+
+  const months   = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const dowLabels = ['S','M','T','W','T','F','S'];
+
+  const firstDay   = new Date(calViewYear, calViewMonth, 1).getDay();
+  const daysInMonth= new Date(calViewYear, calViewMonth+1, 0).getDate();
+  const monthLabel = `${months[calViewMonth]} ${calViewYear}`;
+
+  let html = `
+    <div class="dash-mini-cal-header">
+      <button class="dash-mini-cal-nav" id="calPrev">&#8249;</button>
+      <span>${monthLabel}</span>
+      <button class="dash-mini-cal-nav" id="calNext">&#8250;</button>
+    </div>
+    <div class="dash-mini-cal-grid">
+  `;
+  dowLabels.forEach(d => { html += `<div class="dash-mini-cal-dow">${d}</div>`; });
+  for (let i = 0; i < firstDay; i++) html += `<div class="dash-mini-cal-day empty"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calViewYear}-${String(calViewMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday    = dateStr === today ? ' today' : '';
+    const hasPickup  = pickupDates.has(dateStr) ? ' has-pickup' : '';
+    html += `<div class="dash-mini-cal-day${isToday}${hasPickup}" data-date="${dateStr}">${d}</div>`;
+  }
+  html += `</div>`;
+  container.innerHTML = html;
+
+  document.getElementById('calPrev')?.addEventListener('click', () => {
+    calViewMonth--;
+    if (calViewMonth < 0) { calViewMonth = 11; calViewYear--; }
+    renderMiniCalendar();
+  });
+  document.getElementById('calNext')?.addEventListener('click', () => {
+    calViewMonth++;
+    if (calViewMonth > 11) { calViewMonth = 0; calViewYear++; }
+    renderMiniCalendar();
+  });
+
+  container.querySelectorAll('.dash-mini-cal-day.has-pickup').forEach(el => {
+    el.addEventListener('click', () => {
+      const date = el.getAttribute('data-date');
+      filterPickupByDate(date);
+    });
+  });
+}
+
+function filterPickupByDate(date) {
+  document.querySelectorAll('.dash-pickup-tab').forEach(t => t.classList.remove('active'));
+  renderPickupList('all', date);
+}
+
+function renderPickupList(tab, filterDate) {
+  const list = document.getElementById('dashPickupList');
+  if (!list) return;
+
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+
+  let items = allApplications.filter(app => app.pickupSchedule?.date);
+
+  if (filterDate) {
+    items = items.filter(app => app.pickupSchedule.date === filterDate);
+  } else if (tab === 'today') {
+    items = items.filter(app => app.pickupSchedule.date === todayStr);
+  } else {
+    items.sort((a,b) => {
+      const da = a.pickupSchedule.date + (a.pickupSchedule.time||'');
+      const db2 = b.pickupSchedule.date + (b.pickupSchedule.time||'');
+      return da.localeCompare(db2);
+    });
+    items = items.slice(0, 30);
+  }
+
+  if (!items.length) {
+    list.innerHTML = `<div class="dash-pickup-empty">${tab === 'today' ? 'No pickups today' : 'No scheduled pickups yet'}</div>`;
+    return;
+  }
+
+  list.innerHTML = items.map(app => {
+    const isToday = app.pickupSchedule.date === todayStr;
+    const timeStr = app.pickupSchedule.time || '';
+    const dateStr2 = app.pickupSchedule.date || '';
+    const name    = app.applicantName || app.applicantEmail || 'Applicant';
+    const permit  = (app.permitType || '').length > 38 ? (app.permitType || '').slice(0,38)+'…' : (app.permitType || 'Application');
+    const metaLine = [isToday ? 'Today' : dateStr2, timeStr].filter(Boolean).join(' · ');
+    return `
+      <div class="dash-pickup-item${isToday ? ' today-item' : ''}" onclick="viewApplication('${app.id}')">
+        <div class="dash-pickup-dot"></div>
+        <div class="dash-pickup-body">
+          <div class="dash-pickup-name">${name}</div>
+          <div class="dash-pickup-permit">${permit}</div>
+          <div class="dash-pickup-time">${metaLine}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function refreshDashboardSidebar() {
+  renderMiniCalendar();
+  const activeTab = document.querySelector('.dash-pickup-tab.active')?.getAttribute('data-pickup-tab') || 'today';
+  renderPickupList(activeTab);
+}
+
 // Fetch applications from Firestore with real-time updates
 async function fetchApplications() {
   try {
@@ -537,6 +702,7 @@ async function fetchApplications() {
       updateStats();
       filterAndDisplayApplications();
       loadRecentApplications();
+      refreshDashboardSidebar();
       
       // Applications loaded successfully
     });
@@ -1019,7 +1185,7 @@ window.viewApplication = async function(appId) {
                   </div>
                 </div>
                 <div style="display:flex;gap:6px;padding:8px 10px 10px;">
-                  <button onclick="window.open('/download-file?storagePath=${serverRef}&inline=1','_blank','noopener,noreferrer')" style="flex:1;padding:6px 0;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;" title="Open in new tab">
+                  <button onclick="window.open('/download-file?storagePath=${serverRef}&inline=1','_blank','noopener,noreferrer')" style="flex:1;padding:6px 0;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;" title="View in new tab">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                     View
                   </button>

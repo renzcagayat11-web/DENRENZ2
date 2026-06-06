@@ -135,6 +135,30 @@
         </header>
 
         <!-- Dashboard Content -->
+        <div class="global-layout">
+        <!-- Global Right Sidebar (visible on all sections) -->
+        <aside class="global-right-sidebar">
+          <!-- Date & Calendar Widget -->
+          <div class="dash-widget dash-calendar-widget">
+            <div class="dash-cal-today" id="dashCalToday"></div>
+            <div class="dash-cal-dayname" id="dashCalDayname"></div>
+            <div class="dash-mini-calendar" id="dashMiniCalendar"></div>
+          </div>
+          <!-- Pickup Schedule Widget -->
+          <div class="dash-widget dash-pickup-widget">
+            <div class="dash-widget-header">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span>Scheduled Pickups</span>
+            </div>
+            <div class="dash-pickup-tabs">
+              <button class="dash-pickup-tab active" data-pickup-tab="today">Today</button>
+              <button class="dash-pickup-tab" data-pickup-tab="upcoming">Upcoming</button>
+            </div>
+            <div class="dash-pickup-list" id="dashPickupList">
+              <div class="dash-pickup-empty">No pickups scheduled</div>
+            </div>
+          </div>
+        </aside>
         <div class="content-area">
           <!-- Dashboard Overview Section -->
           <section id="dashboardSection" class="page-section active">
@@ -176,7 +200,7 @@
               </div>
             </section>
 
-            <!-- Recent Applications Summary -->
+            <!-- Recent Applications -->
             <section class="applications-section">
               <div class="section-header">
                 <h3 class="section-title">Recent Applications</h3>
@@ -184,7 +208,7 @@
               </div>
               <div class="applications-table-container">
                 <div class="table-wrapper">
-                  <div class="table-scroll-container" style="max-height: 300px;">
+                  <div class="table-scroll-container" style="max-height: 420px;">
                     <table class="modern-data-table">
                       <thead>
                         <tr>
@@ -1144,6 +1168,7 @@
               </div>
             </div>
           </section>
+        </div>
         </div>
       </main>
     </div>
