@@ -933,24 +933,29 @@ window.viewApplication = async function(appId) {
     <!-- Documents Section -->
     ${(() => {
       const hasNoDocs = !currentApplication.documents || currentApplication.documents.length === 0;
+      const isFailed = currentApplication.uploadStatus === 'failed';
       const isUploading = currentApplication.uploadStatus === 'uploading';
-      if (!hasNoDocs || !isUploading) return '';
-      const submittedMs = currentApplication.createdAt?.toMillis?.() || currentApplication.createdAt?.seconds * 1000 || 0;
-      const minutesSince = submittedMs ? (Date.now() - submittedMs) / 60000 : 0;
-      const isStuck = minutesSince > 10;
-      return `
+      if (!hasNoDocs) return '';
+      if (isFailed || (isUploading && hasNoDocs)) {
+        const submittedMs = currentApplication.createdAt?.toMillis?.() || currentApplication.createdAt?.seconds * 1000 || 0;
+        const minutesSince = submittedMs ? (Date.now() - submittedMs) / 60000 : 999;
+        const showFailed = isFailed || minutesSince > 5;
+        return `
     <div class="detail-section">
       <div class="section-header">
         <h3 class="section-title">📁 Uploaded Documents</h3>
       </div>
       <div class="section-content">
-        <div style="padding:16px;background:${isStuck ? '#fef2f2' : '#fffbeb'};border:1px solid ${isStuck ? '#fca5a5' : '#f59e0b'};border-radius:8px;color:${isStuck ? '#991b1b' : '#92400e'};font-size:14px;">
-          ${isStuck
-            ? '⚠️ <strong>Upload did not complete.</strong> The customer\'s documents failed to upload. Please ask the customer to resubmit with their documents.'
-            : '⏳ <strong>Documents are still being uploaded.</strong> The customer just submitted — files are uploading in the background. This page will update automatically.'}
+        <div style="padding:16px;background:${showFailed ? '#fef2f2' : '#fffbeb'};border:1px solid ${showFailed ? '#fca5a5' : '#f59e0b'};border-radius:8px;color:${showFailed ? '#991b1b' : '#92400e'};font-size:14px;">
+          ${showFailed
+            ? '❌ <strong>Documents were not received.</strong> The customer\'s files failed to upload. Please contact the customer to resubmit their documents through their dashboard.'
+            : '⏳ <strong>Documents are uploading.</strong> The customer just submitted — this page will update automatically in a moment.'}
         </div>
       </div>
     </div>`;
+      }
+      if (!isUploading) return '';
+      return '';
     })()}
     ${currentApplication.documents && currentApplication.documents.length > 0 ? `
     <div class="detail-section">
@@ -988,25 +993,37 @@ window.viewApplication = async function(appId) {
               `;
             }
             
-            const downloadUrl = docData;
+            const safeUrl = docData.replace(/'/g, "\\'");
+            const safeName = docName.replace(/'/g, "\\'");
 
             return `
-              <div class="document-card">
-                <div class="document-preview">
-                  ${isImage ? 
-                    `<img src="${docData}" alt="${docName}" onclick="openImageViewer('${docData}', '${docName.replace(/'/g, "\\'")}')" style="cursor: pointer;" />` :
-                    `<div onclick="downloadDocumentFromServer('${downloadUrl}', '${docName.replace(/'/g, "\\'")}')" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #64748b; cursor: pointer;">
-                      <div style="font-size: 48px; margin-bottom: 8px;">${isPDF ? '📄' : '📎'}</div>
-                      <div style="font-weight: 600;">Click to Download</div>
-                    </div>`
+              <div class="document-card" style="display:flex;flex-direction:column;">
+                <div class="document-preview" style="cursor:pointer;" onclick="${isImage ? `openImageViewer('${safeUrl}','${safeName}')` : `viewDocumentInBrowser('${safeUrl}')`}">
+                  ${isImage
+                    ? `<img src="${docData}" alt="${docName}" style="width:100%;height:100%;object-fit:cover;" />`
+                    : `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#64748b;">
+                        <div style="font-size:48px;margin-bottom:6px;">${isPDF ? '📄' : '📎'}</div>
+                        <div style="font-weight:600;font-size:13px;">${isPDF ? 'PDF Document' : 'Document'}</div>
+                        <div style="font-size:11px;color:#94a3b8;margin-top:2px;">Click to View</div>
+                      </div>`
                   }
                 </div>
-                <div class="document-info">
-                  <div class="document-name">${docName}</div>
+                <div class="document-info" style="flex:1;">
+                  <div class="document-name" title="${docName}">${docName}</div>
                   <div class="document-meta">
                     <span>${docSize ? (docSize / 1024).toFixed(1) + ' KB' : 'Unknown size'}</span>
                     <span>☁️ Firebase</span>
                   </div>
+                </div>
+                <div style="display:flex;gap:6px;padding:8px 10px 10px;">
+                  <button onclick="viewDocumentInBrowser('${safeUrl}')" style="flex:1;padding:6px 0;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;" title="Open in new tab">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    View
+                  </button>
+                  <button onclick="downloadDocumentFromServer('${safeUrl}','${safeName}')" style="flex:1;padding:6px 0;background:#059669;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;" title="Download file">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download
+                  </button>
                 </div>
               </div>
             `;
@@ -1579,10 +1596,9 @@ document.getElementById('underReviewModal').addEventListener('click', (e) => {
 window.downloadDocumentFromServer = function(url, filename) {
   console.log('Opening/downloading document:', url, filename);
   try {
-    // For cross-origin Firebase Storage URLs, fetch via server proxy then trigger download
-    const serverUrl = `/download-file?storagePath=${encodeURIComponent(url.includes('storage.googleapis.com') ? url.split('/o/')[1]?.split('?')[0] ? decodeURIComponent(url.split('/o/')[1].split('?')[0]) : '' : url)}&filename=${encodeURIComponent(filename || 'document')}`;
+    // Pass full URL — server handles all URL format extraction
+    const serverUrl = `/download-file?storagePath=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename || 'document')}`;
     const link = document.createElement('a');
-    // Try server proxy first (gives proper download headers), fallback to direct URL in new tab
     link.href = serverUrl;
     link.download = filename || 'document';
     link.target = '_blank';
@@ -1600,6 +1616,17 @@ window.downloadDocumentFromServer = function(url, filename) {
 // Keep the old function for compatibility
 window.downloadDocument = function(url, filename) {
   return downloadDocumentFromServer(url, filename);
+};
+
+// Open document in a new browser tab for inline viewing
+window.viewDocumentInBrowser = function(url) {
+  try {
+    const viewUrl = `/download-file?storagePath=${encodeURIComponent(url)}&inline=1`;
+    window.open(viewUrl, '_blank', 'noopener,noreferrer');
+  } catch (error) {
+    console.error('View error:', error);
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
 };
 
 // Professional Image Viewer Modal Functions

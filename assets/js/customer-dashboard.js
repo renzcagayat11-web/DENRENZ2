@@ -2562,19 +2562,19 @@ function generateApplicationDetailsHTML(app) {
           </div>
         </div>`;
     }).join('');
+  } else if (app.uploadStatus === 'failed' || (isUploading && (!app.documents || app.documents.length === 0))) {
+    docsInner = `<div class="appview-empty" style="background:#fef2f2;border-radius:10px;border:1px solid #fca5a5;padding:24px;">
+      <div class="appview-empty-icon">❌</div>
+      <div class="appview-empty-text" style="color:#991b1b;font-weight:600;margin-bottom:4px;">Documents failed to upload.</div>
+      <div style="font-size:13px;color:#7f1d1d;margin-bottom:12px;">Your application was saved but no files were received. Please resubmit your documents to continue.</div>
+      <button onclick="openResubmitPage('${app.id}')" style="padding:8px 20px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;">
+        📤 Re-upload Documents
+      </button>
+    </div>`;
   } else if (isUploading) {
-    const hasNoDocuments = !app.documents || app.documents.length === 0;
     docsInner = `<div class="appview-empty" style="background:#fef3c7;border-radius:10px;border:1px solid #fbbf24;padding:24px;">
       <div class="appview-empty-icon">⏳</div>
-      <div class="appview-empty-text" style="color:#92400e;">
-        ${hasNoDocuments
-          ? 'Your documents failed to upload. Please re-upload your documents.'
-          : 'Documents are still being uploaded, please wait...'}
-      </div>
-      ${hasNoDocuments ? `
-      <button onclick="openResubmitPage('${app.id}')" style="margin-top:12px;padding:8px 20px;background:#d97706;color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;">
-        📤 Re-upload Documents
-      </button>` : ''}
+      <div class="appview-empty-text" style="color:#92400e;">Documents are still being uploaded, please wait…</div>
     </div>`;
   } else {
     docsInner = `<div class="appview-empty">
@@ -11664,8 +11664,81 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
 
     console.warn(`⚠️ No file for requirement index ${index}: ${requirements[index]}`);
   }
-  
-  // INSTANT SUBMISSION: Create application immediately
+
+  // ── PRE-UPLOAD: Upload all pending files NOW before saving to Firestore ──
+  const pendingFiles = filesToUpload.filter(f => !f.alreadyUploaded && f.file);
+  if (pendingFiles.length > 0) {
+    // Show upload progress overlay
+    let progressOverlay = document.getElementById('submitUploadOverlay');
+    if (!progressOverlay) {
+      progressOverlay = document.createElement('div');
+      progressOverlay.id = 'submitUploadOverlay';
+      progressOverlay.style.cssText = `
+        position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.55);
+        z-index:99999;display:flex;align-items:center;justify-content:center;`;
+      progressOverlay.innerHTML = `
+        <div style="background:#fff;border-radius:16px;padding:32px 40px;min-width:320px;max-width:440px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+          <div style="font-size:40px;margin-bottom:12px;">📤</div>
+          <div style="font-weight:700;font-size:18px;color:#1e293b;margin-bottom:6px;">Uploading Documents</div>
+          <div id="submitUploadLabel" style="font-size:13px;color:#64748b;margin-bottom:16px;">Preparing…</div>
+          <div style="background:#e2e8f0;border-radius:99px;height:10px;overflow:hidden;">
+            <div id="submitUploadBar" style="height:100%;width:0%;background:linear-gradient(90deg,#2563eb,#06b6d4);border-radius:99px;transition:width 0.3s ease;"></div>
+          </div>
+          <div id="submitUploadCount" style="font-size:12px;color:#94a3b8;margin-top:8px;">0 / ${pendingFiles.length} files</div>
+        </div>`;
+      document.body.appendChild(progressOverlay);
+    }
+    const setProgress = (done, total, label) => {
+      const bar = document.getElementById('submitUploadBar');
+      const lbl = document.getElementById('submitUploadLabel');
+      const cnt = document.getElementById('submitUploadCount');
+      if (bar) bar.style.width = `${Math.round((done / total) * 100)}%`;
+      if (lbl) lbl.textContent = label;
+      if (cnt) cnt.textContent = `${done} / ${total} files`;
+    };
+
+    let doneCount = 0;
+    for (const item of pendingFiles) {
+      setProgress(doneCount, pendingFiles.length, `Uploading ${item.file.name}…`);
+      try {
+        const formData = new FormData();
+        formData.append('file', item.file);
+        formData.append('folder', 'denr-permits');
+        const resp = await fetch('/upload-file-to-storage', { method: 'POST', body: formData });
+        if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+        const result = await resp.json();
+        if (!result.success) throw new Error(result.error || 'Upload failed');
+        // Promote to alreadyUploaded so Firestore gets the URL
+        item.alreadyUploaded = {
+          url: result.url,
+          storagePath: result.storagePath,
+          name: item.file.name,
+          size: item.file.size,
+          type: item.file.type
+        };
+        doneCount++;
+        setProgress(doneCount, pendingFiles.length, `Uploaded ${item.file.name}`);
+        console.log(`✅ Pre-uploaded: ${item.file.name}`);
+      } catch (uploadErr) {
+        console.error(`❌ Pre-upload failed for ${item.file.name}:`, uploadErr);
+        if (progressOverlay) progressOverlay.remove();
+        showAlert(`Failed to upload "${item.file.name}": ${uploadErr.message}. Please check your connection and try again.`, 'error');
+        // Re-enable submit buttons
+        [document.getElementById('submitStep5'),
+         document.querySelector('#newApplicationForm button[type="submit"]'),
+         document.querySelector('button.submit-btn')].forEach(btn => {
+          if (btn) { btn.disabled = false; btn.textContent = 'Submit Application'; btn.classList.remove('loading'); }
+        });
+        return;
+      }
+    }
+    setProgress(pendingFiles.length, pendingFiles.length, 'Upload complete! Saving application…');
+    // Small pause so user sees 100%
+    await new Promise(r => setTimeout(r, 500));
+    if (progressOverlay) progressOverlay.remove();
+  }
+
+  // SUBMISSION: Save application with all documents already uploaded
   try {
     const isEditing = window.editingAppId;
     const applicationId = isEditing ? window.editingAppId : `DENR-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}-${Math.floor(Math.random() * 1000000)}`;
@@ -11676,7 +11749,22 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
       existingDocuments = window.existingDocuments;
       console.log('Preserving existing documents for edit:', existingDocuments);
     }
-    
+
+    // Build complete documents array (all files now have alreadyUploaded)
+    const allUploadedDocs = [
+      ...existingDocuments,
+      ...filesToUpload
+        .filter(f => f.alreadyUploaded)
+        .map(f => ({
+          name: f.alreadyUploaded.name,
+          url: f.alreadyUploaded.url,
+          storagePath: f.alreadyUploaded.storagePath,
+          size: f.alreadyUploaded.size,
+          type: f.alreadyUploaded.type,
+          requirement: f.requirement
+        }))
+    ];
+
     const applicationData = {
       applicationId,
       applicantUid: auth.currentUser.uid,
@@ -11687,24 +11775,11 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
       applicantAddress,
       applicantMobile,
       applicationDetails,
-      documents: [
-        ...existingDocuments,
-        // Include pre-uploaded files immediately so staff can see them right away
-        ...filesToUpload
-          .filter(f => f.alreadyUploaded)
-          .map(f => ({
-            name: f.alreadyUploaded.name,
-            url: f.alreadyUploaded.url,
-            storagePath: f.alreadyUploaded.storagePath,
-            size: f.alreadyUploaded.size,
-            type: f.alreadyUploaded.type,
-            requirement: f.requirement
-          }))
-      ],
+      documents: allUploadedDocs,
       status: 'pending',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-      uploadStatus: (filesToUpload.length > 0 && filesToUpload.some(f => !f.alreadyUploaded)) ? 'uploading' : 'complete'
+      uploadStatus: 'complete'
     };
     
     // INSTANT: Save to Firestore immediately
@@ -11811,23 +11886,6 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
         console.log('Reset submit button:', btn.id || btn.className);
       }
     });
-    
-    // BACKGROUND: Upload files after redirect with progress indicator
-    console.log(`Preparing to upload ${filesToUpload.length} files in background...`);
-    if (filesToUpload.length > 0) {
-      // Log file details for debugging
-      filesToUpload.forEach(({ file, requirement, index, alreadyUploaded }) => {
-        const fileName = file?.name || alreadyUploaded?.name || 'Saved upload';
-        const fileSize = file?.size || alreadyUploaded?.size || 0;
-        console.log(`File ${index + 1}: ${fileName} (${fileSize} bytes) - Requirement: ${requirement}`);
-      });
-      
-      // Show upload progress notification
-      showUploadProgressNotification(filesToUpload.length);
-      backgroundUploadFiles(appRef.id || window.editingAppId, filesToUpload);
-    } else {
-      console.log('No files to upload - application submitted without files');
-    }
     
     // Refresh applications list
     fetchUserApplications();

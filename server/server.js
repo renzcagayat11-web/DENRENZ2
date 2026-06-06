@@ -551,9 +551,45 @@ app.get('/admin/audit-logs', verifyToken, requireAdmin, async (req, res) => {
 });
 
 
+// Fix stuck applications — reset uploadStatus='uploading' with no documents
+app.post('/admin/fix-stuck-uploads', verifyToken, requireStaff, async (req, res) => {
+  try {
+    const db = admin.firestore();
+    const snapshot = await db.collection('applications')
+      .where('uploadStatus', '==', 'uploading')
+      .get();
+
+    const batch = db.batch();
+    let fixed = 0;
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      const hasNoDocs = !data.documents || data.documents.length === 0;
+      const submittedMs = data.createdAt?.toMillis?.() || (data.createdAt?.seconds || 0) * 1000;
+      const minutesSince = submittedMs ? (Date.now() - submittedMs) / 60000 : 999;
+      if (hasNoDocs && minutesSince > 5) {
+        batch.update(docSnap.ref, {
+          uploadStatus: 'failed',
+          uploadFailedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+        fixed++;
+      }
+    });
+    if (fixed > 0) await batch.commit();
+    res.json({ success: true, fixed, total: snapshot.size });
+  } catch (err) {
+    console.error('fix-stuck-uploads error', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Direct file upload route — Firebase Storage
 app.post('/upload-file-to-storage', (req, res, next) => {
   console.log('📥 Upload request incoming, content-type:', req.headers['content-type']);
+  // Set a 60-second timeout for uploads
+  req.setTimeout(60000, () => {
+    console.error('❌ Upload request timed out');
+    if (!res.headersSent) res.status(408).json({ success: false, error: 'Upload timed out. Please try again.' });
+  });
   uploadSingleMemory(req, res, function(err) {
     if (err instanceof multer.MulterError) {
       console.error('❌ Multer error code:', err.code, 'message:', err.message);
@@ -644,8 +680,27 @@ app.get('/download-file', async (req, res) => {
     }
 
     const bucket = admin.storage().bucket();
-    const file = bucket.file(decodeURIComponent(storagePath));
-    const decodedFilename = filename ? decodeURIComponent(filename) : storagePath.split('/').pop();
+
+    // Resolve storagePath from various URL formats:
+    // 1. Already a plain path like "denr-permits/file.pdf"
+    // 2. Firebase download URL: https://...firebasestorage.app/o/denr-permits%2Ffile.pdf?...
+    // 3. Direct public URL: https://storage.googleapis.com/<bucket>/denr-permits/file.pdf
+    let resolvedPath = decodeURIComponent(storagePath);
+    if (resolvedPath.startsWith('http')) {
+      if (resolvedPath.includes('/o/')) {
+        // Firebase download URL — extract path after /o/
+        resolvedPath = decodeURIComponent(resolvedPath.split('/o/')[1].split('?')[0]);
+      } else if (resolvedPath.includes('storage.googleapis.com/')) {
+        // Direct public URL — strip scheme + host + bucket name
+        const afterHost = resolvedPath.split('storage.googleapis.com/')[1] || '';
+        // afterHost = "<bucket>/<path>" — skip the bucket segment
+        const slashIdx = afterHost.indexOf('/');
+        resolvedPath = slashIdx >= 0 ? afterHost.slice(slashIdx + 1) : afterHost;
+      }
+    }
+
+    const file = bucket.file(resolvedPath);
+    const decodedFilename = filename ? decodeURIComponent(filename) : resolvedPath.split('/').pop();
 
     const [exists] = await file.exists();
     if (!exists) {
@@ -654,9 +709,10 @@ app.get('/download-file', async (req, res) => {
 
     const [metadata] = await file.getMetadata();
     const contentType = metadata.contentType || 'application/octet-stream';
+    const inline = req.query.inline === '1';
 
     res.setHeader('Content-Type', contentType);
-    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(decodedFilename)}"`);
+    res.setHeader('Content-Disposition', `${inline ? 'inline' : 'attachment'}; filename="${encodeURIComponent(decodedFilename)}"`);
     res.setHeader('Cache-Control', 'no-cache');
 
     file.createReadStream()

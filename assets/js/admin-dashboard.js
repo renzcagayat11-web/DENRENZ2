@@ -112,11 +112,8 @@ async function logAudit(action, details = '', category = 'user', resourceId = nu
 // Download document function
 window.downloadDocument = function(url, filename) {
   try {
-    // Route through server proxy for proper download headers (cross-origin Firebase Storage)
-    const storagePath = url.includes('storage.googleapis.com') && url.includes('/o/')
-      ? decodeURIComponent(url.split('/o/')[1].split('?')[0])
-      : url;
-    const downloadUrl = `/download-file?storagePath=${encodeURIComponent(storagePath)}&filename=${encodeURIComponent(filename || 'document')}`;
+    // Pass full URL — server handles all URL format extraction
+    const downloadUrl = `/download-file?storagePath=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename || 'document')}`;
     
     const link = document.createElement('a');
     link.href = downloadUrl;
