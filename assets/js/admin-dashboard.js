@@ -112,24 +112,22 @@ async function logAudit(action, details = '', category = 'user', resourceId = nu
 // Download document function
 window.downloadDocument = function(url, filename) {
   try {
-    const downloadUrl = url;
+    // Route through server proxy for proper download headers (cross-origin Firebase Storage)
+    const storagePath = url.includes('storage.googleapis.com') && url.includes('/o/')
+      ? decodeURIComponent(url.split('/o/')[1].split('?')[0])
+      : url;
+    const downloadUrl = `/download-file?storagePath=${encodeURIComponent(storagePath)}&filename=${encodeURIComponent(filename || 'document')}`;
     
-    // Create a temporary anchor element for download
     const link = document.createElement('a');
     link.href = downloadUrl;
     link.download = filename || 'document';
     link.style.display = 'none';
-    link.target = '_blank'; // Ensure it doesn't navigate away
-    
-    // Set additional attributes for better download behavior
-    link.setAttribute('download', filename || 'document');
+    link.target = '_blank';
     link.setAttribute('rel', 'noopener noreferrer');
     
-    // Append to body, click, and remove
     document.body.appendChild(link);
     link.click();
     
-    // Remove the link after a short delay to ensure download starts
     setTimeout(() => {
       document.body.removeChild(link);
     }, 100);

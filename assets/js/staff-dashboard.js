@@ -931,18 +931,27 @@ window.viewApplication = async function(appId) {
     ` : ''}
 
     <!-- Documents Section -->
-    ${(!currentApplication.documents || currentApplication.documents.length === 0) && currentApplication.uploadStatus === 'uploading' ? `
+    ${(() => {
+      const hasNoDocs = !currentApplication.documents || currentApplication.documents.length === 0;
+      const isUploading = currentApplication.uploadStatus === 'uploading';
+      if (!hasNoDocs || !isUploading) return '';
+      const submittedMs = currentApplication.createdAt?.toMillis?.() || currentApplication.createdAt?.seconds * 1000 || 0;
+      const minutesSince = submittedMs ? (Date.now() - submittedMs) / 60000 : 0;
+      const isStuck = minutesSince > 10;
+      return `
     <div class="detail-section">
       <div class="section-header">
         <h3 class="section-title">📁 Uploaded Documents</h3>
       </div>
       <div class="section-content">
-        <div style="padding:16px;background:#fffbeb;border:1px solid #f59e0b;border-radius:8px;color:#92400e;font-size:14px;">
-          ⏳ <strong>Documents are still being uploaded.</strong> The customer submitted the application but the file upload is still in progress. Please check back later or ask the customer to resubmit if the issue persists.
+        <div style="padding:16px;background:${isStuck ? '#fef2f2' : '#fffbeb'};border:1px solid ${isStuck ? '#fca5a5' : '#f59e0b'};border-radius:8px;color:${isStuck ? '#991b1b' : '#92400e'};font-size:14px;">
+          ${isStuck
+            ? '⚠️ <strong>Upload did not complete.</strong> The customer\'s documents failed to upload. Please ask the customer to resubmit with their documents.'
+            : '⏳ <strong>Documents are still being uploaded.</strong> The customer just submitted — files are uploading in the background. This page will update automatically.'}
         </div>
       </div>
-    </div>
-    ` : ''}
+    </div>`;
+    })()}
     ${currentApplication.documents && currentApplication.documents.length > 0 ? `
     <div class="detail-section">
       <div class="section-header">
@@ -1568,26 +1577,23 @@ document.getElementById('underReviewModal').addEventListener('click', (e) => {
 
 // Download Document Function (Final Working Solution)
 window.downloadDocumentFromServer = function(url, filename) {
-  console.log('Downloading document:', url, filename);
-  
+  console.log('Opening/downloading document:', url, filename);
   try {
-    // Create a hidden iframe to handle the download
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = url;
-    
-    // Add to page, let it load, then remove
-    document.body.appendChild(iframe);
-    
-    // Remove iframe after a short delay
-    setTimeout(() => {
-      document.body.removeChild(iframe);
-    }, 1000);
-    
+    // For cross-origin Firebase Storage URLs, fetch via server proxy then trigger download
+    const serverUrl = `/download-file?storagePath=${encodeURIComponent(url.includes('storage.googleapis.com') ? url.split('/o/')[1]?.split('?')[0] ? decodeURIComponent(url.split('/o/')[1].split('?')[0]) : '' : url)}&filename=${encodeURIComponent(filename || 'document')}`;
+    const link = document.createElement('a');
+    // Try server proxy first (gives proper download headers), fallback to direct URL in new tab
+    link.href = serverUrl;
+    link.download = filename || 'document';
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => document.body.removeChild(link), 200);
   } catch (error) {
     console.error('Download error:', error);
-    // Final fallback: direct link
-    window.location.href = url;
+    window.open(url, '_blank', 'noopener,noreferrer');
   }
 };
 

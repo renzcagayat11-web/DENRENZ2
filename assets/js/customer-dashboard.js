@@ -11687,11 +11687,24 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
       applicantAddress,
       applicantMobile,
       applicationDetails,
-      documents: existingDocuments, // Start with existing documents, will add new ones in background
+      documents: [
+        ...existingDocuments,
+        // Include pre-uploaded files immediately so staff can see them right away
+        ...filesToUpload
+          .filter(f => f.alreadyUploaded)
+          .map(f => ({
+            name: f.alreadyUploaded.name,
+            url: f.alreadyUploaded.url,
+            storagePath: f.alreadyUploaded.storagePath,
+            size: f.alreadyUploaded.size,
+            type: f.alreadyUploaded.type,
+            requirement: f.requirement
+          }))
+      ],
       status: 'pending',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-      uploadStatus: filesToUpload.length > 0 ? 'uploading' : 'complete'
+      uploadStatus: (filesToUpload.length > 0 && filesToUpload.some(f => !f.alreadyUploaded)) ? 'uploading' : 'complete'
     };
     
     // INSTANT: Save to Firestore immediately
@@ -12064,8 +12077,8 @@ async function backgroundUploadFiles(appId, filesToUpload) {
         }
       });
       
-      // Mark complete if at least some files uploaded — don't leave stuck at 'uploading'
-      const uploadStatus = allDocuments.length > 0 ? 'complete' : 'uploading';
+      // Mark complete — all uploads finished (successful or pre-uploaded)
+      const uploadStatus = failedUploads.length === 0 ? 'complete' : (allDocuments.length > 0 ? 'complete' : 'uploading');
       
       await updateDoc(appRef, {
         documents: allDocuments,

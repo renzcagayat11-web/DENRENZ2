@@ -6,8 +6,12 @@ service cloud.firestore {
     match /applications/{appId} {
       allow create: if request.auth != null && request.resource.data.applicantUid == request.auth.uid;
       allow read: if request.auth != null;
-      // staff or admin can update status
-      allow update: if request.auth != null && (request.auth.token.role == 'staff' || request.auth.token.role == 'admin');
+      // staff or admin can update any application; customer can only update their own
+      allow update: if request.auth != null && (
+        request.auth.token.role == 'staff' ||
+        request.auth.token.role == 'admin' ||
+        resource.data.applicantUid == request.auth.uid
+      );
       allow delete: if false; // forbid deletes from client
     }
 
