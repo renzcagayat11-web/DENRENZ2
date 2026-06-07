@@ -2,3 +2,5 @@ node_modules/
 serviceAccountKey.json
 *.log
 /.env
+server/.env
+**/.env
