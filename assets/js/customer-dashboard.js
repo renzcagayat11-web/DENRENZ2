@@ -30,9 +30,17 @@ import {
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 const MAX_FILE_SIZE_MB = 5;
 
+// Helper function to get user-specific storage folder
+function getUserStorageFolder(subfolder = 'documents') {
+  const uid = auth.currentUser?.uid;
+  if (!uid) return `denr-permits/${subfolder}`;
+  return `denr-permits/users/${uid}/${subfolder}`;
+}
+
 // Helper function to upload file to Firebase Storage
-async function uploadToStorage(file, folder = 'denr-permits') {
+async function uploadToStorage(file, folder = null) {
   try {
+    if (!folder) folder = getUserStorageFolder();
     const formData = new FormData();
     formData.append('file', file);
     formData.append('folder', folder);
@@ -3109,7 +3117,7 @@ async function handleProfilePictureUpload(e) {
     if (window.fileUploadManager && window.fileUploadManager.uploadFile) {
       // Use the file upload manager for better large file handling
       uploadResult = await window.fileUploadManager.uploadFile(file, {
-        folder: 'profile-pictures',
+        folder: getUserStorageFolder('profile-pictures'),
         validateOptions: {
           allowImages: true,
           allowDocuments: false,
@@ -3125,7 +3133,7 @@ async function handleProfilePictureUpload(e) {
       
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('folder', 'profile-pictures');
+      formData.append('folder', getUserStorageFolder('profile-pictures'));
       
       const uploadResponse = await fetch('/upload-file-to-storage', {
         method: 'POST',
@@ -4412,7 +4420,7 @@ window.submitResubmitApplication = async function() {
     for (const item of uploadPromises) {
       const formData = new FormData();
       formData.append('file', item.file);
-      formData.append('folder', 'denr-permits');
+      formData.append('folder', getUserStorageFolder());
       const resp = await fetch('/upload-file-to-storage', { method: 'POST', body: formData });
       if (!resp.ok) throw new Error(`Upload failed for ${item.file.name}`);
       const result = await resp.json();
@@ -10922,7 +10930,7 @@ async function handleFileSelect(index, file) {
   try {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('folder', 'denr-permits');
+    formData.append('folder', getUserStorageFolder());
 
     const response = await fetch('/upload-file-to-storage', { method: 'POST', body: formData });
     if (!response.ok) throw new Error(`Server error ${response.status}`);
@@ -11703,7 +11711,7 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
       try {
         const formData = new FormData();
         formData.append('file', item.file);
-        formData.append('folder', 'denr-permits');
+        formData.append('folder', getUserStorageFolder());
         const resp = await fetch('/upload-file-to-storage', { method: 'POST', body: formData });
         if (!resp.ok) throw new Error(`Server error ${resp.status}`);
         const result = await resp.json();
@@ -12054,7 +12062,7 @@ async function backgroundUploadFiles(appId, filesToUpload) {
       
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('folder', 'denr-permits');
+      formData.append('folder', getUserStorageFolder());
       
       console.log(`Sending upload request for ${file.name}...`);
       const uploadResponse = await fetch('/upload-file-to-storage', {
@@ -12480,7 +12488,7 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
       try {
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('folder', 'profile-pictures');
+        formData.append('folder', getUserStorageFolder('profile-pictures'));
 
         const uploadResponse = await fetch('/upload-file-to-storage', {
           method: 'POST',
