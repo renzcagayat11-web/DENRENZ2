@@ -26,6 +26,12 @@ import {
   sendPasswordResetEmail
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
+// Backend API base URL — Render.com in production, localhost in dev
+const API_BASE = window.API_BASE ||
+  (location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+    ? 'http://127.0.0.1:3000'
+    : 'https://denr-server.onrender.com');
+
 // File upload settings - MAX 5MB per file for fast uploads
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 const MAX_FILE_SIZE_MB = 5;
@@ -39,7 +45,7 @@ async function uploadToStorage(file, folder = 'denr-permits') {
     
     console.log(`Uploading ${file.name} to Firebase Storage...`);
     
-    const uploadResponse = await fetch('/upload-file-to-storage', {
+    const uploadResponse = await fetch(`${API_BASE}/upload-file-to-storage`, {
       method: 'POST',
       body: formData
     });
@@ -3127,7 +3133,7 @@ async function handleProfilePictureUpload(e) {
       formData.append('file', file);
       formData.append('folder', 'profile-pictures');
       
-      const uploadResponse = await fetch('/upload-file-to-storage', {
+      const uploadResponse = await fetch(`${API_BASE}/upload-file-to-storage`, {
         method: 'POST',
         body: formData
       });
@@ -4413,7 +4419,7 @@ window.submitResubmitApplication = async function() {
       const formData = new FormData();
       formData.append('file', item.file);
       formData.append('folder', 'denr-permits');
-      const resp = await fetch('/upload-file-to-storage', { method: 'POST', body: formData });
+      const resp = await fetch(`${API_BASE}/upload-file-to-storage`, { method: 'POST', body: formData });
       if (!resp.ok) throw new Error(`Upload failed for ${item.file.name}`);
       const result = await resp.json();
       existingDocs[item.index] = {
@@ -10101,7 +10107,7 @@ async function generateFormPDF() {
         const formData = new FormData();
         formData.append('file', pdfFile);
         refreshFormPdfSlot(filename); // show green immediately while uploading
-        const uploadRes = await fetch('/upload-file-to-storage', { method: 'POST', body: formData });
+        const uploadRes = await fetch(`${API_BASE}/upload-file-to-storage`, { method: 'POST', body: formData });
         if (uploadRes.ok) {
           const uploadData = await uploadRes.json();
           const formPdfMeta = {
@@ -10173,7 +10179,7 @@ async function generateFormPDF() {
       const formData = new FormData();
       formData.append('file', pdfFile);
       refreshFormPdfSlot(filename);
-      const uploadRes = await fetch('/upload-file-to-storage', { method: 'POST', body: formData });
+      const uploadRes = await fetch(`${API_BASE}/upload-file-to-storage`, { method: 'POST', body: formData });
       if (uploadRes.ok) {
         const uploadData = await uploadRes.json();
         localStorage.setItem('generatedFormPDF', JSON.stringify({ url: uploadData.url, storagePath: uploadData.storagePath, name: filename, size: pdfFile.size, type: 'application/pdf', timestamp: Date.now(), permitType }));
@@ -10664,7 +10670,7 @@ function updateDocumentUploadFields(documentType, permitType) {
       try {
         const formData = new FormData();
         formData.append('file', file);
-        const uploadRes = await fetch('/upload-file-to-storage', { method: 'POST', body: formData });
+        const uploadRes = await fetch(`${API_BASE}/upload-file-to-storage`, { method: 'POST', body: formData });
         const uploadData = await uploadRes.json().catch(() => null);
         if (uploadRes.ok && uploadData?.url && uploadData?.storagePath) {
           localStorage.setItem('generatedFormPDF', JSON.stringify({
@@ -10924,7 +10930,7 @@ async function handleFileSelect(index, file) {
     formData.append('file', file);
     formData.append('folder', 'denr-permits');
 
-    const response = await fetch('/upload-file-to-storage', { method: 'POST', body: formData });
+    const response = await fetch(`${API_BASE}/upload-file-to-storage`, { method: 'POST', body: formData });
     if (!response.ok) throw new Error(`Server error ${response.status}`);
     const result = await response.json();
     if (!result.success) throw new Error(result.error || 'Upload failed');
@@ -11704,7 +11710,7 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
         const formData = new FormData();
         formData.append('file', item.file);
         formData.append('folder', 'denr-permits');
-        const resp = await fetch('/upload-file-to-storage', { method: 'POST', body: formData });
+        const resp = await fetch(`${API_BASE}/upload-file-to-storage`, { method: 'POST', body: formData });
         if (!resp.ok) throw new Error(`Server error ${resp.status}`);
         const result = await resp.json();
         if (!result.success) throw new Error(result.error || 'Upload failed');
@@ -12057,7 +12063,7 @@ async function backgroundUploadFiles(appId, filesToUpload) {
       formData.append('folder', 'denr-permits');
       
       console.log(`Sending upload request for ${file.name}...`);
-      const uploadResponse = await fetch('/upload-file-to-storage', {
+      const uploadResponse = await fetch(`${API_BASE}/upload-file-to-storage`, {
         method: 'POST',
         body: formData
       });
@@ -12482,7 +12488,7 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
         formData.append('file', file);
         formData.append('folder', 'profile-pictures');
 
-        const uploadResponse = await fetch('/upload-file-to-storage', {
+        const uploadResponse = await fetch(`${API_BASE}/upload-file-to-storage`, {
           method: 'POST',
           body: formData
         });
@@ -13176,7 +13182,7 @@ window.custStartOCR = async function() {
     formData.append('file', _custOcrFile);
 
     setProgress(50, 'Extracting text...');
-    const response = await fetch('/ocr', {
+    const response = await fetch(`${API_BASE}/ocr`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: formData
