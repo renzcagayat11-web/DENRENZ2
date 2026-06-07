@@ -19,7 +19,15 @@ if (!admin) {
 }
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://denrenz2.pages.dev',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    /\.denrenz2\.pages\.dev$/
+  ],
+  credentials: true
+}));
 
 // Optimized payload limits for 5MB file uploads (fast processing)
 app.use(bodyParser.json({ limit: '10mb' }));

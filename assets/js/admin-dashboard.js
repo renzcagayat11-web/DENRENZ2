@@ -25,7 +25,7 @@ import {
   onSnapshot
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-const API_BASE = window.API_BASE || (location.hostname === 'localhost' || location.hostname === '127.0.0.1' ? 'http://127.0.0.1:3000' : '');
+const API_BASE = window.API_BASE || (location.hostname === 'localhost' || location.hostname === '127.0.0.1' ? 'http://127.0.0.1:3000' : 'https://denrenz2-1.onrender.com');
 
 let allApplications = [];
 let adminNotificationCenter = null;

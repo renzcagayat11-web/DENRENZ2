@@ -9088,14 +9088,21 @@ textarea:hover {
   }
 }
 
-/* ─── Customer OCR Scanner ─────────────────────────────────────────────────── */
+/* ─── Customer OCR Scanner — Mobile-First Professional UI ───────────────────── */
 .cust-ocr-container {
   background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
   overflow: hidden;
-  max-width: 860px;
+  max-width: 900px;
   margin: 0 auto;
+  width: 100%;
+}
+@media (max-width: 640px) {
+  .cust-ocr-container {
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
 }
 /* Tabs */
 .cust-ocr-tabs {
@@ -9410,11 +9417,105 @@ textarea:hover {
 }
 .cust-result-textarea:focus { border-color: #10b981; }
 .cust-result-actions { display: flex; gap: 10px; }
-/* Mobile responsive */
-@media (max-width: 640px) {
+/* ─── OCR Mobile-First Responsive Overhaul ──────────────────────────────────── */
+
+/* Tablet */
+@media (max-width: 768px) {
   .cust-result-body { grid-template-columns: 1fr; }
   .cust-result-preview { order: 1; }
   .cust-result-text-section { order: 2; }
-  .cust-camera-wrapper { aspect-ratio: 3/4; }
-  .cust-ocr-tab { font-size: 13px; padding: 12px 8px; }
+  .cust-result-textarea { min-height: 180px; }
+  .cust-camera-wrapper { aspect-ratio: 3/4; max-height: 60vw; }
+}
+
+/* Phone */
+@media (max-width: 640px) {
+  /* Section header */
+  #ocrScannerSection .page-section-header {
+    padding: 16px 16px 0;
+  }
+
+  /* Container full-bleed on mobile */
+  .cust-ocr-container {
+    border-radius: 12px;
+    margin: 0;
+  }
+
+  /* Tabs — bigger touch targets */
+  .cust-ocr-tabs { border-bottom: 2px solid #f1f5f9; }
+  .cust-ocr-tab {
+    font-size: 14px;
+    padding: 16px 8px;
+    gap: 6px;
+  }
+  .cust-ocr-tab svg { width: 18px; height: 18px; }
+
+  /* Tab panels — tighter padding */
+  .cust-ocr-tab-panel { padding: 14px; }
+
+  /* Camera — portrait full-width */
+  .cust-camera-wrapper {
+    aspect-ratio: 3/4;
+    max-height: none;
+    border-radius: 10px;
+  }
+
+  /* Camera controls — larger buttons for touch */
+  .cust-camera-controls { gap: 20px; bottom: 20px; }
+  .cust-cam-btn { width: 52px; height: 52px; }
+  .cust-capture-btn { width: 76px; height: 76px; }
+  .cust-capture-btn svg { width: 30px; height: 30px; }
+
+  /* Start camera button — full width */
+  .cust-btn-start-camera {
+    width: 100%;
+    padding: 16px 20px;
+    font-size: 17px;
+    justify-content: center;
+    border-radius: 14px;
+  }
+
+  /* Preview image */
+  .cust-preview-wrapper img { max-height: 280px; border-radius: 10px; }
+
+  /* Enhance sliders */
+  .cust-enhance-bar { gap: 4px 10px; }
+  .cust-enhance-bar label { font-size: 12px; }
+
+  /* Preview actions — stack on very small screens */
+  .cust-preview-actions { flex-direction: column; gap: 8px; }
+  .cust-preview-actions .cust-btn-primary,
+  .cust-preview-actions .cust-btn-secondary { width: 100%; }
+
+  /* Upload area — tighter */
+  .cust-upload-area { padding: 28px 16px; }
+  .cust-upload-area svg { width: 40px; height: 40px; }
+  .cust-upload-area p { font-size: 15px; }
+
+  /* Buttons — full-height touch-friendly */
+  .cust-btn-primary, .cust-btn-secondary {
+    padding: 14px 16px;
+    font-size: 15px;
+    border-radius: 12px;
+  }
+
+  /* Results */
+  .cust-ocr-results { padding: 14px; }
+  .cust-result-body { grid-template-columns: 1fr; gap: 12px; }
+  .cust-result-preview img { max-height: 220px; }
+  .cust-result-textarea { min-height: 160px; font-size: 14px; }
+
+  /* Result actions — stack */
+  .cust-result-actions { flex-direction: column; gap: 8px; }
+  .cust-result-actions .cust-btn-primary,
+  .cust-result-actions .cust-btn-secondary { width: 100%; }
+
+  /* Result header wrap */
+  .cust-result-header { flex-direction: column; align-items: flex-start; }
+  .cust-scan-again-btn { width: 100%; justify-content: center; }
+
+  /* Processing state */
+  .cust-ocr-processing { padding: 32px 16px; }
+  .cust-ocr-spinner { width: 48px; height: 48px; }
+  .cust-ocr-process-text { font-size: 14px; }
 }
