@@ -26,11 +26,11 @@ import {
   sendPasswordResetEmail
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
-// Backend API base URL — Render.com in production, localhost in dev
+// Backend API base URL — empty (relative) in production, localhost in dev
 const API_BASE = window.API_BASE ||
   (location.hostname === 'localhost' || location.hostname === '127.0.0.1'
     ? 'http://127.0.0.1:3000'
-    : 'https://denr-server.onrender.com');
+    : '');
 
 // File upload settings - MAX 5MB per file for fast uploads
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
