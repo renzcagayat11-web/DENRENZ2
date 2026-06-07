@@ -2880,66 +2880,37 @@ document.addEventListener('DOMContentLoaded', function() {
 // Document Upload Processing (OCR API Integration Ready)
 let uploadedFile = null;
 
-// OCR.space API Configuration (Free, no billing required)
-const OCR_SPACE_API_KEY = 'K88896788488957'; // User's API key
+// Azure Document Intelligence OCR (via secure server proxy)
+async function processWithAzureDI(imageFile) {
+  console.log('Processing image with Azure DI:', imageFile.name, 'Size:', imageFile.size);
 
-// OCR.space API Integration with Formatting Support
-async function processWithOCRSpace(imageFile) {
-  console.log('Processing image:', imageFile.name, 'Size:', imageFile.size, 'Type:', imageFile.type);
+  const token = await auth.currentUser?.getIdToken();
+  if (!token) throw new Error('Not authenticated.');
 
-  // Use API key with overlay enabled for formatting data
   const formData = new FormData();
-  formData.append('apikey', OCR_SPACE_API_KEY);
   formData.append('file', imageFile);
-  formData.append('language', 'eng');
-  formData.append('isOverlayRequired', 'true'); // Enable overlay for formatting data
-  formData.append('detectOrientation', 'true');
-  formData.append('scale', 'true');
-  formData.append('OCREngine', '2');
 
-  console.log('Sending to OCR.space API with formatting support...');
-
-  const response = await fetch('https://api.ocr.space/parse/image', {
+  const response = await fetch(`${API_BASE}/ocr`, {
     method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
     body: formData
   });
 
   const data = await response.json();
-  console.log('OCR.space response with formatting:', data);
+  console.log('Azure DI response:', data);
 
   if (!response.ok) {
-    console.error('HTTP Error:', response.status, response.statusText);
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
   }
 
-  if (data.IsErroredOnProcessing) {
-    const errorMsg = data.ErrorMessage || 'OCR processing failed';
-    console.error('OCR.space processing error:', errorMsg);
-    
-    if (errorMsg.includes('API key')) {
-      throw new Error('Invalid API key. Please check your OCR.space API key.');
-    }
-    
-    throw new Error(errorMsg);
-  }
-
-  const parsedResult = data.ParsedResults?.[0];
-  if (!parsedResult) {
-    console.log('No ParsedResults found, full response:', data);
-    throw new Error('No text detected in image');
-  }
-
-  const extractedText = parsedResult.ParsedText || '';
-  const overlayData = parsedResult.TextOverlay || null;
-
-  console.log('Extracted text length:', extractedText.length);
-  console.log('Overlay data available:', !!overlayData);
+  const lines = data.lines || [];
+  const formattedText = lines.length > 0 ? lines.join('\n') : null;
 
   return {
-    text: extractedText.trim(),
-    confidence: null,
-    formattedText: overlayData ? reconstructFormattedText(overlayData) : null,
-    hasFormatting: !!overlayData
+    text: (data.text || '').trim(),
+    confidence: data.confidence,
+    formattedText,
+    hasFormatting: lines.length > 0
   };
 }
 
@@ -3214,8 +3185,8 @@ function validateOCRFile(file) {
     validation.errors.push('Invalid file format. Only JPEG and PNG images are supported.');
   }
 
-  // File size validation (OCR.space free tier: 1.5MB max)
-  const maxSize = 1.5 * 1024 * 1024; // 1.5MB
+  // File size validation (Azure DI: 10MB max)
+  const maxSize = 10 * 1024 * 1024; // 10MB
   if (file.size > maxSize) {
     validation.needsCompression = true;
     validation.warnings.push(`File is ${(file.size / (1024 * 1024)).toFixed(2)}MB. Will be compressed to 1.5MB limit.`);
@@ -3337,8 +3308,8 @@ window.processOCR = async function() {
     progressText.textContent = 'Extracting text with AI...';
     updateProgressSteps(steps, 2);
 
-    // Call OCR.space API
-    const result = await processWithOCRSpace(processedFile);
+    // Call Azure Document Intelligence via server
+    const result = await processWithAzureDI(processedFile);
 
     progressFill.style.width = '80%';
     progressPercentage.textContent = '80%';
@@ -3392,7 +3363,7 @@ window.processOCR = async function() {
 
     // Store extracted text
     document.getElementById('extractedText').value = result.text;
-    document.getElementById('confidenceScore').textContent = 'N/A';
+    document.getElementById('confidenceScore').textContent = result.confidence != null ? result.confidence + '%' : 'N/A';
     document.getElementById('processingTime').textContent = `${processingTime}s`;
 
     // Update modern UI elements
@@ -3416,13 +3387,11 @@ window.processOCR = async function() {
     
     if (error.message.includes('File too large')) {
       alert(
-        'File size exceeds OCR.space free tier limit.\n\n' +
-        'Limit: 1.5MB per file\n' +
+        'File size exceeds the 10MB limit.\n\n' +
         'Your file: ' + (uploadedFile.size / (1024 * 1024)).toFixed(2) + 'MB\n\n' +
         'Solutions:\n' +
         '• Compress the image before uploading\n' +
-        '• Crop to relevant text areas only\n' +
-        '• Upgrade to OCR.space PRO for larger limits'
+        '• Crop to relevant text areas only'
       );
     } else {
       alert('Error processing document: ' + error.message);
@@ -3594,7 +3563,7 @@ window.saveOCRResults = async function() {
       fileSize: uploadedFile.size,
       status: 'completed',
       documentType: uploadedFile.type.split('/')[0],
-      ocrEngine: 'OCR.space API',
+      ocrEngine: 'Azure Document Intelligence',
       url: uploadResult.url,
       storagePath: uploadResult.storagePath
     };

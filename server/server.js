@@ -813,6 +813,56 @@ app.post('/debug/create-audit-log', verifyToken, async (req, res) => {
   }
 });
 
+// ─── Azure Document Intelligence OCR Route ───────────────────────────────────
+const { DocumentAnalysisClient, AzureKeyCredential } = require('@azure/ai-form-recognizer');
+const multerOcr = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+
+app.post('/ocr', verifyToken, multerOcr.single('file'), async (req, res) => {
+  const endpoint = process.env.AZURE_DI_ENDPOINT;
+  const key      = process.env.AZURE_DI_KEY;
+
+  if (!endpoint || !key) {
+    return res.status(503).json({ error: 'Azure Document Intelligence is not configured on the server. Please set AZURE_DI_ENDPOINT and AZURE_DI_KEY in server/.env.' });
+  }
+
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded.' });
+  }
+
+  try {
+    const client = new DocumentAnalysisClient(endpoint, new AzureKeyCredential(key));
+    const poller = await client.beginAnalyzeDocument('prebuilt-read', req.file.buffer);
+    const result = await poller.pollUntilDone();
+
+    if (!result || !result.content) {
+      return res.status(422).json({ error: 'No readable text found in the document.' });
+    }
+
+    const pages = result.pages || [];
+    let totalConfidence = 0;
+    let wordCount = 0;
+    pages.forEach(page => {
+      (page.words || []).forEach(word => {
+        totalConfidence += word.confidence || 0;
+        wordCount++;
+      });
+    });
+    const avgConfidence = wordCount > 0 ? Math.round((totalConfidence / wordCount) * 100) : null;
+
+    const lines = pages.flatMap(p => (p.lines || []).map(l => l.content));
+
+    res.json({
+      text: result.content,
+      lines,
+      confidence: avgConfidence,
+      pageCount: pages.length
+    });
+  } catch (err) {
+    console.error('Azure DI OCR error:', err);
+    res.status(500).json({ error: err.message || 'OCR processing failed.' });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
 
