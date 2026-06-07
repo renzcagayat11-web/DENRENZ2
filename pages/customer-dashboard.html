@@ -50,6 +50,7 @@
           <a href="#dashboard" class="nav-item active" data-section="dashboardSection">Dashboard</a>
           <a href="#new-application" class="nav-item" data-section="newApplicationSection">Apply for Document</a>
           <a href="#my-applications" class="nav-item" data-section="myApplicationsSection">All Applications</a>
+          <a href="#ocr-scanner" class="nav-item" data-section="ocrScannerSection">Document Scanner</a>
         </nav>
         <button class="dash-hamburger-btn" id="dashHamburgerBtn" aria-label="Toggle menu" aria-expanded="false">
           <span></span><span></span><span></span>
@@ -107,6 +108,7 @@
         <a href="#dashboard" class="dash-mobile-nav-item" data-section="dashboardSection">📊 Dashboard</a>
         <a href="#new-application" class="dash-mobile-nav-item" data-section="newApplicationSection">📝 Apply for Document</a>
         <a href="#my-applications" class="dash-mobile-nav-item" data-section="myApplicationsSection">📋 All Applications</a>
+        <a href="#ocr-scanner" class="dash-mobile-nav-item" data-section="ocrScannerSection">🔍 Document Scanner</a>
       </div>
     </header>
 
@@ -1503,6 +1505,165 @@
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- OCR Scanner Section -->
+          <section class="page-section" id="ocrScannerSection">
+            <div class="dashboard-container-wrapper">
+              <section class="welcome-section" style="margin-bottom:0;">
+                <div class="welcome-flex">
+                  <div class="welcome-main">
+                    <h2 class="welcome-title">Document Scanner</h2>
+                    <p class="welcome-subtitle">Scan or upload a document to extract text using AI</p>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <div class="dashboard-container-wrapper" style="margin-top:20px;">
+              <div class="cust-ocr-container">
+
+                <!-- Step 1: Input -->
+                <div class="cust-ocr-step" id="custOcrStep1">
+                  <div class="cust-ocr-tabs">
+                    <button class="cust-ocr-tab active" data-ocr-tab="camera" onclick="custOcrSwitchTab('camera')">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                      Camera
+                    </button>
+                    <button class="cust-ocr-tab" data-ocr-tab="upload" onclick="custOcrSwitchTab('upload')">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                      Upload
+                    </button>
+                  </div>
+
+                  <!-- Camera Tab -->
+                  <div class="cust-ocr-tab-panel active" id="custOcrCameraPanel">
+                    <div class="cust-camera-wrapper" id="custCameraWrapper">
+                      <video id="custCameraVideo" autoplay playsinline muted></video>
+                      <div class="cust-camera-guide">
+                        <div class="cust-guide-frame">
+                          <div class="cust-corner tl"></div><div class="cust-corner tr"></div>
+                          <div class="cust-corner bl"></div><div class="cust-corner br"></div>
+                          <span class="cust-guide-hint">Align document within frame</span>
+                        </div>
+                      </div>
+                      <div class="cust-camera-controls">
+                        <button class="cust-cam-btn" id="custSwitchCamBtn" onclick="custSwitchCamera()" title="Switch Camera">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+                        </button>
+                        <button class="cust-capture-btn" id="custCaptureBtn" onclick="custCapturePhoto()">
+                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+                        </button>
+                        <button class="cust-cam-btn" id="custTorchBtn" onclick="custToggleTorch()" title="Toggle Flashlight">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2H5L3 6l9 6 9-6-2-4h-4"/><path d="M3 6l9 6 9-6"/><path d="M12 12v10"/></svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="cust-preview-wrapper" id="custPreviewWrapper" style="display:none;">
+                      <img id="custPreviewImg" alt="Captured document" />
+                      <div class="cust-enhance-bar">
+                        <label>Brightness <span id="custBrightnessVal">100%</span></label>
+                        <input type="range" id="custBrightness" min="50" max="200" value="100" oninput="custApplyEnhance()">
+                        <label>Contrast <span id="custContrastVal">100%</span></label>
+                        <input type="range" id="custContrast" min="50" max="200" value="100" oninput="custApplyEnhance()">
+                      </div>
+                      <div class="cust-preview-actions">
+                        <button class="cust-btn-secondary" onclick="custRetake()">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
+                          Retake
+                        </button>
+                        <button class="cust-btn-primary" onclick="custStartOCR()">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                          Scan Document
+                        </button>
+                      </div>
+                    </div>
+                    <canvas id="custCameraCanvas" style="display:none;"></canvas>
+                    <button class="cust-btn-start-camera" id="custStartCamBtn" onclick="custStartCamera()">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                      Start Camera
+                    </button>
+                  </div>
+
+                  <!-- Upload Tab -->
+                  <div class="cust-ocr-tab-panel" id="custOcrUploadPanel">
+                    <div class="cust-upload-area" id="custUploadArea" onclick="document.getElementById('custFileInput').click()" ondragover="event.preventDefault(); this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="custHandleDrop(event)">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                      <p>Tap to upload or drag & drop</p>
+                      <small>JPG, PNG — Max 10MB</small>
+                      <input type="file" id="custFileInput" accept="image/jpeg,image/png" style="display:none" onchange="custHandleFileUpload(event)">
+                    </div>
+                    <!-- Upload preview -->
+                    <div class="cust-preview-wrapper" id="custUploadPreviewWrapper" style="display:none;">
+                      <img id="custUploadPreviewImg" alt="Uploaded document" />
+                      <div class="cust-enhance-bar">
+                        <label>Brightness <span id="custUpBrightnessVal">100%</span></label>
+                        <input type="range" id="custUpBrightness" min="50" max="200" value="100" oninput="custApplyUploadEnhance()">
+                        <label>Contrast <span id="custUpContrastVal">100%</span></label>
+                        <input type="range" id="custUpContrast" min="50" max="200" value="100" oninput="custApplyUploadEnhance()">
+                      </div>
+                      <div class="cust-preview-actions">
+                        <button class="cust-btn-secondary" onclick="custClearUpload()">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                          Clear
+                        </button>
+                        <button class="cust-btn-primary" onclick="custStartOCR()">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                          Scan Document
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Step 2: Processing -->
+                <div class="cust-ocr-step" id="custOcrStep2" style="display:none;">
+                  <div class="cust-ocr-processing">
+                    <div class="cust-ocr-spinner"></div>
+                    <p class="cust-ocr-process-text" id="custOcrProcessText">Scanning document...</p>
+                    <div class="cust-ocr-progress-bar"><div class="cust-ocr-progress-fill" id="custOcrProgressFill"></div></div>
+                  </div>
+                </div>
+
+                <!-- Step 3: Results -->
+                <div class="cust-ocr-step" id="custOcrStep3" style="display:none;">
+                  <div class="cust-ocr-results">
+                    <div class="cust-result-header">
+                      <div class="cust-result-meta">
+                        <span class="cust-confidence-badge" id="custConfidenceBadge">97%</span>
+                        <span class="cust-result-label">Azure AI · Document Intelligence</span>
+                      </div>
+                      <button class="cust-btn-secondary cust-scan-again-btn" onclick="custScanAgain()">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
+                        Scan Again
+                      </button>
+                    </div>
+                    <div class="cust-result-body">
+                      <div class="cust-result-preview">
+                        <img id="custResultImg" alt="Scanned document" />
+                      </div>
+                      <div class="cust-result-text-section">
+                        <div class="cust-result-text-header">
+                          <span>Extracted Text</span>
+                          <button class="cust-copy-btn" onclick="custCopyText()" title="Copy">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                            Copy
+                          </button>
+                        </div>
+                        <textarea id="custOcrResultText" class="cust-result-textarea" placeholder="Extracted text will appear here..."></textarea>
+                        <div class="cust-result-actions">
+                          <button class="cust-btn-secondary" onclick="custDownloadText()">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Download TXT
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
           </section>

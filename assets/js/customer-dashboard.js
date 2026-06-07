@@ -12557,6 +12557,7 @@ async function saveProfileData(updateData) {
 
 // Page Navigation with Loading Effect
 window.navigateToSection = function(sectionId) {
+  if (sectionId !== 'ocrScannerSection' && typeof _custStopCamera === 'function') _custStopCamera();
   const pageLoader = document.getElementById('pageLoader');
   const currentSection = document.querySelector('.page-section.active');
   const targetSection = document.getElementById(sectionId);
@@ -12967,3 +12968,284 @@ function restoreUploadedDocuments(permitType) {
     showFileErrorMessage(preview, filenameSpan, dropzone);
   });
 }
+
+// ─── Customer OCR Scanner ────────────────────────────────────────────────────
+let _custCamStream = null;
+let _custCamFacing = 'environment';
+let _custTorchOn = false;
+let _custOcrFile = null;   // final File to send to Azure DI
+let _custActiveTab = 'camera';
+let _custOriginalBlob = null; // for enhance re-render (camera)
+let _custUploadOriginalBlob = null; // for enhance re-render (upload)
+
+// --- Tab switch ---
+window.custOcrSwitchTab = function(tab) {
+  _custActiveTab = tab;
+  document.querySelectorAll('.cust-ocr-tab').forEach(b => b.classList.toggle('active', b.dataset.ocrTab === tab));
+  document.getElementById('custOcrCameraPanel').classList.toggle('active', tab === 'camera');
+  document.getElementById('custOcrUploadPanel').classList.toggle('active', tab === 'upload');
+  if (tab !== 'camera') _custStopCamera();
+};
+
+// --- Camera ---
+window.custStartCamera = async function() {
+  const btn = document.getElementById('custStartCamBtn');
+  const wrapper = document.getElementById('custCameraWrapper');
+  btn.style.display = 'none';
+  wrapper.style.display = 'block';
+  await _custStartStream();
+};
+
+async function _custStartStream() {
+  _custStopCamera();
+  try {
+    _custCamStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: _custCamFacing, width: { ideal: 1920 }, height: { ideal: 1080 } }
+    });
+    document.getElementById('custCameraVideo').srcObject = _custCamStream;
+  } catch (e) {
+    alert('Camera access denied or not available. Please use the Upload tab instead.');
+    document.getElementById('custStartCamBtn').style.display = 'flex';
+    document.getElementById('custCameraWrapper').style.display = 'none';
+  }
+}
+
+function _custStopCamera() {
+  if (_custCamStream) { _custCamStream.getTracks().forEach(t => t.stop()); _custCamStream = null; }
+}
+
+window.custSwitchCamera = async function() {
+  _custCamFacing = _custCamFacing === 'environment' ? 'user' : 'environment';
+  await _custStartStream();
+};
+
+window.custToggleTorch = async function() {
+  if (!_custCamStream) return;
+  const track = _custCamStream.getVideoTracks()[0];
+  if (!track) return;
+  try {
+    _custTorchOn = !_custTorchOn;
+    await track.applyConstraints({ advanced: [{ torch: _custTorchOn }] });
+    document.getElementById('custTorchBtn').classList.toggle('active', _custTorchOn);
+  } catch { /* torch not supported */ }
+};
+
+window.custCapturePhoto = function() {
+  const video = document.getElementById('custCameraVideo');
+  const canvas = document.getElementById('custCameraCanvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  _custStopCamera();
+
+  canvas.toBlob(blob => {
+    _custOriginalBlob = blob;
+    const url = URL.createObjectURL(blob);
+    const img = document.getElementById('custPreviewImg');
+    img.src = url;
+    img.style.filter = '';
+    document.getElementById('custBrightness').value = 100;
+    document.getElementById('custContrast').value = 100;
+    document.getElementById('custBrightnessVal').textContent = '100%';
+    document.getElementById('custContrastVal').textContent = '100%';
+    document.getElementById('custCameraWrapper').style.display = 'none';
+    document.getElementById('custPreviewWrapper').style.display = 'block';
+    document.getElementById('custStartCamBtn').style.display = 'none';
+  }, 'image/jpeg', 0.95);
+};
+
+window.custRetake = async function() {
+  document.getElementById('custPreviewWrapper').style.display = 'none';
+  document.getElementById('custCameraWrapper').style.display = 'block';
+  _custOriginalBlob = null;
+  await _custStartStream();
+};
+
+// --- Enhance (camera) ---
+window.custApplyEnhance = function() {
+  const b = document.getElementById('custBrightness').value;
+  const c = document.getElementById('custContrast').value;
+  document.getElementById('custBrightnessVal').textContent = b + '%';
+  document.getElementById('custContrastVal').textContent = c + '%';
+  document.getElementById('custPreviewImg').style.filter = `brightness(${b}%) contrast(${c}%)`;
+};
+
+// --- Upload tab ---
+window.custHandleFileUpload = function(event) {
+  const file = event.target.files[0];
+  if (file) _custLoadUploadPreview(file);
+};
+
+window.custHandleDrop = function(event) {
+  event.preventDefault();
+  document.getElementById('custUploadArea').classList.remove('drag-over');
+  const file = event.dataTransfer.files[0];
+  if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
+    _custLoadUploadPreview(file);
+  } else {
+    alert('Only JPG and PNG images are supported.');
+  }
+};
+
+function _custLoadUploadPreview(file) {
+  if (file.size > 10 * 1024 * 1024) { alert('File exceeds 10MB limit.'); return; }
+  _custUploadOriginalBlob = file;
+  const url = URL.createObjectURL(file);
+  const img = document.getElementById('custUploadPreviewImg');
+  img.src = url;
+  img.style.filter = '';
+  document.getElementById('custUpBrightness').value = 100;
+  document.getElementById('custUpContrast').value = 100;
+  document.getElementById('custUpBrightnessVal').textContent = '100%';
+  document.getElementById('custUpContrastVal').textContent = '100%';
+  document.getElementById('custUploadArea').style.display = 'none';
+  document.getElementById('custUploadPreviewWrapper').style.display = 'block';
+}
+
+window.custClearUpload = function() {
+  _custUploadOriginalBlob = null;
+  document.getElementById('custFileInput').value = '';
+  document.getElementById('custUploadArea').style.display = 'block';
+  document.getElementById('custUploadPreviewWrapper').style.display = 'none';
+};
+
+window.custApplyUploadEnhance = function() {
+  const b = document.getElementById('custUpBrightness').value;
+  const c = document.getElementById('custUpContrast').value;
+  document.getElementById('custUpBrightnessVal').textContent = b + '%';
+  document.getElementById('custUpContrastVal').textContent = c + '%';
+  document.getElementById('custUploadPreviewImg').style.filter = `brightness(${b}%) contrast(${c}%)`;
+};
+
+// --- Build enhanced File from canvas ---
+function _custBuildEnhancedFile(originalBlob, brightness, contrast, filename) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob(blob => resolve(new File([blob], filename || 'scan.jpg', { type: 'image/jpeg' })), 'image/jpeg', 0.92);
+    };
+    img.src = URL.createObjectURL(originalBlob);
+  });
+}
+
+// --- OCR start ---
+window.custStartOCR = async function() {
+  let originalBlob, brightness, contrast, filename;
+
+  if (_custActiveTab === 'camera') {
+    if (!_custOriginalBlob) { alert('Please capture a photo first.'); return; }
+    originalBlob = _custOriginalBlob;
+    brightness = document.getElementById('custBrightness').value;
+    contrast = document.getElementById('custContrast').value;
+    filename = 'scan.jpg';
+  } else {
+    if (!_custUploadOriginalBlob) { alert('Please upload an image first.'); return; }
+    originalBlob = _custUploadOriginalBlob;
+    brightness = document.getElementById('custUpBrightness').value;
+    contrast = document.getElementById('custUpContrast').value;
+    filename = _custUploadOriginalBlob.name || 'upload.jpg';
+  }
+
+  // Show processing
+  document.getElementById('custOcrStep1').style.display = 'none';
+  document.getElementById('custOcrStep2').style.display = 'block';
+  document.getElementById('custOcrStep3').style.display = 'none';
+
+  const progress = document.getElementById('custOcrProgressFill');
+  const processText = document.getElementById('custOcrProcessText');
+
+  const setProgress = (pct, text) => { progress.style.width = pct + '%'; processText.textContent = text; };
+  setProgress(10, 'Preparing image...');
+
+  try {
+    // Build enhanced file
+    _custOcrFile = await _custBuildEnhancedFile(originalBlob, brightness, contrast, filename);
+    setProgress(30, 'Uploading to AI...');
+
+    // Get auth token
+    const token = await auth.currentUser?.getIdToken();
+    if (!token) throw new Error('Not signed in.');
+
+    const formData = new FormData();
+    formData.append('file', _custOcrFile);
+
+    setProgress(50, 'Extracting text...');
+    const response = await fetch('/ocr', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: formData
+    });
+
+    setProgress(80, 'Processing results...');
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(data.error || 'OCR failed.');
+    if (!data.text || data.text.trim().length < 3) throw new Error('No readable text found. Try improving lighting or image clarity.');
+
+    setProgress(100, 'Done!');
+
+    // Show results
+    setTimeout(() => {
+      document.getElementById('custOcrStep2').style.display = 'none';
+      document.getElementById('custOcrStep3').style.display = 'block';
+
+      document.getElementById('custOcrResultText').value = data.text.trim();
+      document.getElementById('custResultImg').src = URL.createObjectURL(_custOcrFile);
+      document.getElementById('custConfidenceBadge').textContent =
+        data.confidence != null ? data.confidence + '% confidence' : 'AI Processed';
+    }, 400);
+
+  } catch (err) {
+    document.getElementById('custOcrStep2').style.display = 'none';
+    document.getElementById('custOcrStep1').style.display = 'block';
+    alert('Scan failed: ' + err.message);
+  }
+};
+
+// --- Scan again ---
+window.custScanAgain = function() {
+  document.getElementById('custOcrStep3').style.display = 'none';
+  document.getElementById('custOcrStep1').style.display = 'block';
+  // Reset camera tab
+  _custOriginalBlob = null;
+  _custUploadOriginalBlob = null;
+  document.getElementById('custPreviewWrapper').style.display = 'none';
+  document.getElementById('custCameraWrapper').style.display = 'none';
+  document.getElementById('custStartCamBtn').style.display = 'flex';
+  // Reset upload tab
+  document.getElementById('custFileInput').value = '';
+  document.getElementById('custUploadArea').style.display = 'block';
+  document.getElementById('custUploadPreviewWrapper').style.display = 'none';
+  // Reset progress bar
+  document.getElementById('custOcrProgressFill').style.width = '0%';
+};
+
+// --- Copy text ---
+window.custCopyText = async function() {
+  const text = document.getElementById('custOcrResultText').value;
+  if (!text) return;
+  try {
+    await navigator.clipboard.writeText(text);
+    const btn = document.querySelector('.cust-copy-btn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✓ Copied!';
+    setTimeout(() => { btn.innerHTML = orig; }, 1800);
+  } catch { document.getElementById('custOcrResultText').select(); document.execCommand('copy'); }
+};
+
+// --- Download TXT ---
+window.custDownloadText = function() {
+  const text = document.getElementById('custOcrResultText').value;
+  if (!text) return;
+  const blob = new Blob([text], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `scan_${new Date().toISOString().slice(0,10)}.txt`;
+  a.click();
+};
