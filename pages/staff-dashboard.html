@@ -54,7 +54,6 @@
       </div>
       <a href="#dashboard" class="staff-drawer-item" data-section="dashboardSection"><span>📊</span> Dashboard</a>
       <a href="#applications" class="staff-drawer-item" data-section="applicationsSection"><span>📋</span> Applications</a>
-      <a href="#ocr" class="staff-drawer-item" data-section="ocrSection"><span>📄</span> Document OCR</a>
       <a href="#records" class="staff-drawer-item" data-section="recordsSection"><span>📋</span> My Records</a>
       <a href="#performance" class="staff-drawer-item" data-section="performanceSection"><span>📈</span> My Performance</a>
       <a href="#settings" class="staff-drawer-item" data-section="settingsSection"><span>⚙️</span> Settings</a>
@@ -80,10 +79,6 @@
           <a href="#applications" class="nav-item" data-section="applicationsSection">
             <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg></span>
             <span>Applications</span>
-          </a>
-          <a href="#ocr" class="nav-item" data-section="ocrSection">
-            <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg></span>
-            <span>Document OCR</span>
           </a>
           <a href="#records" class="nav-item" data-section="recordsSection">
             <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>
@@ -303,8 +298,8 @@
             </div>
           </section>
 
-          <!-- OCR Document Processing Section -->
-          <section id="ocrSection" class="page-section">
+          <!-- OCR Document Processing Section removed -->
+          <section id="ocrSection" class="page-section" style="display:none;">
             <div class="ocr-modern-container">
               <!-- OCR Header -->
               <div class="ocr-header">
@@ -1173,8 +1168,8 @@
       </main>
     </div>
 
-    <!-- OCR Document Details Modal -->
-    <div id="ocrDocumentModal" class="modal-backdrop" style="display:none">
+    <!-- OCR Document Details Modal removed -->
+    <div id="ocrDocumentModal" class="modal-backdrop" style="display:none!important">
       <div class="modal-dialog large-modal">
         <div class="modal-header">
           <h3>OCR Document Details</h3>
