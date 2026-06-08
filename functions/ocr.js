@@ -1,8 +1,15 @@
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+};
+
 const json = (body, status = 200) => new Response(JSON.stringify(body), {
   status,
   headers: {
     'Content-Type': 'application/json',
-    'Cache-Control': 'no-store'
+    'Cache-Control': 'no-store',
+    ...corsHeaders
   }
 });
 
@@ -56,8 +63,18 @@ export async function onRequestPost(context) {
   const endpoint = context.env.AZURE_DI_ENDPOINT;
   const key = context.env.AZURE_DI_KEY;
 
+  console.log('OCR Request received:', {
+    hasEndpoint: !!endpoint,
+    hasKey: !!key,
+    timestamp: new Date().toISOString()
+  });
+
   if (!endpoint || !key) {
-    return json({ error: 'OCR is not configured. Add AZURE_DI_ENDPOINT and AZURE_DI_KEY in Cloudflare Pages environment variables.' }, 503);
+    console.error('OCR not configured - missing environment variables');
+    return json({ 
+      error: 'OCR is not configured. Add AZURE_DI_ENDPOINT and AZURE_DI_KEY in Cloudflare Pages environment variables.',
+      setup: 'Go to Cloudflare Pages dashboard > Your Project > Settings > Environment Variables'
+    }, 503);
   }
 
   try {
@@ -65,8 +82,14 @@ export async function onRequestPost(context) {
     const file = formData.get('file');
 
     if (!file || typeof file === 'string') {
-      return json({ error: 'No document image uploaded.' }, 400);
+      return json({ error: 'No document image uploaded. Please select an image file.' }, 400);
     }
+
+    console.log('Processing file:', {
+      name: file.name,
+      size: file.size,
+      type: file.type
+    });
 
     if (file.size > 10 * 1024 * 1024) {
       return json({ error: 'File is too large. Maximum OCR upload size is 10MB.' }, 413);
@@ -74,6 +97,8 @@ export async function onRequestPost(context) {
 
     const contentType = file.type || 'application/octet-stream';
     const analyzeUrl = `${endpoint.replace(/\/$/, '')}/formrecognizer/documentModels/prebuilt-read:analyze?api-version=2023-07-31`;
+
+    console.log('Sending to Azure Document Intelligence...');
 
     const analyzeResponse = await fetch(analyzeUrl, {
       method: 'POST',
@@ -87,11 +112,22 @@ export async function onRequestPost(context) {
     const operationLocation = analyzeResponse.headers.get('operation-location');
     if (!analyzeResponse.ok || !operationLocation) {
       const errorBody = await analyzeResponse.json().catch(() => null);
-      return json({ error: errorBody?.error?.message || `Azure OCR request failed (${analyzeResponse.status})` }, analyzeResponse.status || 500);
+      console.error('Azure OCR request failed:', analyzeResponse.status, errorBody);
+      return json({ 
+        error: errorBody?.error?.message || `Azure OCR request failed (${analyzeResponse.status})`,
+        details: 'Please check your Azure Document Intelligence configuration'
+      }, analyzeResponse.status || 500);
     }
 
+    console.log('Polling for results...');
     const azureResult = await readOperationResult(operationLocation, key);
     const parsed = extractReadText(azureResult);
+
+    console.log('OCR Complete:', {
+      confidence: parsed.confidence,
+      pageCount: parsed.pageCount,
+      textLength: parsed.text?.length
+    });
 
     return json({
       success: true,
@@ -101,10 +137,31 @@ export async function onRequestPost(context) {
       engine: 'Azure Document Intelligence'
     });
   } catch (error) {
-    return json({ error: error.message || 'OCR scan failed. Please try again.' }, 500);
+    console.error('OCR Error:', error);
+    return json({ 
+      error: error.message || 'OCR scan failed. Please try again.',
+      suggestion: 'Try uploading a clearer image with better lighting'
+    }, 500);
   }
 }
 
-export async function onRequestGet() {
-  return json({ ok: true, endpoint: '/ocr', method: 'POST' });
+export async function onRequestGet(context) {
+  const endpoint = context.env.AZURE_DI_ENDPOINT;
+  const key = context.env.AZURE_DI_KEY;
+  
+  return json({ 
+    ok: true, 
+    endpoint: '/ocr', 
+    method: 'POST',
+    configured: !!(endpoint && key),
+    timestamp: new Date().toISOString(),
+    version: '1.0.0'
+  });
+}
+
+export async function onRequestOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: corsHeaders
+  });
 }
