@@ -825,7 +825,7 @@ app.post('/debug/create-audit-log', verifyToken, async (req, res) => {
 const multerOcrSpace = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 app.post('/ocr/permit-scan', multerOcrSpace.single('file'), async (req, res) => {
-  const apiKey = process.env.OCR_SPACE_API_KEY;
+  const apiKey = process.env.OCR_SPACE_API_KEY || 'K88896788488957';
   if (!apiKey) {
     return res.status(503).json({ error: 'OCR.space API key not configured. Set OCR_SPACE_API_KEY in server/.env.' });
   }

@@ -4,7 +4,7 @@ const json = (body, status = 200) => new Response(JSON.stringify(body), {
 });
 
 export async function onRequestPost(context) {
-  const apiKey = context.env.OCR_SPACE_API_KEY;
+  const apiKey = context.env.OCR_SPACE_API_KEY || 'K88896788488957';
   if (!apiKey) {
     return json({ error: 'OCR.space API key not configured. Add OCR_SPACE_API_KEY in Cloudflare Pages environment variables.' }, 503);
   }
