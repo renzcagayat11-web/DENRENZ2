@@ -1592,52 +1592,33 @@ if (ocrUploadArea && ocrFileInput) {
   });
 }
 
-// OCR.space API Integration for Permit ID Extraction
-const OCR_SPACE_API_KEY = 'K88896788488957'; // User's API key
+// OCR Permit ID Extraction — via backend proxy (API key is server-side)
+const OCR_API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://127.0.0.1:3000'
+  : '';
 
 async function extractTextWithOCRSpace(imageFile) {
   console.log('Processing image for permit ID:', imageFile.name, 'Size:', imageFile.size, 'Type:', imageFile.type);
 
-  // Use API key directly with minimal parameters
   const formData = new FormData();
-  formData.append('apikey', OCR_SPACE_API_KEY);
   formData.append('file', imageFile);
-  formData.append('language', 'eng');
-  formData.append('isOverlayRequired', 'false');
 
-  console.log('Sending to OCR.space API with API key...');
-
-  const response = await fetch('https://api.ocr.space/parse/image', {
+  const response = await fetch(`${OCR_API_BASE}/ocr/permit-scan`, {
     method: 'POST',
     body: formData
   });
 
   const data = await response.json();
-  console.log('OCR.space response:', data);
 
   if (!response.ok) {
-    console.error('HTTP Error:', response.status, response.statusText);
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    throw new Error(data.error || `Server error ${response.status}`);
   }
 
-  if (data.IsErroredOnProcessing) {
-    const errorMsg = data.ErrorMessage || 'OCR processing failed';
-    console.error('OCR.space processing error:', errorMsg);
-    
-    if (errorMsg.includes('API key')) {
-      throw new Error('Invalid API key. Please check your OCR.space API key.');
-    }
-    
-    throw new Error(errorMsg);
-  }
-
-  const parsedResult = data.ParsedResults?.[0];
-  if (!parsedResult) {
-    console.log('No ParsedResults found, full response:', data);
+  if (!data.success || !data.text) {
     throw new Error('No text detected in image');
   }
 
-  return parsedResult.ParsedText || '';
+  return data.text;
 }
 
 function showOCRFilePreview(file) {

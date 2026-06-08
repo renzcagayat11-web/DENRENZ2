@@ -87,10 +87,14 @@ service cloud.firestore {
       allow delete: if false; // Audit logs should never be deleted
     }
 
-    // OCR documents collection - staff and admin access
+    // OCR documents collection - staff/admin full access, customers read own
     match /ocrDocuments/{docId} {
-      allow read: if request.auth != null && (request.auth.token.role == 'staff' || request.auth.token.role == 'admin');
-      allow create: if request.auth != null && (request.auth.token.role == 'staff' || request.auth.token.role == 'admin');
+      allow read: if request.auth != null && (
+        request.auth.token.role == 'staff' ||
+        request.auth.token.role == 'admin' ||
+        resource.data.userId == request.auth.uid
+      );
+      allow create: if request.auth != null;
       allow update: if request.auth != null && (request.auth.token.role == 'staff' || request.auth.token.role == 'admin');
       allow delete: if request.auth != null && request.auth.token.role == 'admin';
     }
