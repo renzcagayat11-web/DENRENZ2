@@ -821,6 +821,44 @@ app.post('/debug/create-audit-log', verifyToken, async (req, res) => {
   }
 });
 
+// ─── OCR.space Proxy (moves API key to server-side) ─────────────────────────
+const multerOcrSpace = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+
+app.post('/ocr/permit-scan', multerOcrSpace.single('file'), async (req, res) => {
+  const apiKey = process.env.OCR_SPACE_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: 'OCR.space API key not configured. Set OCR_SPACE_API_KEY in server/.env.' });
+  }
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded.' });
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append('apikey', apiKey);
+    formData.append('file', new Blob([req.file.buffer], { type: req.file.mimetype }), req.file.originalname);
+    formData.append('language', 'eng');
+    formData.append('isOverlayRequired', 'false');
+
+    const response = await fetch('https://api.ocr.space/parse/image', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.IsErroredOnProcessing) {
+      return res.status(422).json({ error: data.ErrorMessage || 'OCR processing failed' });
+    }
+
+    const parsedText = data.ParsedResults?.[0]?.ParsedText || '';
+    res.json({ success: true, text: parsedText });
+  } catch (err) {
+    console.error('OCR.space proxy error:', err);
+    res.status(500).json({ error: err.message || 'OCR processing failed.' });
+  }
+});
+
 // ─── Azure Document Intelligence OCR Route ───────────────────────────────────
 const { DocumentAnalysisClient, AzureKeyCredential } = require('@azure/ai-form-recognizer');
 const multerOcr = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -868,6 +906,128 @@ app.post('/ocr', verifyToken, multerOcr.single('file'), async (req, res) => {
   } catch (err) {
     console.error('Azure DI OCR error:', err);
     res.status(500).json({ error: err.message || 'OCR processing failed.' });
+  }
+});
+
+// ─── ID Document Scan (prebuilt-idDocument) ─────────────────────────────────
+app.post('/ocr/scan-id', verifyToken, multerOcr.single('file'), async (req, res) => {
+  const endpoint = process.env.AZURE_DI_ENDPOINT;
+  const key      = process.env.AZURE_DI_KEY;
+
+  if (!endpoint || !key) {
+    return res.status(503).json({ error: 'Azure Document Intelligence is not configured. Set AZURE_DI_ENDPOINT and AZURE_DI_KEY in server/.env.' });
+  }
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded.' });
+  }
+
+  try {
+    const client = new DocumentAnalysisClient(endpoint, new AzureKeyCredential(key));
+    const poller = await client.beginAnalyzeDocument('prebuilt-idDocument', req.file.buffer);
+    const result = await poller.pollUntilDone();
+
+    if (!result || !result.documents || result.documents.length === 0) {
+      return res.status(422).json({ error: 'No ID document detected. Please upload a clear photo of a valid ID.' });
+    }
+
+    const idDoc = result.documents[0];
+    const f = idDoc.fields || {};
+
+    // Extract common fields across ID types
+    const fields = {};
+    if (f.FirstName) fields.firstName = f.FirstName.content || f.FirstName.value || '';
+    if (f.LastName) fields.lastName = f.LastName.content || f.LastName.value || '';
+    // Some IDs have middle name
+    if (f.MiddleName) fields.middleName = f.MiddleName.content || f.MiddleName.value || '';
+
+    // Address
+    if (f.Address) fields.address = f.Address.content || f.Address.value || '';
+
+    // Date of birth
+    if (f.DateOfBirth) fields.dateOfBirth = f.DateOfBirth.content || f.DateOfBirth.value || '';
+
+    // Document number
+    if (f.DocumentNumber) fields.documentNumber = f.DocumentNumber.content || f.DocumentNumber.value || '';
+
+    // Sex
+    if (f.Sex) fields.sex = f.Sex.content || f.Sex.value || '';
+
+    // Confidence
+    const docConfidence = idDoc.confidence ? Math.round(idDoc.confidence * 100) : null;
+
+    res.json({
+      success: true,
+      docType: idDoc.docType || 'unknown',
+      confidence: docConfidence,
+      fields,
+      rawFieldCount: Object.keys(f).length
+    });
+  } catch (err) {
+    console.error('Azure DI ID scan error:', err);
+    res.status(500).json({ error: err.message || 'ID scan failed.' });
+  }
+});
+
+// ─── Document Verification (prebuilt-document for key-value extraction) ─────
+app.post('/ocr/verify-document', verifyToken, multerOcr.single('file'), async (req, res) => {
+  const endpoint = process.env.AZURE_DI_ENDPOINT;
+  const key      = process.env.AZURE_DI_KEY;
+
+  if (!endpoint || !key) {
+    return res.status(503).json({ error: 'Azure Document Intelligence is not configured.' });
+  }
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded.' });
+  }
+
+  try {
+    const client = new DocumentAnalysisClient(endpoint, new AzureKeyCredential(key));
+    const poller = await client.beginAnalyzeDocument('prebuilt-document', req.file.buffer);
+    const result = await poller.pollUntilDone();
+
+    const text = result.content || '';
+
+    // Extract key-value pairs
+    const keyValuePairs = (result.keyValuePairs || []).map(kv => ({
+      key: kv.key?.content || '',
+      value: kv.value?.content || '',
+      confidence: kv.confidence ? Math.round(kv.confidence * 100) : null
+    }));
+
+    // Extract tables
+    const tables = (result.tables || []).map(table => ({
+      rowCount: table.rowCount,
+      columnCount: table.columnCount,
+      cells: (table.cells || []).map(cell => ({
+        text: cell.content,
+        row: cell.rowIndex,
+        col: cell.columnIndex
+      }))
+    }));
+
+    // Page-level confidence
+    const pages = result.pages || [];
+    let totalConfidence = 0;
+    let wordCount = 0;
+    pages.forEach(page => {
+      (page.words || []).forEach(word => {
+        totalConfidence += word.confidence || 0;
+        wordCount++;
+      });
+    });
+    const avgConfidence = wordCount > 0 ? Math.round((totalConfidence / wordCount) * 100) : null;
+
+    res.json({
+      success: true,
+      text,
+      confidence: avgConfidence,
+      pageCount: pages.length,
+      keyValuePairs,
+      tables
+    });
+  } catch (err) {
+    console.error('Azure DI verify-document error:', err);
+    res.status(500).json({ error: err.message || 'Document verification failed.' });
   }
 });
 
