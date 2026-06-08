@@ -26,18 +26,6 @@ import {
   sendPasswordResetEmail
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
-// OCR System Imports
-import { OCRUI } from './ocr-ui.js';
-import { OCRSearchEngine } from './ocr-search.js';
-
-// Initialize OCR UI
-const ocrUI = new OCRUI(db, {
-  onOCRComplete: handleOCRComplete,
-  onError: handleOCRError
-});
-
-const ocrSearch = new OCRSearchEngine(db);
-
 // Backend API base URL — same-origin Cloudflare Pages Functions in production, localhost in dev
 const API_BASE = window.API_BASE ||
   (location.hostname === 'localhost' || location.hostname === '127.0.0.1'
@@ -10754,7 +10742,6 @@ function updateDocumentUploadFields(documentType, permitType) {
   // Generate upload fields for each required document
   requirements.forEach((req, index) => {
     const safeName = req.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-    const isIdDocument = /id|identification|passport|driver/i.test(req);
     const uploadGroup = document.createElement('div');
     uploadGroup.className = 'form-group';
     uploadGroup.style.marginBottom = '0';
@@ -10769,11 +10756,6 @@ function updateDocumentUploadFields(documentType, permitType) {
           </svg>
           <p style="color: #1f2937; font-size: 15px; margin: 0 0 6px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Drop your document here</p>
           <p style="color: #6b7280; font-size: 13px; margin: 0; font-weight: 500;">or click to select file</p>
-          ${isIdDocument ? `
-          <button type="button" class="ocr-scan-btn" data-req="${index}" data-type="id" style="margin-top: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;">
-            <span style="font-size: 14px;">📷</span> Scan with Camera
-          </button>
-          ` : ''}
         </div>
         <input type="file" id="docUpload_${index}" name="${safeName}" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display: none;" />
         <div id="docUpload_${index}_preview" style="position: absolute; bottom: 12px; left: 12px; right: 12px; display: none;">
@@ -10795,48 +10777,6 @@ function updateDocumentUploadFields(documentType, permitType) {
       <small style="display: block; margin-top: 6px; color: #9ca3af; font-size: 11px;">Accepted: PDF, JPG, PNG, DOC, DOCX (up to 50MB)</small>
     `;
     uploadContainer.appendChild(uploadGroup);
-
-    // Add OCR scan button event listener
-    const scanBtn = uploadGroup.querySelector('.ocr-scan-btn');
-    if (scanBtn) {
-      scanBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const reqIndex = scanBtn.dataset.req;
-        const docType = scanBtn.dataset.type;
-        
-        try {
-          const result = await ocrUI.showScanner(docType);
-          if (result.success) {
-            // Create file from blob and set it
-            const scannedFile = new File([result.file], `scanned_${docType}_${Date.now()}.jpg`, {
-              type: 'image/jpeg',
-              lastModified: Date.now()
-            });
-            
-            // Set the file in the input
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(scannedFile);
-            document.getElementById(`docUpload_${reqIndex}`).files = dataTransfer.files;
-            
-            // Trigger file select handler
-            handleFileSelect(parseInt(reqIndex), scannedFile);
-            
-            // Show extracted info
-            if (result.fields?.fullName || result.fields?.idNumber) {
-              showAlert(`Extracted: ${result.fields.fullName || ''} ${result.fields.idNumber || ''}`, 'success');
-            }
-            
-            // Save OCR result to user's account
-            await saveOCRResult(auth.currentUser.uid, result, scannedFile.name);
-          }
-        } catch (error) {
-          if (error.message !== 'Scan cancelled') {
-            console.error('Scan failed:', error);
-            showAlert('Scan failed: ' + error.message, 'error');
-          }
-        }
-      });
-    }
 
     // Add dropzone functionality
     const dropzone = document.getElementById(`dropzone_${index}`);
@@ -13033,78 +12973,3 @@ function restoreUploadedDocuments(permitType) {
     showFileErrorMessage(preview, filenameSpan, dropzone);
   });
 }
-
-// ===== OCR SYSTEM FUNCTIONS =====
-
-/**
- * Handle OCR completion
- */
-async function handleOCRComplete(ocrResult) {
-  console.log('OCR Complete:', ocrResult);
-  
-  // Show success message
-  if (ocrResult.fields?.fullName) {
-    showAlert(`Document scanned successfully! Name detected: ${ocrResult.fields.fullName}`, 'success');
-  } else {
-    showAlert('Document scanned successfully!', 'success');
-  }
-  
-  return ocrResult;
-}
-
-/**
- * Handle OCR errors
- */
-function handleOCRError(error) {
-  console.error('OCR Error:', error);
-  showAlert('OCR Error: ' + error.message, 'error');
-}
-
-/**
- * Save OCR result to Firestore
- */
-async function saveOCRResult(userId, ocrResult, filename) {
-  try {
-    const ocrData = {
-      userId,
-      text: ocrResult.text,
-      confidence: ocrResult.confidence,
-      fields: ocrResult.fields,
-      documentType: ocrResult.documentType,
-      filename,
-      timestamp: serverTimestamp()
-    };
-    
-    // Save to ocrResults collection
-    const docRef = await addDoc(collection(db, 'ocrResults'), ocrData);
-    
-    // Add to search index
-    await ocrSearch.addToIndex(userId, docRef.id, ocrResult);
-    
-    console.log('OCR result saved:', docRef.id);
-    return docRef.id;
-  } catch (error) {
-    console.error('Failed to save OCR result:', error);
-  }
-}
-
-/**
- * Open document search interface
- */
-async function openDocumentSearch() {
-  if (!auth.currentUser) {
-    showAlert('Please login first', 'error');
-    return;
-  }
-  
-  await ocrUI.showSearchInterface(auth.currentUser.uid, (result) => {
-    console.log('Selected document:', result);
-    showAlert(`Selected: ${result.fields?.fullName || result.documentType}`, 'success');
-  });
-}
-
-// Make functions available globally
-window.handleOCRComplete = handleOCRComplete;
-window.handleOCRError = handleOCRError;
-window.openDocumentSearch = openDocumentSearch;
-window.saveOCRResult = saveOCRResult;

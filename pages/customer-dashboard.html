@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="/assets/css/customer-dashboard.css" />
     <link rel="stylesheet" href="/assets/css/leaflet.css" />
     <link rel="stylesheet" href="/assets/css/responsive.css" />
-    <link rel="stylesheet" href="/assets/css/ocr-system.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- jsPDF + html2canvas: PDF matches on-screen DENR form layout -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -85,19 +84,9 @@
                 <a href="#" class="dropdown-item" onclick="navigateToSection('settingsSection'); return false;">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                   </svg>
                   <span>Settings</span>
-                </a>
-                <a href="#" class="dropdown-item" onclick="openDocumentSearch(); return false;">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                    <polyline points="10 9 9 9 8 9"></polyline>
-                  </svg>
-                  <span>My Documents</span>
                 </a>
                 <div class="dropdown-divider"></div>
                 <button class="dropdown-item dropdown-logout" id="dropdownLogoutBtn">
@@ -118,7 +107,6 @@
         <a href="#dashboard" class="dash-mobile-nav-item" data-section="dashboardSection">📊 Dashboard</a>
         <a href="#new-application" class="dash-mobile-nav-item" data-section="newApplicationSection">📝 Apply for Document</a>
         <a href="#my-applications" class="dash-mobile-nav-item" data-section="myApplicationsSection">📋 All Applications</a>
-        <a href="#documents" class="dash-mobile-nav-item" data-section="documentsSection" onclick="openDocumentSearch(); return false;">📄 My Documents</a>
       </div>
     </header>
 
@@ -201,29 +189,6 @@
                     <div class="stat-value" id="rejectedApps">0</div>
                     <div class="stat-label">Rejected</div>
                   </div>
-                </div>
-              </section>
-            </div>
-
-            <!-- Document Scanner Card -->
-            <div class="dashboard-container-wrapper">
-              <section style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 24px; color: white;">
-                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
-                  <div>
-                    <h4 style="margin: 0 0 8px 0; font-size: 18px; display: flex; align-items: center; gap: 10px;">
-                      <span style="font-size: 24px;">📷</span> Document Scanner
-                    </h4>
-                    <p style="margin: 0; opacity: 0.9; font-size: 14px;">Scan and auto-fill your documents using your phone camera</p>
-                  </div>
-                  <button onclick="openDocumentSearch();" style="padding: 12px 24px; background: white; color: #667eea; border: none; border-radius: 25px; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                    🔍 Search My Documents
-                  </button>
-                </div>
-                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.2); display: flex; gap: 20px; flex-wrap: wrap; font-size: 13px; opacity: 0.9;">
-                  <span>✓ ID Cards</span>
-                  <span>✓ Permits</span>
-                  <span>✓ Land Titles</span>
-                  <span>✓ Auto-fill forms</span>
                 </div>
               </section>
             </div>
