@@ -7,7 +7,7 @@ let initialized = false;
 function initFirebase() {
   if (initialized) return admin;
 
-  // 1. Try FIREBASE_SERVICE_ACCOUNT env var (JSON string) — used on Render/cloud
+  // 1. Try FIREBASE_SERVICE_ACCOUNT env var (JSON string) — used in cloud hosting
   if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     try {
       const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
@@ -65,7 +65,7 @@ function initFirebase() {
   }
 
   console.error('No valid Firebase credentials found. Please check:');
-  console.error('1. Set FIREBASE_SERVICE_ACCOUNT env var (JSON string) on Render');
+  console.error('1. Set FIREBASE_SERVICE_ACCOUNT env var (JSON string) in cloud hosting');
   console.error('2. Or place serviceAccountKey.json in server/ folder for local dev');
   return null;
 }

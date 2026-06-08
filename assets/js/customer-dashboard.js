@@ -26,11 +26,11 @@ import {
   sendPasswordResetEmail
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
 
-// Backend API base URL — Render.com in production, localhost in dev
+// Backend API base URL — same-origin Cloudflare Pages Functions in production, localhost in dev
 const API_BASE = window.API_BASE ||
   (location.hostname === 'localhost' || location.hostname === '127.0.0.1'
     ? 'http://127.0.0.1:3000'
-    : 'https://denrenz2-1.onrender.com');
+    : '');
 
 // File upload settings - MAX 5MB per file for fast uploads
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
@@ -13189,9 +13189,10 @@ window.custStartOCR = async function() {
     });
 
     setProgress(80, 'Processing results...');
-    const data = await response.json();
+    const data = await response.json().catch(() => null);
 
-    if (!response.ok) throw new Error(data.error || 'OCR failed.');
+    if (!response.ok) throw new Error(data?.error || `OCR failed with server status ${response.status}.`);
+    if (!data) throw new Error('OCR server returned an invalid response.');
     if (!data.text || data.text.trim().length < 3) throw new Error('No readable text found. Try improving lighting or image clarity.');
 
     setProgress(100, 'Done!');
