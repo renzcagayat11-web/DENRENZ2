@@ -15,6 +15,206 @@ body* {
   padding-top: 8px;
 }
 
+/* Application Progress Header */
+.application-progress-header {
+  background: linear-gradient(135deg, #166534 0%, #15803d 100%);
+  color: white !important;
+  padding: 32px;
+  border-radius: 16px;
+  position: relative;
+}
+
+.application-progress-header .progress-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: white !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.application-progress-header .progress-subtitle {
+  font-size: 14px;
+  color: rgba(255,255,255,0.9) !important;
+  margin: 0 0 16px 0;
+}
+
+.application-progress-header .progress-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.application-progress-header .meta-badge {
+  background: rgba(255,255,255,0.25);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white !important;
+}
+
+.application-progress-header .meta-date,
+.application-progress-header .meta-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  background: rgba(255,255,255,0.2);
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: white !important;
+}
+
+.application-progress-header .back-btn {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(255,255,255,0.25);
+  border: 1px solid rgba(255,255,255,0.4);
+  color: white !important;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.application-progress-header .back-btn:hover {
+  background: rgba(255,255,255,0.35);
+}
+
+/* Step Progress Container */
+.step-progress-container {
+  background: white;
+  border-radius: 16px;
+  padding: 40px 32px;
+  text-align: center;
+}
+
+.step-progress-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #166534;
+  margin: 0 0 8px 0;
+  letter-spacing: 0.5px;
+}
+
+.step-progress-subtitle {
+  font-size: 14px;
+  color: #9ca3af;
+  margin: 0 0 40px 0;
+}
+
+/* Step Progress Wrapper */
+.step-progress-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Dotted connector line background */
+.step-progress-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 32px;
+  left: 15%;
+  right: 15%;
+  height: 2px;
+  border-top: 2px dotted #d1d5db;
+  z-index: 0;
+}
+
+.step-progress-wrapper .step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 160px;
+  max-width: 200px;
+  position: relative;
+  z-index: 1;
+}
+
+.step-progress-wrapper .step-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+  border: 2px solid #d1d5db;
+  color: #d1d5db;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* Completed step - green filled */
+.step-progress-wrapper .step-item.completed .step-icon-wrapper {
+  background: #166534;
+  border-color: #166534;
+  color: white;
+  box-shadow: 0 4px 12px rgba(22, 101, 52, 0.3);
+}
+
+/* Active step - green ring */
+.step-progress-wrapper .step-item.active .step-icon-wrapper {
+  background: white;
+  border-color: #166534;
+  color: #166534;
+  box-shadow: 0 0 0 4px rgba(22, 101, 52, 0.15);
+}
+
+/* Pending step - gray */
+.step-progress-wrapper .step-item:not(.active):not(.completed) .step-icon-wrapper {
+  background: white;
+  border-color: #e5e7eb;
+  color: #d1d5db;
+}
+
+.step-progress-wrapper .step-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.step-progress-wrapper .step-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  line-height: 1.3;
+  margin-top: 4px;
+}
+
+.step-progress-wrapper .step-item.active .step-label {
+  color: #166534;
+}
+
+.step-progress-wrapper .step-item:not(.active):not(.completed) .step-label {
+  color: #9ca3af;
+}
+
+.step-progress-wrapper .step-description {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.5;
+  padding: 0 8px;
+}
+
+.step-progress-wrapper .step-item:not(.active):not(.completed) .step-description {
+  color: #d1d5db;
+}
+
 .new-application-section .dashboard-container-wrapper {
   padding: 20px;
   border-radius: 16px;

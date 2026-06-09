@@ -4902,20 +4902,15 @@ document.getElementById('nextStep1')?.addEventListener('click', () => {
   goToStep(2);
 });
 
-// Step 2: DENR Application Forms
+// Step 2: Location Details
 document.getElementById('nextStep2')?.addEventListener('click', () => {
-  // Auto-hide download awareness if still showing
-  if (formDownloadAwareness && formDownloadAwareness.style.display !== 'none') {
-    formDownloadAwareness.style.display = 'none';
-  }
-  
   goToStep(3);
 });
 document.getElementById('prevStep2')?.addEventListener('click', () => {
   goToStep(1);
 });
 
-// Step 3: Location Details
+// Step 3: Application Details
 document.getElementById('nextStep3')?.addEventListener('click', () => {
   goToStep(4);
 });
@@ -4923,8 +4918,13 @@ document.getElementById('prevStep3')?.addEventListener('click', () => {
   goToStep(2);
 });
 
-// Step 4: Application Details
+// Step 4: DENR Application Forms
 document.getElementById('nextStep4')?.addEventListener('click', () => {
+  // Auto-hide download awareness if still showing
+  if (formDownloadAwareness && formDownloadAwareness.style.display !== 'none') {
+    formDownloadAwareness.style.display = 'none';
+  }
+  
   goToStep(5);
 });
 document.getElementById('prevStep4')?.addEventListener('click', () => {
@@ -4963,11 +4963,16 @@ async function updatePermitInfo() {
 // Update permit info when permit type changes
 document.getElementById('permitType')?.addEventListener('change', updatePermitInfo);
 
-// Update permit info when navigating to step 4
+// Update permit info when navigating to step 3 (Application Details)
+// Also auto-fill Step 4 from ID data when navigating there
 const originalGoToStep = goToStep;
 goToStep = function(step) {
-  if (step === 4) {
+  if (step === 3) {
     updatePermitInfo();
+  }
+  if (step === 4) {
+    // Auto-fill Step 4 form fields from ID scan data
+    autoFillStep4FromId();
   }
   if (step === 5) {
     const documentType = document.getElementById('documentType')?.value || '';
@@ -5280,6 +5285,687 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ID OCR SCANNING & AUTO-FILL FEATURES (Azure Document Intelligence)
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Store extracted ID data for later use
+let extractedIdData = null;
+
+// Initialize ID upload functionality - Simplified version
+function initIdUpload() {
+  const idUploadInput = document.getElementById('idUploadInput');
+  
+  if (!idUploadInput) return;
+  
+  // Handle file selection - auto-scan immediately
+  idUploadInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 10 * 1024 * 1024) {
+      showAlert('File size must be less than 10MB', 'warning');
+      return;
+    }
+    
+    // Auto-scan on file select
+    await scanIdDocument(file);
+  });
+}
+
+// Scan ID using Azure Document Intelligence
+async function scanIdDocument(file) {
+  const idScanResult = document.getElementById('idScanResult');
+  const idScanConfidence = document.getElementById('idScanConfidence');
+  const idExtractedData = document.getElementById('idExtractedData');
+  
+  // Show loading state in result area
+  if (idScanResult) {
+    idScanResult.style.display = 'block';
+    idScanResult.innerHTML = `
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 20px;">
+        <div style="width: 40px; height: 40px; border: 3px solid #e5e7eb; border-top-color: #16a34a; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <p style="margin: 0; color: #166534; font-weight: 500;">Scanning ID with Azure AI...</p>
+      </div>
+    `;
+  }
+  
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await fetch(`${API_BASE}/ocr/scan-id`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${await getAuthToken()}`
+      },
+      body: formData
+    });
+    
+    if (!response.ok) {
+      throw new Error('ID scanning failed');
+    }
+    
+    const result = await response.json();
+    
+    if (result.success && result.fields) {
+      extractedIdData = result.fields;
+      
+      // Backend extracted address from raw text if needed
+      // Check if we have valid address
+      const hasValidAddress = extractedIdData.address && 
+                              extractedIdData.address !== 'N/A' && 
+                              extractedIdData.address.trim() !== '' &&
+                              extractedIdData.address.toLowerCase() !== 'n/a';
+      
+      // Check if address is within Laguna (from backend flag)
+      const isLagunaAddress = extractedIdData.isLagunaAddress === true;
+      
+      // Parse the address for location form
+      const address = parseAddressFromId(extractedIdData.address || '');
+      extractedIdData.parsedAddress = address;
+      
+      // Show manual entry if no valid address OR if address is not Laguna
+      const showManualEntry = !hasValidAddress || !isLagunaAddress;
+      
+      if (idScanResult) {
+        idScanResult.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <span style="color: #166534; font-weight: 600; font-size: 14px;">ID Scanned Successfully!</span>
+            <span id="idScanConfidence" style="margin-left: auto; background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">Confidence: ${result.confidence || 85}%</span>
+          </div>
+          <div id="idExtractedData" style="font-size: 13px; color: #4b5563; line-height: 1.6;"></div>
+          <div id="idManualEntry" style="${showManualEntry ? 'display: block;' : 'display: none;'} margin-top: 12px; padding: 12px; background: #fef3c7; border-radius: 8px; border: 1px solid #f59e0b;">
+            <p style="margin: 0 0 8px 0; font-size: 13px; color: #92400e;"><strong>⚠️ Address not detected from ID photo</strong></p>
+            <p style="margin: 0 0 8px 0; font-size: 12px; color: #78350f;">Please type the address shown on your ID:</p>
+            <input type="text" id="manualAddressInput" placeholder="e.g., Quinale (POB.), Paete, Laguna" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; margin-bottom: 8px;" />
+            <button type="button" id="applyManualAddressBtn" class="btn-primary btn-sm" style="width: 100%;">Apply Address to Form</button>
+          </div>
+        `;
+      }
+      
+      // Update extracted data display
+      const dataDiv = document.getElementById('idExtractedData');
+      if (dataDiv) {
+        const name = [extractedIdData.firstName, extractedIdData.middleName, extractedIdData.lastName].filter(Boolean).join(' ');
+        
+        let addressDisplay = extractedIdData.address || 'N/A';
+        let addressStatus = '';
+        
+        if (hasValidAddress && isLagunaAddress) {
+          addressStatus = '<span style="color: #16a34a; font-size: 11px;">✓ Auto-filled</span>';
+        } else if (hasValidAddress && !isLagunaAddress) {
+          addressStatus = '<span style="color: #f59e0b; font-size: 11px;">⚠ Outside Laguna - Manual entry required</span>';
+        }
+        
+        dataDiv.innerHTML = `
+          <strong>Name:</strong> ${name || 'N/A'}<br>
+          <strong>Address:</strong> ${addressDisplay} ${addressStatus}<br>
+          ${extractedIdData.dateOfBirth ? `<strong>Date of Birth:</strong> ${extractedIdData.dateOfBirth}<br>` : ''}
+          ${extractedIdData.documentNumber ? `<strong>ID Number:</strong> ${extractedIdData.documentNumber}<br>` : ''}
+        `;
+      }
+      
+      // Show manual entry if no valid address OR if outside Laguna
+      const manualEntryDiv = document.getElementById('idManualEntry');
+      if (manualEntryDiv && showManualEntry) {
+        manualEntryDiv.style.display = 'block';
+        
+        // Pre-fill with detected address (even if outside Laguna) for reference
+        const manualInput = document.getElementById('manualAddressInput');
+        if (manualInput && hasValidAddress && !isLagunaAddress) {
+          manualInput.value = extractedIdData.address;
+          manualInput.placeholder = "Enter your Laguna address here...";
+        }
+        
+        // Update message for non-Laguna addresses
+        const warningText = manualEntryDiv.querySelector('p strong');
+        if (warningText && hasValidAddress && !isLagunaAddress) {
+          warningText.innerHTML = '⚠️ Address detected but OUTSIDE Laguna coverage area';
+        }
+        
+        // Setup manual address button
+        document.getElementById('applyManualAddressBtn')?.addEventListener('click', () => {
+          const manualAddress = document.getElementById('manualAddressInput')?.value;
+          if (manualAddress) {
+            extractedIdData.address = manualAddress;
+            extractedIdData.parsedAddress = parseAddressFromId(manualAddress);
+            applyExtractedIdData();
+            
+            // Update display
+            if (dataDiv) {
+              const name = [extractedIdData.firstName, extractedIdData.middleName, extractedIdData.lastName].filter(Boolean).join(' ');
+              dataDiv.innerHTML = `
+                <strong>Name:</strong> ${name || 'N/A'}<br>
+                <strong>Address:</strong> ${extractedIdData.address || 'N/A'} <span style="color: #16a34a; font-size: 11px;">✓ Applied</span><br>
+                ${extractedIdData.dateOfBirth ? `<strong>Date of Birth:</strong> ${extractedIdData.dateOfBirth}<br>` : ''}
+                ${extractedIdData.documentNumber ? `<strong>ID Number:</strong> ${extractedIdData.documentNumber}<br>` : ''}
+              `;
+            }
+            
+            manualEntryDiv.style.display = 'none';
+            showAlert('Address applied from manual entry!', 'success');
+          }
+        });
+      }
+      
+      // Auto-apply location data ONLY if address is within Laguna
+      // If outside Laguna or N/A, show manual entry
+      if (hasValidAddress && isLagunaAddress) {
+        applyExtractedIdData();
+        showAlert('ID scanned! Laguna address auto-filled from ID.', 'success');
+      } else if (hasValidAddress && !isLagunaAddress) {
+        // Address detected but NOT in Laguna
+        // Store personal data for Step 4
+        sessionStorage.setItem('idExtractedPersonalData', JSON.stringify({
+          firstName: extractedIdData.firstName || '',
+          middleName: extractedIdData.middleName || '',
+          lastName: extractedIdData.lastName || '',
+          dateOfBirth: extractedIdData.dateOfBirth || '',
+          documentNumber: extractedIdData.documentNumber || ''
+        }));
+        
+        showAlert(`ID scanned! Address detected: ${extractedIdData.address}. Please select your Laguna address manually.`, 'warning');
+      } else {
+        // No address detected
+        extractedIdData.parsedAddress = null;
+        
+        // Store personal data only (for Step 4)
+        sessionStorage.setItem('idExtractedPersonalData', JSON.stringify({
+          firstName: extractedIdData.firstName || '',
+          middleName: extractedIdData.middleName || '',
+          lastName: extractedIdData.lastName || '',
+          dateOfBirth: extractedIdData.dateOfBirth || '',
+          documentNumber: extractedIdData.documentNumber || ''
+        }));
+        
+        showAlert('ID scanned! Name detected. Please enter address manually below.', 'success');
+      }
+    } else {
+      throw new Error('Could not extract data from ID');
+    }
+  } catch (error) {
+    console.error('ID scan error:', error);
+    if (idScanResult) {
+      idScanResult.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px; color: #dc2626;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          <span style="font-weight: 500;">Failed to scan ID. Please enter details manually.</span>
+        </div>
+      `;
+    }
+    showAlert('Failed to scan ID. Please enter details manually.', 'warning');
+  }
+}
+
+// Parse address from raw OCR text (fallback when prebuilt model fails)
+function parseAddressFromRawText(rawText) {
+  if (!rawText) return null;
+  
+  const text = rawText.toLowerCase();
+  
+  // Look for address patterns in raw text
+  // Common patterns on Philippine IDs:
+  // - Address, Barangay X, Municipal, Laguna
+  // - May have "Address:" label or just the text
+  
+  const lagunaMunicipals = Object.keys(lagunaBarangays);
+  
+  // Find municipal in text
+  let foundMunicipal = '';
+  let municipalPos = -1;
+  
+  for (const municipal of lagunaMunicipals) {
+    const pos = text.indexOf(municipal.toLowerCase());
+    if (pos !== -1) {
+      foundMunicipal = municipal;
+      municipalPos = pos;
+      break;
+    }
+  }
+  
+  if (!foundMunicipal) return null;
+  
+  // Get barangays for this municipal
+  const barangays = lagunaBarangays[foundMunicipal];
+  let foundBarangay = '';
+  let barangayPos = -1;
+  
+  // Look for barangay in text (before municipal)
+  for (const barangay of barangays) {
+    const pos = text.indexOf(barangay.toLowerCase());
+    if (pos !== -1 && pos < municipalPos) {
+      // Check if it's preceded by "Barangay" or "Brgy"
+      const beforeBarangay = text.substring(Math.max(0, pos - 20), pos);
+      if (beforeBarangay.includes('barangay') || beforeBarangay.includes('brgy') || beforeBarangay.includes('bgy')) {
+        foundBarangay = barangay;
+        barangayPos = pos;
+        break;
+      }
+    }
+  }
+  
+  // If no barangay with label found, try just the name
+  if (!foundBarangay) {
+    for (const barangay of barangays) {
+      const pos = text.indexOf(barangay.toLowerCase());
+      if (pos !== -1 && pos < municipalPos) {
+        const distance = municipalPos - pos;
+        if (distance < 100) { // Within reasonable distance
+          foundBarangay = barangay;
+          barangayPos = pos;
+          break;
+        }
+      }
+    }
+  }
+  
+  // Extract full address line from original text
+  // Find the line that contains both barangay and municipal
+  const lines = rawText.split('\n');
+  let addressLine = '';
+  
+  for (const line of lines) {
+    const lowerLine = line.toLowerCase();
+    if (lowerLine.includes(foundMunicipal.toLowerCase())) {
+      if (!foundBarangay || lowerLine.includes(foundBarangay.toLowerCase())) {
+        addressLine = line.trim();
+        break;
+      }
+    }
+  }
+  
+  // If no line found with both, try to construct from positions
+  if (!addressLine && municipalPos !== -1) {
+    const startPos = foundBarangay && barangayPos !== -1 ? barangayPos - 50 : Math.max(0, municipalPos - 100);
+    const endPos = text.indexOf('\n', municipalPos);
+    addressLine = rawText.substring(startPos, endPos !== -1 ? endPos : municipalPos + 50).trim();
+  }
+  
+  if (!addressLine) return null;
+  
+  // Parse the components
+  return parseAddressFromId(addressLine);
+}
+
+// Parse address from ID text - extract EXACT values from the ID
+function parseAddressFromId(addressText) {
+  if (!addressText) return null;
+  
+  const parsed = {
+    fullAddress: addressText,
+    municipal: '',
+    barangay: '',
+    street: ''
+  };
+  
+  // Normalize for searching but keep original for extraction
+  const normalizedAddress = addressText.toLowerCase();
+  
+  // STEP 1: Find Municipal - look for Laguna municipalities in ID address
+  const lagunaMunicipals = Object.keys(lagunaBarangays);
+  let municipalPos = -1;
+  let foundMunicipal = '';
+  
+  for (const municipal of lagunaMunicipals) {
+    const pos = normalizedAddress.indexOf(municipal.toLowerCase());
+    if (pos !== -1) {
+      // Get EXACT text from original address (preserve capitalization)
+      foundMunicipal = addressText.substring(pos, pos + municipal.length);
+      municipalPos = pos;
+      parsed.municipal = foundMunicipal;
+      break;
+    }
+  }
+  
+  // STEP 2: Find Barangay - look for "Barangay X" pattern BEFORE the municipal
+  if (municipalPos !== -1) {
+    const beforeMunicipal = normalizedAddress.substring(0, municipalPos);
+    
+    // Look for "Barangay [Name]" or "Brgy [Name]" or "Bgy [Name]"
+    const barangayPatterns = [
+      /barangay\s+([a-z0-9\s]+?)(?:,|$|\s+paete|\s+pagsanjan|\s+cavinti|\s+famy|\s+kalayaan|\s+luisiana|\s+lumban|\s+mabitac|\s+magdalena|\s+majayjay|\s+paete|\s+pakil|\s+pangil|\s+pila|\s+santa\s+cruz|\s+santa\s+maria)/i,
+      /brgy\.?\s+([a-z0-9\s]+?)(?:,|$|\s+paete|\s+pagsanjan)/i,
+      /bgy\.?\s+([a-z0-9\s]+?)(?:,|$|\s+paete|\s+pagsanjan)/i
+    ];
+    
+    for (const pattern of barangayPatterns) {
+      const match = beforeMunicipal.match(pattern);
+      if (match && match[1]) {
+        // Get EXACT barangay name from original address
+        const barangayStart = beforeMunicipal.search(pattern);
+        if (barangayStart !== -1) {
+          const fullMatch = beforeMunicipal.substring(barangayStart).match(pattern);
+          if (fullMatch) {
+            // Extract just the barangay name (without "Barangay" prefix)
+            const barangayText = fullMatch[1].trim();
+            // Find position in original text
+            const originalPos = addressText.toLowerCase().indexOf(barangayText.toLowerCase());
+            if (originalPos !== -1) {
+              parsed.barangay = addressText.substring(originalPos, originalPos + barangayText.length);
+            } else {
+              parsed.barangay = barangayText; // fallback
+            }
+            break;
+          }
+        }
+      }
+    }
+    
+    // If no "Barangay" label, try to find common barangay names near municipal
+    if (!parsed.barangay) {
+      const barangays = lagunaBarangays[parsed.municipal] || [];
+      let closestBarangay = '';
+      let closestPos = -1;
+      let minDistance = Infinity;
+      
+      for (const barangay of barangays) {
+        const pos = normalizedAddress.indexOf(barangay.toLowerCase());
+        if (pos !== -1 && pos < municipalPos) {
+          const distance = municipalPos - pos;
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestPos = pos;
+            closestBarangay = barangay;
+          }
+        }
+      }
+      
+      if (closestBarangay && closestPos !== -1) {
+        // Get EXACT text from original
+        parsed.barangay = addressText.substring(closestPos, closestPos + closestBarangay.length);
+      }
+    }
+  }
+  
+  // STEP 3: Extract Street - everything BEFORE municipal and barangay
+  if (municipalPos !== -1) {
+    let streetEnd = municipalPos;
+    
+    // If barangay found and it's before municipal, adjust street end
+    if (parsed.barangay) {
+      const barangayPos = addressText.toLowerCase().indexOf(parsed.barangay.toLowerCase());
+      if (barangayPos !== -1 && barangayPos < municipalPos) {
+        streetEnd = barangayPos;
+      }
+    }
+    
+    // Get street part
+    let streetPart = addressText.substring(0, streetEnd).trim();
+    
+    // Remove "Barangay X" or "Brgy X" from street
+    streetPart = streetPart.replace(/barangay\s+\S+/gi, '').trim();
+    streetPart = streetPart.replace(/brgy\.?\s+\S+/gi, '').trim();
+    streetPart = streetPart.replace(/bgy\.?\s+\S+/gi, '').trim();
+    
+    // Clean up
+    streetPart = streetPart
+      .replace(/^[,\s-]+/, '')
+      .replace(/[,\s-]+$/, '')
+      .trim();
+    
+    parsed.street = streetPart;
+  }
+  
+  return parsed;
+}
+
+// Apply extracted ID data to location form fields
+function applyExtractedIdData() {
+  if (!extractedIdData) return;
+  
+  // Check if we have valid address data from ID
+  const rawAddress = extractedIdData.address;
+  if (!rawAddress || rawAddress === 'N/A' || rawAddress === 'n/a' || rawAddress.trim() === '') {
+    console.log('No valid address detected from ID, skipping location auto-fill');
+    
+    // Still store personal data for Step 4 (name, birthday, etc)
+    sessionStorage.setItem('idExtractedPersonalData', JSON.stringify({
+      firstName: extractedIdData.firstName || '',
+      middleName: extractedIdData.middleName || '',
+      lastName: extractedIdData.lastName || '',
+      dateOfBirth: extractedIdData.dateOfBirth || '',
+      documentNumber: extractedIdData.documentNumber || ''
+    }));
+    
+    showAlert('ID scanned! Name extracted. Please enter address manually.', 'success');
+    return;
+  }
+  
+  const { parsedAddress } = extractedIdData;
+  
+  // Only auto-fill if we have actual address data
+  if (parsedAddress && (parsedAddress.municipal || parsedAddress.barangay || parsedAddress.street)) {
+    // Fill municipal
+    const municipalSelect = document.getElementById('municipal');
+    if (municipalSelect && parsedAddress.municipal) {
+      municipalSelect.value = parsedAddress.municipal;
+      // Trigger barangay population
+      municipalSelect.dispatchEvent(new Event('change'));
+      
+      // Fill barangay after a short delay (to allow options to populate)
+      if (parsedAddress.barangay) {
+        setTimeout(() => {
+          const barangaySelect = document.getElementById('barangay');
+          if (barangaySelect) {
+            barangaySelect.value = parsedAddress.barangay;
+          }
+        }, 100);
+      }
+    }
+    
+    // Fill street address
+    const streetInput = document.getElementById('streetAddress');
+    if (streetInput && parsedAddress.street) {
+      streetInput.value = parsedAddress.street;
+    }
+    
+    // Add badges to show auto-filled fields
+    addAutoFillBadge('municipal');
+    addAutoFillBadge('barangay');
+    addAutoFillBadge('streetAddress');
+    
+    showAlert('Address auto-filled from ID successfully!', 'success');
+  }
+  
+  // Store personal data for Step 4 (Application Forms)
+  sessionStorage.setItem('idExtractedPersonalData', JSON.stringify({
+    firstName: extractedIdData.firstName || '',
+    middleName: extractedIdData.middleName || '',
+    lastName: extractedIdData.lastName || '',
+    dateOfBirth: extractedIdData.dateOfBirth || '',
+    documentNumber: extractedIdData.documentNumber || ''
+  }));
+}
+
+// Add "Auto-filled from ID" badge to form fields
+function addAutoFillBadge(fieldId) {
+  const field = document.getElementById(fieldId);
+  if (!field) return;
+  
+  // Remove existing badge
+  const existingBadge = field.parentElement.querySelector('.auto-fill-badge');
+  if (existingBadge) existingBadge.remove();
+  
+  // Add badge
+  const badge = document.createElement('span');
+  badge.className = 'auto-fill-badge';
+  badge.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px;">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    Auto-filled from ID
+  `;
+  badge.style.cssText = 'display: inline-block; margin-left: 8px; padding: 2px 8px; background: #dcfce7; color: #166534; border-radius: 12px; font-size: 11px; font-weight: 500;';
+  
+  const label = field.parentElement.querySelector('label');
+  if (label) {
+    label.appendChild(badge);
+  }
+}
+
+// Get auth token for API calls
+async function getAuthToken() {
+  try {
+    const user = auth.currentUser;
+    if (user) {
+      return await getIdToken(user);
+    }
+  } catch (error) {
+    console.error('Error getting auth token:', error);
+  }
+  return '';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STEP 4: APPLICATION FORMS - AUTO-FILL FROM ID
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Auto-fill Step 4 form fields with ID-extracted data
+function autoFillStep4FromId() {
+  const idData = sessionStorage.getItem('idExtractedPersonalData');
+  if (!idData) return;
+  
+  const data = JSON.parse(idData);
+  
+  // Try to fill form fields in Step 4
+  // Note: Form fields are dynamically loaded, so we need to wait for them
+  const checkAndFillFields = () => {
+    let filledCount = 0;
+    
+    // Fill First Name
+    const firstNameField = document.querySelector('#formContentArea input[name*="first"], #formContentArea input[id*="first"], #formContentArea input[placeholder*="First"]');
+    if (firstNameField && data.firstName && !firstNameField.value) {
+      firstNameField.value = data.firstName;
+      addAutoFillBadgeToElement(firstNameField);
+      filledCount++;
+    }
+    
+    // Fill Last Name/Surname
+    const lastNameField = document.querySelector('#formContentArea input[name*="last"], #formContentArea input[id*="last"], #formContentArea input[name*="surname"], #formContentArea input[placeholder*="Last"], #formContentArea input[placeholder*="Surname"]');
+    if (lastNameField && data.lastName && !lastNameField.value) {
+      lastNameField.value = data.lastName;
+      addAutoFillBadgeToElement(lastNameField);
+      filledCount++;
+    }
+    
+    // Fill Middle Name
+    const middleNameField = document.querySelector('#formContentArea input[name*="middle"], #formContentArea input[id*="middle"], #formContentArea input[placeholder*="Middle"]');
+    if (middleNameField && data.middleName && !middleNameField.value) {
+      middleNameField.value = data.middleName;
+      addAutoFillBadgeToElement(middleNameField);
+      filledCount++;
+    }
+    
+    // Fill Date of Birth
+    const dobField = document.querySelector('#formContentArea input[type="date"], #formContentArea input[name*="birth"], #formContentArea input[id*="birth"], #formContentArea input[placeholder*="Birth"]');
+    if (dobField && data.dateOfBirth && !dobField.value) {
+      // Try to parse and format date
+      const parsedDate = parseIdDateToInputFormat(data.dateOfBirth);
+      if (parsedDate) {
+        dobField.value = parsedDate;
+        addAutoFillBadgeToElement(dobField);
+        filledCount++;
+      }
+    }
+    
+    // Fill ID Number (if there's a field for it)
+    const idNumberField = document.querySelector('#formContentArea input[name*="id"], #formContentArea input[id*="id"], #formContentArea input[name*="license"], #formContentArea input[placeholder*="ID"]');
+    if (idNumberField && data.documentNumber && !idNumberField.value) {
+      idNumberField.value = data.documentNumber;
+      addAutoFillBadgeToElement(idNumberField);
+      filledCount++;
+    }
+    
+    if (filledCount > 0) {
+      showAlert(`${filledCount} field(s) auto-filled from ID scan`, 'success');
+    }
+  };
+  
+  // Try immediately and then after a delay (for dynamic content)
+  checkAndFillFields();
+  setTimeout(checkAndFillFields, 500);
+  setTimeout(checkAndFillFields, 1000);
+}
+
+// Parse ID date string to input date format (YYYY-MM-DD)
+function parseIdDateToInputFormat(dateString) {
+  if (!dateString) return null;
+  
+  // Try common date formats
+  const formats = [
+    // MM/DD/YYYY
+    { regex: /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/, fn: (m) => `${m[3]}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}` },
+    // DD/MM/YYYY
+    { regex: /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/, fn: (m) => `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}` },
+    // YYYY-MM-DD
+    { regex: /^(\d{4})-(\d{1,2})-(\d{1,2})$/, fn: (m) => `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}` },
+    // Month DD, YYYY
+    { regex: /^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})$/, fn: (m) => {
+      const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+      const month = months.indexOf(m[1].toLowerCase()) + 1;
+      return month > 0 ? `${m[3]}-${String(month).padStart(2, '0')}-${m[2].padStart(2, '0')}` : null;
+    }}
+  ];
+  
+  for (const format of formats) {
+    const match = dateString.match(format.regex);
+    if (match) {
+      const result = format.fn(match);
+      if (result) return result;
+    }
+  }
+  
+  // Try Date object parsing as fallback
+  const date = new Date(dateString);
+  if (!isNaN(date.getTime())) {
+    return date.toISOString().split('T')[0];
+  }
+  
+  return null;
+}
+
+// Add auto-fill badge to dynamically found form elements
+function addAutoFillBadgeToElement(element) {
+  if (!element) return;
+  
+  // Find the form-group parent
+  const formGroup = element.closest('.form-group') || element.parentElement;
+  if (!formGroup) return;
+  
+  // Remove existing badge
+  const existingBadge = formGroup.querySelector('.auto-fill-badge');
+  if (existingBadge) existingBadge.remove();
+  
+  // Add badge after the label
+  const label = formGroup.querySelector('label');
+  if (label) {
+    const badge = document.createElement('span');
+    badge.className = 'auto-fill-badge';
+    badge.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -1px;">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+      Auto-filled from ID
+    `;
+    badge.style.cssText = 'display: inline-block; margin-left: 8px; padding: 2px 8px; background: #dcfce7; color: #166534; border-radius: 12px; font-size: 11px; font-weight: 500;';
+    label.appendChild(badge);
+  }
+}
+
+// Initialize ID upload on page load
+document.addEventListener('DOMContentLoaded', () => {
+  initIdUpload();
 });
 
 // Initialize default step indicators on page load

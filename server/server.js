@@ -909,7 +909,7 @@ app.post('/ocr', verifyToken, multerOcr.single('file'), async (req, res) => {
   }
 });
 
-// ─── ID Document Scan (prebuilt-idDocument) ─────────────────────────────────
+// ─── ID Document Scan (read ALL text from Philippine Driver's License) ─────────
 app.post('/ocr/scan-id', verifyToken, multerOcr.single('file'), async (req, res) => {
   const endpoint = process.env.AZURE_DI_ENDPOINT;
   const key      = process.env.AZURE_DI_KEY;
@@ -923,44 +923,153 @@ app.post('/ocr/scan-id', verifyToken, multerOcr.single('file'), async (req, res)
 
   try {
     const client = new DocumentAnalysisClient(endpoint, new AzureKeyCredential(key));
-    const poller = await client.beginAnalyzeDocument('prebuilt-idDocument', req.file.buffer);
+    
+    // Use prebuilt-read to get ALL text from the ID
+    const poller = await client.beginAnalyzeDocument('prebuilt-read', req.file.buffer);
     const result = await poller.pollUntilDone();
-
-    if (!result || !result.documents || result.documents.length === 0) {
-      return res.status(422).json({ error: 'No ID document detected. Please upload a clear photo of a valid ID.' });
+    
+    if (!result || !result.content) {
+      return res.status(422).json({ error: 'Could not read text from ID image.' });
     }
-
-    const idDoc = result.documents[0];
-    const f = idDoc.fields || {};
-
-    // Extract common fields across ID types
-    const fields = {};
-    if (f.FirstName) fields.firstName = f.FirstName.content || f.FirstName.value || '';
-    if (f.LastName) fields.lastName = f.LastName.content || f.LastName.value || '';
-    // Some IDs have middle name
-    if (f.MiddleName) fields.middleName = f.MiddleName.content || f.MiddleName.value || '';
-
-    // Address
-    if (f.Address) fields.address = f.Address.content || f.Address.value || '';
-
-    // Date of birth
-    if (f.DateOfBirth) fields.dateOfBirth = f.DateOfBirth.content || f.DateOfBirth.value || '';
-
-    // Document number
-    if (f.DocumentNumber) fields.documentNumber = f.DocumentNumber.content || f.DocumentNumber.value || '';
-
-    // Sex
-    if (f.Sex) fields.sex = f.Sex.content || f.Sex.value || '';
-
-    // Confidence
-    const docConfidence = idDoc.confidence ? Math.round(idDoc.confidence * 100) : null;
+    
+    const rawText = result.content;
+    const lines = result.pages?.[0]?.lines?.map(l => l.content) || rawText.split('\n');
+    
+    // Parse all fields from raw text
+    const fields = {
+      firstName: '',
+      lastName: '',
+      middleName: '',
+      address: '',
+      dateOfBirth: '',
+      documentNumber: '',
+      sex: ''
+    };
+    
+    // DEBUG: Log all lines to see what Azure detected
+    console.log('=== OCR LINES ===');
+    lines.forEach((line, i) => console.log(`${i}: ${line}`));
+    console.log('=================');
+    
+    // Extract Name: Look for "LastName, FirstName MiddleName" pattern
+    // Philippine Driver's License format: "CAGAYAT, JOHN LORENCE PAGGATO"
+    for (const line of lines) {
+      const trimmed = line.trim();
+      
+      // More flexible pattern: ALL CAPS names with comma
+      // "CAGAYAT, JOHN LORENCE PAGGATO" or "CAGAYAT, JOHN LORENCE"
+      const nameMatch = trimmed.match(/^([A-Z]{2,})\s*,\s*([A-Z\s]+?)(?:\s+([A-Z]+))?$/);
+      if (nameMatch && nameMatch[2].trim().length > 0) {
+        fields.lastName = nameMatch[1].trim();
+        fields.firstName = nameMatch[2].trim();
+        fields.middleName = nameMatch[3] ? nameMatch[3].trim() : '';
+        console.log('Name found:', fields);
+        break;
+      }
+    }
+    
+    // Extract Address: Look for Philippine address patterns
+    // Format: "Barangay, Municipal, Province, Zip" or "Barangay, Municipal, Province"
+    const lagunaCities = ['cavinti', 'famy', 'kalayaan', 'luisiana', 'lumban', 'mabitac', 
+      'magdalena', 'majayjay', 'paete', 'pagsanjan', 'pakil', 'pangil', 'pila', 'santa cruz', 'santa maria'];
+    
+    const allCities = [...lagunaCities, 'calamba', 'los baños', 'san pablo', 'binan', 'cabuyao', 
+      'manila', 'quezon city', 'caloocan', 'pasig', 'marikina', 'makati', 'pasay', 
+      'paranaque', 'las pinas', 'muntinlupa', 'taguig', 'batangas', 'lipa', 'cavite'];
+    
+    // First try: Look for lines with "Barangay, Municipal, Province" format
+    for (const line of lines) {
+      const trimmed = line.trim();
+      const lowerLine = trimmed.toLowerCase();
+      
+      // Check if line contains any municipal/city
+      for (const city of allCities) {
+        if (lowerLine.includes(city)) {
+          // Found a line with municipal - this is likely the address
+          // Remove Address: prefix if present
+          let address = trimmed.replace(/^address[:\s]*/i, '').trim();
+          
+          // Remove zip code (4 digits at end)
+          address = address.replace(/,?\s*\d{4}$/, '').trim();
+          
+          fields.address = address;
+          console.log('Address found:', address);
+          break;
+        }
+      }
+      if (fields.address) break;
+    }
+    
+    // If no address found, try combining lines that look like address parts
+    if (!fields.address) {
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        const lowerLine = line.toLowerCase();
+        
+        // Look for barangay indicators
+        if (/\b(brgy|barangay|pob\.?| poblacion)\b/i.test(line)) {
+          // This line has barangay, check if next line has municipal
+          if (i + 1 < lines.length) {
+            const nextLine = lines[i + 1].trim();
+            for (const city of allCities) {
+              if (nextLine.toLowerCase().includes(city)) {
+                fields.address = line + ', ' + nextLine;
+                console.log('Address combined:', fields.address);
+                break;
+              }
+            }
+          }
+        }
+        if (fields.address) break;
+      }
+    }
+    
+    // Check if address is in Laguna (for auto-fill eligibility)
+    fields.isLagunaAddress = lagunaCities.some(city => 
+      fields.address.toLowerCase().includes(city)
+    );
+    
+    // Extract Birthday: Look for date patterns (2001/09/12 or 09/12/2001)
+    const birthdayPatterns = [
+      /(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})/,  // YYYY/MM/DD
+      /(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/,  // DD/MM/YYYY
+      /date\s+of\s+birth[:\s]+(\S+)/i,
+      /birthday[:\s]+(\S+)/i
+    ];
+    
+    for (const line of lines) {
+      for (const pattern of birthdayPatterns) {
+        const match = line.match(pattern);
+        if (match) {
+          fields.dateOfBirth = match[1].length === 4 ? 
+            `${match[1]}-${match[2].padStart(2,'0')}-${match[3].padStart(2,'0')}` :
+            `${match[3]}-${match[2].padStart(2,'0')}-${match[1].padStart(2,'0')}`;
+          break;
+        }
+      }
+      if (fields.dateOfBirth) break;
+    }
+    
+    // Extract ID Number: Look for license number pattern (D34-22-301229 or 22-301229)
+    for (const line of lines) {
+      const idMatch = line.match(/([A-Z]?\d{1,2}[\-\.]\d{2}[\-\.]\d{6})/) ||
+                      line.match(/license\s*no[:\s]+([\w\-]+)/i) ||
+                      line.match(/id\s*no[:\s]+([\w\-]+)/i);
+      if (idMatch) {
+        fields.documentNumber = idMatch[1];
+        break;
+      }
+    }
+    
+    // Calculate confidence based on how many fields we found
+    const filledFields = Object.values(fields).filter(v => v && v !== true && v !== false).length;
+    const confidence = Math.min(95, Math.round((filledFields / 6) * 100));
 
     res.json({
       success: true,
-      docType: idDoc.docType || 'unknown',
-      confidence: docConfidence,
+      confidence,
       fields,
-      rawFieldCount: Object.keys(f).length
+      rawText: rawText.substring(0, 1000)
     });
   } catch (err) {
     console.error('Azure DI ID scan error:', err);
