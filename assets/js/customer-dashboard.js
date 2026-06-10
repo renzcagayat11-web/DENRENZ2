@@ -5297,8 +5297,17 @@ let extractedIdData = null;
 // Initialize ID upload functionality - Simplified version
 function initIdUpload() {
   const idUploadInput = document.getElementById('idUploadInput');
+  const idCameraBtn = document.getElementById('idCameraBtn');
   
   if (!idUploadInput) return;
+  
+  // Camera button click handler - triggers file input with camera capture
+  if (idCameraBtn) {
+    idCameraBtn.addEventListener('click', () => {
+      console.log('[ID Upload] Camera button clicked, triggering file input');
+      idUploadInput.click();
+    });
+  }
   
   // Handle file selection - auto-scan immediately
   idUploadInput.addEventListener('change', async (e) => {
@@ -5476,7 +5485,9 @@ async function scanIdDocument(file) {
           middleName: extractedIdData.middleName || '',
           lastName: extractedIdData.lastName || '',
           dateOfBirth: extractedIdData.dateOfBirth || '',
-          documentNumber: extractedIdData.documentNumber || ''
+          documentNumber: extractedIdData.documentNumber || '',
+          fullAddress: extractedIdData.address || '',
+          parsedAddress: extractedIdData.parsedAddress || null
         }));
         
         showAlert(`ID scanned! Address detected: ${extractedIdData.address}. Please select your Laguna address manually.`, 'warning');
@@ -5490,7 +5501,9 @@ async function scanIdDocument(file) {
           middleName: extractedIdData.middleName || '',
           lastName: extractedIdData.lastName || '',
           dateOfBirth: extractedIdData.dateOfBirth || '',
-          documentNumber: extractedIdData.documentNumber || ''
+          documentNumber: extractedIdData.documentNumber || '',
+          fullAddress: '',
+          parsedAddress: null
         }));
         
         showAlert('ID scanned! Name detected. Please enter address manually below.', 'success');
@@ -5639,7 +5652,6 @@ function parseAddressFromId(addressText) {
   // STEP 2: Find Barangay - look for "Barangay X" pattern OR barangay names before municipal
   if (municipalPos !== -1) {
     const beforeMunicipal = normalizedAddress.substring(0, municipalPos);
-    console.log('[Parse Address] beforeMunicipal text:', JSON.stringify(beforeMunicipal));
     
     // Look for "Barangay [Name]" or "Brgy [Name]" or "Bgy [Name]"
     const barangayPatterns = [
@@ -5662,7 +5674,6 @@ function parseAddressFromId(addressText) {
             const originalPos = addressText.toLowerCase().indexOf(barangayText.toLowerCase());
             if (originalPos !== -1) {
               parsed.barangay = addressText.substring(originalPos, originalPos + barangayText.length);
-              console.log('[Parse Address] Found barangay with label:', parsed.barangay);
             } else {
               parsed.barangay = barangayText; // fallback
             }
@@ -5676,66 +5687,53 @@ function parseAddressFromId(addressText) {
     // This handles cases like "QUINALE (POB.), PAETE" where barangay has no label
     if (!parsed.barangay) {
       const barangays = lagunaBarangays[parsed.municipal] || [];
-      console.log('[Parse Address] Looking for barangays in:', JSON.stringify(beforeMunicipal));
-      console.log('[Parse Address] Available barangays for', parsed.municipal, ':', barangays);
       
-      // Clean beforeMunicipal - remove special chars that might interfere
+      // Clean beforeMunicipal - remove special characters like middle dot (·), bullets, etc.
       const cleanedBeforeMunicipal = beforeMunicipal
-        .replace(/[·•]/g, ' ')  // Remove bullet points
-        .replace(/\s+/g, ' ')   // Normalize spaces
+        .replace(/[·•●■□▪▫]/g, ' ')  // Remove special bullet characters
+        .replace(/\s+/g, ' ')        // Normalize spaces
         .trim();
-      console.log('[Parse Address] Cleaned beforeMunicipal:', JSON.stringify(cleanedBeforeMunicipal));
+      
+      console.log('[Parse Address] Looking for barangays in:', beforeMunicipal);
+      console.log('[Parse Address] Cleaned beforeMunicipal:', cleanedBeforeMunicipal);
+      console.log('[Parse Address] Available barangays for', parsed.municipal, ':', barangays);
       
       // First: try to find exact barangay names in the cleaned text
       for (const barangay of barangays) {
-        const barangayLower = barangay.toLowerCase();
-        // Check if barangay name exists in the text (with word boundaries)
-        const barangayIndex = cleanedBeforeMunicipal.indexOf(barangayLower);
+        // Create a pattern that matches the barangay name with flexible boundaries
+        // Handles: "QUINALE", "QUINALE (POB.)", "· QUINALE", etc.
+        const barangayPattern = new RegExp(
+          '(?:^|[^a-z])' + barangay.toLowerCase().replace(/\s+/g, '\\s+') + '(?:\\s*\\(pob\\.?\\)|\\s*\\(poblacion\\)|\\s*\\(pob\\))?(?=[^a-z]|$)',
+          'i'
+        );
         
-        if (barangayIndex !== -1) {
-          // Verify it's a whole word by checking surrounding chars
-          const beforeChar = barangayIndex > 0 ? cleanedBeforeMunicipal[barangayIndex - 1] : ' ';
-          const afterPos = barangayIndex + barangayLower.length;
-          const afterChar = afterPos < cleanedBeforeMunicipal.length ? cleanedBeforeMunicipal[afterPos] : ' ';
-          
-          // Word boundaries: space, comma, or start/end of string
-          const isWordBoundary = (c) => /[\s,()]/.test(c) || c === undefined;
-          
-          if (isWordBoundary(beforeChar) && isWordBoundary(afterChar)) {
-            // Find position in original text
-            const originalPos = addressText.toLowerCase().indexOf(barangayLower);
-            if (originalPos !== -1 && originalPos < municipalPos) {
-              parsed.barangay = addressText.substring(originalPos, originalPos + barangay.length);
-              console.log('[Parse Address] Found barangay by word match:', parsed.barangay);
-              break;
-            }
+        const match = cleanedBeforeMunicipal.match(barangayPattern);
+        if (match) {
+          // Find the exact position in the original text (using original addressText)
+          const originalPos = addressText.toLowerCase().indexOf(barangay.toLowerCase());
+          if (originalPos !== -1 && originalPos < municipalPos) {
+            parsed.barangay = addressText.substring(originalPos, originalPos + barangay.length);
+            console.log('[Parse Address] Found barangay by pattern match:', parsed.barangay);
+            break;
           }
         }
       }
       
-      // Fallback: use pattern matching with optional suffixes
+      // Fallback: simple includes check on cleaned text
       if (!parsed.barangay) {
         for (const barangay of barangays) {
-          // Create a pattern that matches the barangay name optionally followed by (POB.), (POBLACION), etc.
-          const barangayPattern = new RegExp(
-            '\\b' + barangay.toLowerCase().replace(/\s+/g, '\\s+') + '\\b(?:\\s*\\(pob\\.?\\)|\\s*\\(poblacion\\)|\\s*\\(pob\\))?',
-            'i'
-          );
-          
-          const match = beforeMunicipal.match(barangayPattern);
-          if (match) {
-            // Find the exact position in the original text
+          if (cleanedBeforeMunicipal.includes(barangay.toLowerCase())) {
             const originalPos = addressText.toLowerCase().indexOf(barangay.toLowerCase());
             if (originalPos !== -1 && originalPos < municipalPos) {
               parsed.barangay = addressText.substring(originalPos, originalPos + barangay.length);
-              console.log('[Parse Address] Found barangay by regex pattern:', parsed.barangay);
+              console.log('[Parse Address] Found barangay by simple includes:', parsed.barangay);
               break;
             }
           }
         }
       }
       
-      // Last fallback: find closest barangay by position
+      // Final fallback: find closest barangay by position
       if (!parsed.barangay) {
         let closestBarangay = '';
         let closestPos = -1;
@@ -5755,7 +5753,7 @@ function parseAddressFromId(addressText) {
         
         if (closestBarangay && closestPos !== -1) {
           parsed.barangay = addressText.substring(closestPos, closestPos + closestBarangay.length);
-          console.log('[Parse Address] Found barangay by position fallback:', parsed.barangay);
+          console.log('[Parse Address] Found barangay by position:', parsed.barangay);
         }
       }
     }
@@ -5786,10 +5784,12 @@ function parseAddressFromId(addressText) {
     // Also remove any remaining barangay-like text (words ending with comma before municipal)
     streetPart = streetPart.replace(/\s*\([^)]*\)\s*$/, '').trim(); // Remove trailing (POB.) etc
     
-    // Clean up
+    // Clean up special characters like middle dots, bullets, etc.
     streetPart = streetPart
-      .replace(/^[,:;\s-]+/, '')
-      .replace(/[,;:\s-]+$/, '')
+      .replace(/[·•●■□▪▫]/g, ' ')   // Replace special bullets with space
+      .replace(/\s+/g, ' ')          // Normalize spaces
+      .replace(/^[,:;\s-]+/, '')    // Remove leading punctuation
+      .replace(/[,;:\s-]+$/, '')    // Remove trailing punctuation
       .trim();
     
     parsed.street = streetPart;
@@ -5889,7 +5889,9 @@ function applyExtractedIdData() {
       middleName: extractedIdData.middleName || '',
       lastName: extractedIdData.lastName || '',
       dateOfBirth: extractedIdData.dateOfBirth || '',
-      documentNumber: extractedIdData.documentNumber || ''
+      documentNumber: extractedIdData.documentNumber || '',
+      fullAddress: '',
+      parsedAddress: null
     }));
     
     showAlert('ID scanned! Name extracted. Please enter address manually.', 'success');
@@ -5984,7 +5986,9 @@ function applyExtractedIdData() {
     middleName: extractedIdData.middleName || '',
     lastName: extractedIdData.lastName || '',
     dateOfBirth: extractedIdData.dateOfBirth || '',
-    documentNumber: extractedIdData.documentNumber || ''
+    documentNumber: extractedIdData.documentNumber || '',
+    fullAddress: extractedIdData.address || '',
+    parsedAddress: extractedIdData.parsedAddress || null
   };
   console.log('[Step 2 Auto-fill] Storing personal data for Step 4:', personalData);
   sessionStorage.setItem('idExtractedPersonalData', JSON.stringify(personalData));
@@ -6048,8 +6052,8 @@ function autoFillStep4FromId() {
   const checkAndFillFields = () => {
     let filledCount = 0;
     
-    // DEBUG: Log all available inputs
-    const allInputs = document.querySelectorAll('input[type="text"], input:not([type="hidden"])');
+    // DEBUG: Log all available inputs (exclude file and tel inputs)
+    const allInputs = document.querySelectorAll('input[type="text"], input:not([type="hidden"]):not([type="file"]):not([type="tel"])');
     console.log('[ID Auto-fill] Found', allInputs.length, 'input fields');
     allInputs.forEach((input, i) => {
       if (i < 10) console.log(`[ID Auto-fill] Input ${i}:`, input.id, input.name, input.placeholder?.substring(0, 30));
@@ -6060,8 +6064,9 @@ function autoFillStep4FromId() {
     const fullName = [data.firstName, data.middleName, data.lastName].filter(Boolean).join(' ');
     console.log('[ID Auto-fill] Constructed full name:', fullName);
     
-    // Try multiple selectors for name field
+    // Try multiple selectors for name field - FILL ALL MATCHING FIELDS
     const nameSelectors = [
+      'input[id*="ackApplicant"]',  // ALL Receipt form applicant names (ro_f06_ackApplicant, r4a_b01_ackApplicant, etc.)
       'input[name*="applicant"]', 'input[id*="applicant"]', 
       'input[name*="name"]', 'input[id*="name"]',
       'input[placeholder*="Name"]', 'input[placeholder*="name"]',
@@ -6070,38 +6075,44 @@ function autoFillStep4FromId() {
       '.form-group:has(label:contains("Applicant")) input'
     ];
     
-    let nameField = null;
+    // Find and fill ALL matching name fields (not just first)
+    const filledNameFields = new Set();
     for (const selector of nameSelectors) {
       try {
-        nameField = document.querySelector(selector);
-        if (nameField) {
-          console.log('[ID Auto-fill] Found name field with selector:', selector);
-          break;
-        }
+        const fields = document.querySelectorAll(selector);
+        fields.forEach(field => {
+          // Skip file inputs, tel inputs (contact numbers), and already filled fields
+          if (field.type === 'file' || field.type === 'tel' || filledNameFields.has(field)) return;
+          if (field && fullName && !field.value) {
+            field.value = fullName;
+            addAutoFillBadgeToElement(field);
+            filledCount++;
+            filledNameFields.add(field);
+            console.log('[ID Auto-fill] Filled name field:', field.id || field.name, 'with:', fullName);
+          }
+        });
       } catch (e) { /* invalid selector, continue */ }
     }
     
-    // Fallback: look for first text input in the form
-    if (!nameField) {
-      const formInputs = document.querySelectorAll('.form-step[data-step="4"] input[type="text"], #formContentArea input[type="text"]');
-      if (formInputs.length > 0) {
-        nameField = formInputs[0];
-        console.log('[ID Auto-fill] Using first text input as name field:', nameField.id || nameField.name);
+    // Fallback: look for first empty text input in the form if no name fields found
+    if (filledNameFields.size === 0) {
+      const formInputs = document.querySelectorAll('.form-step[data-step="4"] input[type="text"]:not([type="file"]):not([type="tel"]), #formContentArea input[type="text"]:not([type="file"]):not([type="tel"])');
+      for (const input of formInputs) {
+        if (!input.value && input.placeholder?.toLowerCase().includes('name')) {
+          input.value = fullName;
+          addAutoFillBadgeToElement(input);
+          filledCount++;
+          console.log('[ID Auto-fill] Filled fallback name field:', input.id || input.name);
+          break;
+        }
       }
-    }
-    
-    if (nameField && fullName && !nameField.value) {
-      nameField.value = fullName;
-      addAutoFillBadgeToElement(nameField);
-      filledCount++;
-      console.log('[ID Auto-fill] Filled name field:', fullName);
     }
     
     // STRATEGY 2: Fill individual name fields if they exist
     // First Name
     const firstNameSelectors = ['input[name*="first"]', 'input[id*="first"]', 'input[placeholder*="First"]'];
     const firstNameField = querySelectorAny(firstNameSelectors);
-    if (firstNameField && data.firstName && !firstNameField.value) {
+    if (firstNameField && data.firstName && !firstNameField.value && firstNameField.type !== 'file') {
       firstNameField.value = data.firstName;
       addAutoFillBadgeToElement(firstNameField);
       filledCount++;
@@ -6110,7 +6121,7 @@ function autoFillStep4FromId() {
     // Last Name
     const lastNameSelectors = ['input[name*="last"]', 'input[id*="last"]', 'input[name*="surname"]', 'input[placeholder*="Last"]', 'input[placeholder*="Surname"]'];
     const lastNameField = querySelectorAny(lastNameSelectors);
-    if (lastNameField && data.lastName && !lastNameField.value) {
+    if (lastNameField && data.lastName && !lastNameField.value && lastNameField.type !== 'file') {
       lastNameField.value = data.lastName;
       addAutoFillBadgeToElement(lastNameField);
       filledCount++;
@@ -6119,7 +6130,7 @@ function autoFillStep4FromId() {
     // Middle Name
     const middleNameSelectors = ['input[name*="middle"]', 'input[id*="middle"]', 'input[placeholder*="Middle"]'];
     const middleNameField = querySelectorAny(middleNameSelectors);
-    if (middleNameField && data.middleName && !middleNameField.value) {
+    if (middleNameField && data.middleName && !middleNameField.value && middleNameField.type !== 'file') {
       middleNameField.value = data.middleName;
       addAutoFillBadgeToElement(middleNameField);
       filledCount++;
@@ -6127,22 +6138,33 @@ function autoFillStep4FromId() {
     
     // STRATEGY 3: Look for Address field
     const addressSelectors = [
+      '#applicantAddress',
       'textarea[name*="address"]', 'textarea[id*="address"]',
       'input[name*="address"]', 'input[id*="address"]',
       'textarea[placeholder*="Address"]', 'input[placeholder*="Address"]'
     ];
     const addressField = querySelectorAny(addressSelectors);
-    if (addressField && data.fullAddress && !addressField.value) {
-      addressField.value = data.fullAddress;
+    
+    // Build full address from parsed components if available
+    let fullAddress = data.fullAddress || '';
+    if (!fullAddress && data.parsedAddress) {
+      const parts = [data.parsedAddress.street, data.parsedAddress.barangay, data.parsedAddress.municipal].filter(Boolean);
+      if (parts.length > 0) {
+        fullAddress = parts.join(', ') + ', Laguna';
+      }
+    }
+    
+    if (addressField && fullAddress && !addressField.value && addressField.type !== 'file') {
+      addressField.value = fullAddress;
       addAutoFillBadgeToElement(addressField);
       filledCount++;
-      console.log('[ID Auto-fill] Filled address field');
+      console.log('[ID Auto-fill] Filled address field:', fullAddress);
     }
     
     // STRATEGY 4: Date of Birth
     const dobSelectors = ['input[type="date"]', 'input[name*="birth"]', 'input[id*="birth"]', 'input[placeholder*="Birth"]'];
     const dobField = querySelectorAny(dobSelectors);
-    if (dobField && data.dateOfBirth && !dobField.value) {
+    if (dobField && data.dateOfBirth && !dobField.value && dobField.type !== 'file') {
       const parsedDate = parseIdDateToInputFormat(data.dateOfBirth);
       if (parsedDate) {
         dobField.value = parsedDate;
@@ -6154,7 +6176,7 @@ function autoFillStep4FromId() {
     // STRATEGY 5: ID Number
     const idSelectors = ['input[name*="id"]', 'input[id*="id"]', 'input[name*="license"]', 'input[placeholder*="ID"]'];
     const idNumberField = querySelectorAny(idSelectors);
-    if (idNumberField && data.documentNumber && !idNumberField.value) {
+    if (idNumberField && data.documentNumber && !idNumberField.value && idNumberField.type !== 'file') {
       idNumberField.value = data.documentNumber;
       addAutoFillBadgeToElement(idNumberField);
       filledCount++;
@@ -6171,7 +6193,8 @@ function autoFillStep4FromId() {
     for (const selector of selectors) {
       try {
         const el = document.querySelector(selector);
-        if (el) return el;
+        // Skip file inputs - they cannot be programmatically filled
+        if (el && el.type !== 'file') return el;
       } catch (e) { /* continue */ }
     }
     return null;
@@ -10987,7 +11010,7 @@ async function generateFormPDF() {
 
       denrForm.classList.add('denr-form--pdf-snapshot');
 
-      // For PDF: replace signature canvas with a clean <img> in the signature field row
+      // For PDF: replace signature canvas with formatted signature output (line + name + date)
       const sigSwaps = [];
       const sigLoadPromises = [];
       receiptSignaturePads.forEach((padState) => {
@@ -11005,17 +11028,64 @@ async function generateFormPDF() {
         const sigContainer = sigField.querySelector('.denr-cc-signature-container');
         if (sigContainer) sigContainer.style.display = 'none';
 
-        // Insert a clean signature image in its place
-        const img = document.createElement('img');
-        img.style.cssText = 'height:60px;width:auto;max-width:100%;object-fit:contain;display:block;margin:0 auto;';
-        sigField.appendChild(img);
+        // Get the applicant name from corresponding input field
+        const applicantInputId = padState.canvas.id?.replace('_signatureData', '') || '';
+        const applicantInput = document.getElementById(applicantInputId);
+        let rawNameValue = applicantInput?.value?.trim();
+        
+        // If input has placeholder text or is empty, try to get from profile or other name fields
+        if (!rawNameValue || rawNameValue === 'APPLICANT NAME' || rawNameValue.toUpperCase() === 'APPLICANT NAME') {
+          // Try to get from profile name
+          const profileName = document.getElementById('fullName')?.value?.trim() || 
+                             document.getElementById('applicantName')?.value?.trim() ||
+                             document.getElementById('applicantFullName')?.value?.trim();
+          if (profileName) {
+            rawNameValue = profileName;
+          }
+        }
+        
+        const applicantName = rawNameValue && rawNameValue.toUpperCase() !== 'APPLICANT NAME' 
+          ? rawNameValue 
+          : 'Applicant Name';
+        
+        console.log('[PDF Signature] Input ID:', applicantInputId);
+        console.log('[PDF Signature] Raw value:', applicantInput?.value?.trim());
+        console.log('[PDF Signature] Resolved name:', rawNameValue);
+        console.log('[PDF Signature] Final name:', applicantName);
 
-        sigSwaps.push({ img, sigField, sigContainer });
+        // Get the date received from corresponding date input
+        const dateInputId = applicantInputId.replace('ackApplicant', 'ackDateReceived');
+        const dateInput = document.getElementById(dateInputId);
+        let dateReceived = dateInput?.value?.trim();
+        
+        // If date is empty, use today's date
+        if (!dateReceived) {
+          const today = new Date();
+          const options = { year: 'numeric', month: 'long', day: 'numeric' };
+          dateReceived = today.toLocaleDateString('en-US', options);
+        }
+        
+        console.log('[PDF Signature] Date ID:', dateInputId);
+        console.log('[PDF Signature] Date value:', dateReceived);
 
+        // Create signature output container with proper format
+        const sigOutput = document.createElement('div');
+        sigOutput.className = 'denr-cc-signature-output';
+        sigOutput.innerHTML = `
+          <img class="denr-cc-signature-output__image" src="${dataUrl}" alt="Signature" />
+          <div class="denr-cc-signature-output__line"></div>
+          <div class="denr-cc-signature-output__name">${applicantName}</div>
+          <div class="denr-cc-signature-output__date">${dateReceived}</div>
+        `;
+        sigField.appendChild(sigOutput);
+
+        sigSwaps.push({ sigOutput, sigField, sigContainer });
+
+        // Wait for image to load
+        const img = sigOutput.querySelector('img');
         sigLoadPromises.push(new Promise((resolve) => {
           img.onload = resolve;
           img.onerror = resolve;
-          img.src = dataUrl;
         }));
       });
       await Promise.all(sigLoadPromises);
@@ -11053,9 +11123,9 @@ async function generateFormPDF() {
         });
       } finally {
         denrForm.classList.remove('denr-form--pdf-snapshot');
-        // Restore signature UI and remove injected PDF images
-        sigSwaps.forEach(({ img, sigContainer }) => {
-          img.remove();
+        // Restore signature UI and remove injected signature outputs
+        sigSwaps.forEach(({ sigOutput, sigContainer }) => {
+          sigOutput.remove();
           if (sigContainer) sigContainer.style.display = '';
         });
       }
@@ -11729,7 +11799,7 @@ function updateDocumentUploadFields(documentType, permitType) {
           <p style="color: #1f2937; font-size: 15px; margin: 0 0 6px 0; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Drop your document here</p>
           <p style="color: #6b7280; font-size: 13px; margin: 0; font-weight: 500;">or click to select file</p>
         </div>
-        <input type="file" id="docUpload_${index}" name="${safeName}" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display: none;" />
+        <input type="file" id="docUpload_${index}" name="${safeName}" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" capture="environment" style="display: none;" />
         <div id="docUpload_${index}_preview" style="position: absolute; bottom: 12px; left: 12px; right: 12px; display: none;">
           <div style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #f0fdf4; padding: 8px 14px; border-radius: 8px; border: 1px solid #bbf7d0; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

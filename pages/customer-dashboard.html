@@ -798,9 +798,19 @@
                     </div>
                     <p style="margin: 0 0 16px 0; color: #4b5563; font-size: 13px;">Upload a photo of your valid ID to auto-fill address and personal details.</p>
                     
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                      <input type="file" id="idUploadInput" accept="image/*" capture="environment" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" />
+                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                      <input type="file" id="idUploadInput" accept="image/*" capture="environment" style="flex: 1; min-width: 200px; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" />
+                      <button type="button" id="idCameraBtn" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: #16a34a; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;" title="Take photo with camera">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                          <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                        <span>Camera</span>
+                      </button>
                     </div>
+                    <small style="display: block; margin-top: 8px; color: #6b7280; font-size: 12px;">
+                      💡 <strong>Tip:</strong> On mobile, tap "Camera" to take a photo directly, or choose file to upload from gallery
+                    </small>
                     
                     <div class="id-scan-result" id="idScanResult" style="display: none; margin-top: 16px; padding: 16px; background: white; border-radius: 8px; border-left: 4px solid #16a34a;">
                       <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
@@ -910,7 +920,7 @@
                       <circle cx="12" cy="13" r="4"></circle>
                     </svg>
                   </button>
-                  <input type="file" id="profilePicture" accept="image/*" style="display: none;" />
+                  <input type="file" id="profilePicture" accept="image/*" capture="environment" style="display: none;" />
                 </div>
                 <div class="profile-info">
                   <h4 id="profileName">Customer Name</h4>
