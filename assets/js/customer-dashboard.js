@@ -5315,7 +5315,19 @@ function initIdUpload() {
   // Camera button click handler - opens camera modal
   if (idCameraBtn && idCameraModal) {
     idCameraBtn.addEventListener('click', async () => {
-      console.log('[ID Upload] Camera button clicked, opening camera modal');
+      console.log('[ID Upload] Camera button clicked');
+      
+      // Check if on production/cloud without backend (mobile)
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+      
+      if (!isLocalhost && isMobile) {
+        showAlert('ID scanning is available on desktop/laptop only. Please upload a photo from your gallery.', 'info');
+        // Trigger file input instead
+        idUploadInput.click();
+        return;
+      }
+      
       await openIdCamera();
     });
   }
@@ -5530,6 +5542,33 @@ async function scanIdDocument(file) {
   const isHeic = file.type === 'image/heic' || file.type === 'image/heif' || file.name.toLowerCase().endsWith('.heic');
   
   console.log('[ID Scan] File info:', { name: file.name, type: file.type, size: file.size, isMobile, isHeic });
+  
+  // Check if on production/cloud without backend
+  const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  if (!isLocalhost && isMobile) {
+    console.log('[ID Scan] Mobile on production - backend not available');
+    if (idScanResult) {
+      idScanResult.innerHTML = `
+        <div style="padding: 16px; background: #fef3c7; border-radius: 8px; border: 1px solid #f59e0b;">
+          <div style="display: flex; align-items: center; gap: 8px; color: #92400e; margin-bottom: 8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span style="font-weight: 500;">ID Scanning Not Available</span>
+          </div>
+          <p style="margin: 0; font-size: 13px; color: #78350f;">
+            ID scanning is only available on desktop/laptop at this time. 
+            Please enter your address and name manually below.
+          </p>
+        </div>
+      `;
+      idScanResult.style.display = 'block';
+    }
+    showAlert('ID scanning available on desktop only. Please enter details manually.', 'warning');
+    return;
+  }
   
   try {
     // For mobile HEIC files, show warning
