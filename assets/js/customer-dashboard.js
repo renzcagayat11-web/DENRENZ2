@@ -5703,6 +5703,9 @@ async function scanIdDocument(file) {
           parsedAddress: extractedIdData.parsedAddress || null
         }));
         
+        // Trigger auto-fill for Step 4 immediately (for mobile/desktop consistency)
+        autoFillStep4FromId();
+        
         showAlert(`ID scanned! Address detected: ${extractedIdData.address}. Please select your Laguna address manually.`, 'warning');
       } else {
         // No address detected
@@ -5718,6 +5721,9 @@ async function scanIdDocument(file) {
           fullAddress: '',
           parsedAddress: null
         }));
+        
+        // Trigger auto-fill for Step 4 immediately (for mobile/desktop consistency)
+        autoFillStep4FromId();
         
         showAlert('ID scanned! Name detected. Please enter address manually below.', 'success');
       }
@@ -6434,9 +6440,14 @@ function autoFillStep4FromId() {
       '#applicantAddress',
       'textarea[name*="address"]', 'textarea[id*="address"]',
       'input[name*="address"]', 'input[id*="address"]',
-      'textarea[placeholder*="Address"]', 'input[placeholder*="Address"]'
+      'textarea[placeholder*="Address"]', 'input[placeholder*="Address"]',
+      'textarea[placeholder*="address"]', 'input[placeholder*="address"]',
+      '#address', '.address-field', '[data-field="address"]'
     ];
     const addressField = querySelectorAny(addressSelectors);
+    
+    console.log('[ID Auto-fill] Address field found:', addressField?.id || addressField?.name || 'NOT FOUND');
+    console.log('[ID Auto-fill] Address data:', { fullAddress: data.fullAddress, parsedAddress: data.parsedAddress });
     
     // Build full address from parsed components if available
     let fullAddress = data.fullAddress || '';
@@ -6447,11 +6458,34 @@ function autoFillStep4FromId() {
       }
     }
     
-    if (addressField && fullAddress && !addressField.value && addressField.type !== 'file') {
-      addressField.value = fullAddress;
-      addAutoFillBadgeToElement(addressField);
-      filledCount++;
-      console.log('[ID Auto-fill] Filled address field:', fullAddress);
+    console.log('[ID Auto-fill] Final address to fill:', fullAddress);
+    
+    if (addressField && fullAddress) {
+      if (!addressField.value && addressField.type !== 'file') {
+        addressField.value = fullAddress;
+        addAutoFillBadgeToElement(addressField);
+        filledCount++;
+        console.log('[ID Auto-fill] ✓ Filled address field:', fullAddress);
+      } else if (addressField.value) {
+        console.log('[ID Auto-fill] Address field already has value:', addressField.value);
+      }
+    } else {
+      console.log('[ID Auto-fill] ✗ Could not fill address. Field:', !!addressField, 'Address:', !!fullAddress);
+    }
+    
+    // FALLBACK: If still no address field found, try to find ANY empty textarea
+    if (!addressField && fullAddress) {
+      const allTextareas = document.querySelectorAll('textarea');
+      console.log('[ID Auto-fill] Fallback: Found', allTextareas.length, 'textareas');
+      for (const textarea of allTextareas) {
+        if (!textarea.value && !textarea.disabled && !textarea.readOnly) {
+          textarea.value = fullAddress;
+          addAutoFillBadgeToElement(textarea);
+          filledCount++;
+          console.log('[ID Auto-fill] ✓ Filled fallback textarea with address:', textarea.id || textarea.name);
+          break;
+        }
+      }
     }
     
     // STRATEGY 4: Date of Birth
@@ -6494,10 +6528,13 @@ function autoFillStep4FromId() {
   }
   
   // Try multiple times with increasing delays (for dynamic content)
+  // Mobile devices may need more time for form fields to render
   checkAndFillFields();
   setTimeout(checkAndFillFields, 300);
   setTimeout(checkAndFillFields, 600);
   setTimeout(checkAndFillFields, 1000);
+  setTimeout(checkAndFillFields, 1500); // Extra retry for mobile
+  setTimeout(checkAndFillFields, 2500); // Final retry for slow mobile
 }
 
 // Parse ID date string to input date format (YYYY-MM-DD)
