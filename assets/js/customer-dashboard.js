@@ -5293,23 +5293,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Store extracted ID data for later use
 let extractedIdData = null;
+let idCameraStream = null;
+let idCapturedImage = null;
 
-// Initialize ID upload functionality - Simplified version
+// Initialize ID upload functionality with Camera Modal
 function initIdUpload() {
   const idUploadInput = document.getElementById('idUploadInput');
   const idCameraBtn = document.getElementById('idCameraBtn');
+  const idCameraModal = document.getElementById('idCameraModal');
+  const idCameraVideo = document.getElementById('idCameraVideo');
+  const idCameraCanvas = document.getElementById('idCameraCanvas');
+  const idCameraPreview = document.getElementById('idCameraPreview');
+  const idCaptureBtn = document.getElementById('idCaptureBtn');
+  const idRetakeBtn = document.getElementById('idRetakeBtn');
+  const idConfirmCaptureBtn = document.getElementById('idConfirmCaptureBtn');
+  const idCancelCameraBtn = document.getElementById('idCancelCameraBtn');
+  const idCameraError = document.getElementById('idCameraError');
   
   if (!idUploadInput) return;
   
-  // Camera button click handler - triggers file input with camera capture
-  if (idCameraBtn) {
-    idCameraBtn.addEventListener('click', () => {
-      console.log('[ID Upload] Camera button clicked, triggering file input');
-      idUploadInput.click();
+  // Camera button click handler - opens camera modal
+  if (idCameraBtn && idCameraModal) {
+    idCameraBtn.addEventListener('click', async () => {
+      console.log('[ID Upload] Camera button clicked, opening camera modal');
+      await openIdCamera();
     });
   }
   
-  // Handle file selection - auto-scan immediately
+  // Cancel camera button
+  if (idCancelCameraBtn) {
+    idCancelCameraBtn.addEventListener('click', closeIdCamera);
+  }
+  
+  // Capture photo button
+  if (idCaptureBtn) {
+    idCaptureBtn.addEventListener('click', captureIdPhoto);
+  }
+  
+  // Retake photo button
+  if (idRetakeBtn) {
+    idRetakeBtn.addEventListener('click', retakeIdPhoto);
+  }
+  
+  // Confirm and use photo button
+  if (idConfirmCaptureBtn) {
+    idConfirmCaptureBtn.addEventListener('click', confirmIdPhoto);
+  }
+  
+  // Handle file selection from file input - auto-scan immediately
   idUploadInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -5322,6 +5353,144 @@ function initIdUpload() {
     // Auto-scan on file select
     await scanIdDocument(file);
   });
+  
+  // Function to open camera modal
+  async function openIdCamera() {
+    idCameraModal.style.display = 'flex';
+    idCameraError.style.display = 'none';
+    idCameraError.textContent = '';
+    
+    try {
+      // Check if browser supports getUserMedia
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Camera not supported in this browser. Please use the file upload option.');
+      }
+      
+      // Request camera access - prefer back camera on mobile, any camera on desktop
+      const constraints = {
+        video: {
+          facingMode: 'environment', // Prefer back camera on mobile
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        }
+      };
+      
+      console.log('[ID Camera] Requesting camera access...');
+      idCameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+      
+      // Connect stream to video element
+      idCameraVideo.srcObject = idCameraStream;
+      idCameraVideo.style.display = 'block';
+      idCameraPreview.style.display = 'none';
+      
+      // Reset button states
+      idCaptureBtn.style.display = 'block';
+      idRetakeBtn.style.display = 'none';
+      idConfirmCaptureBtn.style.display = 'none';
+      
+      console.log('[ID Camera] Camera started successfully');
+    } catch (err) {
+      console.error('[ID Camera] Error accessing camera:', err);
+      idCameraError.textContent = 'Camera error: ' + err.message;
+      idCameraError.style.display = 'block';
+      
+      // If camera fails, fallback to file input
+      setTimeout(() => {
+        closeIdCamera();
+        if (confirm('Camera access failed. Would you like to upload a file instead?')) {
+          idUploadInput.click();
+        }
+      }, 2000);
+    }
+  }
+  
+  // Function to close camera modal
+  function closeIdCamera() {
+    idCameraModal.style.display = 'none';
+    
+    // Stop camera stream
+    if (idCameraStream) {
+      idCameraStream.getTracks().forEach(track => track.stop());
+      idCameraStream = null;
+    }
+    
+    // Reset UI
+    idCameraVideo.srcObject = null;
+    idCameraVideo.style.display = 'block';
+    idCameraPreview.style.display = 'none';
+    idCaptureBtn.style.display = 'block';
+    idRetakeBtn.style.display = 'none';
+    idConfirmCaptureBtn.style.display = 'none';
+    idCapturedImage = null;
+  }
+  
+  // Function to capture photo
+  function captureIdPhoto() {
+    if (!idCameraVideo.videoWidth) {
+      console.error('[ID Camera] Video not ready');
+      return;
+    }
+    
+    // Set canvas size to match video
+    idCameraCanvas.width = idCameraVideo.videoWidth;
+    idCameraCanvas.height = idCameraVideo.videoHeight;
+    
+    // Draw video frame to canvas
+    const ctx = idCameraCanvas.getContext('2d');
+    ctx.drawImage(idCameraVideo, 0, 0);
+    
+    // Get image data
+    idCapturedImage = idCameraCanvas.toDataURL('image/jpeg', 0.9);
+    
+    // Show preview
+    idCameraPreview.src = idCapturedImage;
+    idCameraPreview.style.display = 'block';
+    idCameraVideo.style.display = 'none';
+    
+    // Update button states
+    idCaptureBtn.style.display = 'none';
+    idRetakeBtn.style.display = 'block';
+    idConfirmCaptureBtn.style.display = 'block';
+    
+    console.log('[ID Camera] Photo captured');
+  }
+  
+  // Function to retake photo
+  function retakeIdPhoto() {
+    idCameraPreview.style.display = 'none';
+    idCameraVideo.style.display = 'block';
+    idCapturedImage = null;
+    
+    idCaptureBtn.style.display = 'block';
+    idRetakeBtn.style.display = 'none';
+    idConfirmCaptureBtn.style.display = 'none';
+  }
+  
+  // Function to confirm and use photo
+  async function confirmIdPhoto() {
+    if (!idCapturedImage) return;
+    
+    // Convert data URL to file
+    const byteString = atob(idCapturedImage.split(',')[1]);
+    const mimeString = idCapturedImage.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    
+    const blob = new Blob([ab], { type: mimeString });
+    const file = new File([blob], 'id-capture-' + Date.now() + '.jpg', { type: 'image/jpeg' });
+    
+    console.log('[ID Camera] Photo confirmed, file size:', file.size);
+    
+    // Close camera
+    closeIdCamera();
+    
+    // Scan the captured photo
+    await scanIdDocument(file);
+  }
 }
 
 // Scan ID using Azure Document Intelligence

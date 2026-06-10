@@ -834,6 +834,40 @@
                       </div>
                       <div id="idExtractedData" style="font-size: 13px; color: #4b5563; line-height: 1.6;"></div>
                     </div>
+                    
+                    <!-- Camera Modal for ID Capture -->
+                    <div id="idCameraModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; flex-direction: column; align-items: center; justify-content: center;">
+                      <div style="position: relative; width: 100%; max-width: 640px; padding: 20px;">
+                        <h3 style="color: white; text-align: center; margin: 0 0 16px 0; font-size: 18px;">📷 Take Photo of Your ID</h3>
+                        <div style="position: relative; background: #000; border-radius: 12px; overflow: hidden;">
+                          <video id="idCameraVideo" autoplay playsinline style="width: 100%; height: auto; display: block;"></video>
+                          <canvas id="idCameraCanvas" style="display: none;"></canvas>
+                          <img id="idCameraPreview" style="display: none; width: 100%; height: auto;" />
+                          
+                          <!-- Overlay guide frame -->
+                          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 60%; border: 2px dashed rgba(255,255,255,0.5); border-radius: 8px; pointer-events: none;">
+                            <span style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); color: white; font-size: 12px; white-space: nowrap;">Align ID within frame</span>
+                          </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 12px; justify-content: center; margin-top: 20px;">
+                          <button type="button" id="idCaptureBtn" style="padding: 12px 24px; background: #16a34a; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                            📸 Capture
+                          </button>
+                          <button type="button" id="idRetakeBtn" style="display: none; padding: 12px 24px; background: #6b7280; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                            🔄 Retake
+                          </button>
+                          <button type="button" id="idConfirmCaptureBtn" style="display: none; padding: 12px 24px; background: #16a34a; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                            ✓ Use Photo
+                          </button>
+                          <button type="button" id="idCancelCameraBtn" style="padding: 12px 24px; background: #dc2626; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;">
+                            ✕ Cancel
+                          </button>
+                        </div>
+                        
+                        <p id="idCameraError" style="display: none; color: #fecaca; text-align: center; margin-top: 16px; font-size: 14px;"></p>
+                      </div>
+                    </div>
                   </div>
 
                   <div class="form-actions">
