@@ -315,6 +315,134 @@ img, video, iframe, embed { max-width: 100%; height: auto; }
 
   /* Body scroll lock when modal open */
   body.modal-open { overflow: hidden !important; }
+
+  /* Auth form specific mobile fixes */
+  .row-between {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    margin-top: 12px !important;
+    flex-wrap: wrap;
+  }
+
+  .row-between .checkbox {
+    order: 1;
+    width: auto;
+    display: flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+    white-space: nowrap;
+  }
+
+  .row-between #forgotLink {
+    order: 2;
+    align-self: center;
+    font-size: 13px !important;
+    white-space: nowrap;
+    margin: 0 !important;
+  }
+
+  /* Checkbox better touch target - aligned properly */
+  .checkbox {
+    font-size: 14px !important;
+    gap: 8px !important;
+    padding: 0;
+    color: #4b5563;
+  }
+
+  .checkbox input[type="checkbox"] {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px;
+    min-height: 20px;
+    margin: 0 !important;
+    flex-shrink: 0;
+  }
+
+  /* Input eye button mobile sizing */
+  .input-eye input {
+    padding-right: 44px !important;
+    min-height: 48px !important;
+  }
+
+  .eye-btn {
+    width: 40px !important;
+    height: calc(100% - 4px) !important;
+    right: 2px !important;
+    top: 2px !important;
+  }
+
+  .eye-btn svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  /* Auth form labels */
+  .auth-form label {
+    font-size: 14px !important;
+    margin-top: 16px !important;
+  }
+
+  .auth-form label:first-of-type {
+    margin-top: 0 !important;
+  }
+
+  /* Auth modal footer links */
+  .auth-body .auth-form + div,
+  .auth-body > div:last-child {
+    flex-direction: column !important;
+    gap: 8px !important;
+    text-align: center;
+  }
+
+  .auth-body span {
+    font-size: 13px !important;
+  }
+
+  /* Login CTA button */
+  .login-cta {
+    margin-top: 8px !important;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 380px) {
+  .auth-body {
+    padding: 16px !important;
+  }
+
+  .auth-form input,
+  .auth-form select {
+    padding: 12px 14px !important;
+    font-size: 16px !important; /* Prevent zoom on iOS */
+  }
+
+  /* Stack the row on very small screens */
+  .row-between {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .row-between .checkbox {
+    width: 100%;
+    justify-content: flex-start;
+    order: 2;
+  }
+
+  .row-between #forgotLink {
+    align-self: flex-end;
+    order: 1;
+  }
+
+  .checkbox {
+    font-size: 13px !important;
+  }
+
+  .auth-body span {
+    font-size: 12px !important;
+  }
 }
 
 /* ============================================================

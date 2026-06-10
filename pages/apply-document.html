@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Apply for Document | DENR-CENRO Sta. Cruz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/denr-dashboard.css">
+  <link rel="stylesheet" href="/assets/css/apply-document.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="navbar-inner">
+      <div class="navbar-brand">
+        <a href="/pages/dashboard-new.html#dashboard" class="nav-logo-link">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="navbar-logo">
+        </a>
+        <span class="navbar-title">DENR-CENRO Sta. Cruz</span>
+      </div>
+      <div class="navbar-actions">
+        <button class="icon-btn" aria-label="Notifications">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+          </svg>
+          <span class="badge">3</span>
+        </button>
+        <div class="user-menu">
+          <button class="avatar-btn" id="userMenuBtn" aria-label="User menu">JD</button>
+          <div class="dropdown" id="userDropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-name">Juan Dela Cruz</div>
+              <div class="dropdown-email">juan@email.com</div>
+            </div>
+            <a href="/pages/dashboard-new.html#profile" class="dropdown-item">My Profile</a>
+            <a href="/pages/dashboard-new.html#settings" class="dropdown-item">Settings</a>
+            <div class="dropdown-divider"></div>
+            <a href="#logout" class="dropdown-item">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="hero-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>New Application</span>
+        </div>
+        <h1 class="hero-title">Apply for Document</h1>
+        <p class="hero-subtitle">Complete the 5-step process to apply for an environmental permit.</p>
+        <div class="hero-actions" style="margin-top: 20px;">
+          <a href="/pages/dashboard-new.html#dashboard" class="btn btn-ghost">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Back to Dashboard
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <div class="container">
+      <!-- Stepper -->
+      <div class="stepper" id="stepper">
+        <div class="step active" data-step="1"><div class="step-icon">1</div><span class="step-label">Document Info</span></div>
+        <div class="step" data-step="2"><div class="step-icon">2</div><span class="step-label">Location</span></div>
+        <div class="step" data-step="3"><div class="step-icon">3</div><span class="step-label">Details</span></div>
+        <div class="step" data-step="4"><div class="step-icon">4</div><span class="step-label">Forms</span></div>
+        <div class="step" data-step="5"><div class="step-icon">5</div><span class="step-label">Documents</span></div>
+      </div>
+
+      <!-- Step 1: Document Information -->
+      <div class="step-content active" id="step-1">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Document Information</h2>
+              <p class="card-subtitle">Select the type of permit you want to apply for</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="categoryType">Category Type *</label>
+            <select class="form-select" id="categoryType" required>
+              <option value="">Select a category...</option>
+              <option value="tree">Tree Cutting Permit</option>
+              <option value="wildlife">Wildlife Permit</option>
+              <option value="transport">Transport Permit</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="permitType">Permit Type *</label>
+            <select class="form-select" id="permitType" required disabled>
+              <option value="">Select a permit type...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="purpose">Purpose of Application *</label>
+            <textarea class="form-input" id="purpose" rows="3" placeholder="Describe the purpose..." required></textarea>
+          </div>
+          <div class="step-actions">
+            <a href="/pages/dashboard-new.html#dashboard" class="btn btn-secondary">Cancel</a>
+            <div class="step-actions-right">
+              <button class="btn btn-primary" onclick="nextStep()">Continue</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Location Details -->
+      <div class="step-content" id="step-2">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Location Details</h2>
+              <p class="card-subtitle">Provide the location information for your permit</p>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="form-section-title">Site Address</h3>
+            <div class="form-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+              <div class="form-group" style="margin: 0;">
+                <label class="form-label">Region *</label>
+                <select class="form-select" required>
+                  <option value="">Select region...</option>
+                  <option value="4a">Region IV-A (CALABARZON)</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label class="form-label">Province *</label>
+                <select class="form-select" required>
+                  <option value="">Select province...</option>
+                  <option value="laguna">Laguna</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-top: 16px;">
+              <div class="form-group" style="margin: 0;">
+                <label class="form-label">City/Municipality *</label>
+                <select class="form-select" required>
+                  <option value="">Select city...</option>
+                  <option value="sta-cruz">Sta. Cruz</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label class="form-label">Barangay *</label>
+                <select class="form-select" required>
+                  <option value="">Select barangay...</option>
+                  <option value="poblacion">Poblacion</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group" style="margin-top: 16px;">
+              <label class="form-label">Street Address *</label>
+              <input type="text" class="form-input" placeholder="House No., Street, Landmark" required>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="form-section-title">Geographic Coordinates</h3>
+            <div class="form-row" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+              <div class="form-group" style="margin: 0;">
+                <label class="form-label">Latitude</label>
+                <input type="text" class="form-input" placeholder="e.g., 14.2753">
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label class="form-label">Longitude</label>
+                <input type="text" class="form-input" placeholder="e.g., 121.4168">
+              </div>
+            </div>
+            <button type="button" class="btn btn-secondary" style="margin-top: 16px; width: auto;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              Use Current Location
+            </button>
+          </div>
+
+          <div class="step-actions">
+            <button class="btn btn-secondary" onclick="prevStep()">Back</button>
+            <div class="step-actions-right">
+              <button class="btn btn-primary" onclick="nextStep()">Continue</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Application Details -->
+      <div class="step-content" id="step-3">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Application Details</h2>
+              <p class="card-subtitle">Provide specific details about your application</p>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="form-section-title">Applicant Information</h3>
+            <div class="form-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+              <div class="form-group" style="margin: 0;">
+                <label class="form-label">Applicant Type *</label>
+                <select class="form-select" required>
+                  <option value="">Select type...</option>
+                  <option value="individual">Individual</option>
+                  <option value="corporation">Corporation</option>
+                  <option value="cooperative">Cooperative</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label class="form-label">Contact Number *</label>
+                <input type="tel" class="form-input" placeholder="+63 912 345 6789" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="form-section-title">Project/Activity Details</h3>
+            <div class="form-group">
+              <label class="form-label">Project/Activity Name *</label>
+              <input type="text" class="form-input" placeholder="Enter project name" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Project Description *</label>
+              <textarea class="form-input" rows="4" placeholder="Describe the project in detail..." required></textarea>
+            </div>
+            <div class="form-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+              <div class="form-group" style="margin: 0;">
+                <label class="form-label">Expected Start Date *</label>
+                <input type="date" class="form-input" required>
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label class="form-label">Expected End Date *</label>
+                <input type="date" class="form-input" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-actions">
+            <button class="btn btn-secondary" onclick="prevStep()">Back</button>
+            <div class="step-actions-right">
+              <button class="btn btn-primary" onclick="nextStep()">Continue</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: DENR Forms -->
+      <div class="step-content" id="step-4">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">DENR Application Forms</h2>
+              <p class="card-subtitle">Select the required DENR forms for your application</p>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="form-section-title">Required Forms</h3>
+            <div class="checkbox-grid">
+              <label class="checkbox-item">
+                <input type="checkbox" checked>
+                <span class="checkbox-label">Application Form (CENRO-001)</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" checked>
+                <span class="checkbox-label">Environmental Compliance</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <span class="checkbox-label">Tree Inventory Form</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <span class="checkbox-label">Wildlife Handling Permit</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <span class="checkbox-label">Transport Agreement</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" checked>
+                <span class="checkbox-label">Affidavit of Undertaking</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="form-section-title">Additional Requirements</h3>
+            <div class="checkbox-grid">
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <span class="checkbox-label">Barangay Clearance</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <span class="checkbox-label">Land Title / Tax Declaration</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <span class="checkbox-label">Site Development Plan</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox">
+                <span class="checkbox-label">Environmental Assessment</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="step-actions">
+            <button class="btn btn-secondary" onclick="prevStep()">Back</button>
+            <div class="step-actions-right">
+              <button class="btn btn-primary" onclick="nextStep()">Continue</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5: Documents & Review -->
+      <div class="step-content" id="step-5">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Documents & Review</h2>
+              <p class="card-subtitle">Upload required documents and review your application</p>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="form-section-title">Upload Documents</h3>
+            <div class="file-upload" onclick="document.getElementById('fileInput').click()">
+              <input type="file" id="fileInput" multiple style="display: none;" accept=".pdf,.jpg,.jpeg,.png">
+              <svg class="file-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <div class="file-upload-text">Click to upload or drag and drop</div>
+              <div class="file-upload-hint">PDF, JPG, PNG up to 10MB each</div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="form-section-title">Uploaded Documents</h3>
+            <div class="document-list">
+              <div class="document-item">
+                <div class="document-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                  </svg>
+                </div>
+                <div class="document-info">
+                  <div class="document-name">Application_Form.pdf</div>
+                  <div class="document-status">Uploaded successfully</div>
+                </div>
+                <button class="action-btn" aria-label="Remove">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="form-section-title">Application Summary</h3>
+            <div class="review-section">
+              <div class="review-title">Document Information</div>
+              <div class="review-item">
+                <span class="review-label">Category Type</span>
+                <span class="review-value">Tree Cutting Permit</span>
+              </div>
+              <div class="review-item">
+                <span class="review-label">Permit Type</span>
+                <span class="review-value">Private Land</span>
+              </div>
+            </div>
+            <div class="review-section">
+              <div class="review-title">Location</div>
+              <div class="review-item">
+                <span class="review-label">Address</span>
+                <span class="review-value">123 Main St, Poblacion, Sta. Cruz, Laguna</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-item" style="justify-content: flex-start; background: transparent; border: none; padding: 0;">
+              <input type="checkbox" required>
+              <span class="checkbox-label">I confirm that all information provided is accurate and complete.</span>
+            </label>
+          </div>
+
+          <div class="step-actions">
+            <button class="btn btn-secondary" onclick="prevStep()">Back</button>
+            <div class="step-actions-right">
+              <button class="btn btn-primary" onclick="submitApplication()">Submit Application</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let currentStep = 1;
+    const totalSteps = 5;
+
+    function updateStepper() {
+      document.querySelectorAll('.step').forEach((step, index) => {
+        const stepNum = index + 1;
+        step.classList.remove('active', 'completed');
+        if (stepNum < currentStep) {
+          step.classList.add('completed');
+        } else if (stepNum === currentStep) {
+          step.classList.add('active');
+        }
+      });
+
+      document.querySelectorAll('.step-content').forEach((content, index) => {
+        content.classList.remove('active');
+        if (index + 1 === currentStep) {
+          content.classList.add('active');
+        }
+      });
+
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+
+    function nextStep() {
+      if (currentStep < totalSteps) {
+        currentStep++;
+        updateStepper();
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 1) {
+        currentStep--;
+        updateStepper();
+      }
+    }
+
+    function submitApplication() {
+      // Show success message
+      alert('Application submitted successfully! Your application ID is APP-2026-004.');
+      // Redirect to dashboard
+      window.location.href = '/pages/dashboard-new.html#dashboard';
+    }
+
+    // User dropdown
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    userMenuBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      userDropdown.classList.toggle('active');
+    });
+    document.addEventListener('click', () => {
+      userDropdown?.classList.remove('active');
+    });
+
+    // Initialize
+    updateStepper();
+  </script>
+</body>
+</html>

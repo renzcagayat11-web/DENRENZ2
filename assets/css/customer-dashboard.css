@@ -9412,3 +9412,1734 @@ textarea:hover {
   }
 }
 
+/* ============================================================
+   CUSTOMER DASHBOARD UI MODERNIZATION 2025
+   Enhanced Desktop & Mobile Responsive Design
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   WELCOME SECTION ENHANCEMENTS
+   ---------------------------------------------------------- */
+
+/* Desktop: Larger welcome section with better spacing */
+@media (min-width: 1024px) {
+  .welcome-section {
+    padding: 48px 56px;
+    border-radius: 16px;
+    margin-bottom: 32px;
+  }
+
+  .welcome-title {
+    font-size: 48px;
+  }
+
+  .welcome-subtitle {
+    font-size: 20px;
+    max-width: 700px;
+  }
+
+  .welcome-datetime {
+    margin-top: 24px;
+    gap: 20px;
+  }
+
+  .datetime-item {
+    padding: 12px 24px;
+  }
+
+  .time-greeting {
+    margin-top: 18px;
+    padding: 8px 18px 8px 14px;
+    font-size: 15px;
+  }
+}
+
+/* Tablet adjustments */
+@media (max-width: 1023px) and (min-width: 769px) {
+  .welcome-section {
+    padding: 40px 32px;
+  }
+
+  .welcome-title {
+    font-size: 36px;
+  }
+
+  .welcome-subtitle {
+    font-size: 17px;
+  }
+}
+
+/* Mobile: Compact welcome section */
+@media (max-width: 768px) {
+  .welcome-section {
+    padding: 28px 20px;
+    margin-bottom: 20px;
+  }
+
+  .welcome-title {
+    font-size: 26px;
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+
+  .welcome-subtitle {
+    font-size: 14px;
+    max-width: 100%;
+    line-height: 1.5;
+  }
+
+  .welcome-flex {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .welcome-main {
+    flex: 1 1 auto;
+    min-width: auto;
+  }
+
+  .welcome-cta-btn {
+    align-self: stretch;
+    justify-content: center;
+    padding: 14px 20px;
+  }
+
+  .welcome-datetime {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .datetime-item {
+    padding: 10px 16px;
+    width: 100%;
+  }
+
+  .datetime-text {
+    font-size: 14px;
+  }
+
+  .time-greeting {
+    margin-top: 14px;
+    padding: 6px 12px 6px 10px;
+    font-size: 13px;
+    width: fit-content;
+  }
+
+  .greeting-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .welcome-section {
+    padding: 24px 16px;
+  }
+
+  .welcome-title {
+    font-size: 22px;
+  }
+
+  .welcome-subtitle {
+    font-size: 13px;
+  }
+
+  .datetime-item {
+    padding: 8px 12px;
+  }
+
+  .datetime-label {
+    font-size: 11px;
+  }
+
+  .datetime-text {
+    font-size: 13px;
+  }
+}
+
+/* ----------------------------------------------------------
+   QUICK STATS ENHANCEMENTS
+   ---------------------------------------------------------- */
+
+/* Desktop: 4 columns */
+@media (min-width: 1200px) {
+  .quick-stats {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+
+  .stat-card {
+    padding: 28px 24px;
+  }
+
+  .stat-value {
+    font-size: 40px;
+  }
+}
+
+/* Tablet: 2 columns */
+@media (max-width: 1199px) and (min-width: 769px) {
+  .quick-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+/* Mobile: 2 columns compact */
+@media (max-width: 768px) {
+  .quick-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 0;
+  }
+
+  .stat-card {
+    padding: 18px 14px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .stat-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .stat-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 0.3px;
+  }
+}
+
+/* Small mobile: Single column option if needed */
+@media (max-width: 380px) {
+  .quick-stats {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .stat-card {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 16px;
+  }
+
+  .stat-content {
+    text-align: left;
+  }
+}
+
+/* ----------------------------------------------------------
+   DASHBOARD CONTAINER WRAPPER ENHANCEMENTS
+   ---------------------------------------------------------- */
+
+@media (min-width: 1024px) {
+  .dashboard-container-wrapper {
+    padding: 32px;
+    border-radius: 16px;
+    margin-bottom: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container-wrapper {
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+  }
+
+  .dashboard-main {
+    padding-top: 0;
+    padding-bottom: 24px;
+  }
+
+  .dashboard-container {
+    padding: 0 12px;
+  }
+
+  .page-section {
+    padding: 8px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-container-wrapper {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .dashboard-container {
+    padding: 0 8px;
+  }
+}
+
+/* ----------------------------------------------------------
+   MY APPLICATIONS SECTION ENHANCEMENTS
+   ---------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .my-applications-card {
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .my-apps-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .my-apps-header-text h3 {
+    font-size: 22px;
+  }
+
+  .my-apps-header-text .subtitle {
+    font-size: 13px;
+  }
+
+  .my-apps-badges {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    width: 100%;
+  }
+
+  .apps-badge {
+    padding: 10px 12px;
+    min-width: auto;
+  }
+
+  .apps-badge span {
+    font-size: 10px;
+  }
+
+  .apps-badge strong {
+    font-size: 18px;
+  }
+
+  /* Filter section mobile */
+  .filter-section {
+    padding: 20px 16px;
+    border-radius: 12px;
+  }
+
+  .filter-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .filter-group {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .filter-group label {
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .filter-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .filter-actions button {
+    flex: 1;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .my-apps-badges {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .apps-badge strong {
+    font-size: 16px;
+  }
+}
+
+/* ----------------------------------------------------------
+   TABLE ACTIONS MOBILE
+   ---------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .table-actions {
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+
+  .action-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+    min-height: 32px;
+  }
+
+  .action-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .table-actions {
+    justify-content: center;
+  }
+
+  .action-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+    flex: 1;
+    min-width: 70px;
+    max-width: 100px;
+  }
+}
+
+/* ----------------------------------------------------------
+   SETTINGS SECTION ENHANCEMENTS
+   ---------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .settings-section {
+    padding: 8px;
+  }
+
+  .settings-tabs-nav {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 4px;
+  }
+
+  .settings-tab-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .settings-tab-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .settings-card-simple {
+    padding: 20px 16px;
+    border-radius: 12px;
+  }
+
+  .settings-card-title {
+    font-size: 18px;
+  }
+
+  .settings-toggle-item {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .toggle-info .toggle-label {
+    font-size: 14px !important;
+  }
+
+  .toggle-info .toggle-desc {
+    font-size: 12px !important;
+  }
+
+  .toggle-switch {
+    transform: scale(0.9);
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-tab-btn {
+    min-width: calc(50% - 4px);
+    padding: 10px 12px;
+    font-size: 12px;
+    justify-content: center;
+  }
+
+  .settings-tab-btn svg {
+    display: none;
+  }
+
+  .settings-toggle-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .toggle-switch {
+    align-self: flex-end;
+  }
+}
+
+/* ----------------------------------------------------------
+   QUICK ACTIONS SECTION
+   ---------------------------------------------------------- */
+
+@media (min-width: 1024px) {
+  .quick-actions-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+
+  .quick-action-btn {
+    padding: 32px 24px;
+  }
+
+  .action-icon svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .action-text {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .quick-actions-section {
+    padding: 16px;
+  }
+
+  .quick-actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .quick-action-btn {
+    padding: 20px 16px;
+    border-radius: 12px;
+  }
+
+  .action-icon {
+    margin-bottom: 8px;
+  }
+
+  .action-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .action-text {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 380px) {
+  .quick-actions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-action-btn {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .action-icon {
+    margin-bottom: 0;
+  }
+}
+
+/* ----------------------------------------------------------
+   MOBILE NAVIGATION ENHANCEMENTS
+   ---------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .dash-hamburger-btn {
+    display: flex;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+  }
+
+  .dash-mobile-nav {
+    top: 60px;
+    padding: 8px;
+  }
+
+  .dash-mobile-nav-item {
+    padding: 14px 16px;
+    font-size: 15px;
+    border-radius: 10px;
+  }
+
+  .nav-cta {
+    gap: 8px;
+  }
+
+  .notification-bell {
+    padding: 8px;
+    margin-right: 4px;
+  }
+
+  .notification-bell svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .nav-cta .avatar-circle {
+    width: 36px;
+    height: 36px;
+    font-size: 13px;
+  }
+
+  .user-dropdown {
+    width: calc(100vw - 32px);
+    right: 16px;
+    left: 16px;
+    top: 56px;
+  }
+
+  .dropdown-header {
+    padding: 16px;
+  }
+
+  .dropdown-avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
+  }
+
+  .dropdown-name {
+    font-size: 15px;
+  }
+
+  .dropdown-email {
+    font-size: 12px;
+  }
+
+  .dropdown-item {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dash-hamburger-btn {
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+  }
+
+  .dash-hamburger-btn span {
+    width: 20px;
+    height: 2px;
+  }
+
+  .brand-title {
+    font-size: 13px;
+  }
+
+  .logo {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* ----------------------------------------------------------
+   NEW APPLICATION FORM MOBILE
+   ---------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .new-application-section {
+    gap: 16px;
+    padding-top: 4px;
+  }
+
+  .application-progress-header {
+    padding: 24px 20px;
+    border-radius: 12px;
+  }
+
+  .application-progress-header .progress-title {
+    font-size: 22px;
+  }
+
+  .application-progress-header .progress-subtitle {
+    font-size: 13px;
+  }
+
+  .application-progress-header .back-btn {
+    position: static;
+    margin-top: 16px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .step-progress-container {
+    padding: 24px 16px;
+  }
+
+  .step-progress-title {
+    font-size: 18px;
+  }
+
+  .step-progress-subtitle {
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  .step-progress-wrapper {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .step-progress-wrapper::before {
+    display: none;
+  }
+
+  .step-progress-wrapper .step-item {
+    min-width: calc(50% - 8px);
+    max-width: none;
+    flex: 1 1 calc(50% - 8px);
+    gap: 10px;
+  }
+
+  .step-progress-wrapper .step-icon-wrapper {
+    width: 48px;
+    height: 48px;
+  }
+
+  .step-progress-wrapper .step-icon-wrapper svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .step-progress-wrapper .step-label {
+    font-size: 12px;
+  }
+
+  .step-progress-wrapper .step-description {
+    font-size: 11px;
+    padding: 0;
+  }
+
+  .step-card {
+    padding: 20px 16px;
+    border-radius: 12px;
+  }
+
+  .step-title {
+    font-size: 18px;
+  }
+
+  .step-description {
+    font-size: 13px;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+  }
+
+  .form-actions button {
+    width: 100%;
+    min-height: 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .step-progress-wrapper .step-item {
+    min-width: 100%;
+    flex: 1 1 100%;
+    flex-direction: row;
+    text-align: left;
+    gap: 12px;
+  }
+
+  .step-progress-wrapper .step-icon-wrapper {
+    flex-shrink: 0;
+  }
+
+  .step-label-wrapper {
+    flex: 1;
+  }
+}
+
+/* ----------------------------------------------------------
+   PAGINATION MOBILE
+   ---------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .apps-pagination {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .apps-pagination__info {
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .apps-pagination__controls {
+    justify-content: center;
+  }
+
+  .apps-pagination__btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .apps-pagination__pages {
+    gap: 4px;
+  }
+
+  .apps-pagination__page {
+    min-width: 36px;
+    height: 36px;
+    font-size: 13px;
+  }
+}
+
+/* ----------------------------------------------------------
+   REMINDERS & TIMELINE SECTIONS
+   ---------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .reminders-section,
+  .timeline-section,
+  .activity-section {
+    padding: 16px;
+  }
+
+  .reminders-section .section-title,
+  .timeline-section .section-title,
+  .activity-section .section-title {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .reminder-item,
+  .activity-item,
+  .timeline-item {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .reminder-icon,
+  .activity-icon,
+  .timeline-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .reminder-content h4,
+  .activity-content h4,
+  .timeline-content h4 {
+    font-size: 14px;
+  }
+
+  .reminder-content p,
+  .activity-content p,
+  .timeline-content p {
+    font-size: 12px;
+  }
+}
+
+/* ----------------------------------------------------------
+   PROFILE COMPLETION WIDGET
+   ---------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .profile-completion-section {
+    padding: 16px;
+  }
+
+  .profile-completion-card {
+    padding: 20px;
+  }
+
+  .completion-header {
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .completion-title {
+    font-size: 16px;
+  }
+
+  .completion-percentage {
+    font-size: 28px;
+  }
+
+  .completion-items {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .completion-item {
+    padding: 10px;
+    font-size: 13px;
+  }
+}
+
+/* ----------------------------------------------------------
+   HELP SECTION MOBILE
+   ---------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .help-section {
+    padding: 16px;
+  }
+
+  .help-content {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .help-card {
+    padding: 20px;
+  }
+
+  .help-card h4 {
+    font-size: 16px;
+  }
+
+  .help-card p,
+  .faq-item p {
+    font-size: 13px;
+  }
+
+  .faq-item h5 {
+    font-size: 14px;
+  }
+}
+
+/* ----------------------------------------------------------
+   GENERAL ACCESSIBILITY IMPROVEMENTS
+   ---------------------------------------------------------- */
+
+/* Focus visible styles */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #0b5f2c;
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .stat-card,
+  .dashboard-container-wrapper,
+  .step-card,
+  .profile-card,
+  .settings-card-simple,
+  .help-card {
+    border-width: 2px;
+  }
+
+  .btn-primary,
+  .action-btn.view,
+  .welcome-cta-btn {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Print styles */
+@media print {
+  .site-header-hero,
+  .dash-hamburger-btn,
+  .nav-cta,
+  .form-actions,
+  .modal-backdrop,
+  .page-loader {
+    display: none !important;
+  }
+
+  .dashboard-main {
+    padding-top: 0;
+  }
+
+  .page-section {
+    display: block !important;
+    page-break-inside: avoid;
+  }
+
+  .dashboard-container-wrapper {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+}
+
+/* ============================================================
+   IPHONE SE SPECIFIC STYLES (375px width)
+   Professional & Responsive Design
+   ============================================================ */
+@media (max-width: 375px) {
+  /* Container */
+  .dashboard-container {
+    padding: 0 6px;
+  }
+
+  .dashboard-container-wrapper {
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+
+  /* Welcome Section - Compact */
+  .welcome-section {
+    padding: 18px 14px;
+    margin-bottom: 12px;
+  }
+
+  .welcome-title {
+    font-size: 20px;
+    margin-bottom: 8px;
+    line-height: 1.25;
+  }
+
+  .welcome-subtitle {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .welcome-datetime {
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .datetime-item {
+    padding: 8px 10px;
+    border-radius: 6px;
+  }
+
+  .datetime-label {
+    font-size: 9px;
+  }
+
+  .datetime-text {
+    font-size: 11px;
+  }
+
+  .time-greeting {
+    font-size: 11px;
+    padding: 5px 10px 5px 8px;
+    margin-top: 10px;
+  }
+
+  .greeting-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Quick Stats - Single column for very small screens */
+  .quick-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin: 0;
+  }
+
+  .stat-card {
+    padding: 14px 10px;
+    border-radius: 8px;
+    gap: 8px;
+  }
+
+  .stat-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .stat-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .stat-value {
+    font-size: 20px;
+    margin-bottom: 2px;
+  }
+
+  .stat-label {
+    font-size: 9px;
+    letter-spacing: 0.2px;
+  }
+
+  /* My Applications Card */
+  .my-applications-card {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .my-apps-header {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .my-apps-header-text h3 {
+    font-size: 16px;
+  }
+
+  .my-apps-header-text .subtitle {
+    font-size: 11px;
+  }
+
+  .my-apps-badges {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .apps-badge {
+    padding: 8px 10px;
+    min-width: auto;
+  }
+
+  .apps-badge span {
+    font-size: 8px;
+  }
+
+  .apps-badge strong {
+    font-size: 14px;
+  }
+
+  /* Filter Section */
+  .filter-section {
+    padding: 14px 12px;
+    border-radius: 8px;
+  }
+
+  .filter-row {
+    gap: 10px;
+  }
+
+  .filter-group label {
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+
+  .filter-group input,
+  .filter-group select {
+    padding: 8px 10px;
+    font-size: 12px;
+    min-height: 36px;
+  }
+
+  .filter-actions button {
+    min-height: 36px;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  /* Data Table */
+  .data-table-enhanced th,
+  .data-table-enhanced td {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+
+  .status-badge {
+    padding: 4px 8px;
+    font-size: 9px;
+  }
+
+  .table-actions {
+    gap: 4px;
+  }
+
+  .action-btn {
+    padding: 4px 8px;
+    font-size: 9px;
+    min-height: 26px;
+  }
+
+  .action-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* MOBILE CARD VIEW FOR APPLICATIONS TABLE */
+  .table-container-applications,
+  .table-responsive {
+    overflow-x: visible !important;
+    padding: 0 !important;
+  }
+
+  .data-table-enhanced,
+  .data-table {
+    display: block !important;
+    width: 100% !important;
+    min-width: unset !important;
+  }
+
+  .data-table-enhanced thead,
+  .data-table thead {
+    display: none !important;
+  }
+
+  .data-table-enhanced tbody,
+  .data-table tbody {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .data-table-enhanced tbody tr,
+  .data-table tbody tr {
+    display: block !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    margin-bottom: 12px !important;
+    padding: 0 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+    overflow: hidden !important;
+  }
+
+  .data-table-enhanced tbody tr:last-child,
+  .data-table tbody tr:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  .data-table-enhanced td,
+  .data-table td {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    padding: 12px 16px !important;
+    border-bottom: 1px solid #f3f4f6 !important;
+    font-size: 13px !important;
+    text-align: left !important;
+  }
+
+  .data-table-enhanced td:first-child,
+  .data-table td:first-child {
+    background: linear-gradient(135deg, rgba(11,95,44,0.08) 0%, rgba(11,95,44,0.02) 100%) !important;
+    font-weight: 600 !important;
+    color: #0b5f2c !important;
+    font-size: 14px !important;
+  }
+
+  .data-table-enhanced td:last-child,
+  .data-table td:last-child {
+    border-bottom: none !important;
+    justify-content: center !important;
+    padding: 14px 16px !important;
+    background: #f9fafb !important;
+  }
+
+  /* Row labels */
+  .data-table-enhanced td::before,
+  .data-table td::before {
+    content: attr(data-label) !important;
+    font-weight: 600 !important;
+    color: #6b7280 !important;
+    font-size: 10px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  /* Status badge in card */
+  .data-table-enhanced .status-badge,
+  .data-table .status-badge {
+    font-size: 11px !important;
+    padding: 5px 10px !important;
+    border-radius: 20px !important;
+  }
+
+  /* View button full width */
+  .data-table-enhanced td .action-btn,
+  .data-table td .action-btn {
+    width: 100% !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    background: #0b5f2c !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    padding: 0 16px !important;
+  }
+
+  .data-table-enhanced td .action-btn::after,
+  .data-table td .action-btn::after {
+    content: "View" !important;
+  }
+
+  /* Pagination */
+  .apps-pagination {
+    padding: 10px;
+  }
+
+  .apps-pagination__info {
+    font-size: 10px;
+  }
+
+  .apps-pagination__btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .apps-pagination__page {
+    min-width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  /* Header & Navigation */
+  .site-header-hero {
+    height: 52px;
+    min-height: 52px;
+  }
+
+  .brand-title {
+    font-size: 11px;
+  }
+
+  .logo {
+    width: 28px;
+    height: 28px;
+  }
+
+  .dash-hamburger-btn {
+    width: 32px;
+    height: 32px;
+    padding: 6px;
+  }
+
+  .dash-hamburger-btn span {
+    width: 18px;
+    height: 1.5px;
+  }
+
+  .notification-bell svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .nav-cta .avatar-circle {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  /* Mobile Navigation Dropdown */
+  .dash-mobile-nav {
+    top: 52px;
+    padding: 6px;
+  }
+
+  .dash-mobile-nav-item {
+    padding: 10px 12px;
+    font-size: 13px;
+    border-radius: 6px;
+  }
+
+  .user-dropdown {
+    width: calc(100vw - 20px);
+    right: 10px;
+    left: 10px;
+    top: 48px;
+  }
+
+  /* Profile Section */
+  .profile-section {
+    padding: 6px;
+  }
+
+  .profile-card {
+    border-radius: 10px;
+  }
+
+  .profile-header {
+    padding: 20px 14px;
+    gap: 14px;
+  }
+
+  .profile-avatar {
+    width: 70px;
+    height: 70px;
+    font-size: 24px;
+  }
+
+  .profile-avatar-edit {
+    width: 26px;
+    height: 26px;
+    bottom: 2px;
+    right: 2px;
+  }
+
+  .profile-info h4 {
+    font-size: 18px;
+  }
+
+  .profile-info p {
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .profile-badge {
+    padding: 4px 10px;
+    font-size: 10px;
+  }
+
+  .profile-form {
+    padding: 14px;
+  }
+
+  .form-section-title {
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+  }
+
+  .form-section-title h5 {
+    font-size: 14px;
+  }
+
+  .form-section-title p {
+    font-size: 11px;
+  }
+
+  .profile-form .form-group {
+    margin-bottom: 14px;
+  }
+
+  .profile-form .form-group label {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .profile-form .form-group input,
+  .profile-form .form-group select {
+    padding: 10px 12px;
+    font-size: 13px;
+    border-radius: 6px;
+  }
+
+  .profile-form .form-row {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .profile-form .form-actions {
+    margin-top: 20px;
+    padding-top: 16px;
+    gap: 10px;
+  }
+
+  .profile-form .btn-primary,
+  .profile-form .btn-secondary {
+    padding: 10px 18px;
+    font-size: 13px;
+    border-radius: 6px;
+  }
+
+  /* Settings Section */
+  .settings-section {
+    padding: 6px;
+  }
+
+  .settings-tabs-nav {
+    gap: 6px;
+    padding: 4px;
+  }
+
+  .settings-tab-btn {
+    padding: 8px 10px;
+    font-size: 11px;
+    min-width: calc(50% - 3px);
+    border-radius: 6px;
+  }
+
+  .settings-tab-btn svg {
+    display: none;
+  }
+
+  .settings-card-simple {
+    padding: 14px 12px;
+    border-radius: 8px;
+  }
+
+  .settings-card-title {
+    font-size: 14px;
+  }
+
+  .settings-toggle-item {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .toggle-info .toggle-label {
+    font-size: 12px !important;
+  }
+
+  .toggle-info .toggle-desc {
+    font-size: 10px !important;
+  }
+
+  .toggle-switch {
+    transform: scale(0.8);
+  }
+
+  /* New Application Form */
+  .new-application-section {
+    gap: 10px;
+  }
+
+  .application-progress-header {
+    padding: 16px 12px;
+    border-radius: 8px;
+  }
+
+  .application-progress-header .progress-title {
+    font-size: 16px;
+  }
+
+  .application-progress-header .progress-subtitle {
+    font-size: 11px;
+  }
+
+  .step-progress-container {
+    padding: 16px 12px;
+  }
+
+  .step-progress-title {
+    font-size: 14px;
+  }
+
+  .step-progress-subtitle {
+    font-size: 11px;
+    margin-bottom: 16px;
+  }
+
+  .step-progress-wrapper .step-item {
+    min-width: 100%;
+    gap: 8px;
+  }
+
+  .step-progress-wrapper .step-icon-wrapper {
+    width: 36px;
+    height: 36px;
+  }
+
+  .step-progress-wrapper .step-icon-wrapper svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .step-progress-wrapper .step-label {
+    font-size: 11px;
+  }
+
+  .step-progress-wrapper .step-description {
+    font-size: 9px;
+  }
+
+  .step-card {
+    padding: 14px 12px;
+    border-radius: 8px;
+  }
+
+  .step-title {
+    font-size: 14px;
+  }
+
+  .step-description {
+    font-size: 11px;
+  }
+
+  .form-actions {
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 14px;
+  }
+
+  .form-actions button {
+    min-height: 40px;
+    font-size: 13px;
+  }
+
+  /* Quick Actions */
+  .quick-actions-section {
+    padding: 12px;
+  }
+
+  .quick-actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .quick-action-btn {
+    padding: 14px 10px;
+    border-radius: 8px;
+  }
+
+  .action-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .action-text {
+    font-size: 11px;
+  }
+
+  /* Dashboard Main */
+  .dashboard-main {
+    padding-top: 12px;
+    padding-bottom: 16px;
+  }
+
+  .page-section {
+    padding: 6px 0;
+  }
+
+  /* Section Headers */
+  .section-header {
+    padding: 10px 0;
+    margin-bottom: 10px;
+  }
+
+  .section-header h2 {
+    font-size: 16px;
+  }
+
+  .section-header p {
+    font-size: 11px;
+  }
+
+  /* Buttons */
+  .btn-primary,
+  .btn-secondary {
+    padding: 10px 14px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+
+  /* Progress Widget */
+  .progress-widget-header {
+    gap: 8px;
+  }
+
+  .progress-widget-title {
+    font-size: 14px;
+  }
+
+  .progress-widget-subtitle {
+    font-size: 11px;
+  }
+
+  .progress-percentage {
+    font-size: 24px;
+  }
+
+  .progress-hint {
+    font-size: 10px;
+    padding: 6px 10px;
+  }
+
+  /* Timeline */
+  .timeline-section,
+  .reminders-section,
+  .activity-section {
+    padding: 12px;
+  }
+
+  .timeline-item,
+  .reminder-item,
+  .activity-item {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .timeline-icon,
+  .reminder-icon,
+  .activity-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .timeline-content h4,
+  .reminder-content h4,
+  .activity-content h4 {
+    font-size: 12px;
+  }
+
+  .timeline-content p,
+  .reminder-content p,
+  .activity-content p {
+    font-size: 10px;
+  }
+
+  /* Help Section */
+  .help-section {
+    padding: 12px;
+  }
+
+  .help-card {
+    padding: 14px;
+  }
+
+  .help-card h4 {
+    font-size: 14px;
+  }
+
+  .help-card p {
+    font-size: 11px;
+  }
+
+  .faq-item h5 {
+    font-size: 12px;
+  }
+
+  .faq-item p {
+    font-size: 10px;
+  }
+
+  /* Modal */
+  .custom-modal .modal-content {
+    margin: 10px;
+    border-radius: 10px;
+  }
+
+  .modal-header {
+    padding: 12px 14px;
+  }
+
+  .modal-body {
+    padding: 12px 14px;
+  }
+
+  .modal-footer {
+    padding: 10px 14px;
+  }
+}
+

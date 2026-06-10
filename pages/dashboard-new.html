@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Dashboard | DENR-CENRO Sta. Cruz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/denr-dashboard.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <div class="navbar-inner">
+      <div class="navbar-brand">
+        <a href="#dashboard" class="nav-logo-link" data-section="dashboardSection">
+          <img src="/assets/images/logo.png" alt="DENR Logo" class="navbar-logo">
+        </a>
+        <span class="navbar-title">DENR-CENRO Sta. Cruz</span>
+      </div>
+
+      <div class="navbar-nav">
+        <a href="#dashboard" class="nav-link active" data-section="dashboardSection" aria-current="page">Dashboard</a>
+        <a href="#new-application" class="nav-link" data-section="newApplicationSection">Apply for Document</a>
+        <a href="#my-applications" class="nav-link" data-section="myApplicationsSection">All Applications</a>
+      </div>
+
+      <div class="navbar-actions">
+        <button class="icon-btn" aria-label="Notifications">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+          <span class="badge">3</span>
+        </button>
+
+        <div class="user-menu">
+          <button class="avatar-btn" id="userMenuBtn" aria-label="User menu">JD</button>
+          <div class="dropdown" id="userDropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-name">Juan Dela Cruz</div>
+              <div class="dropdown-email">juan@email.com</div>
+            </div>
+            <a href="#profile" class="dropdown-item" data-section="profileSection">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              <span>My Profile</span>
+            </a>
+            <a href="#settings" class="dropdown-item" data-section="settingsSection">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+              <span>Settings</span>
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="#logout" class="dropdown-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+              <span>Logout</span>
+            </a>
+          </div>
+        </div>
+
+        <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Drawer -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <aside class="mobile-drawer" id="mobileDrawer">
+    <div class="drawer-header">
+      <span>Menu</span>
+      <button class="drawer-close" id="drawerClose">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <nav class="drawer-nav">
+      <a href="#dashboard" class="drawer-link active" data-section="dashboardSection">Dashboard</a>
+      <a href="#new-application" class="drawer-link" data-section="newApplicationSection">Apply for Document</a>
+      <a href="#my-applications" class="drawer-link" data-section="myApplicationsSection">All Applications</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- DASHBOARD SECTION -->
+    <section id="dashboardSection" class="page-section active">
+      <!-- Hero Banner -->
+      <section class="hero">
+        <div class="hero-inner">
+          <div class="hero-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+            <span>Good morning!</span>
+          </div>
+          <h1 class="hero-title">Welcome, Juan!</h1>
+          <p class="hero-subtitle">Track your environmental permit applications and stay updated with the latest status.</p>
+          <div class="hero-datetime">
+            <div class="datetime-pill">
+              <span class="datetime-label">Date</span>
+              <span class="datetime-value" id="currentDate">Jun 10, 2026</span>
+            </div>
+            <div class="datetime-pill">
+              <span class="datetime-label">Time</span>
+              <span class="datetime-value" id="currentTime">2:30 PM</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="container">
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          </div>
+          <div class="stat-value">12</div>
+          <div class="stat-label">Total Applications</div>
+        </div>
+        <div class="stat-card pending">
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <div class="stat-value">5</div>
+          <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card approved">
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
+          <div class="stat-value">6</div>
+          <div class="stat-label">Approved</div>
+        </div>
+        <div class="stat-card rejected">
+          <div class="stat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+          </div>
+          <div class="stat-value">1</div>
+          <div class="stat-label">Rejected</div>
+        </div>
+      </div>
+
+      <!-- Dashboard Grid -->
+      <div class="dashboard-grid">
+        <!-- Timeline Card -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Application Status</h2>
+              <p class="card-subtitle">Track your permit progress</p>
+            </div>
+          </div>
+          <div class="timeline">
+            <div class="timeline-item completed">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="timeline-title">Application Submitted</div>
+                <div class="timeline-meta">Jun 8, 2026 • 10:30 AM</div>
+                <div class="timeline-desc">Your Tree Cutting Permit application has been received.</div>
+              </div>
+            </div>
+            <div class="timeline-item completed">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="timeline-title">Under Review</div>
+                <div class="timeline-meta">Jun 9, 2026 • 2:15 PM</div>
+                <div class="timeline-desc">Documents are being reviewed by the CENRO staff.</div>
+              </div>
+            </div>
+            <div class="timeline-item pending">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="timeline-title">Site Inspection</div>
+                <div class="timeline-meta">Pending</div>
+                <div class="timeline-desc">Scheduled for next week.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Card -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Recent Activity</h2>
+              <p class="card-subtitle">Latest updates on your documents</p>
+            </div>
+          </div>
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+              </div>
+              <div class="activity-content">
+                <div class="activity-title">Tree Cutting Permit - Approved</div>
+                <div class="activity-date">Jun 9, 2026</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+              </div>
+              <div class="activity-content">
+                <div class="activity-title">Wildlife Permit - Submitted</div>
+                <div class="activity-date">Jun 8, 2026</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              </div>
+              <div class="activity-content">
+                <div class="activity-title">Transport Permit - Pending</div>
+                <div class="activity-date">Jun 7, 2026</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              </div>
+              <div class="activity-content">
+                <div class="activity-title">Profile Updated</div>
+                <div class="activity-date">Jun 5, 2026</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reminders Card -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Upcoming Reminders</h2>
+            <p class="card-subtitle">Important dates and deadlines</p>
+          </div>
+        </div>
+        <div class="reminder-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+          <p>No upcoming reminders</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <button class="quick-btn" onclick="navigateToSection('newApplicationSection')">
+          <div class="quick-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </div>
+          <span class="quick-label">New Application</span>
+        </button>
+        <button class="quick-btn" onclick="navigateToSection('myApplicationsSection')">
+          <div class="quick-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          </div>
+          <span class="quick-label">My Applications</span>
+        </button>
+        <button class="quick-btn" onclick="navigateToSection('dashboardSection')">
+          <div class="quick-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          </div>
+          <span class="quick-label">Profile</span>
+        </button>
+        <button class="quick-btn">
+          <div class="quick-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </div>
+          <span class="quick-label">Help</span>
+        </button>
+      </div>
+      </div><!-- /container -->
+    </section><!-- /dashboardSection -->
+
+    <!-- NEW APPLICATION SECTION -->
+    <section id="newApplicationSection" class="page-section">
+      <section class="hero">
+        <div class="hero-inner">
+          <div class="hero-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>New Application</span>
+          </div>
+          <h1 class="hero-title">Apply for Document</h1>
+          <p class="hero-subtitle">Fill out the form below to apply for an environmental permit.</p>
+          <div class="hero-actions" style="margin-top: 20px;">
+            <button class="btn btn-ghost" onclick="navigateToSection('dashboardSection')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              Back to Dashboard
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <div class="container">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Application Form</h2>
+              <p class="card-subtitle">Step 1 of 5: Document Information</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="categoryType">Category Type</label>
+            <select class="form-select" id="categoryType">
+              <option value="">Select category...</option>
+              <option value="tree">Tree Cutting Permit</option>
+              <option value="wildlife">Wildlife Permit</option>
+              <option value="transport">Transport Permit</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="permitType">Permit Type</label>
+            <select class="form-select" id="permitType">
+              <option value="">Select permit type...</option>
+            </select>
+          </div>
+          <div class="form-actions" style="justify-content: space-between;">
+            <button class="btn btn-secondary" onclick="navigateToSection('dashboardSection')">Cancel</button>
+            <div style="display: flex; gap: 12px;">
+              <button class="btn btn-secondary" disabled>Previous</button>
+              <button class="btn btn-primary">Next Step</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MY APPLICATIONS SECTION -->
+    <section id="myApplicationsSection" class="page-section">
+      <section class="hero">
+        <div class="hero-inner">
+          <div class="hero-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            <span>My Applications</span>
+          </div>
+          <h1 class="hero-title">All Applications</h1>
+          <p class="hero-subtitle">View and manage all your submitted permit applications.</p>
+          <div class="hero-actions" style="margin-top: 20px;">
+            <button class="btn btn-ghost" onclick="navigateToSection('dashboardSection')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              Back to Dashboard
+            </button>
+            <button class="btn btn-ghost" style="background: rgba(255,255,255,0.25);" onclick="navigateToSection('newApplicationSection')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              New Application
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <div class="container">
+        <!-- Filters -->
+        <div class="card">
+          <div class="form-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label">Status</label>
+              <select class="form-select">
+                <option>All Status</option>
+                <option>Pending</option>
+                <option>Approved</option>
+                <option>Rejected</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label">Document Type</label>
+              <select class="form-select">
+                <option>All Types</option>
+                <option>Tree Cutting</option>
+                <option>Wildlife</option>
+                <option>Transport</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label">Search</label>
+              <input type="text" class="form-input" placeholder="Search applications...">
+            </div>
+          </div>
+          <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button class="btn btn-secondary">Clear Filters</button>
+            <button class="btn btn-primary">Apply Filters</button>
+          </div>
+        </div>
+
+        <!-- Applications Table -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Application List</h2>
+              <p class="card-subtitle">Showing 5 of 12 applications</p>
+            </div>
+          </div>
+          <div class="table-wrapper" style="overflow-x: auto;">
+            <table class="data-table" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: var(--bg-page);">
+                  <th style="padding: 12px 16px; text-align: left; font-size: 13px; font-weight: 600;">Application ID</th>
+                  <th style="padding: 12px 16px; text-align: left; font-size: 13px; font-weight: 600;">Permit Type</th>
+                  <th style="padding: 12px 16px; text-align: left; font-size: 13px; font-weight: 600;">Date Submitted</th>
+                  <th style="padding: 12px 16px; text-align: left; font-size: 13px; font-weight: 600;">Status</th>
+                  <th style="padding: 12px 16px; text-align: left; font-size: 13px; font-weight: 600;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom: 1px solid var(--border-light);">
+                  <td style="padding: 12px 16px; font-size: 14px; font-weight: 500; color: var(--denr-primary);">APP-2026-001</td>
+                  <td style="padding: 12px 16px; font-size: 14px;">Tree Cutting Permit</td>
+                  <td style="padding: 12px 16px; font-size: 14px; color: var(--text-secondary);">Jun 10, 2026</td>
+                  <td style="padding: 12px 16px;"><span class="badge badge-pending">Pending</span></td>
+                  <td style="padding: 12px 16px;">
+                    <button class="action-btn" aria-label="View"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+                  </td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border-light);">
+                  <td style="padding: 12px 16px; font-size: 14px; font-weight: 500; color: var(--denr-primary);">APP-2026-002</td>
+                  <td style="padding: 12px 16px; font-size: 14px;">Wildlife Permit</td>
+                  <td style="padding: 12px 16px; font-size: 14px; color: var(--text-secondary);">Jun 8, 2026</td>
+                  <td style="padding: 12px 16px;"><span class="badge badge-approved">Approved</span></td>
+                  <td style="padding: 12px 16px;">
+                    <button class="action-btn" aria-label="View"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+                  </td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border-light);">
+                  <td style="padding: 12px 16px; font-size: 14px; font-weight: 500; color: var(--denr-primary);">APP-2026-003</td>
+                  <td style="padding: 12px 16px; font-size: 14px;">Transport Permit</td>
+                  <td style="padding: 12px 16px; font-size: 14px; color: var(--text-secondary);">Jun 5, 2026</td>
+                  <td style="padding: 12px 16px;"><span class="badge badge-rejected">Rejected</span></td>
+                  <td style="padding: 12px 16px;">
+                    <button class="action-btn" aria-label="View"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- Pagination -->
+          <div class="pagination" style="margin-top: 20px;">
+            <button class="page-btn" disabled>← Previous</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">Next →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFILE SECTION -->
+    <section id="profileSection" class="page-section">
+      <section class="hero">
+        <div class="hero-inner">
+          <div class="hero-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span>My Profile</span>
+          </div>
+          <h1 class="hero-title">Profile Settings</h1>
+          <p class="hero-subtitle">Manage your personal information and account details.</p>
+          <div class="hero-actions" style="margin-top: 20px;">
+            <button class="btn btn-ghost" onclick="navigateToSection('dashboardSection')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              Back to Dashboard
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <div class="container">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Personal Information</h2>
+              <p class="card-subtitle">Update your basic profile details</p>
+            </div>
+          </div>
+          <div class="form-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label">First Name</label>
+              <input type="text" class="form-input" value="Juan">
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label">Last Name</label>
+              <input type="text" class="form-input" value="Dela Cruz">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" class="form-input" value="juan@email.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" class="form-input" value="+63 912 345 6789">
+          </div>
+          <div class="form-actions" style="justify-content: flex-end;">
+            <button class="btn btn-secondary" onclick="navigateToSection('dashboardSection')">Cancel</button>
+            <button class="btn btn-primary">Save Changes</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Address Information</h2>
+              <p class="card-subtitle">Your current residential address</p>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Street Address</label>
+            <input type="text" class="form-input" value="123 Main Street">
+          </div>
+          <div class="form-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label">City</label>
+              <input type="text" class="form-input" value="Sta. Cruz">
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label class="form-label">Province</label>
+              <input type="text" class="form-input" value="Laguna">
+            </div>
+          </div>
+          <div class="form-actions" style="justify-content: flex-end;">
+            <button class="btn btn-secondary" onclick="navigateToSection('dashboardSection')">Cancel</button>
+            <button class="btn btn-primary">Save Address</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS SECTION -->
+    <section id="settingsSection" class="page-section">
+      <section class="hero">
+        <div class="hero-inner">
+          <div class="hero-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <span>Settings</span>
+          </div>
+          <h1 class="hero-title">Account Settings</h1>
+          <p class="hero-subtitle">Manage your notification preferences and security settings.</p>
+          <div class="hero-actions" style="margin-top: 20px;">
+            <button class="btn btn-ghost" onclick="navigateToSection('dashboardSection')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              Back to Dashboard
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <div class="container">
+        <!-- Tabs -->
+        <div class="tabs" style="display: flex; gap: 4px; border-bottom: 1px solid var(--border-light); margin-bottom: 24px; overflow-x: auto;">
+          <button class="tab-btn active" onclick="switchTab('notifications')" style="padding: 12px 20px; font-size: 14px; font-weight: 500; color: var(--denr-primary); border-bottom: 2px solid var(--denr-primary); background: none; white-space: nowrap;">Notifications</button>
+          <button class="tab-btn" onclick="switchTab('security')" style="padding: 12px 20px; font-size: 14px; font-weight: 500; color: var(--text-secondary); border-bottom: 2px solid transparent; background: none; white-space: nowrap;">Security</button>
+          <button class="tab-btn" onclick="switchTab('privacy')" style="padding: 12px 20px; font-size: 14px; font-weight: 500; color: var(--text-secondary); border-bottom: 2px solid transparent; background: none; white-space: nowrap;">Privacy</button>
+        </div>
+
+        <!-- Notification Settings -->
+        <div class="card" id="tab-notifications">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Notification Preferences</h2>
+              <p class="card-subtitle">Choose how you want to be notified</p>
+            </div>
+          </div>
+          
+          <div class="toggle-row" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--border-light);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(26,92,42,0.1); color: var(--denr-primary); border-radius: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+              </div>
+              <div>
+                <div style="font-weight: 500; font-size: 14px;">Application Status Updates</div>
+                <div style="font-size: 12px; color: var(--text-secondary);">Get notified when your application status changes</div>
+              </div>
+            </div>
+            <label class="toggle-switch" style="position: relative; width: 48px; height: 26px; flex-shrink: 0;">
+              <input type="checkbox" checked style="opacity: 0; width: 0; height: 0;">
+              <span style="position: absolute; cursor: pointer; inset: 0; background: var(--denr-primary); border-radius: 20px; transition: 0.2s;">
+                <span style="position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.2s; transform: translateX(22px);"></span>
+              </span>
+            </label>
+          </div>
+
+          <div class="toggle-row" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--border-light);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(22,163,74,0.1); color: var(--status-approved); border-radius: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              </div>
+              <div>
+                <div style="font-weight: 500; font-size: 14px;">Approval Notifications</div>
+                <div style="font-size: 12px; color: var(--text-secondary);">Notify when applications are approved</div>
+              </div>
+            </div>
+            <label class="toggle-switch" style="position: relative; width: 48px; height: 26px; flex-shrink: 0;">
+              <input type="checkbox" checked style="opacity: 0; width: 0; height: 0;">
+              <span style="position: absolute; cursor: pointer; inset: 0; background: var(--denr-primary); border-radius: 20px; transition: 0.2s;">
+                <span style="position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.2s; transform: translateX(22px);"></span>
+              </span>
+            </label>
+          </div>
+
+          <div class="toggle-row" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 0;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(245,158,11,0.1); color: var(--status-pending); border-radius: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              </div>
+              <div>
+                <div style="font-weight: 500; font-size: 14px;">Weekly Summary</div>
+                <div style="font-size: 12px; color: var(--text-secondary);">Get a weekly digest of all activities</div>
+              </div>
+            </div>
+            <label class="toggle-switch" style="position: relative; width: 48px; height: 26px; flex-shrink: 0;">
+              <input type="checkbox" style="opacity: 0; width: 0; height: 0;">
+              <span style="position: absolute; cursor: pointer; inset: 0; background: var(--border-light); border-radius: 20px; transition: 0.2s;">
+                <span style="position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.2s;"></span>
+              </span>
+            </label>
+          </div>
+
+          <div class="form-actions" style="justify-content: flex-end; margin-top: 24px;">
+            <button class="btn btn-primary">Save Preferences</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ========== SECTION NAVIGATION ==========
+    const sections = ['dashboardSection', 'newApplicationSection', 'myApplicationsSection', 'profileSection', 'settingsSection'];
+    let currentSection = 'dashboardSection';
+
+    function navigateToSection(sectionId) {
+      if (!sectionId || currentSection === sectionId) return;
+
+      // Hide all sections using CSS class
+      sections.forEach(id => {
+        const section = document.getElementById(id);
+        if (section) {
+          section.classList.remove('active');
+        }
+      });
+
+      // Show target section
+      const targetSection = document.getElementById(sectionId);
+      if (targetSection) {
+        targetSection.classList.add('active');
+        currentSection = sectionId;
+
+        // Update URL hash
+        const hashMap = {
+          'dashboardSection': 'dashboard',
+          'newApplicationSection': 'new-application',
+          'myApplicationsSection': 'my-applications',
+          'profileSection': 'profile',
+          'settingsSection': 'settings'
+        };
+        const newHash = hashMap[sectionId];
+        if (newHash) {
+          history.pushState(null, null, '#' + newHash);
+        }
+      }
+
+      // Update nav links
+      document.querySelectorAll('.nav-link, .drawer-link').forEach(link => {
+        link.classList.remove('active');
+        link.removeAttribute('aria-current');
+        if (link.dataset.section === sectionId) {
+          link.classList.add('active');
+          link.setAttribute('aria-current', 'page');
+        }
+      });
+
+      // Close mobile drawer
+      closeDrawer();
+
+      // Scroll to top immediately
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+
+    // ========== MOBILE DRAWER ==========
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const drawerOverlay = document.getElementById('drawerOverlay');
+    const mobileDrawer = document.getElementById('mobileDrawer');
+    const drawerClose = document.getElementById('drawerClose');
+
+    function openDrawer() {
+      mobileDrawer.classList.add('active');
+      drawerOverlay.classList.add('active');
+      hamburgerBtn.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      mobileDrawer.classList.remove('active');
+      drawerOverlay.classList.remove('active');
+      hamburgerBtn.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+
+    hamburgerBtn?.addEventListener('click', openDrawer);
+    drawerClose?.addEventListener('click', closeDrawer);
+    drawerOverlay?.addEventListener('click', closeDrawer);
+
+    // Close drawer on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDrawer();
+    });
+
+    // ========== NAVIGATION LINKS ==========
+    document.querySelectorAll('[data-section]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const sectionId = link.dataset.section;
+        if (sectionId) {
+          navigateToSection(sectionId);
+        }
+      });
+    });
+
+    // ========== USER DROPDOWN ==========
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userDropdown = document.getElementById('userDropdown');
+
+    userMenuBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = userDropdown.classList.toggle('active');
+      userMenuBtn.setAttribute('aria-expanded', isOpen);
+    });
+
+    document.addEventListener('click', () => {
+      userDropdown?.classList.remove('active');
+      userMenuBtn?.setAttribute('aria-expanded', 'false');
+    });
+
+    // ========== DATE/TIME ==========
+    function updateDateTime() {
+      const now = new Date();
+      const dateEl = document.getElementById('currentDate');
+      const timeEl = document.getElementById('currentTime');
+      if (dateEl) {
+        dateEl.textContent = now.toLocaleDateString('en-US', { 
+          year: 'numeric', month: 'short', day: 'numeric' 
+        });
+      }
+      if (timeEl) {
+        timeEl.textContent = now.toLocaleTimeString('en-US', { 
+          hour: 'numeric', minute: '2-digit' 
+        });
+      }
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 60000);
+
+    // Handle browser back/forward
+    window.addEventListener('popstate', (e) => {
+      e.preventDefault();
+      initSections();
+    });
+
+    // Also handle hashchange for direct hash navigation
+    window.addEventListener('hashchange', () => {
+      initSections();
+    });
+
+    // Initialize on load
+    function initSections() {
+      // Hide all sections
+      sections.forEach(id => {
+        const section = document.getElementById(id);
+        if (section) {
+          section.classList.remove('active');
+        }
+      });
+
+      // Check for hash first
+      const hash = window.location.hash.slice(1);
+      const sectionMap = {
+        'dashboard': 'dashboardSection',
+        'new-application': 'newApplicationSection',
+        'my-applications': 'myApplicationsSection',
+        'apply': 'newApplicationSection',
+        'applications': 'myApplicationsSection',
+        'profile': 'profileSection',
+        'settings': 'settingsSection'
+      };
+
+      // Show section based on hash, or default to dashboard
+      const sectionId = sectionMap[hash] || 'dashboardSection';
+      const section = document.getElementById(sectionId);
+      if (section) {
+        section.classList.add('active');
+        currentSection = sectionId;
+
+        // Update nav links
+        document.querySelectorAll('.nav-link, .drawer-link').forEach(link => {
+          link.classList.remove('active');
+          link.removeAttribute('aria-current');
+          if (link.dataset.section === sectionId) {
+            link.classList.add('active');
+            link.setAttribute('aria-current', 'page');
+          }
+        });
+      }
+    }
+
+    // Tab switching for settings
+    function switchTab(tabName) {
+      // Update tab buttons
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.style.color = 'var(--text-secondary)';
+        btn.style.borderBottomColor = 'transparent';
+      });
+      event.target.classList.add('active');
+      event.target.style.color = 'var(--denr-primary)';
+      event.target.style.borderBottomColor = 'var(--denr-primary)';
+
+      // Hide all tab content
+      document.querySelectorAll('[id^="tab-"]').forEach(tab => {
+        tab.style.display = 'none';
+      });
+
+      // Show selected tab
+      const selectedTab = document.getElementById('tab-' + tabName);
+      if (selectedTab) {
+        selectedTab.style.display = 'block';
+      }
+    }
+
+    // Run initialization
+    initSections();
+
+    // Add click handlers to all navigation links
+    document.querySelectorAll('.nav-link[data-section], .drawer-link[data-section], .dropdown-item[data-section]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const sectionId = link.dataset.section;
+        if (sectionId) {
+          navigateToSection(sectionId);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

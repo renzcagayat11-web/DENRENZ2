@@ -1,0 +1,363 @@
+/* Apply Document Page Styles */
+
+/* Stepper */
+.stepper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.stepper::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--border-light);
+  z-index: 0;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.step-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  border: 2px solid var(--border-light);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+}
+
+.step.completed .step-icon {
+  background: var(--status-approved);
+  border-color: var(--status-approved);
+  color: white;
+}
+
+.step.active .step-icon {
+  background: var(--denr-primary);
+  border-color: var(--denr-primary);
+  color: white;
+  box-shadow: 0 0 0 4px rgba(26,92,42,0.15);
+}
+
+.step-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+  max-width: 80px;
+  line-height: 1.3;
+}
+
+.step.active .step-label {
+  color: var(--denr-primary);
+  font-weight: 600;
+}
+
+.step.completed .step-label {
+  color: var(--status-approved);
+}
+
+/* Step Content */
+.step-content {
+  display: none;
+}
+
+.step-content.active {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Form Sections */
+.form-section {
+  margin-bottom: 24px;
+}
+
+.form-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border-light);
+}
+
+/* Step Actions */
+.step-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-light);
+}
+
+.step-actions-right {
+  display: flex;
+  gap: 12px;
+}
+
+/* File Upload */
+.file-upload {
+  border: 2px dashed var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 40px 20px;
+  text-align: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.file-upload:hover {
+  border-color: var(--denr-primary-light);
+  background: rgba(26,92,42,0.02);
+}
+
+.file-upload-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
+  color: var(--denr-primary);
+}
+
+.file-upload-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.file-upload-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Checkbox Grid */
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: var(--bg-page);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.checkbox-item:hover {
+  border-color: var(--denr-primary-light);
+}
+
+.checkbox-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--denr-primary);
+}
+
+.checkbox-label {
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+/* Document List */
+.document-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.document-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--bg-page);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+}
+
+.document-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(26,92,42,0.1);
+  color: var(--denr-primary);
+  border-radius: 8px;
+}
+
+.document-info {
+  flex: 1;
+}
+
+.document-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.document-status {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Review Section */
+.review-section {
+  margin-bottom: 24px;
+}
+
+.review-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--denr-primary);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.review-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.review-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.review-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-align: right;
+}
+
+/* Mobile Responsive - iPhone SE (375px) */
+@media (max-width: 480px) {
+  .stepper {
+    margin-bottom: 24px;
+  }
+
+  .stepper::before {
+    top: 16px;
+  }
+
+  .step-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .step.active .step-icon {
+    box-shadow: 0 0 0 3px rgba(26,92,42,0.15);
+  }
+
+  .step-label {
+    font-size: 9px;
+    max-width: 55px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .form-section-title {
+    font-size: 14px;
+  }
+
+  .file-upload {
+    padding: 24px 16px;
+  }
+
+  .file-upload-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .checkbox-item {
+    padding: 10px;
+  }
+
+  .document-item {
+    padding: 12px;
+  }
+
+  .document-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .step-actions {
+    flex-direction: column-reverse;
+    gap: 12px;
+  }
+
+  .step-actions-right {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .step-actions .btn,
+  .step-actions-right .btn {
+    width: 100%;
+  }
+
+  .review-item {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .review-value {
+    text-align: left;
+  }
+}
+
+/* Extra small - iPhone SE optimized */
+@media (max-width: 375px) {
+  .step-label {
+    font-size: 8px;
+    max-width: 50px;
+  }
+
+  .step-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+}
