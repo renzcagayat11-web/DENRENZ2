@@ -4983,6 +4983,8 @@ goToStep = function(step) {
     if (!window.editingAppId) {
       setTimeout(() => restoreDraftUploadsToUI(), 400);
     }
+    // Show/hide Business Permit upload based on checkbox from Step 4
+    updateBusinessPermitVisibility();
   }
   return originalGoToStep(step);
 };
@@ -6606,6 +6608,122 @@ function autoFillStep4FromId() {
   setTimeout(checkAndFillFields, 2500); // Final retry for slow mobile
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// BUSINESS PERMIT UPLOAD (Conditional - Step 5)
+// ═══════════════════════════════════════════════════════════════════════════
+
+let businessPermitFile = null;
+
+// Check if Business Permit checkbox was checked in Step 4
+function checkBusinessPermitRequired() {
+  // The checkbox has data-denr-storage-key containing "Business Permit"
+  const checkbox = document.querySelector('input[type="checkbox"][data-denr-storage-key*="Business Permit"]');
+  return checkbox && checkbox.checked;
+}
+
+// Show/hide Business Permit upload section in Step 5
+function updateBusinessPermitVisibility() {
+  const uploadSection = document.getElementById('businessPermitUploadSection');
+  if (!uploadSection) return;
+  
+  const isRequired = checkBusinessPermitRequired();
+  console.log('[Business Permit] Checkbox checked:', isRequired);
+  
+  if (isRequired) {
+    uploadSection.style.display = 'block';
+  } else {
+    uploadSection.style.display = 'none';
+  }
+}
+
+// Initialize Business Permit upload (simple file upload, no OCR)
+function initBusinessPermitUpload() {
+  const dropzone = document.getElementById('businessPermitDropzone');
+  const fileInput = document.getElementById('businessPermitFileInput');
+  const preview = document.getElementById('businessPermitPreview');
+  const filenameSpan = document.getElementById('businessPermitFilename');
+  const removeBtn = document.getElementById('removeBusinessPermitBtn');
+  
+  if (!dropzone || !fileInput) return;
+  
+  console.log('[Business Permit] Initializing simple upload handler');
+  
+  // Click to browse
+  dropzone.addEventListener('click', (e) => {
+    if (e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+      fileInput.click();
+    }
+  });
+  
+  // Drag and drop events
+  dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.style.borderColor = '#059669';
+    dropzone.style.background = '#ecfdf5';
+  });
+  
+  dropzone.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    dropzone.style.borderColor = '#10b981';
+    dropzone.style.background = '#ffffff';
+  });
+  
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.style.borderColor = '#10b981';
+    dropzone.style.background = '#ffffff';
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleBusinessPermitFile(files[0]);
+    }
+  });
+  
+  // File input change
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      handleBusinessPermitFile(file);
+    }
+  });
+  
+  // Remove button
+  if (removeBtn) {
+    removeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      businessPermitFile = null;
+      fileInput.value = '';
+      if (preview) preview.style.display = 'none';
+      document.getElementById('businessPermitContent').style.display = 'flex';
+      showAlert('Business Permit removed', 'info');
+    });
+  }
+}
+
+// Handle Business Permit file selection
+function handleBusinessPermitFile(file) {
+  const preview = document.getElementById('businessPermitPreview');
+  const filenameSpan = document.getElementById('businessPermitFilename');
+  const content = document.getElementById('businessPermitContent');
+  
+  // Validate file size (50MB limit)
+  if (file.size > 50 * 1024 * 1024) {
+    showAlert('File size must be less than 50MB', 'error');
+    return;
+  }
+  
+  // Store file
+  businessPermitFile = file;
+  
+  // Update UI
+  if (filenameSpan) filenameSpan.textContent = file.name;
+  if (preview) preview.style.display = 'block';
+  if (content) content.style.display = 'none';
+  
+  showAlert(`Business Permit selected: ${file.name}`, 'success');
+  console.log('[Business Permit] File selected:', file.name, `(${(file.size / 1024).toFixed(1)} KB)`);
+}
+
 // Parse ID date string to input date format (YYYY-MM-DD)
 function parseIdDateToInputFormat(dateString) {
   if (!dateString) return null;
@@ -6674,6 +6792,7 @@ function addAutoFillBadgeToElement(element) {
 // Initialize ID upload on page load
 document.addEventListener('DOMContentLoaded', () => {
   initIdUpload();
+  initBusinessPermitUpload();
 });
 
 // Initialize default step indicators on page load
@@ -7386,7 +7505,6 @@ function resolvePermitRequirementsKey(permitType) {
 /** Permit requirements data (keys must match option values in categoryTypePermitOptions). */
 const PERMIT_REQUIREMENTS = {
   'R4A-B-01 – Issuance of Wildlife Farm Permit – Small Scale Farming': [
-    'Duly accomplished application form',
     'Two (2) recent 2x2 ID pictures',
     'Valid government-issued ID',
     'DTI/SEC/CDA Registration (if business/entity)',
@@ -7397,7 +7515,6 @@ const PERMIT_REQUIREMENTS = {
     'Proof of legal source of wildlife stocks'
   ],
   'R4A-B-02 – Issuance of Wildlife Farm Permit – Medium to Large Scale Farming': [
-    'Duly accomplished application form',
     'Business registration documents (SEC/DTI/CDA)',
     'Feasibility study or business plan',
     'Environmental management plan',
@@ -7408,7 +7525,6 @@ const PERMIT_REQUIREMENTS = {
     'Proof of legal source of wildlife'
   ],
   'R4A-B-03 – Issuance of Certificate of Wildlife Registration (CWR)': [
-    'Accomplished application form',
     'Valid ID of owner/applicant',
     'Photos of wildlife species',
     'Proof of legal acquisition/source',
@@ -7424,7 +7540,6 @@ const PERMIT_REQUIREMENTS = {
     'Proof of legal source'
   ],
   'R4A-B-05 – Issuance of Special Local Transport Permit (SLTP) (Wildlife)': [
-    'Duly accomplished application form',
     'Justification/request for special transport',
     'Copy of existing wildlife permits',
     'Veterinary clearance/certificate',
@@ -7449,7 +7564,6 @@ const PERMIT_REQUIREMENTS = {
     'Endorsement from concerned LGU/barangay (if applicable)'
   ],
   'RO-L-01 – Issuance of Certification of Land Classification Status': [
-    'Duly accomplished application form/request letter',
     'Valid government-issued ID',
     'Tax Declaration or proof of land claim/ownership',
     'Lot/Survey Plan or Sketch Plan',
@@ -7467,7 +7581,6 @@ const PERMIT_REQUIREMENTS = {
     'Payment of applicable fees'
   ],
   'RO-L-03 – Application for Free Patent (Agricultural)': [
-    'Duly accomplished Free Patent application form',
     'Alienable and Disposable (A&D) land certification',
     'Tax Declaration',
     'Certification from DENR/CENRO',
@@ -7478,7 +7591,6 @@ const PERMIT_REQUIREMENTS = {
     'Latest real property tax receipt (if applicable)'
   ],
   'RO-L-04 – Application for Free Patent (Residential)': [
-    'Accomplished application form',
     'Certification that land is alienable and disposable',
     'Tax Declaration',
     'Barangay Certification of actual occupancy',
@@ -7488,7 +7600,6 @@ const PERMIT_REQUIREMENTS = {
     'Latest tax payment receipt (if applicable)'
   ],
   'RO-F-01 – Issuance of Private Tree Plantation Registration (PTPR)': [
-    'Duly accomplished application form',
     'Proof of land ownership (TCT, Tax Declaration, CLOA, etc.)',
     'Sketch map/location map',
     'List or inventory of planted trees',
@@ -7511,7 +7622,6 @@ const PERMIT_REQUIREMENTS = {
   'RO-F-04 – Application for Chainsaw Registration': [
     'Official Receipt of chainsaw purchase',
     'Stencil Serial Number of chainsaw',
-    'Duly accomplished application form',
     'Detailed specification of chainsaw',
     'SPA if representative only',
     'Notarized Deed of Sale (if transferred ownership)',
@@ -7535,7 +7645,6 @@ const PERMIT_REQUIREMENTS = {
     'Valid ID'
   ],
   'RO-F-07 – Issuance of Private Land Timber Permit (PLTP/SPLTP)': [
-    'Duly accomplished application form',
     'Proof of land ownership',
     'Tree inventory report',
     'Sketch/vicinity map',

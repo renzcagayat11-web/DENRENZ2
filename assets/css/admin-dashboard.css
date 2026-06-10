@@ -4,6 +4,20 @@
   box-sizing: border-box;
 }
 
+/* Mobile Responsive Styles for Business Permit Upload */
+@media (max-width: 768px) {
+  #businessPermitUploadSection {
+    margin: 16px 0 !important;
+    padding: 16px !important;
+  }
+  
+  #businessPermitUploadSection > div:first-child {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background: #f8fafc;
