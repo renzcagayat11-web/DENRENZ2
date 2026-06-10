@@ -24,9 +24,16 @@ app.use(cors({
     'https://denrenz2.pages.dev',
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    /\.denrenz2\.pages\.dev$/
+    'http://localhost:8080',
+    'http://127.0.0.1:8080',
+    'http://127.0.0.1:56712',
+    'http://127.0.0.1:62427',
+    /\.denrenz2\.pages\.dev$/,
+    /http:\/\/127\.0\.0\.1:\d+$/
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Optimized payload limits for 5MB file uploads (fast processing)

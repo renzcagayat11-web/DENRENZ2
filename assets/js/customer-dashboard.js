@@ -5353,6 +5353,8 @@ async function scanIdDocument(file) {
     if (result.success && result.fields) {
       extractedIdData = result.fields;
       
+      console.log('[ID Scan] Extracted data from backend:', extractedIdData);
+      
       // Backend extracted address from raw text if needed
       // Check if we have valid address
       const hasValidAddress = extractedIdData.address && 
@@ -5360,12 +5362,18 @@ async function scanIdDocument(file) {
                               extractedIdData.address.trim() !== '' &&
                               extractedIdData.address.toLowerCase() !== 'n/a';
       
+      console.log('[ID Scan] hasValidAddress:', hasValidAddress, 'Raw address:', extractedIdData.address);
+      
       // Check if address is within Laguna (from backend flag)
       const isLagunaAddress = extractedIdData.isLagunaAddress === true;
+      
+      console.log('[ID Scan] isLagunaAddress:', isLagunaAddress);
       
       // Parse the address for location form
       const address = parseAddressFromId(extractedIdData.address || '');
       extractedIdData.parsedAddress = address;
+      
+      console.log('[ID Scan] Parsed address:', address);
       
       // Show manual entry if no valid address OR if address is not Laguna
       const showManualEntry = !hasValidAddress || !isLagunaAddress;
@@ -5628,9 +5636,10 @@ function parseAddressFromId(addressText) {
     }
   }
   
-  // STEP 2: Find Barangay - look for "Barangay X" pattern BEFORE the municipal
+  // STEP 2: Find Barangay - look for "Barangay X" pattern OR barangay names before municipal
   if (municipalPos !== -1) {
     const beforeMunicipal = normalizedAddress.substring(0, municipalPos);
+    console.log('[Parse Address] beforeMunicipal text:', JSON.stringify(beforeMunicipal));
     
     // Look for "Barangay [Name]" or "Brgy [Name]" or "Bgy [Name]"
     const barangayPatterns = [
@@ -5653,6 +5662,7 @@ function parseAddressFromId(addressText) {
             const originalPos = addressText.toLowerCase().indexOf(barangayText.toLowerCase());
             if (originalPos !== -1) {
               parsed.barangay = addressText.substring(originalPos, originalPos + barangayText.length);
+              console.log('[Parse Address] Found barangay with label:', parsed.barangay);
             } else {
               parsed.barangay = barangayText; // fallback
             }
@@ -5662,28 +5672,91 @@ function parseAddressFromId(addressText) {
       }
     }
     
-    // If no "Barangay" label, try to find common barangay names near municipal
+    // If no "Barangay" label found, try to find barangay names from the list
+    // This handles cases like "QUINALE (POB.), PAETE" where barangay has no label
     if (!parsed.barangay) {
       const barangays = lagunaBarangays[parsed.municipal] || [];
-      let closestBarangay = '';
-      let closestPos = -1;
-      let minDistance = Infinity;
+      console.log('[Parse Address] Looking for barangays in:', JSON.stringify(beforeMunicipal));
+      console.log('[Parse Address] Available barangays for', parsed.municipal, ':', barangays);
       
+      // Clean beforeMunicipal - remove special chars that might interfere
+      const cleanedBeforeMunicipal = beforeMunicipal
+        .replace(/[·•]/g, ' ')  // Remove bullet points
+        .replace(/\s+/g, ' ')   // Normalize spaces
+        .trim();
+      console.log('[Parse Address] Cleaned beforeMunicipal:', JSON.stringify(cleanedBeforeMunicipal));
+      
+      // First: try to find exact barangay names in the cleaned text
       for (const barangay of barangays) {
-        const pos = normalizedAddress.indexOf(barangay.toLowerCase());
-        if (pos !== -1 && pos < municipalPos) {
-          const distance = municipalPos - pos;
-          if (distance < minDistance) {
-            minDistance = distance;
-            closestPos = pos;
-            closestBarangay = barangay;
+        const barangayLower = barangay.toLowerCase();
+        // Check if barangay name exists in the text (with word boundaries)
+        const barangayIndex = cleanedBeforeMunicipal.indexOf(barangayLower);
+        
+        if (barangayIndex !== -1) {
+          // Verify it's a whole word by checking surrounding chars
+          const beforeChar = barangayIndex > 0 ? cleanedBeforeMunicipal[barangayIndex - 1] : ' ';
+          const afterPos = barangayIndex + barangayLower.length;
+          const afterChar = afterPos < cleanedBeforeMunicipal.length ? cleanedBeforeMunicipal[afterPos] : ' ';
+          
+          // Word boundaries: space, comma, or start/end of string
+          const isWordBoundary = (c) => /[\s,()]/.test(c) || c === undefined;
+          
+          if (isWordBoundary(beforeChar) && isWordBoundary(afterChar)) {
+            // Find position in original text
+            const originalPos = addressText.toLowerCase().indexOf(barangayLower);
+            if (originalPos !== -1 && originalPos < municipalPos) {
+              parsed.barangay = addressText.substring(originalPos, originalPos + barangay.length);
+              console.log('[Parse Address] Found barangay by word match:', parsed.barangay);
+              break;
+            }
           }
         }
       }
       
-      if (closestBarangay && closestPos !== -1) {
-        // Get EXACT text from original
-        parsed.barangay = addressText.substring(closestPos, closestPos + closestBarangay.length);
+      // Fallback: use pattern matching with optional suffixes
+      if (!parsed.barangay) {
+        for (const barangay of barangays) {
+          // Create a pattern that matches the barangay name optionally followed by (POB.), (POBLACION), etc.
+          const barangayPattern = new RegExp(
+            '\\b' + barangay.toLowerCase().replace(/\s+/g, '\\s+') + '\\b(?:\\s*\\(pob\\.?\\)|\\s*\\(poblacion\\)|\\s*\\(pob\\))?',
+            'i'
+          );
+          
+          const match = beforeMunicipal.match(barangayPattern);
+          if (match) {
+            // Find the exact position in the original text
+            const originalPos = addressText.toLowerCase().indexOf(barangay.toLowerCase());
+            if (originalPos !== -1 && originalPos < municipalPos) {
+              parsed.barangay = addressText.substring(originalPos, originalPos + barangay.length);
+              console.log('[Parse Address] Found barangay by regex pattern:', parsed.barangay);
+              break;
+            }
+          }
+        }
+      }
+      
+      // Last fallback: find closest barangay by position
+      if (!parsed.barangay) {
+        let closestBarangay = '';
+        let closestPos = -1;
+        let minDistance = Infinity;
+        
+        for (const barangay of barangays) {
+          const pos = normalizedAddress.indexOf(barangay.toLowerCase());
+          if (pos !== -1 && pos < municipalPos) {
+            const distance = municipalPos - pos;
+            if (distance < minDistance) {
+              minDistance = distance;
+              closestPos = pos;
+              closestBarangay = barangay;
+            }
+          }
+        }
+        
+        if (closestBarangay && closestPos !== -1) {
+          parsed.barangay = addressText.substring(closestPos, closestPos + closestBarangay.length);
+          console.log('[Parse Address] Found barangay by position fallback:', parsed.barangay);
+        }
       }
     }
   }
@@ -5697,37 +5770,118 @@ function parseAddressFromId(addressText) {
       const barangayPos = addressText.toLowerCase().indexOf(parsed.barangay.toLowerCase());
       if (barangayPos !== -1 && barangayPos < municipalPos) {
         streetEnd = barangayPos;
+        console.log('[Parse Address] Street ends at barangay position:', barangayPos);
       }
     }
     
     // Get street part
     let streetPart = addressText.substring(0, streetEnd).trim();
+    console.log('[Parse Address] Raw street part:', streetPart);
     
-    // Remove "Barangay X" or "Brgy X" from street
+    // Remove "Barangay X" or "Brgy X" or "Bgy X" from street
     streetPart = streetPart.replace(/barangay\s+\S+/gi, '').trim();
     streetPart = streetPart.replace(/brgy\.?\s+\S+/gi, '').trim();
     streetPart = streetPart.replace(/bgy\.?\s+\S+/gi, '').trim();
     
+    // Also remove any remaining barangay-like text (words ending with comma before municipal)
+    streetPart = streetPart.replace(/\s*\([^)]*\)\s*$/, '').trim(); // Remove trailing (POB.) etc
+    
     // Clean up
     streetPart = streetPart
-      .replace(/^[,\s-]+/, '')
-      .replace(/[,\s-]+$/, '')
+      .replace(/^[,:;\s-]+/, '')
+      .replace(/[,;:\s-]+$/, '')
       .trim();
     
     parsed.street = streetPart;
+    console.log('[Parse Address] Final street:', streetPart);
   }
   
   return parsed;
 }
 
+// Helper function to find matching option value (case-insensitive)
+function findMatchingOptionValue(selectElement, searchValue) {
+  if (!selectElement || !searchValue) {
+    console.log('[findMatchingOptionValue] Missing selectElement or searchValue:', { selectElement: !!selectElement, searchValue });
+    return null;
+  }
+  
+  // Clean the search value - remove common ID suffixes like (POB.), (POBLACION)
+  let cleanedSearch = searchValue.toLowerCase().trim()
+    .replace(/\s*\(pob\.?\)\s*$/i, '')     // Remove (POB.) or (POB)
+    .replace(/\s*\(poblacion\)\s*$/i, '')   // Remove (POBLACION)
+    .replace(/\s*\(pob\)\s*$/i, '')          // Remove (POB)
+    .replace(/\s*brgy\.?\s*/i, '')           // Remove Brgy.
+    .replace(/\s*barangay\s*/i, '');         // Remove Barangay
+  
+  const options = Array.from(selectElement.options);
+  const optionValues = options.map(o => o.value);
+  
+  console.log('[findMatchingOptionValue] Input:', searchValue);
+  console.log('[findMatchingOptionValue] Cleaned:', cleanedSearch);
+  console.log('[findMatchingOptionValue] Available options:', optionValues);
+  
+  // Try exact match first
+  let match = options.find(o => o.value === searchValue);
+  if (match) {
+    console.log('[findMatchingOptionValue] Exact match found:', match.value);
+    return match.value;
+  }
+  
+  // Try case-insensitive match
+  match = options.find(o => o.value.toLowerCase() === cleanedSearch);
+  if (match) {
+    console.log('[findMatchingOptionValue] Case-insensitive match found:', match.value);
+    return match.value;
+  }
+  
+  // Try partial match - option value is contained in search
+  match = options.find(o => cleanedSearch.includes(o.value.toLowerCase()));
+  if (match) {
+    console.log('[findMatchingOptionValue] Partial match (option in search):', match.value);
+    return match.value;
+  }
+  
+  // Try partial match - search is contained in option value
+  match = options.find(o => o.value.toLowerCase().includes(cleanedSearch));
+  if (match) {
+    console.log('[findMatchingOptionValue] Partial match (search in option):', match.value);
+    return match.value;
+  }
+  
+  // Try word-by-word matching (for multi-word barangays)
+  const searchWords = cleanedSearch.split(/\s+/);
+  if (searchWords.length > 0) {
+    match = options.find(o => {
+      const optionLower = o.value.toLowerCase();
+      return searchWords.some(word => word.length > 2 && optionLower.includes(word));
+    });
+    if (match) {
+      console.log('[findMatchingOptionValue] Word-by-word match found:', match.value);
+      return match.value;
+    }
+  }
+  
+  console.log('[findMatchingOptionValue] NO MATCH FOUND');
+  return null;
+}
+
 // Apply extracted ID data to location form fields
 function applyExtractedIdData() {
-  if (!extractedIdData) return;
+  console.log('[Step 2 Auto-fill] Starting applyExtractedIdData');
+  console.log('[Step 2 Auto-fill] extractedIdData:', extractedIdData);
+  
+  if (!extractedIdData) {
+    console.log('[Step 2 Auto-fill] No extractedIdData available');
+    return;
+  }
   
   // Check if we have valid address data from ID
   const rawAddress = extractedIdData.address;
+  console.log('[Step 2 Auto-fill] Raw address:', rawAddress);
+  
   if (!rawAddress || rawAddress === 'N/A' || rawAddress === 'n/a' || rawAddress.trim() === '') {
-    console.log('No valid address detected from ID, skipping location auto-fill');
+    console.log('[Step 2 Auto-fill] No valid address detected from ID, skipping location auto-fill');
     
     // Still store personal data for Step 4 (name, birthday, etc)
     sessionStorage.setItem('idExtractedPersonalData', JSON.stringify({
@@ -5743,49 +5897,97 @@ function applyExtractedIdData() {
   }
   
   const { parsedAddress } = extractedIdData;
+  console.log('[Step 2 Auto-fill] Parsed address:', parsedAddress);
   
   // Only auto-fill if we have actual address data
   if (parsedAddress && (parsedAddress.municipal || parsedAddress.barangay || parsedAddress.street)) {
+    console.log('[Step 2 Auto-fill] Attempting to auto-fill location fields');
+    
     // Fill municipal
     const municipalSelect = document.getElementById('municipal');
+    console.log('[Step 2 Auto-fill] Municipal select element:', municipalSelect);
+    console.log('[Step 2 Auto-fill] Municipal value to set (raw):', parsedAddress.municipal);
+    
     if (municipalSelect && parsedAddress.municipal) {
-      municipalSelect.value = parsedAddress.municipal;
-      // Trigger barangay population
-      municipalSelect.dispatchEvent(new Event('change'));
+      // Find correct case match for municipal
+      const municipalMatch = findMatchingOptionValue(municipalSelect, parsedAddress.municipal);
+      console.log('[Step 2 Auto-fill] Municipal matched value:', municipalMatch);
       
-      // Fill barangay after a short delay (to allow options to populate)
-      if (parsedAddress.barangay) {
-        setTimeout(() => {
-          const barangaySelect = document.getElementById('barangay');
-          if (barangaySelect) {
-            barangaySelect.value = parsedAddress.barangay;
-          }
-        }, 100);
+      if (municipalMatch) {
+        municipalSelect.value = municipalMatch;
+        console.log('[Step 2 Auto-fill] Municipal set to:', municipalSelect.value);
+        
+        // Trigger barangay population
+        municipalSelect.dispatchEvent(new Event('change'));
+        console.log('[Step 2 Auto-fill] Municipal change event dispatched');
+        
+        // Fill barangay after delay (allow options to populate)
+        if (parsedAddress.barangay) {
+          console.log('[Step 2 Auto-fill] Waiting to set barangay:', parsedAddress.barangay);
+          setTimeout(() => {
+            const barangaySelect = document.getElementById('barangay');
+            console.log('[Step 2 Auto-fill] Barangay select element:', barangaySelect);
+            
+            if (barangaySelect) {
+              // Find correct case match for barangay
+              const barangayMatch = findMatchingOptionValue(barangaySelect, parsedAddress.barangay);
+              console.log('[Step 2 Auto-fill] Barangay matched value:', barangayMatch);
+              
+              if (barangayMatch) {
+                barangaySelect.value = barangayMatch;
+                console.log('[Step 2 Auto-fill] Barangay set to:', barangaySelect.value);
+                
+                if (barangaySelect.value === barangayMatch) {
+                  console.log('[Step 2 Auto-fill] Barangay successfully set!');
+                } else {
+                  console.warn('[Step 2 Auto-fill] Barangay value mismatch after setting');
+                }
+                
+                addAutoFillBadge('barangay');
+              } else {
+                console.warn('[Step 2 Auto-fill] No matching barangay option found');
+                console.log('[Step 2 Auto-fill] Available options:', Array.from(barangaySelect.options).map(o => o.value));
+              }
+            } else {
+              console.warn('[Step 2 Auto-fill] Barangay select not found!');
+            }
+          }, 400); // Slightly longer delay for barangay population
+        }
+        
+        // Add badge for municipal
+        addAutoFillBadge('municipal');
+      } else {
+        console.warn('[Step 2 Auto-fill] No matching municipal option found for:', parsedAddress.municipal);
+        console.log('[Step 2 Auto-fill] Available municipal options:', Array.from(municipalSelect.options).map(o => o.value));
       }
+    } else {
+      console.warn('[Step 2 Auto-fill] Municipal select or value missing');
     }
     
     // Fill street address
     const streetInput = document.getElementById('streetAddress');
+    console.log('[Step 2 Auto-fill] Street input element:', streetInput);
     if (streetInput && parsedAddress.street) {
       streetInput.value = parsedAddress.street;
+      console.log('[Step 2 Auto-fill] Street set to:', parsedAddress.street);
+      addAutoFillBadge('streetAddress');
     }
     
-    // Add badges to show auto-filled fields
-    addAutoFillBadge('municipal');
-    addAutoFillBadge('barangay');
-    addAutoFillBadge('streetAddress');
-    
     showAlert('Address auto-filled from ID successfully!', 'success');
+  } else {
+    console.warn('[Step 2 Auto-fill] No parsed address data available');
   }
   
   // Store personal data for Step 4 (Application Forms)
-  sessionStorage.setItem('idExtractedPersonalData', JSON.stringify({
+  const personalData = {
     firstName: extractedIdData.firstName || '',
     middleName: extractedIdData.middleName || '',
     lastName: extractedIdData.lastName || '',
     dateOfBirth: extractedIdData.dateOfBirth || '',
     documentNumber: extractedIdData.documentNumber || ''
-  }));
+  };
+  console.log('[Step 2 Auto-fill] Storing personal data for Step 4:', personalData);
+  sessionStorage.setItem('idExtractedPersonalData', JSON.stringify(personalData));
 }
 
 // Add "Auto-filled from ID" badge to form fields
@@ -5834,43 +6036,113 @@ async function getAuthToken() {
 // Auto-fill Step 4 form fields with ID-extracted data
 function autoFillStep4FromId() {
   const idData = sessionStorage.getItem('idExtractedPersonalData');
-  if (!idData) return;
+  if (!idData) {
+    console.log('[ID Auto-fill] No ID data in sessionStorage');
+    return;
+  }
   
   const data = JSON.parse(idData);
+  console.log('[ID Auto-fill] Data from sessionStorage:', data);
   
   // Try to fill form fields in Step 4
-  // Note: Form fields are dynamically loaded, so we need to wait for them
   const checkAndFillFields = () => {
     let filledCount = 0;
     
-    // Fill First Name
-    const firstNameField = document.querySelector('#formContentArea input[name*="first"], #formContentArea input[id*="first"], #formContentArea input[placeholder*="First"]');
+    // DEBUG: Log all available inputs
+    const allInputs = document.querySelectorAll('input[type="text"], input:not([type="hidden"])');
+    console.log('[ID Auto-fill] Found', allInputs.length, 'input fields');
+    allInputs.forEach((input, i) => {
+      if (i < 10) console.log(`[ID Auto-fill] Input ${i}:`, input.id, input.name, input.placeholder?.substring(0, 30));
+    });
+    
+    // STRATEGY 1: Look for "Name of Applicant" field (common in DENR forms)
+    // Combine first + middle + last name
+    const fullName = [data.firstName, data.middleName, data.lastName].filter(Boolean).join(' ');
+    console.log('[ID Auto-fill] Constructed full name:', fullName);
+    
+    // Try multiple selectors for name field
+    const nameSelectors = [
+      'input[name*="applicant"]', 'input[id*="applicant"]', 
+      'input[name*="name"]', 'input[id*="name"]',
+      'input[placeholder*="Name"]', 'input[placeholder*="name"]',
+      'label:contains("Name of Applicant") + input',
+      '[field-label="Name of Applicant"] input',
+      '.form-group:has(label:contains("Applicant")) input'
+    ];
+    
+    let nameField = null;
+    for (const selector of nameSelectors) {
+      try {
+        nameField = document.querySelector(selector);
+        if (nameField) {
+          console.log('[ID Auto-fill] Found name field with selector:', selector);
+          break;
+        }
+      } catch (e) { /* invalid selector, continue */ }
+    }
+    
+    // Fallback: look for first text input in the form
+    if (!nameField) {
+      const formInputs = document.querySelectorAll('.form-step[data-step="4"] input[type="text"], #formContentArea input[type="text"]');
+      if (formInputs.length > 0) {
+        nameField = formInputs[0];
+        console.log('[ID Auto-fill] Using first text input as name field:', nameField.id || nameField.name);
+      }
+    }
+    
+    if (nameField && fullName && !nameField.value) {
+      nameField.value = fullName;
+      addAutoFillBadgeToElement(nameField);
+      filledCount++;
+      console.log('[ID Auto-fill] Filled name field:', fullName);
+    }
+    
+    // STRATEGY 2: Fill individual name fields if they exist
+    // First Name
+    const firstNameSelectors = ['input[name*="first"]', 'input[id*="first"]', 'input[placeholder*="First"]'];
+    const firstNameField = querySelectorAny(firstNameSelectors);
     if (firstNameField && data.firstName && !firstNameField.value) {
       firstNameField.value = data.firstName;
       addAutoFillBadgeToElement(firstNameField);
       filledCount++;
     }
     
-    // Fill Last Name/Surname
-    const lastNameField = document.querySelector('#formContentArea input[name*="last"], #formContentArea input[id*="last"], #formContentArea input[name*="surname"], #formContentArea input[placeholder*="Last"], #formContentArea input[placeholder*="Surname"]');
+    // Last Name
+    const lastNameSelectors = ['input[name*="last"]', 'input[id*="last"]', 'input[name*="surname"]', 'input[placeholder*="Last"]', 'input[placeholder*="Surname"]'];
+    const lastNameField = querySelectorAny(lastNameSelectors);
     if (lastNameField && data.lastName && !lastNameField.value) {
       lastNameField.value = data.lastName;
       addAutoFillBadgeToElement(lastNameField);
       filledCount++;
     }
     
-    // Fill Middle Name
-    const middleNameField = document.querySelector('#formContentArea input[name*="middle"], #formContentArea input[id*="middle"], #formContentArea input[placeholder*="Middle"]');
+    // Middle Name
+    const middleNameSelectors = ['input[name*="middle"]', 'input[id*="middle"]', 'input[placeholder*="Middle"]'];
+    const middleNameField = querySelectorAny(middleNameSelectors);
     if (middleNameField && data.middleName && !middleNameField.value) {
       middleNameField.value = data.middleName;
       addAutoFillBadgeToElement(middleNameField);
       filledCount++;
     }
     
-    // Fill Date of Birth
-    const dobField = document.querySelector('#formContentArea input[type="date"], #formContentArea input[name*="birth"], #formContentArea input[id*="birth"], #formContentArea input[placeholder*="Birth"]');
+    // STRATEGY 3: Look for Address field
+    const addressSelectors = [
+      'textarea[name*="address"]', 'textarea[id*="address"]',
+      'input[name*="address"]', 'input[id*="address"]',
+      'textarea[placeholder*="Address"]', 'input[placeholder*="Address"]'
+    ];
+    const addressField = querySelectorAny(addressSelectors);
+    if (addressField && data.fullAddress && !addressField.value) {
+      addressField.value = data.fullAddress;
+      addAutoFillBadgeToElement(addressField);
+      filledCount++;
+      console.log('[ID Auto-fill] Filled address field');
+    }
+    
+    // STRATEGY 4: Date of Birth
+    const dobSelectors = ['input[type="date"]', 'input[name*="birth"]', 'input[id*="birth"]', 'input[placeholder*="Birth"]'];
+    const dobField = querySelectorAny(dobSelectors);
     if (dobField && data.dateOfBirth && !dobField.value) {
-      // Try to parse and format date
       const parsedDate = parseIdDateToInputFormat(data.dateOfBirth);
       if (parsedDate) {
         dobField.value = parsedDate;
@@ -5879,22 +6151,36 @@ function autoFillStep4FromId() {
       }
     }
     
-    // Fill ID Number (if there's a field for it)
-    const idNumberField = document.querySelector('#formContentArea input[name*="id"], #formContentArea input[id*="id"], #formContentArea input[name*="license"], #formContentArea input[placeholder*="ID"]');
+    // STRATEGY 5: ID Number
+    const idSelectors = ['input[name*="id"]', 'input[id*="id"]', 'input[name*="license"]', 'input[placeholder*="ID"]'];
+    const idNumberField = querySelectorAny(idSelectors);
     if (idNumberField && data.documentNumber && !idNumberField.value) {
       idNumberField.value = data.documentNumber;
       addAutoFillBadgeToElement(idNumberField);
       filledCount++;
     }
     
+    console.log('[ID Auto-fill] Total fields filled:', filledCount);
     if (filledCount > 0) {
       showAlert(`${filledCount} field(s) auto-filled from ID scan`, 'success');
     }
   };
   
-  // Try immediately and then after a delay (for dynamic content)
+  // Helper function to try multiple selectors
+  function querySelectorAny(selectors) {
+    for (const selector of selectors) {
+      try {
+        const el = document.querySelector(selector);
+        if (el) return el;
+      } catch (e) { /* continue */ }
+    }
+    return null;
+  }
+  
+  // Try multiple times with increasing delays (for dynamic content)
   checkAndFillFields();
-  setTimeout(checkAndFillFields, 500);
+  setTimeout(checkAndFillFields, 300);
+  setTimeout(checkAndFillFields, 600);
   setTimeout(checkAndFillFields, 1000);
 }
 
