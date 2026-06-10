@@ -6364,14 +6364,18 @@ function autoFillStep4FromId() {
     console.log('[ID Auto-fill] Constructed full name:', fullName);
     
     // Try multiple selectors for name field - FILL ALL MATCHING FIELDS
+    // IMPORTANT: Exclude address fields to prevent name going to street address
     const nameSelectors = [
       'input[id*="ackApplicant"]',  // ALL Receipt form applicant names (ro_f06_ackApplicant, r4a_b01_ackApplicant, etc.)
       'input[name*="applicant"]', 'input[id*="applicant"]', 
-      'input[name*="name"]', 'input[id*="name"]',
-      'input[placeholder*="Name"]', 'input[placeholder*="name"]',
+      'input[name*="firstName"]', 'input[id*="firstName"]',
+      'input[name*="lastName"]', 'input[id*="lastName"]',
+      'input[name*="fullName"]', 'input[id*="fullName"]',
+      'input[placeholder*="Name of Applicant"]', 'input[placeholder*="Full Name"]',
+      'input[placeholder*="First Name"]', 'input[placeholder*="Last Name"]',
       'label:contains("Name of Applicant") + input',
       '[field-label="Name of Applicant"] input',
-      '.form-group:has(label:contains("Applicant")) input'
+      '.form-group:has(label:contains("Applicant")) input:not([name*="address"]):not([id*="address"])'
     ];
     
     // Find and fill ALL matching name fields (not just first)
@@ -6486,6 +6490,71 @@ function autoFillStep4FromId() {
           break;
         }
       }
+    }
+    
+    // STRATEGY 3b: Fill Municipal and Barangay dropdowns from parsed address
+    if (data.parsedAddress) {
+      console.log('[ID Auto-fill] Attempting to fill location dropdowns:', data.parsedAddress);
+      
+      // Fill Municipal dropdown
+      const municipalSelect = document.getElementById('municipal') || 
+                               document.querySelector('select[name*="municipal"], select[id*="municipal"]');
+      if (municipalSelect && data.parsedAddress.municipal) {
+        const municipalValue = data.parsedAddress.municipal.toUpperCase();
+        // Try exact match first
+        let option = Array.from(municipalSelect.options).find(opt => 
+          opt.text.toUpperCase() === municipalValue || 
+          opt.value.toUpperCase() === municipalValue
+        );
+        // Try partial match
+        if (!option) {
+          option = Array.from(municipalSelect.options).find(opt => 
+            opt.text.toUpperCase().includes(municipalValue) || 
+            municipalValue.includes(opt.text.toUpperCase())
+          );
+        }
+        if (option && !municipalSelect.value) {
+          municipalSelect.value = option.value;
+          municipalSelect.dispatchEvent(new Event('change', { bubbles: true }));
+          addAutoFillBadgeToElement(municipalSelect);
+          filledCount++;
+          console.log('[ID Auto-fill] ✓ Filled municipal dropdown:', option.text);
+        }
+      }
+      
+      // Fill Barangay dropdown (after municipal is set, it may need time to populate)
+      setTimeout(() => {
+        const barangaySelect = document.getElementById('barangay') || 
+                              document.querySelector('select[name*="barangay"], select[id*="barangay"]');
+        if (barangaySelect && data.parsedAddress.barangay) {
+          const barangayValue = data.parsedAddress.barangay.toUpperCase();
+          // Try exact match first
+          let option = Array.from(barangaySelect.options).find(opt => 
+            opt.text.toUpperCase() === barangayValue || 
+            opt.value.toUpperCase() === barangayValue
+          );
+          // Try partial match
+          if (!option) {
+            option = Array.from(barangaySelect.options).find(opt => 
+              opt.text.toUpperCase().includes(barangayValue) || 
+              barangayValue.includes(opt.text.toUpperCase())
+            );
+          }
+          // Try with "POB" or "Poblacion" variations
+          if (!option && barangayValue.includes('POB')) {
+            option = Array.from(barangaySelect.options).find(opt => 
+              opt.text.toUpperCase().includes('POBLACION') || 
+              opt.text.toUpperCase().includes('POB.')
+            );
+          }
+          if (option && !barangaySelect.value) {
+            barangaySelect.value = option.value;
+            barangaySelect.dispatchEvent(new Event('change', { bubbles: true }));
+            addAutoFillBadgeToElement(barangaySelect);
+            console.log('[ID Auto-fill] ✓ Filled barangay dropdown:', option.text);
+          }
+        }
+      }, 500); // Delay to allow barangay options to populate after municipal selection
     }
     
     // STRATEGY 4: Date of Birth
