@@ -27,6 +27,17 @@
         loginRedirect: '/index.html'
       });
     </script>
+    
+    <!-- API Configuration for Cloudflare Pages -->
+    <script>
+      // Set API_BASE for production (same-origin for Cloudflare Pages Functions)
+      window.API_BASE = window.API_BASE || 
+        (location.hostname === 'localhost' || location.hostname === '127.0.0.1' 
+          ? 'http://127.0.0.1:3000' 
+          : (location.origin || ''));
+      
+      console.log('[Config] API_BASE set to:', window.API_BASE);
+    </script>
   </head>
   <body>
     <!-- Page Loader Overlay -->

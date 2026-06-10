@@ -5330,6 +5330,20 @@ async function scanIdDocument(file) {
   const idScanConfidence = document.getElementById('idScanConfidence');
   const idExtractedData = document.getElementById('idExtractedData');
   
+  // Check API_BASE is configured
+  if (!API_BASE) {
+    console.error('[ID Scan] API_BASE not configured');
+    if (idScanResult) {
+      idScanResult.innerHTML = `
+        <div style="padding: 16px; background: #fef2f2; border-radius: 8px; border: 1px solid #fecaca;">
+          <p style="margin: 0; color: #dc2626; font-weight: 500;">⚠️ Backend API not configured</p>
+          <p style="margin: 8px 0 0; font-size: 12px; color: #7f1d1d;">Please contact support.</p>
+        </div>
+      `;
+    }
+    return;
+  }
+  
   // Show loading state in result area
   if (idScanResult) {
     idScanResult.style.display = 'block';
@@ -5337,13 +5351,39 @@ async function scanIdDocument(file) {
       <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 20px;">
         <div style="width: 40px; height: 40px; border: 3px solid #e5e7eb; border-top-color: #16a34a; border-radius: 50%; animation: spin 1s linear infinite;"></div>
         <p style="margin: 0; color: #166534; font-weight: 500;">Scanning ID with Azure AI...</p>
+        <p style="margin: 0; font-size: 12px; color: #6b7280;">File: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)</p>
       </div>
     `;
   }
   
+  // Mobile: Check file type and size
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const isHeic = file.type === 'image/heic' || file.type === 'image/heif' || file.name.toLowerCase().endsWith('.heic');
+  
+  console.log('[ID Scan] File info:', { name: file.name, type: file.type, size: file.size, isMobile, isHeic });
+  
   try {
+    // For mobile HEIC files, show warning
+    if (isHeic && isMobile) {
+      console.warn('[ID Scan] HEIC file detected on mobile, may have compatibility issues');
+    }
+    
+    // Compress image if too large (mobile photos can be 5MB+)
+    let uploadFile = file;
+    if (file.size > 4 * 1024 * 1024) {
+      console.log('[ID Scan] File too large, attempting compression...');
+      try {
+        uploadFile = await compressImage(file, 4 * 1024 * 1024);
+        console.log('[ID Scan] Compressed to:', uploadFile.size);
+      } catch (compressErr) {
+        console.warn('[ID Scan] Compression failed, using original:', compressErr);
+      }
+    }
+    
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', uploadFile);
+    
+    console.log('[ID Scan] Sending request to:', `${API_BASE}/ocr/scan-id`);
     
     const response = await fetch(`${API_BASE}/ocr/scan-id`, {
       method: 'POST',
@@ -5353,8 +5393,12 @@ async function scanIdDocument(file) {
       body: formData
     });
     
+    console.log('[ID Scan] Response status:', response.status);
+    
     if (!response.ok) {
-      throw new Error('ID scanning failed');
+      const errorText = await response.text();
+      console.error('[ID Scan] Server error:', response.status, errorText);
+      throw new Error(`Server error ${response.status}: ${errorText || 'Unknown error'}`);
     }
     
     const result = await response.json();
@@ -5513,20 +5557,100 @@ async function scanIdDocument(file) {
     }
   } catch (error) {
     console.error('ID scan error:', error);
+    console.error('[ID Scan] Error:', error);
+    
+    // Better error messages for mobile
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    let errorMessage = 'Failed to scan ID. Please enter details manually.';
+    let errorDetail = '';
+    
+    if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+      errorMessage = 'Network connection failed.';
+      errorDetail = isMobile 
+        ? 'Please check your internet connection and try again.' 
+        : 'Please ensure you have a stable internet connection.';
+    } else if (error.message.includes('401') || error.message.includes('403')) {
+      errorMessage = 'Authentication failed.';
+      errorDetail = 'Please log out and log in again.';
+    } else if (error.message.includes('413') || error.message.includes('Payload Too Large')) {
+      errorMessage = 'Image file too large.';
+      errorDetail = 'Please take a photo with lower resolution or compress the image.';
+    } else if (error.message.includes('500')) {
+      errorMessage = 'Server error while processing ID.';
+      errorDetail = 'The scanning service may be temporarily unavailable. Please try again later or enter details manually.';
+    }
+    
     if (idScanResult) {
       idScanResult.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px; color: #dc2626;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="15" y1="9" x2="9" y2="15"/>
-            <line x1="9" y1="9" x2="15" y2="15"/>
-          </svg>
-          <span style="font-weight: 500;">Failed to scan ID. Please enter details manually.</span>
+        <div style="padding: 16px; background: #fef2f2; border-radius: 8px; border: 1px solid #fecaca;">
+          <div style="display: flex; align-items: center; gap: 8px; color: #dc2626; margin-bottom: 8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+            <span style="font-weight: 500;">${errorMessage}</span>
+          </div>
+          ${errorDetail ? `<p style="margin: 0; font-size: 12px; color: #7f1d1d;">${errorDetail}</p>` : ''}
+          <p style="margin: 8px 0 0; font-size: 11px; color: #991b1b;">Error: ${error.message}</p>
         </div>
       `;
     }
-    showAlert('Failed to scan ID. Please enter details manually.', 'warning');
+    showAlert(errorMessage, 'warning');
   }
+}
+
+// Compress image to reduce file size for mobile uploads
+async function compressImage(file, maxSize = 4 * 1024 * 1024) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      
+      // Calculate new dimensions to reduce file size
+      let width = img.width;
+      let height = img.height;
+      const maxDimension = 1920; // Max width/height
+      
+      if (width > maxDimension || height > maxDimension) {
+        if (width > height) {
+          height = Math.round((height * maxDimension) / width);
+          width = maxDimension;
+        } else {
+          width = Math.round((width * maxDimension) / height);
+          height = maxDimension;
+        }
+      }
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      // Convert to JPEG with reduced quality
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const compressedFile = new File([blob], file.name.replace(/\.heic$/i, '.jpg'), {
+            type: 'image/jpeg',
+            lastModified: Date.now()
+          });
+          resolve(compressedFile);
+        } else {
+          reject(new Error('Compression failed'));
+        }
+      }, 'image/jpeg', 0.85);
+    };
+    
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Failed to load image for compression'));
+    };
+    
+    img.src = url;
+  });
 }
 
 // Parse address from raw OCR text (fallback when prebuilt model fails)
