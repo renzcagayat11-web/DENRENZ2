@@ -19,8 +19,9 @@ async function readOperationResult(operationLocation, key) {
 }
 
 export async function onRequestPost(context) {
-  const endpoint = context.env.AZURE_DI_ENDPOINT;
-  const key = context.env.AZURE_DI_KEY;
+  // Use environment variables from .env file
+  const endpoint = context.env.AZURE_DOC_INTEL_ENDPOINT || context.env.AZURE_DI_ENDPOINT;
+  const key = context.env.AZURE_DOC_INTEL_KEY || context.env.AZURE_DI_KEY;
 
   if (!endpoint || !key) {
     return json({ error: 'Azure Document Intelligence is not configured.' }, 503);
