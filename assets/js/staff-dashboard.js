@@ -3796,9 +3796,7 @@ window.scanDocumentOCR = async function(docUrl, docName) {
     const formData = new FormData();
     formData.append('file', imageBlob, docName);
     
-    // Use the server's general OCR endpoint (Azure Document Intelligence)
-    const API_BASE = window.API_BASE || 
-      (location.hostname === 'localhost' ? 'http://127.0.0.1:3000' : '');
+    // Uses top-level API_BASE (localhost:3000 in dev, same-origin CF Function in production)
     
     // Get Firebase ID token for authentication
     let idToken = '';
