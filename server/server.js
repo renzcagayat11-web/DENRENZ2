@@ -1258,22 +1258,53 @@ app.get('/ocr/search', verifyToken, requireStaff, async (req, res) => {
       }
     });
 
-    // Enrich any results still missing applicantName by fetching from Firestore
-    const needsEnrich = matches.filter(m => !m.applicantName && m.applicationId);
-    if (needsEnrich.length > 0) {
-      await Promise.all(needsEnrich.map(async m => {
+    // Enrich ALL results that have an applicationId — always pull name from the customer's account
+    const toEnrich = matches.filter(m => m.applicationId);
+
+    if (toEnrich.length > 0) {
+      // Batch fetch unique application IDs
+      const uniqueIds = [...new Set(toEnrich.map(m => m.applicationId))];
+      const appDataMap = {};
+      await Promise.all(uniqueIds.map(async appId => {
         try {
-          const appSnap = await db.collection('applications').doc(m.applicationId).get();
-          if (appSnap.exists) {
-            const d = appSnap.data();
-            m.applicantName = d.applicantName || null;
-            m.permitType    = d.permitType || d.documentType || null;
-            // Back-fill ocrIndex so future searches are instant
-            await db.collection('ocrIndex').doc(m.storagePath.replace(/\//g, '_'))
-              .update({ applicantName: m.applicantName, permitType: m.permitType });
-          }
-        } catch (e) { /* non-fatal */ }
+          const appSnap = await db.collection('applications').doc(appId).get();
+          if (appSnap.exists) appDataMap[appId] = appSnap.data();
+        } catch (e) {
+          console.error(`[OCR Search] Failed to fetch app ${appId}:`, e.message);
+        }
       }));
+
+      // Collect UIDs needing user-level lookup (when applicantName is blank)
+      const uidToFetch = new Set();
+      toEnrich.forEach(m => {
+        const d = appDataMap[m.applicationId];
+        if (d && !d.applicantName && d.applicantUid) uidToFetch.add(d.applicantUid);
+      });
+
+      // Fetch user docs by UID
+      const userDataMap = {};
+      await Promise.all([...uidToFetch].map(async uid => {
+        try {
+          const userSnap = await db.collection('users').doc(uid).get();
+          if (userSnap.exists) userDataMap[uid] = userSnap.data();
+        } catch (e) {
+          console.error(`[OCR Search] Failed to fetch user ${uid}:`, e.message);
+        }
+      }));
+
+      toEnrich.forEach(m => {
+        const d = appDataMap[m.applicationId];
+        if (d) {
+          let name = d.applicantName || '';
+          if (!name && d.applicantUid && userDataMap[d.applicantUid]) {
+            const u = userDataMap[d.applicantUid];
+            name = [u.firstName, u.middleName, u.surname].filter(Boolean).join(' ');
+          }
+          m.applicantName = name || null;
+          m.permitType    = d.permitType || d.documentType || null;
+          m.appStatus     = d.status || null;
+        }
+      });
     }
 
     res.json({ success: true, query: q, count: matches.length, results: matches });
@@ -1359,6 +1390,51 @@ app.post('/ocr/batch-index', verifyToken, requireStaff, async (req, res) => {
       console.log(`[OCR Batch] Done. Queued: ${queued}, Indexed: ${indexed}`);
     } catch (err) {
       console.error('[OCR Batch] Error:', err.message);
+    }
+  })();
+});
+
+// POST /ocr/relink-all — back-fill applicantName + applicationId for ALL ocrIndex docs by matching storagePaths from applications
+app.post('/ocr/relink-all', verifyToken, requireStaff, async (req, res) => {
+  res.json({ success: true, message: 'Re-linking started in background. Results in server logs.' });
+
+  (async () => {
+    try {
+      const db = admin.firestore();
+
+      // Build a map: storagePath -> { applicationId, applicantName, permitType }
+      const appsSnap = await db.collection('applications').get();
+      const pathMap = {};
+      appsSnap.forEach(appDoc => {
+        const d = appDoc.data();
+        const docs = d.documents || d.uploadedDocuments || d.files || [];
+        docs.forEach(doc => {
+          const sp = doc.storagePath || doc.url || '';
+          if (!sp) return;
+          const key = sp.replace(/\//g, '_');
+          pathMap[key] = {
+            applicationId: appDoc.id,
+            applicantName: d.applicantName || null,
+            permitType:    d.permitType || d.documentType || null
+          };
+        });
+      });
+
+      // Patch every ocrIndex doc that matches
+      const ocrSnap = await db.collection('ocrIndex').get();
+      let patched = 0;
+      const batch = db.batch();
+      ocrSnap.forEach(ocrDoc => {
+        const info = pathMap[ocrDoc.id];
+        if (info) {
+          batch.update(ocrDoc.ref, info);
+          patched++;
+        }
+      });
+      await batch.commit();
+      console.log(`[OCR Relink] Patched ${patched} / ${ocrSnap.size} ocrIndex records.`);
+    } catch (err) {
+      console.error('[OCR Relink] Error:', err.message);
     }
   })();
 });

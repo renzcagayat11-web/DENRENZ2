@@ -2875,6 +2875,31 @@ document.getElementById('batchIndexBtn')?.addEventListener('click', async () => 
   }
 });
 
+// Re-link Names button — patches all ocrIndex docs with applicantName from their application
+document.getElementById('relinkNamesBtn')?.addEventListener('click', async () => {
+  const btn = document.getElementById('relinkNamesBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Fixing…';
+  try {
+    const token = await auth.currentUser.getIdToken();
+    const res = await fetch(`${API_BASE}/ocr/relink-all`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ Applicant names are being fixed in the background. Re-search in a few seconds.', 'success');
+    } else {
+      showToast('⚠️ ' + (data.error || 'Re-link failed.'), 'warning');
+    }
+  } catch (err) {
+    showToast('❌ Failed: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔗 Fix Names';
+  }
+});
+
 // Run OCR full-text search against the server index
 async function runOCRSearch() {
   const q = document.getElementById('searchApplication')?.value?.trim();
@@ -2926,7 +2951,7 @@ async function runOCRSearch() {
       const matchedApp = allApplications.find(a => a.id === r.applicationId);
       const applicantName = r.applicantName || matchedApp?.applicantName || '—';
       const permitType = r.permitType || matchedApp?.permitType || matchedApp?.documentType || '';
-      const appStatus = matchedApp?.status || '';
+      const appStatus = r.appStatus || matchedApp?.status || '';
       const statusBadge = appStatus === 'approved'
         ? '<span style="background:#dcfce7;color:#166534;padding:1px 8px;border-radius:10px;font-size:11px;">✅ Approved</span>'
         : appStatus === 'rejected'
