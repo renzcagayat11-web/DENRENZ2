@@ -637,6 +637,16 @@ app.post('/upload-file-to-storage', (req, res, next) => {
       original_filename: result.original_filename,
       contentType: result.contentType
     });
+
+    // Background OCR indexing — non-blocking, runs after response is sent
+    indexDocumentOCR({
+      storagePath: result.storagePath,
+      url: result.url,
+      fileName: result.original_filename,
+      contentType: result.contentType,
+      applicationId: req.body.applicationId || null
+    }).catch(err => console.warn('[OCR Index] Background index failed:', err.message));
+
   } catch (error) {
     console.error('Firebase Storage upload error:', error);
     res.status(500).json({ success: false, error: 'Failed to upload file', details: error.message });
@@ -1145,6 +1155,212 @@ app.post('/ocr/verify-document', verifyToken, multerOcr.single('file'), async (r
     console.error('Azure DI verify-document error:', err);
     res.status(500).json({ error: err.message || 'Document verification failed.' });
   }
+});
+
+// ─── OCR Full-Text Search Index ───────────────────────────────────────────────
+
+// Helper: run OCR on a file (by storagePath or URL) and save text to Firestore
+async function indexDocumentOCR({ storagePath, url, fileName, contentType, applicationId }) {
+  const endpoint = process.env.AZURE_DI_ENDPOINT;
+  const key      = process.env.AZURE_DI_KEY;
+  if (!endpoint || !key) return; // Azure not configured, skip silently
+
+  const isIndexable = contentType && (
+    contentType.startsWith('image/') ||
+    contentType === 'application/pdf'
+  );
+  if (!isIndexable) return;
+
+  console.log('[OCR Index] Indexing:', fileName, '|', storagePath);
+
+  try {
+    // Fetch the file buffer via the internal download helper
+    const { getFileBuffer } = require('./firebase-storage');
+    const buffer = await getFileBuffer(storagePath);
+
+    const client = new DocumentAnalysisClient(endpoint, new AzureKeyCredential(key));
+    const poller = await client.beginAnalyzeDocument('prebuilt-read', buffer);
+    const result = await poller.pollUntilDone();
+
+    const text = (result.content || '').trim();
+    if (!text) return;
+
+    const db = admin.firestore();
+
+    // Look up applicant info from the application document
+    let applicantName = null;
+    let permitType = null;
+    if (applicationId) {
+      try {
+        const appSnap = await db.collection('applications').doc(applicationId).get();
+        if (appSnap.exists) {
+          const appData = appSnap.data();
+          applicantName = appData.applicantName || null;
+          permitType = appData.permitType || appData.documentType || null;
+        }
+      } catch (e) { /* non-fatal */ }
+    }
+
+    await db.collection('ocrIndex').doc(storagePath.replace(/\//g, '_')).set({
+      storagePath,
+      url,
+      fileName,
+      contentType,
+      applicationId: applicationId || null,
+      applicantName,
+      permitType,
+      text,
+      textLower: text.toLowerCase(),
+      indexedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    console.log('[OCR Index] Indexed:', fileName, '— words:', text.split(/\s+/).length);
+  } catch (err) {
+    console.warn('[OCR Index] Failed to index', fileName, ':', err.message);
+  }
+}
+
+// POST /ocr/search — full-text keyword search across indexed documents
+app.get('/ocr/search', verifyToken, requireStaff, async (req, res) => {
+  const { q } = req.query;
+  if (!q || q.trim().length < 2) {
+    return res.status(400).json({ error: 'Query must be at least 2 characters.' });
+  }
+
+  try {
+    const db = admin.firestore();
+    const keyword = q.trim().toLowerCase();
+
+    // Fetch all indexed docs (Firestore doesn't support full-text natively — we filter in memory)
+    // For large datasets this should be replaced with Algolia/Typesense, but works well up to ~5000 docs
+    const snap = await db.collection('ocrIndex').get();
+
+    const matches = [];
+    snap.forEach(doc => {
+      const data = doc.data();
+      if (data.textLower && data.textLower.includes(keyword)) {
+        // Find surrounding context (snippet)
+        const idx = data.textLower.indexOf(keyword);
+        const start = Math.max(0, idx - 80);
+        const end   = Math.min(data.text.length, idx + keyword.length + 80);
+        const snippet = (start > 0 ? '…' : '') + data.text.slice(start, end) + (end < data.text.length ? '…' : '');
+
+        matches.push({
+          storagePath: data.storagePath,
+          url: data.url,
+          fileName: data.fileName,
+          applicationId: data.applicationId,
+          applicantName: data.applicantName || null,
+          permitType: data.permitType || null,
+          snippet,
+          indexedAt: data.indexedAt
+        });
+      }
+    });
+
+    // Enrich any results still missing applicantName by fetching from Firestore
+    const needsEnrich = matches.filter(m => !m.applicantName && m.applicationId);
+    if (needsEnrich.length > 0) {
+      await Promise.all(needsEnrich.map(async m => {
+        try {
+          const appSnap = await db.collection('applications').doc(m.applicationId).get();
+          if (appSnap.exists) {
+            const d = appSnap.data();
+            m.applicantName = d.applicantName || null;
+            m.permitType    = d.permitType || d.documentType || null;
+            // Back-fill ocrIndex so future searches are instant
+            await db.collection('ocrIndex').doc(m.storagePath.replace(/\//g, '_'))
+              .update({ applicantName: m.applicantName, permitType: m.permitType });
+          }
+        } catch (e) { /* non-fatal */ }
+      }));
+    }
+
+    res.json({ success: true, query: q, count: matches.length, results: matches });
+  } catch (err) {
+    console.error('[OCR Search] Error:', err);
+    res.status(500).json({ error: err.message || 'Search failed.' });
+  }
+});
+
+// POST /ocr/link-application — link uploaded storagePaths to their applicationId after Firestore save
+app.post('/ocr/link-application', async (req, res) => {
+  const { applicationId, applicantName, permitType, storagePaths } = req.body;
+  if (!applicationId || !Array.isArray(storagePaths) || storagePaths.length === 0) {
+    return res.status(400).json({ error: 'applicationId and storagePaths[] are required.' });
+  }
+
+  try {
+    const db = admin.firestore();
+    const updates = storagePaths.map(sp => {
+      const docId = sp.replace(/\//g, '_');
+      return db.collection('ocrIndex').doc(docId).set(
+        { applicationId, applicantName: applicantName || null, permitType: permitType || null },
+        { merge: true }
+      );
+    });
+    await Promise.all(updates);
+    res.json({ success: true, linked: storagePaths.length });
+  } catch (err) {
+    console.error('[OCR Link] Error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /ocr/batch-index — one-time scan of all existing application documents
+app.post('/ocr/batch-index', verifyToken, requireStaff, async (req, res) => {
+  const endpoint = process.env.AZURE_DI_ENDPOINT;
+  const key      = process.env.AZURE_DI_KEY;
+  if (!endpoint || !key) {
+    return res.status(503).json({ error: 'Azure Document Intelligence not configured.' });
+  }
+
+  // Respond immediately so the browser does not time out
+  res.json({ success: true, message: 'Batch OCR indexing started in background. Check server logs for progress.' });
+
+  // Run async in background
+  (async () => {
+    try {
+      const db = admin.firestore();
+      const snap = await db.collection('applications').get();
+      let queued = 0;
+      let indexed = 0;
+
+      for (const appDoc of snap.docs) {
+        const data = appDoc.data();
+        const docs = data.documents || data.uploadedDocuments || data.files || [];
+        for (const doc of docs) {
+          const storagePath = doc.storagePath || '';
+          const url         = doc.url || doc.data || '';
+          const fileName    = doc.name || 'document';
+          const contentType = doc.type || '';
+
+          if (!storagePath && !url) continue;
+
+          // Skip if already indexed
+          const docId = (storagePath || url).replace(/\//g, '_');
+          const existing = await db.collection('ocrIndex').doc(docId).get();
+          if (existing.exists) continue;
+
+          queued++;
+          await indexDocumentOCR({
+            storagePath: storagePath || url,
+            url,
+            fileName,
+            contentType,
+            applicationId: appDoc.id
+          });
+          indexed++;
+          // Small delay to avoid Azure rate limits
+          await new Promise(r => setTimeout(r, 800));
+        }
+      }
+
+      console.log(`[OCR Batch] Done. Queued: ${queued}, Indexed: ${indexed}`);
+    } catch (err) {
+      console.error('[OCR Batch] Error:', err.message);
+    }
+  })();
 });
 
 const PORT = process.env.PORT || 3000;

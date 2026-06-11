@@ -13361,6 +13361,21 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
       try {
         await updateDoc(appRef, updateData);
         console.log('✅ Application updated successfully with status: pending');
+
+        // Link any newly uploaded docs to this application in the OCR index (non-blocking)
+        const updatedPaths = allUploadedDocs.map(d => d.storagePath).filter(Boolean);
+        if (updatedPaths.length > 0) {
+          fetch(`${API_BASE}/ocr/link-application`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              applicationId: isEditing,
+              applicantName: applicationData.applicantName || null,
+              permitType: applicationData.permitType || applicationData.documentType || null,
+              storagePaths: updatedPaths
+            })
+          }).catch(e => console.warn('[OCR Link] Failed:', e.message));
+        }
         
         // Verify the update was successful
         const verifyDoc = await getDoc(appRef);
@@ -13386,6 +13401,21 @@ document.getElementById('newApplicationForm').addEventListener('submit', async (
       });
     } else {
       appRef = await addDoc(collection(db, 'applications'), applicationData);
+
+      // Link uploaded docs to this application in the OCR index (non-blocking)
+      const newStoragePaths = allUploadedDocs.map(d => d.storagePath).filter(Boolean);
+      if (newStoragePaths.length > 0) {
+        fetch(`${API_BASE}/ocr/link-application`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            applicationId: appRef.id,
+            applicantName: applicationData.applicantName || null,
+            permitType: applicationData.permitType || applicationData.documentType || null,
+            storagePaths: newStoragePaths
+          })
+        }).catch(e => console.warn('[OCR Link] Failed:', e.message));
+      }
 
       notifyTeamAboutApplication('application-submitted', {
         ...applicationData,

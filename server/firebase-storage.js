@@ -129,9 +129,21 @@ const deleteFile = async (storagePath) => {
   }
 };
 
+/**
+ * Download a file from Firebase Storage and return it as a Buffer
+ * @param {string} storagePath - The storage path (e.g. 'denr-permits/file.pdf')
+ * @returns {Promise<Buffer>}
+ */
+const getFileBuffer = async (storagePath) => {
+  const bucket = admin.storage().bucket();
+  const [buffer] = await bucket.file(storagePath).download();
+  return buffer;
+};
+
 module.exports = {
   uploadSingleMemory,
   uploadFromBase64,
   uploadBuffer,
-  deleteFile
+  deleteFile,
+  getFileBuffer
 };

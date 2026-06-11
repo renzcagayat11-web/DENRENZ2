@@ -262,16 +262,35 @@
                   <label for="filterDateTo">Date To</label>
                   <input type="date" id="filterDateTo">
                 </div>
-                <div class="filter-group">
+                <div class="filter-group" style="flex:2;min-width:260px;">
                   <label for="searchApplication">Search</label>
-                  <input type="text" id="searchApplication" placeholder="Search by ID or permit type...">
+                  <div style="display:flex;gap:6px;align-items:center;">
+                    <input type="text" id="searchApplication" placeholder="Search by ID, name, permit type..." style="flex:1;">
+                    <label title="Search inside document content using AI OCR" style="display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap;font-size:12px;font-weight:600;color:#7c3aed;user-select:none;">
+                      <input type="checkbox" id="ocrSearchToggle" style="accent-color:#7c3aed;width:14px;height:14px;">
+                      🔍 Doc Content
+                    </label>
+                  </div>
                 </div>
                 <div class="filter-actions">
                   <button class="btn-primary" id="applyFilterBtn">Filter</button>
                   <button class="btn-secondary" id="clearFilterBtn">Clear</button>
+                  <button class="btn-secondary" id="batchIndexBtn" title="Run OCR on all existing documents to enable content search" style="background:#f5f3ff;color:#7c3aed;border-color:#c4b5fd;">⚡ Index Docs</button>
                 </div>
               </div>
             </div>
+
+            <!-- OCR Search Results Panel (shown when Doc Content toggle is on) -->
+            <div id="ocrSearchPanel" style="display:none;margin:0 0 16px 0;background:#f5f3ff;border:1px solid #c4b5fd;border-radius:10px;padding:16px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <span style="font-weight:700;color:#5b21b6;font-size:14px;">🔍 Document Content Search Results</span>
+                <span id="ocrSearchStatus" style="font-size:12px;color:#7c3aed;"></span>
+              </div>
+              <div id="ocrSearchResults" style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
+                <p style="color:#9ca3af;font-size:13px;text-align:center;margin:16px 0;">Type a keyword above and enable "Doc Content" to search inside uploaded documents.</p>
+              </div>
+            </div>
+
             <div class="applications-table-container">
               <div class="table-header-info">
                 <p class="table-info">Showing <span id="visibleCount">5</span> of <span id="totalCount">0</span> applications</p>
@@ -647,106 +666,129 @@
 
           <!-- Records Section -->
           <section id="recordsSection" class="page-section">
-            <div class="section-header">
-              <h2 class="section-title">Records & Documents</h2>
+            <div class="section-header" style="margin-bottom:20px;">
+              <h2 class="section-title">📁 Records &amp; Documents</h2>
             </div>
-            <div class="records-grid">
-              <div class="record-card">
-                <div class="record-icon">📄</div>
-                <h3>Approved Permits</h3>
-                <p>View permits you have approved</p>
-                <button class="btn-secondary" onclick="showStaffApproved()">View All</button>
-              </div>
-              <div class="record-card">
-                <div class="record-icon">📁</div>
-                <h3>Archived Records</h3>
-                <p>View applications you have rejected</p>
-                <button class="btn-secondary" onclick="showStaffRejected()">View Archive</button>
-              </div>
-                          </div>
 
-            <!-- Staff Approved Table (hidden by default) -->
-            <div id="staffApprovedContainer" style="display:none; margin-top: 32px;">
-              <div class="section-header">
-                <h3 class="section-title">Approved Permits</h3>
-                <button class="btn-secondary" onclick="hideStaffApproved()">Close</button>
+            <!-- Records Stats Row -->
+            <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px;">
+              <div style="flex:1;min-width:140px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px;text-align:center;">
+                <div style="font-size:28px;font-weight:800;color:#16a34a;" id="recApprovedCount">0</div>
+                <div style="font-size:12px;color:#166534;font-weight:600;margin-top:2px;">✅ Approved Permits</div>
               </div>
-              <div class="applications-table-container">
-                <div class="table-wrapper">
-                  <div class="table-scroll-container">
-                    <table class="modern-data-table">
-                      <thead>
-                        <tr>
-                          <th>Application ID</th>
-                          <th>Applicant Name</th>
-                          <th>Permit Type</th>
-                          <th>Date Approved</th>
-                          <th>Pickup Date</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody id="staffApprovedTable">
-                        <!-- Approved permits will be loaded here -->
-                      </tbody>
-                    </table>
+              <div style="flex:1;min-width:140px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:16px;text-align:center;">
+                <div style="font-size:28px;font-weight:800;color:#dc2626;" id="recRejectedCount">0</div>
+                <div style="font-size:12px;color:#991b1b;font-weight:600;margin-top:2px;">❌ Rejected / Archived</div>
+              </div>
+              <div style="flex:1;min-width:140px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:16px;text-align:center;">
+                <div style="font-size:28px;font-weight:800;color:#2563eb;" id="recTotalCount">0</div>
+                <div style="font-size:12px;color:#1e40af;font-weight:600;margin-top:2px;">📋 Total Records</div>
+              </div>
+            </div>
+
+            <!-- Search & Filters -->
+            <div style="background:white;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:16px;">
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+                <div style="flex:2;min-width:220px;">
+                  <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Search Records</label>
+                  <div style="display:flex;gap:6px;align-items:center;">
+                    <input type="text" id="recordsSearchInput" placeholder="Name, ID, permit type, reason…" style="flex:1;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                    <label title="Search inside document content using AI OCR" style="display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap;font-size:12px;font-weight:600;color:#7c3aed;user-select:none;">
+                      <input type="checkbox" id="recordsOcrToggle" style="accent-color:#7c3aed;width:14px;height:14px;">
+                      🔍 Doc Content
+                    </label>
                   </div>
+                </div>
+                <div style="min-width:130px;">
+                  <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Permit Type</label>
+                  <select id="recordsTypeFilter" style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                    <option value="">All Types</option>
+                    <option value="Free Patent">Free Patent</option>
+                    <option value="Business Permit">Business Permit</option>
+                    <option value="Certificate of Land Ownership">Land Ownership</option>
+                    <option value="Environmental Compliance">Environmental</option>
+                  </select>
+                </div>
+                <div style="min-width:110px;">
+                  <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Date From</label>
+                  <input type="date" id="recordsDateFrom" style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                </div>
+                <div style="min-width:110px;">
+                  <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Date To</label>
+                  <input type="date" id="recordsDateTo" style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                </div>
+                <div style="display:flex;gap:6px;align-items:flex-end;">
+                  <button class="btn-secondary" onclick="clearRecordsFilters()" style="padding:8px 14px;font-size:13px;">Clear</button>
+                </div>
+              </div>
+
+              <!-- OCR Search Results for Records -->
+              <div id="recordsOcrPanel" style="display:none;margin-top:14px;background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;padding:14px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                  <span style="font-weight:700;color:#5b21b6;font-size:13px;">🔍 Document Content Search Results</span>
+                  <span id="recordsOcrStatus" style="font-size:12px;color:#7c3aed;"></span>
+                </div>
+                <div id="recordsOcrResults" style="max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
+                  <p style="color:#9ca3af;font-size:13px;text-align:center;margin:12px 0;">Type a keyword and enable "Doc Content" to search inside documents.</p>
                 </div>
               </div>
             </div>
 
-            <!-- Staff Rejected Table (hidden by default) -->
-            <div id="staffRejectedContainer" style="display:none; margin-top: 32px;">
-              <div class="section-header">
-                <h3 class="section-title">Archived Records (Rejected Applications)</h3>
-                <button class="btn-secondary" onclick="hideStaffRejected()">Close</button>
+            <!-- Tabs -->
+            <div style="display:flex;gap:0;border-bottom:2px solid #e5e7eb;margin-bottom:0;">
+              <button id="recTabApproved" onclick="switchRecordsTab('approved')"
+                style="padding:10px 24px;border:none;border-bottom:3px solid #16a34a;background:none;font-weight:700;font-size:14px;color:#16a34a;cursor:pointer;">
+                ✅ Approved Permits
+              </button>
+              <button id="recTabRejected" onclick="switchRecordsTab('rejected')"
+                style="padding:10px 24px;border:none;border-bottom:3px solid transparent;background:none;font-weight:600;font-size:14px;color:#9ca3af;cursor:pointer;">
+                ❌ Rejected / Archived
+              </button>
+            </div>
+
+            <!-- Approved Table -->
+            <div id="recApprovedPanel" style="background:white;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;">
+              <div style="padding:10px 14px;font-size:12px;color:#6b7280;border-bottom:1px solid #f3f4f6;">
+                Showing <span id="recApprovedShown">0</span> of <span id="recApprovedTotal">0</span> approved permits
               </div>
-              <div class="applications-table-container">
-                <div class="table-wrapper">
-                  <div class="table-scroll-container">
-                    <table class="modern-data-table">
-                      <thead>
-                        <tr>
-                          <th>Application ID</th>
-                          <th>Applicant Name</th>
-                          <th>Permit Type</th>
-                          <th>Date Rejected</th>
-                          <th>Rejection Reason</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody id="staffRejectedTable">
-                        <!-- Rejected applications will be loaded here -->
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+              <div class="table-scroll-container">
+                <table class="modern-data-table">
+                  <thead>
+                    <tr>
+                      <th>Application ID</th>
+                      <th>Applicant Name</th>
+                      <th>Permit Type</th>
+                      <th>Date Submitted</th>
+                      <th>Date Approved</th>
+                      <th>Pickup Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recApprovedBody"></tbody>
+                </table>
               </div>
             </div>
 
-            <!-- Staff Logs Table (hidden by default) -->
-            <div id="staffLogsContainer" style="display:none; margin-top: 32px;">
-              <div class="section-header">
-                <h3 class="section-title">System Activity Logs</h3>
-                <button class="btn-secondary" onclick="hideStaffLogs()">Close</button>
+            <!-- Rejected Table -->
+            <div id="recRejectedPanel" style="display:none;background:white;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;">
+              <div style="padding:10px 14px;font-size:12px;color:#6b7280;border-bottom:1px solid #f3f4f6;">
+                Showing <span id="recRejectedShown">0</span> of <span id="recRejectedTotal">0</span> rejected applications
               </div>
-              <div class="applications-table-container">
-                <div class="table-wrapper">
-                  <div class="table-scroll-container">
-                    <table class="modern-data-table">
-                      <thead>
-                        <tr>
-                          <th>Date & Time</th>
-                          <th>Action</th>
-                          <th>Application ID</th>
-                          <th>Details</th>
-                        </tr>
-                      </thead>
-                      <tbody id="staffLogsTable">
-                        <!-- System logs will be loaded here -->
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+              <div class="table-scroll-container">
+                <table class="modern-data-table">
+                  <thead>
+                    <tr>
+                      <th>Application ID</th>
+                      <th>Applicant Name</th>
+                      <th>Permit Type</th>
+                      <th>Date Submitted</th>
+                      <th>Date Rejected</th>
+                      <th>Reason</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recRejectedBody"></tbody>
+                </table>
               </div>
             </div>
           </section>

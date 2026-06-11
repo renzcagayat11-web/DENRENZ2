@@ -1189,7 +1189,7 @@ window.viewApplication = async function(appId) {
                     <span>☁️ Firebase</span>
                   </div>
                 </div>
-                <div style="display:flex;gap:6px;padding:8px 10px 10px;">
+                <div style="display:flex;gap:6px;padding:8px 10px 4px;">
                   <button onclick="window.open('/download-file?storagePath=${serverRef}&inline=1','_blank','noopener,noreferrer')" style="flex:1;padding:6px 0;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;" title="View in new tab">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                     View
@@ -1198,6 +1198,12 @@ window.viewApplication = async function(appId) {
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Download
                   </a>
+                </div>
+                <div style="padding:0 10px 10px;">
+                  <button onclick="scanDocumentOCR('/download-file?storagePath=${serverRef}&inline=1','${safeName}')" style="width:100%;padding:6px 0;background:#7c3aed;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;" title="Scan & extract text using AI OCR">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h.01M7 12h10M7 17h10"/></svg>
+                    Scan &amp; Extract Text
+                  </button>
                 </div>
               </div>
             `;
@@ -2817,7 +2823,161 @@ function loadSettingsData() {
 // Filter event listeners
 document.getElementById('applyFilterBtn')?.addEventListener('click', filterAndDisplayApplications);
 document.getElementById('clearFilterBtn')?.addEventListener('click', clearFilters);
-document.getElementById('searchApplication')?.addEventListener('input', filterAndDisplayApplications);
+
+// Search input — normal filter OR OCR content search depending on toggle
+let ocrSearchDebounceTimer = null;
+document.getElementById('searchApplication')?.addEventListener('input', () => {
+  const toggle = document.getElementById('ocrSearchToggle');
+  if (toggle && toggle.checked) {
+    clearTimeout(ocrSearchDebounceTimer);
+    ocrSearchDebounceTimer = setTimeout(runOCRSearch, 600);
+  } else {
+    filterAndDisplayApplications();
+  }
+});
+
+// OCR toggle — show/hide the results panel
+document.getElementById('ocrSearchToggle')?.addEventListener('change', (e) => {
+  const panel = document.getElementById('ocrSearchPanel');
+  if (!panel) return;
+  if (e.target.checked) {
+    panel.style.display = 'block';
+    const q = document.getElementById('searchApplication')?.value?.trim();
+    if (q && q.length >= 2) runOCRSearch();
+  } else {
+    panel.style.display = 'none';
+    filterAndDisplayApplications();
+  }
+});
+
+// Batch Index button
+document.getElementById('batchIndexBtn')?.addEventListener('click', async () => {
+  const btn = document.getElementById('batchIndexBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Indexing…';
+  try {
+    const token = await auth.currentUser.getIdToken();
+    const res = await fetch(`${API_BASE}/ocr/batch-index`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ Batch OCR indexing started! This runs in the background. Check again in a few minutes.', 'success');
+    } else {
+      showToast('⚠️ ' + (data.error || 'Batch index failed.'), 'warning');
+    }
+  } catch (err) {
+    showToast('❌ Failed to start batch index: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⚡ Index Docs';
+  }
+});
+
+// Run OCR full-text search against the server index
+async function runOCRSearch() {
+  const q = document.getElementById('searchApplication')?.value?.trim();
+  const resultsDiv = document.getElementById('ocrSearchResults');
+  const statusSpan = document.getElementById('ocrSearchStatus');
+  if (!resultsDiv) return;
+
+  if (!q || q.length < 2) {
+    resultsDiv.innerHTML = '<p style="color:#9ca3af;font-size:13px;text-align:center;margin:16px 0;">Type a keyword above and enable "Doc Content" to search inside uploaded documents.</p>';
+    if (statusSpan) statusSpan.textContent = '';
+    return;
+  }
+
+  resultsDiv.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:20px;color:#7c3aed;">
+      <div style="width:20px;height:20px;border:2px solid #c4b5fd;border-top-color:#7c3aed;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+      Searching document contents…
+    </div>`;
+  if (statusSpan) statusSpan.textContent = 'Searching…';
+
+  try {
+    const token = await auth.currentUser.getIdToken();
+    const res = await fetch(`${API_BASE}/ocr/search?q=${encodeURIComponent(q)}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || `Search failed (${res.status})`);
+    }
+
+    if (statusSpan) statusSpan.textContent = `${data.count} match${data.count !== 1 ? 'es' : ''} found`;
+
+    if (data.count === 0) {
+      resultsDiv.innerHTML = `
+        <div style="text-align:center;padding:20px;color:#6b7280;">
+          <div style="font-size:32px;margin-bottom:8px;">🔎</div>
+          <p style="margin:0;font-size:13px;">No documents contain "<strong>${escapeHtml(q)}</strong>"</p>
+          <p style="margin:8px 0 0;font-size:12px;color:#9ca3af;">Try clicking ⚡ Index Docs if documents haven't been indexed yet.</p>
+        </div>`;
+      return;
+    }
+
+    resultsDiv.innerHTML = data.results.map(r => {
+      const highlight = r.snippet.replace(
+        new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'),
+        m => `<mark style="background:#fde68a;color:#92400e;padding:1px 2px;border-radius:2px;">${m}</mark>`
+      );
+      const matchedApp = allApplications.find(a => a.id === r.applicationId);
+      const applicantName = r.applicantName || matchedApp?.applicantName || '—';
+      const permitType = r.permitType || matchedApp?.permitType || matchedApp?.documentType || '';
+      const appStatus = matchedApp?.status || '';
+      const statusBadge = appStatus === 'approved'
+        ? '<span style="background:#dcfce7;color:#166534;padding:1px 8px;border-radius:10px;font-size:11px;">✅ Approved</span>'
+        : appStatus === 'rejected'
+          ? '<span style="background:#fee2e2;color:#991b1b;padding:1px 8px;border-radius:10px;font-size:11px;">❌ Rejected</span>'
+          : appStatus === 'pending'
+            ? '<span style="background:#fef3c7;color:#92400e;padding:1px 8px;border-radius:10px;font-size:11px;">⏳ Pending</span>'
+            : '';
+      return `
+        <div style="background:white;border:1px solid #e9d5ff;border-radius:8px;padding:12px;cursor:pointer;"
+             onclick="openApplicationFromOCR('${r.applicationId}')"
+             title="Click to open application">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+            <span style="font-weight:600;font-size:13px;color:#5b21b6;">📄 ${escapeHtml(r.fileName)}</span>
+            ${statusBadge}
+          </div>
+          <div style="display:flex;gap:12px;margin-bottom:6px;font-size:12px;flex-wrap:wrap;">
+            <span><strong style="color:#374151;">👤 Applicant:</strong> <span style="color:#1d4ed8;font-weight:600;">${escapeHtml(applicantName)}</span></span>
+            ${permitType ? `<span><strong style="color:#374151;">📋 Permit:</strong> <span style="color:#6b7280;">${escapeHtml(permitType)}</span></span>` : ''}
+            ${r.applicationId ? `<span><strong style="color:#374151;">ID:</strong> <span style="font-family:monospace;color:#6b7280;">${r.applicationId.slice(0,8)}…</span></span>` : ''}
+          </div>
+          <div style="font-size:12px;color:#374151;line-height:1.6;font-style:italic;background:#faf5ff;border-left:3px solid #c4b5fd;padding:6px 8px;border-radius:0 4px 4px 0;">"${highlight}"</div>
+          <div style="margin-top:8px;display:flex;gap:6px;">
+            <button onclick="event.stopPropagation();scanDocumentOCR('/download-file?storagePath=${encodeURIComponent(r.storagePath)}&inline=1','${escapeHtml(r.fileName).replace(/'/g,"\\'")}')"
+              style="padding:4px 10px;background:#7c3aed;color:white;border:none;border-radius:5px;font-size:11px;cursor:pointer;">
+              🔍 View Extracted Text
+            </button>
+            <a href="/download-file?storagePath=${encodeURIComponent(r.storagePath)}&inline=1" target="_blank"
+              style="padding:4px 10px;background:#2563eb;color:white;border-radius:5px;font-size:11px;text-decoration:none;">
+              👁 View Doc
+            </a>
+          </div>
+        </div>`;
+    }).join('');
+
+  } catch (err) {
+    console.error('[OCR Search]', err);
+    if (statusSpan) statusSpan.textContent = 'Error';
+    resultsDiv.innerHTML = `<p style="color:#dc2626;font-size:13px;text-align:center;padding:16px;">❌ ${escapeHtml(err.message)}</p>`;
+  }
+}
+
+// Open the application detail modal from an OCR search result
+window.openApplicationFromOCR = function(applicationId) {
+  if (!applicationId) return;
+  const app = allApplications.find(a => a.id === applicationId || a.applicationId === applicationId);
+  if (app) {
+    openApplicationDetail(app);
+  } else {
+    showToast('Application not loaded yet. Please refresh the list.', 'warning');
+  }
+};
 
 // Clear filters function
 function clearFilters() {
@@ -2826,8 +2986,290 @@ function clearFilters() {
   document.getElementById('filterDateFrom').value = '';
   document.getElementById('filterDateTo').value = '';
   document.getElementById('searchApplication').value = '';
+  document.getElementById('ocrSearchToggle').checked = false;
+  document.getElementById('ocrSearchPanel').style.display = 'none';
   filterAndDisplayApplications();
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RECORDS PAGE — Approved & Rejected with Smart Search
+// ═══════════════════════════════════════════════════════════════════════════
+
+let currentRecordsTab = 'approved';
+
+// Called whenever the Records section becomes active or data changes
+function renderRecordsPage() {
+  const approved = allApplications.filter(a => a.status === 'approved');
+  const rejected = allApplications.filter(a => a.status === 'rejected');
+
+  // Update stats
+  const el = id => document.getElementById(id);
+  if (el('recApprovedCount')) el('recApprovedCount').textContent = approved.length;
+  if (el('recRejectedCount')) el('recRejectedCount').textContent = rejected.length;
+  if (el('recTotalCount'))    el('recTotalCount').textContent    = approved.length + rejected.length;
+
+  applyRecordsFilters();
+}
+
+// Switch between Approved / Rejected tabs
+window.switchRecordsTab = function(tab) {
+  currentRecordsTab = tab;
+  const approvedPanel  = document.getElementById('recApprovedPanel');
+  const rejectedPanel  = document.getElementById('recRejectedPanel');
+  const tabApproved    = document.getElementById('recTabApproved');
+  const tabRejected    = document.getElementById('recTabRejected');
+
+  if (tab === 'approved') {
+    approvedPanel.style.display  = '';
+    rejectedPanel.style.display  = 'none';
+    tabApproved.style.color       = '#16a34a';
+    tabApproved.style.fontWeight  = '700';
+    tabApproved.style.borderBottom = '3px solid #16a34a';
+    tabRejected.style.color       = '#9ca3af';
+    tabRejected.style.fontWeight  = '600';
+    tabRejected.style.borderBottom = '3px solid transparent';
+  } else {
+    approvedPanel.style.display  = 'none';
+    rejectedPanel.style.display  = '';
+    tabRejected.style.color       = '#dc2626';
+    tabRejected.style.fontWeight  = '700';
+    tabRejected.style.borderBottom = '3px solid #dc2626';
+    tabApproved.style.color       = '#9ca3af';
+    tabApproved.style.fontWeight  = '600';
+    tabApproved.style.borderBottom = '3px solid transparent';
+  }
+};
+
+// Apply filters and re-render both tables
+function applyRecordsFilters() {
+  const q        = (document.getElementById('recordsSearchInput')?.value || '').toLowerCase().trim();
+  const typeVal  = (document.getElementById('recordsTypeFilter')?.value || '').toLowerCase();
+  const dateFrom = document.getElementById('recordsDateFrom')?.value;
+  const dateTo   = document.getElementById('recordsDateTo')?.value;
+
+  const filter = (apps) => apps.filter(app => {
+    // Keyword match
+    if (q) {
+      const haystack = [
+        app.applicationId, app.id, app.applicantName,
+        app.permitType, app.documentType, app.rejectionReason,
+        app.rejectReason, app.comments
+      ].map(v => (v || '').toLowerCase()).join(' ');
+      if (!haystack.includes(q)) return false;
+    }
+    // Permit type
+    if (typeVal && !(app.permitType || app.documentType || '').toLowerCase().includes(typeVal)) return false;
+    // Date range — use createdAt
+    if (dateFrom || dateTo) {
+      const raw = app.createdAt;
+      if (!raw) return false;
+      const d = raw.toDate ? raw.toDate() : new Date(raw);
+      if (dateFrom && d < new Date(dateFrom)) return false;
+      if (dateTo   && d > new Date(dateTo + 'T23:59:59')) return false;
+    }
+    return true;
+  });
+
+  const approved = filter(allApplications.filter(a => a.status === 'approved'));
+  const rejected = filter(allApplications.filter(a => a.status === 'rejected'));
+
+  renderRecordsTable('approved', approved);
+  renderRecordsTable('rejected', rejected);
+}
+
+function renderRecordsTable(type, apps) {
+  const bodyId   = type === 'approved' ? 'recApprovedBody'  : 'recRejectedBody';
+  const shownId  = type === 'approved' ? 'recApprovedShown' : 'recRejectedShown';
+  const totalId  = type === 'approved' ? 'recApprovedTotal' : 'recRejectedTotal';
+  const tbody    = document.getElementById(bodyId);
+  if (!tbody) return;
+
+  const allOfType = allApplications.filter(a => a.status === type);
+  document.getElementById(shownId).textContent = apps.length;
+  document.getElementById(totalId).textContent = allOfType.length;
+
+  if (apps.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;color:#9ca3af;">No ${type} records found.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = apps.map(app => {
+    const id       = app.applicationId || app.id?.slice(0, 8) || '—';
+    const name     = app.applicantName || '—';
+    const permit   = app.permitType || app.documentType || '—';
+    const created  = formatRecordDate(app.createdAt);
+
+    if (type === 'approved') {
+      const approvedDate = formatRecordDate(app.approvedAt || app.reviewedAt);
+      const pickup = app.pickupSchedule?.date || '—';
+      return `<tr>
+        <td><span style="font-family:monospace;font-size:12px;">${escapeHtml(id)}</span></td>
+        <td>${escapeHtml(name)}</td>
+        <td><span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:10px;font-size:12px;">${escapeHtml(permit)}</span></td>
+        <td style="font-size:12px;color:#6b7280;">${created}</td>
+        <td style="font-size:12px;color:#16a34a;font-weight:600;">${approvedDate}</td>
+        <td style="font-size:12px;">${pickup !== '—' ? `<span style="background:#eff6ff;color:#2563eb;padding:2px 8px;border-radius:10px;">${pickup}</span>` : '—'}</td>
+        <td>
+          <button onclick="viewApplication('${app.id}')" style="padding:4px 12px;background:#2563eb;color:white;border:none;border-radius:5px;font-size:12px;cursor:pointer;">View</button>
+        </td>
+      </tr>`;
+    } else {
+      const rejectedDate = formatRecordDate(app.rejectedAt || app.reviewedAt);
+      const reason = app.rejectionReason || app.rejectReason || app.comments || '—';
+      const reasonShort = reason.length > 50 ? reason.slice(0, 50) + '…' : reason;
+      return `<tr>
+        <td><span style="font-family:monospace;font-size:12px;">${escapeHtml(id)}</span></td>
+        <td>${escapeHtml(name)}</td>
+        <td><span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:10px;font-size:12px;">${escapeHtml(permit)}</span></td>
+        <td style="font-size:12px;color:#6b7280;">${created}</td>
+        <td style="font-size:12px;color:#dc2626;font-weight:600;">${rejectedDate}</td>
+        <td style="font-size:12px;color:#6b7280;" title="${escapeHtml(reason)}">${escapeHtml(reasonShort)}</td>
+        <td>
+          <button onclick="viewApplication('${app.id}')" style="padding:4px 12px;background:#6b7280;color:white;border:none;border-radius:5px;font-size:12px;cursor:pointer;">View</button>
+        </td>
+      </tr>`;
+    }
+  }).join('');
+}
+
+function formatRecordDate(val) {
+  if (!val) return '—';
+  try {
+    const d = val.toDate ? val.toDate() : new Date(val);
+    return d.toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' });
+  } catch { return '—'; }
+}
+
+window.clearRecordsFilters = function() {
+  const el = id => document.getElementById(id);
+  if (el('recordsSearchInput')) el('recordsSearchInput').value = '';
+  if (el('recordsTypeFilter'))  el('recordsTypeFilter').value  = '';
+  if (el('recordsDateFrom'))    el('recordsDateFrom').value    = '';
+  if (el('recordsDateTo'))      el('recordsDateTo').value      = '';
+  if (el('recordsOcrToggle')) { el('recordsOcrToggle').checked = false; }
+  if (el('recordsOcrPanel'))    el('recordsOcrPanel').style.display = 'none';
+  applyRecordsFilters();
+};
+
+// Wire up filter inputs
+document.getElementById('recordsSearchInput')?.addEventListener('input', () => {
+  const ocrOn = document.getElementById('recordsOcrToggle')?.checked;
+  if (ocrOn) {
+    clearTimeout(window._recOcrTimer);
+    window._recOcrTimer = setTimeout(runRecordsOCRSearch, 600);
+  } else {
+    applyRecordsFilters();
+  }
+});
+document.getElementById('recordsTypeFilter')?.addEventListener('change', applyRecordsFilters);
+document.getElementById('recordsDateFrom')?.addEventListener('change', applyRecordsFilters);
+document.getElementById('recordsDateTo')?.addEventListener('change', applyRecordsFilters);
+
+// OCR toggle for Records
+document.getElementById('recordsOcrToggle')?.addEventListener('change', (e) => {
+  const panel = document.getElementById('recordsOcrPanel');
+  if (!panel) return;
+  if (e.target.checked) {
+    panel.style.display = 'block';
+    const q = document.getElementById('recordsSearchInput')?.value?.trim();
+    if (q && q.length >= 2) runRecordsOCRSearch();
+  } else {
+    panel.style.display = 'none';
+    applyRecordsFilters();
+  }
+});
+
+// OCR search for the Records page (reuses the same /ocr/search endpoint)
+async function runRecordsOCRSearch() {
+  const q          = document.getElementById('recordsSearchInput')?.value?.trim();
+  const resultsDiv = document.getElementById('recordsOcrResults');
+  const statusSpan = document.getElementById('recordsOcrStatus');
+  if (!resultsDiv) return;
+
+  if (!q || q.length < 2) {
+    resultsDiv.innerHTML = '<p style="color:#9ca3af;font-size:13px;text-align:center;margin:12px 0;">Type a keyword and enable "Doc Content" to search inside documents.</p>';
+    if (statusSpan) statusSpan.textContent = '';
+    return;
+  }
+
+  resultsDiv.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:16px;color:#7c3aed;">
+    <div style="width:18px;height:18px;border:2px solid #c4b5fd;border-top-color:#7c3aed;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+    Searching document contents…</div>`;
+  if (statusSpan) statusSpan.textContent = 'Searching…';
+
+  try {
+    const token = await auth.currentUser.getIdToken();
+    const res   = await fetch(`${API_BASE}/ocr/search?q=${encodeURIComponent(q)}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `Search failed (${res.status})`);
+
+    // Filter results to only show approved/rejected applications
+    const recordAppIds = new Set(
+      allApplications.filter(a => a.status === 'approved' || a.status === 'rejected').map(a => a.id)
+    );
+    const filtered = data.results.filter(r => !r.applicationId || recordAppIds.has(r.applicationId));
+
+    if (statusSpan) statusSpan.textContent = `${filtered.length} match${filtered.length !== 1 ? 'es' : ''} in records`;
+
+    if (filtered.length === 0) {
+      resultsDiv.innerHTML = `<div style="text-align:center;padding:16px;color:#6b7280;">
+        <div style="font-size:28px;margin-bottom:6px;">🔎</div>
+        <p style="margin:0;font-size:13px;">No records contain "<strong>${escapeHtml(q)}</strong>"</p>
+        <p style="margin:6px 0 0;font-size:12px;color:#9ca3af;">Try ⚡ Index Docs on the Applications page first.</p>
+      </div>`;
+      return;
+    }
+
+    resultsDiv.innerHTML = filtered.map(r => {
+      const highlight = r.snippet.replace(
+        new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'),
+        m => `<mark style="background:#fde68a;color:#92400e;padding:1px 2px;border-radius:2px;">${m}</mark>`
+      );
+      const app = allApplications.find(a => a.id === r.applicationId);
+      const status = app?.status || '';
+      const applicantName = r.applicantName || app?.applicantName || '—';
+      const permitType = r.permitType || app?.permitType || app?.documentType || '';
+      const statusBadge = status === 'approved'
+        ? '<span style="background:#dcfce7;color:#166534;padding:1px 8px;border-radius:10px;font-size:11px;">✅ Approved</span>'
+        : status === 'rejected'
+          ? '<span style="background:#fee2e2;color:#991b1b;padding:1px 8px;border-radius:10px;font-size:11px;">❌ Rejected</span>'
+          : '<span style="background:#fef3c7;color:#92400e;padding:1px 8px;border-radius:10px;font-size:11px;">⏳ Pending</span>';
+      return `<div style="background:white;border:1px solid #e9d5ff;border-radius:8px;padding:10px;cursor:pointer;"
+           onclick="viewApplication('${r.applicationId}')" title="Click to open application">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+          <span style="font-weight:600;font-size:12px;color:#5b21b6;">📄 ${escapeHtml(r.fileName)}</span>
+          <div style="display:flex;gap:4px;align-items:center;">
+            ${statusBadge}
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-bottom:6px;font-size:12px;">
+          <span><strong style="color:#374151;">👤 Applicant:</strong> <span style="color:#1d4ed8;font-weight:600;">${escapeHtml(applicantName)}</span></span>
+          ${permitType ? `<span><strong style="color:#374151;">📋 Permit:</strong> <span style="color:#6b7280;">${escapeHtml(permitType)}</span></span>` : ''}
+          ${r.applicationId ? `<span><strong style="color:#374151;">ID:</strong> <span style="font-family:monospace;color:#6b7280;">${r.applicationId.slice(0,8)}…</span></span>` : ''}
+        </div>
+        <div style="font-size:12px;color:#374151;line-height:1.5;font-style:italic;background:#faf5ff;border-left:3px solid #c4b5fd;padding:6px 8px;border-radius:0 4px 4px 0;">"${highlight}"</div>
+        <div style="margin-top:6px;display:flex;gap:6px;">
+          <button onclick="event.stopPropagation();scanDocumentOCR('/download-file?storagePath=${encodeURIComponent(r.storagePath)}&inline=1','${escapeHtml(r.fileName).replace(/'/g,"\\'")}')"
+            style="padding:3px 10px;background:#7c3aed;color:white;border:none;border-radius:5px;font-size:11px;cursor:pointer;">🔍 View Text</button>
+          <a href="/download-file?storagePath=${encodeURIComponent(r.storagePath)}&inline=1" target="_blank"
+            style="padding:3px 10px;background:#2563eb;color:white;border-radius:5px;font-size:11px;text-decoration:none;">👁 View Doc</a>
+        </div>
+      </div>`;
+    }).join('');
+
+  } catch (err) {
+    console.error('[Records OCR Search]', err);
+    if (statusSpan) statusSpan.textContent = 'Error';
+    resultsDiv.innerHTML = `<p style="color:#dc2626;font-size:13px;text-align:center;padding:12px;">❌ ${escapeHtml(err.message)}</p>`;
+  }
+}
+
+// Refresh records page when the section becomes visible
+document.querySelectorAll('[data-section="recordsSection"]').forEach(link => {
+  link.addEventListener('click', () => setTimeout(renderRecordsPage, 100));
+});
 
 // Logout
 const logoutBtn = document.getElementById('logoutBtn');
