@@ -2850,20 +2850,28 @@ document.getElementById('ocrSearchToggle')?.addEventListener('change', (e) => {
   }
 });
 
-// Batch Index button
-document.getElementById('batchIndexBtn')?.addEventListener('click', async () => {
+// Batch Index button — normal click = index new docs only, shift+click = force re-index all + refresh names
+document.getElementById('batchIndexBtn')?.addEventListener('click', async (e) => {
   const btn = document.getElementById('batchIndexBtn');
+  const force = e.shiftKey;
   btn.disabled = true;
-  btn.textContent = '⏳ Indexing…';
+  btn.textContent = force ? '⏳ Re-linking names…' : '⏳ Indexing…';
+  if (force) btn.title = 'Force re-indexing all docs and refreshing applicant names…';
   try {
     const token = await auth.currentUser.getIdToken();
-    const res = await fetch(`${API_BASE}/ocr/batch-index`, {
+    const url = force ? `${API_BASE}/ocr/batch-index?force=true` : `${API_BASE}/ocr/batch-index`;
+    const res = await fetch(url, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` }
     });
     const data = await res.json();
     if (data.success) {
-      showToast('✅ Batch OCR indexing started! This runs in the background. Check again in a few minutes.', 'success');
+      showToast(
+        force
+          ? '✅ Force re-index started! All applicant names will be refreshed in the background.'
+          : '✅ Batch OCR indexing started! New documents are being indexed in the background.',
+        'success'
+      );
     } else {
       showToast('⚠️ ' + (data.error || 'Batch index failed.'), 'warning');
     }
@@ -2872,33 +2880,10 @@ document.getElementById('batchIndexBtn')?.addEventListener('click', async () => 
   } finally {
     btn.disabled = false;
     btn.textContent = '⚡ Index Docs';
+    btn.title = 'Index new docs. Shift+click to force refresh all applicant names.';
   }
 });
 
-// Re-link Names button — patches all ocrIndex docs with applicantName from their application
-document.getElementById('relinkNamesBtn')?.addEventListener('click', async () => {
-  const btn = document.getElementById('relinkNamesBtn');
-  btn.disabled = true;
-  btn.textContent = '⏳ Fixing…';
-  try {
-    const token = await auth.currentUser.getIdToken();
-    const res = await fetch(`${API_BASE}/ocr/relink-all`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const data = await res.json();
-    if (data.success) {
-      showToast('✅ Applicant names are being fixed in the background. Re-search in a few seconds.', 'success');
-    } else {
-      showToast('⚠️ ' + (data.error || 'Re-link failed.'), 'warning');
-    }
-  } catch (err) {
-    showToast('❌ Failed: ' + err.message, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '🔗 Fix Names';
-  }
-});
 
 // Run OCR full-text search against the server index
 async function runOCRSearch() {
@@ -3885,8 +3870,11 @@ function displayOCRResults(result, docUrl, docName) {
       <!-- Left: Document Preview -->
       <div style="background: #f9fafb; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; max-height: 70vh; overflow: hidden;">
         <h4 style="margin: 0 0 12px 0; color: #374151; font-size: 14px; font-weight: 600;">📄 Original Document</h4>
-        <div style="flex: 1; overflow: auto; border-radius: 8px; border: 1px solid #e5e7eb; background: white;">
-          <img src="${docUrl}" alt="${docName}" style="width: 100%; height: auto; display: block;" />
+        <div style="flex: 1; overflow: auto; border-radius: 8px; border: 1px solid #e5e7eb; background: white; min-height: 300px;">
+          ${docName.toLowerCase().endsWith('.pdf') || (docUrl && docUrl.includes('.pdf'))
+            ? `<iframe src="${docUrl}" style="width:100%;height:100%;min-height:340px;border:none;border-radius:8px;" title="${docName}"></iframe>`
+            : `<img src="${docUrl}" alt="${docName}" style="width:100%;height:auto;display:block;" />`
+          }
         </div>
         <div style="margin-top: 12px; display: flex; gap: 8px;">
           <a href="${docUrl}" target="_blank" style="flex: 1; padding: 8px; background: #3b82f6; color: white; text-decoration: none; border-radius: 6px; text-align: center; font-size: 12px; font-weight: 500;">👁️ View Full Size</a>

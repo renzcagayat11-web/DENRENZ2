@@ -1349,6 +1349,8 @@ app.post('/ocr/batch-index', verifyToken, requireStaff, async (req, res) => {
   // Respond immediately so the browser does not time out
   res.json({ success: true, message: 'Batch OCR indexing started in background. Check server logs for progress.' });
 
+  const force = req.query.force === 'true' || req.body?.force === true;
+
   // Run async in background
   (async () => {
     try {
@@ -1356,10 +1358,24 @@ app.post('/ocr/batch-index', verifyToken, requireStaff, async (req, res) => {
       const snap = await db.collection('applications').get();
       let queued = 0;
       let indexed = 0;
+      let relinked = 0;
 
       for (const appDoc of snap.docs) {
         const data = appDoc.data();
         const docs = data.documents || data.uploadedDocuments || data.files || [];
+
+        // Resolve applicant name for this application
+        let applicantName = data.applicantName || null;
+        if (!applicantName && data.applicantUid) {
+          try {
+            const userSnap = await db.collection('users').doc(data.applicantUid).get();
+            if (userSnap.exists) {
+              const u = userSnap.data();
+              applicantName = [u.firstName, u.middleName, u.surname].filter(Boolean).join(' ') || null;
+            }
+          } catch (e) { /* non-fatal */ }
+        }
+
         for (const doc of docs) {
           const storagePath = doc.storagePath || '';
           const url         = doc.url || doc.data || '';
@@ -1368,10 +1384,21 @@ app.post('/ocr/batch-index', verifyToken, requireStaff, async (req, res) => {
 
           if (!storagePath && !url) continue;
 
-          // Skip if already indexed
           const docId = (storagePath || url).replace(/\//g, '_');
           const existing = await db.collection('ocrIndex').doc(docId).get();
-          if (existing.exists) continue;
+
+          if (existing.exists) {
+            if (force) {
+              // Force mode: patch applicantName + applicationId even if already indexed
+              await db.collection('ocrIndex').doc(docId).update({
+                applicationId: appDoc.id,
+                applicantName: applicantName || null,
+                permitType: data.permitType || data.documentType || null
+              });
+              relinked++;
+            }
+            continue;
+          }
 
           queued++;
           await indexDocumentOCR({
@@ -1387,7 +1414,7 @@ app.post('/ocr/batch-index', verifyToken, requireStaff, async (req, res) => {
         }
       }
 
-      console.log(`[OCR Batch] Done. Queued: ${queued}, Indexed: ${indexed}`);
+      console.log(`[OCR Batch] Done. Queued: ${queued}, Indexed: ${indexed}, Re-linked: ${relinked}`);
     } catch (err) {
       console.error('[OCR Batch] Error:', err.message);
     }
