@@ -1098,7 +1098,9 @@ window.viewApplication = async function(appId) {
 
     <!-- Documents Section -->
     ${(() => {
-      const hasNoDocs = !currentApplication.documents || currentApplication.documents.length === 0;
+      // Check all possible document field names (documents, uploadedDocuments, files)
+      const docsArray = currentApplication.documents || currentApplication.uploadedDocuments || currentApplication.files || [];
+      const hasNoDocs = !docsArray || docsArray.length === 0;
       const isFailed = currentApplication.uploadStatus === 'failed';
       const isUploading = currentApplication.uploadStatus === 'uploading';
       if (!hasNoDocs) return '';
@@ -1123,14 +1125,17 @@ window.viewApplication = async function(appId) {
       if (!isUploading) return '';
       return '';
     })()}
-    ${currentApplication.documents && currentApplication.documents.length > 0 ? `
+    ${(() => {
+      // Check all possible document field names
+      const docsArray = currentApplication.documents || currentApplication.uploadedDocuments || currentApplication.files || [];
+      return docsArray && docsArray.length > 0 ? `
     <div class="detail-section">
       <div class="section-header">
-        <h3 class="section-title">📁 Uploaded Documents (${currentApplication.documents.length})</h3>
+        <h3 class="section-title">📁 Uploaded Documents (${docsArray.length})</h3>
       </div>
       <div class="section-content">
         <div class="documents-grid">
-          ${currentApplication.documents.map((doc, index) => {
+          ${docsArray.map((doc, index) => {
             const originalName = doc.name || `Document ${index + 1}`;
             const docName = getCleanDocumentName(originalName, doc.type, index);
             const docUrl  = doc.url  || doc.data || '';
@@ -1200,7 +1205,8 @@ window.viewApplication = async function(appId) {
         </div>
       </div>
     </div>
-    ` : ''}
+    ` : '';
+    })()}
 
     <!-- Resubmit History Section -->
     ${(currentApplication.revisionRequestedAt || currentApplication.revisionSubmittedAt) ? `
@@ -1736,6 +1742,13 @@ document.getElementById('documentsModal').addEventListener('click', (e) => {
 // Documents modal close button
 document.getElementById('closeDocumentsModal').addEventListener('click', () => {
   document.getElementById('documentsModal').style.display = 'none';
+});
+
+// OCR Result modal - close when clicking outside
+document.getElementById('ocrResultModal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'ocrResultModal') {
+    closeOCRModal();
+  }
 });
 
 // Under review modal event listeners
@@ -3162,10 +3175,13 @@ window.viewDocuments = async function(appId) {
       </style>
     `;
     
-    if (application.documents && application.documents.length > 0) {
+    // Check all possible document field names (documents, uploadedDocuments, files)
+    const docsArray = application.documents || application.uploadedDocuments || application.files || [];
+    
+    if (docsArray && docsArray.length > 0) {
       documentsHTML = css + '<div class="documents-grid">';
       
-      application.documents.forEach((doc, index) => {
+      docsArray.forEach((doc, index) => {
         // Generate user-friendly name instead of technical file name
         const originalName = doc.name || `Document ${index + 1}`;
         const docName = getCleanDocumentName(originalName, doc.type, index);
@@ -3237,6 +3253,12 @@ window.viewDocuments = async function(appId) {
                   📥 Download
                 </a>
               ` : ''}
+              ${isImage ? `
+                <button onclick="scanDocumentOCR('${downloadUrl}', '${docName.replace(/'/g, "\\'")}')" class="btn-ocr" style="padding: 8px 16px; margin: 4px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;" title="Extract text from image using OCR">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h20M2 12l5-5m-5 5 5 5M22 12l-5-5m5 5-5 5"/></svg>
+                  🔍 OCR Scan
+                </button>
+              ` : ''}
               ${isPDF ? '<span style="color: #059669; font-size: 11px; display: block; margin-top: 4px;">• Auto-download enabled</span>' : ''}
               <span style="color: #059669; font-size: 11px; display: block; margin-top: 2px;">☁️ Firebase hosted</span>
             </div>
@@ -3267,6 +3289,213 @@ window.viewDocuments = async function(appId) {
     `;
   }
 };
+
+// ═══════════════════════════════════════════════════════════════════════════
+// STAFF DOCUMENT OCR - Scan customer documents directly
+// ═══════════════════════════════════════════════════════════════════════════
+
+let currentOCRAbortController = null;
+
+// Scan document using OCR (for staff viewing customer documents)
+window.scanDocumentOCR = async function(docUrl, docName) {
+  const modal = document.getElementById('ocrResultModal');
+  const contentDiv = document.getElementById('ocrResultContent');
+  const titleSpan = document.getElementById('ocrDocTitle');
+  
+  if (!modal || !contentDiv) {
+    console.error('[Staff OCR] Modal elements not found');
+    alert('OCR viewer not initialized. Please refresh the page.');
+    return;
+  }
+  
+  // Show modal with loading state
+  titleSpan.textContent = docName;
+  contentDiv.innerHTML = `
+    <div style="text-align: center; padding: 40px 20px;">
+      <div style="display: inline-block; width: 50px; height: 50px; border: 4px solid #e5e7eb; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+      <h3 style="margin: 0 0 8px 0; color: #1f2937; font-size: 18px;">🔍 Scanning Document...</h3>
+      <p style="margin: 0; color: #6b7280; font-size: 14px;">Extracting text using AI-powered OCR</p>
+      <p style="margin: 8px 0 0 0; color: #9ca3af; font-size: 12px;">This may take a few seconds</p>
+    </div>
+  `;
+  modal.style.display = 'flex';
+  
+  // Cancel any previous OCR request
+  if (currentOCRAbortController) {
+    currentOCRAbortController.abort();
+  }
+  currentOCRAbortController = new AbortController();
+  
+  try {
+    console.log('[Staff OCR] Starting OCR scan for:', docName);
+    
+    // First, fetch the image as blob
+    const imageResponse = await fetch(docUrl, { 
+      signal: currentOCRAbortController.signal 
+    });
+    
+    if (!imageResponse.ok) {
+      throw new Error(`Failed to fetch image: ${imageResponse.status}`);
+    }
+    
+    const imageBlob = await imageResponse.blob();
+    
+    // Create form data for OCR API
+    const formData = new FormData();
+    formData.append('file', imageBlob, docName);
+    
+    // Use the server's general OCR endpoint (Azure Document Intelligence)
+    const API_BASE = window.API_BASE || 
+      (location.hostname === 'localhost' ? 'http://127.0.0.1:3000' : '');
+    
+    // Get Firebase ID token for authentication
+    let idToken = '';
+    try {
+      if (typeof auth !== 'undefined' && auth.currentUser) {
+        idToken = await auth.currentUser.getIdToken();
+      } else if (window.auth && window.auth.currentUser) {
+        idToken = await window.auth.currentUser.getIdToken();
+      }
+    } catch (e) {
+      console.warn('[Staff OCR] Could not get auth token:', e);
+    }
+    
+    const ocrResponse = await fetch(`${API_BASE}/ocr`, {
+      method: 'POST',
+      body: formData,
+      signal: currentOCRAbortController.signal,
+      headers: idToken ? {
+        'Authorization': `Bearer ${idToken}`
+      } : {}
+    });
+    
+    if (!ocrResponse.ok) {
+      const errorData = await ocrResponse.json().catch(() => ({}));
+      throw new Error(errorData.error || `OCR failed: ${ocrResponse.status}`);
+    }
+    
+    const ocrResult = await ocrResponse.json();
+    
+    // Display OCR results
+    displayOCRResults(ocrResult, docUrl, docName);
+    
+    console.log('[Staff OCR] Scan completed successfully');
+    
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      console.log('[Staff OCR] Request was cancelled');
+      return;
+    }
+    
+    console.error('[Staff OCR] Error:', error);
+    contentDiv.innerHTML = `
+      <div style="text-align: center; padding: 40px 20px; color: #ef4444;">
+        <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+        <h3 style="margin: 0 0 8px 0; color: #dc2626; font-size: 18px;">OCR Scan Failed</h3>
+        <p style="margin: 0 0 16px 0; color: #7f1d1d; font-size: 14px;">${error.message}</p>
+        <button onclick="scanDocumentOCR('${docUrl}', '${docName.replace(/'/g, "\\'")}')" class="btn-primary" style="padding: 10px 20px; border-radius: 6px; cursor: pointer;">
+          🔄 Try Again
+        </button>
+      </div>
+    `;
+  }
+};
+
+// Display OCR results in the modal
+function displayOCRResults(result, docUrl, docName) {
+  const contentDiv = document.getElementById('ocrResultContent');
+  
+  const extractedText = result.text || 'No text detected';
+  const confidence = result.confidence || null;
+  const lines = result.lines || [];
+  
+  // Calculate text statistics
+  const wordCount = extractedText.split(/\s+/).filter(w => w.length > 0).length;
+  const charCount = extractedText.length;
+  
+  contentDiv.innerHTML = `
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 100%;">
+      <!-- Left: Document Preview -->
+      <div style="background: #f9fafb; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; max-height: 70vh; overflow: hidden;">
+        <h4 style="margin: 0 0 12px 0; color: #374151; font-size: 14px; font-weight: 600;">📄 Original Document</h4>
+        <div style="flex: 1; overflow: auto; border-radius: 8px; border: 1px solid #e5e7eb; background: white;">
+          <img src="${docUrl}" alt="${docName}" style="width: 100%; height: auto; display: block;" />
+        </div>
+        <div style="margin-top: 12px; display: flex; gap: 8px;">
+          <a href="${docUrl}" target="_blank" style="flex: 1; padding: 8px; background: #3b82f6; color: white; text-decoration: none; border-radius: 6px; text-align: center; font-size: 12px; font-weight: 500;">👁️ View Full Size</a>
+          <a href="${docUrl}" download="${docName}" style="flex: 1; padding: 8px; background: #10b981; color: white; text-decoration: none; border-radius: 6px; text-align: center; font-size: 12px; font-weight: 500;">📥 Download</a>
+        </div>
+      </div>
+      
+      <!-- Right: Extracted Text -->
+      <div style="background: white; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; max-height: 70vh; overflow: hidden; border: 1px solid #e5e7eb;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e5e7eb;">
+          <h4 style="margin: 0; color: #374151; font-size: 14px; font-weight: 600;">📝 Extracted Text</h4>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            ${confidence ? `<span style="padding: 4px 8px; background: ${confidence > 80 ? '#d1fae5' : confidence > 60 ? '#fef3c7' : '#fee2e2'}; color: ${confidence > 80 ? '#065f46' : confidence > 60 ? '#92400e' : '#991b1b'}; border-radius: 12px; font-size: 11px; font-weight: 600;">${confidence}% Confidence</span>` : ''}
+            <button onclick="copyOCRText()" style="padding: 6px 12px; background: #f3f4f6; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px; color: #374151;" title="Copy extracted text">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+        </div>
+        
+        <div style="flex: 1; overflow: auto; background: #f9fafb; border-radius: 8px; padding: 12px; font-family: 'Monaco', 'Consolas', monospace; font-size: 13px; line-height: 1.6; color: #1f2937; white-space: pre-wrap; word-break: break-word;" id="ocrExtractedText">
+          ${escapeHtml(extractedText)}
+        </div>
+        
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; color: #6b7280; font-size: 12px;">
+          <span>${wordCount} words • ${charCount} characters • ${lines.length} lines</span>
+          <span style="color: #3b82f6; font-weight: 500;">Powered by Azure AI</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Copy OCR text to clipboard
+window.copyOCRText = function() {
+  const textEl = document.getElementById('ocrExtractedText');
+  if (!textEl) return;
+  
+  const text = textEl.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    showNotification('✅ Text copied to clipboard', 'success');
+  }).catch(err => {
+    console.error('Failed to copy:', err);
+    showNotification('❌ Failed to copy text', 'error');
+  });
+};
+
+// Close OCR modal
+window.closeOCRModal = function() {
+  const modal = document.getElementById('ocrResultModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+  // Abort any ongoing OCR request
+  if (currentOCRAbortController) {
+    currentOCRAbortController.abort();
+    currentOCRAbortController = null;
+  }
+};
+
+// Helper: Escape HTML to prevent XSS
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Helper: Show notification
+function showNotification(message, type = 'info') {
+  // Use existing notification system or alert
+  if (window.showNotification && typeof window.showNotification === 'function') {
+    window.showNotification(message, type);
+  } else {
+    alert(message);
+  }
+}
 
 const uploadArea = document.getElementById('uploadArea');
 if (uploadArea) {
